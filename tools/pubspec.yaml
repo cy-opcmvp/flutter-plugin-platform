@@ -1,0 +1,21 @@
+name: plugin_cli
+description: Flutter插件平台 - 插件CLI工具
+version: 1.0.0
+
+environment:
+  sdk: '>=2.17.0 <4.0.0'
+
+dependencies:
+  args: ^2.4.2
+  path: ^1.8.3
+  http: ^1.1.0
+  yaml: ^3.1.2
+  archive: ^3.4.9
+  crypto: ^3.0.3
+
+dev_dependencies:
+  test: ^1.24.0
+  lints: ^2.1.0
+
+executables:
+  plugin-cli: plugin_cli

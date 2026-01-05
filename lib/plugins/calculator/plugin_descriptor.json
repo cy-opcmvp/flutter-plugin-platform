@@ -1,0 +1,17 @@
+{
+  "id": "com.example.calculator",
+  "name": "Calculator",
+  "version": "1.0.0",
+  "type": "tool",
+  "requiredPermissions": ["notifications"],
+  "metadata": {
+    "description": "A simple calculator tool for basic arithmetic operations",
+    "author": "Example Developer",
+    "category": "Utility",
+    "tags": ["calculator", "math", "arithmetic", "tool"],
+    "icon": "calculate",
+    "minPlatformVersion": "1.0.0",
+    "supportedPlatforms": ["mobile", "desktop", "steam"]
+  },
+  "entryPoint": "lib/plugins/calculator/calculator_plugin.dart"
+}
