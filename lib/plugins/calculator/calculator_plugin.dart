@@ -5,10 +5,9 @@ import '../../core/models/plugin_models.dart';
 /// A simple calculator plugin that demonstrates tool plugin implementation
 class CalculatorPlugin implements IPlugin {
   late PluginContext _context;
-  String _display = '0';
-  String _previousValue = '';
-  String _operation = '';
-  bool _waitingForOperand = false;
+  
+  // Calculator state - shared with the widget
+  final CalculatorState calculatorState = CalculatorState();
 
   @override
   String get id => 'com.example.calculator';
@@ -29,10 +28,10 @@ class CalculatorPlugin implements IPlugin {
     // Load saved state if available
     final savedState = await _context.dataStorage.retrieve<Map<String, dynamic>>('calculator_state');
     if (savedState != null) {
-      _display = savedState['display'] ?? '0';
-      _previousValue = savedState['previousValue'] ?? '';
-      _operation = savedState['operation'] ?? '';
-      _waitingForOperand = savedState['waitingForOperand'] ?? false;
+      calculatorState.display = savedState['display'] ?? '0';
+      calculatorState.previousValue = savedState['previousValue'] ?? '';
+      calculatorState.operation = savedState['operation'] ?? '';
+      calculatorState.waitingForOperand = savedState['waitingForOperand'] ?? false;
     }
 
     // Show notification that calculator is ready
@@ -41,16 +40,94 @@ class CalculatorPlugin implements IPlugin {
 
   @override
   Future<void> dispose() async {
-    // Save current state before disposal
     await _saveState();
     await _context.platformServices.showNotification('Calculator plugin disposed');
   }
 
   @override
   Widget buildUI(BuildContext context) {
+    return CalculatorWidget(
+      state: calculatorState,
+      onStateChanged: _saveState,
+    );
+  }
+
+  Future<void> _saveState() async {
+    final state = {
+      'display': calculatorState.display,
+      'previousValue': calculatorState.previousValue,
+      'operation': calculatorState.operation,
+      'waitingForOperand': calculatorState.waitingForOperand,
+    };
+    await _context.dataStorage.store('calculator_state', state);
+  }
+
+  @override
+  Future<void> onStateChanged(PluginState state) async {
+    switch (state) {
+      case PluginState.active:
+        break;
+      case PluginState.paused:
+      case PluginState.inactive:
+        await _saveState();
+        break;
+      case PluginState.error:
+        calculatorState.clear();
+        break;
+      case PluginState.loading:
+        break;
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getState() async {
+    return {
+      'display': calculatorState.display,
+      'previousValue': calculatorState.previousValue,
+      'operation': calculatorState.operation,
+      'waitingForOperand': calculatorState.waitingForOperand,
+    };
+  }
+}
+
+/// Shared calculator state
+class CalculatorState {
+  String display = '0';
+  String previousValue = '';
+  String operation = '';
+  bool waitingForOperand = false;
+
+  void clear() {
+    display = '0';
+    previousValue = '';
+    operation = '';
+    waitingForOperand = false;
+  }
+}
+
+/// StatefulWidget for calculator UI
+class CalculatorWidget extends StatefulWidget {
+  final CalculatorState state;
+  final VoidCallback onStateChanged;
+
+  const CalculatorWidget({
+    super.key,
+    required this.state,
+    required this.onStateChanged,
+  });
+
+  @override
+  State<CalculatorWidget> createState() => _CalculatorWidgetState();
+}
+
+class _CalculatorWidgetState extends State<CalculatorWidget> {
+  CalculatorState get _state => widget.state;
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(name),
+        title: const Text('Calculator'),
         backgroundColor: Colors.blue,
       ),
       body: Column(
@@ -62,16 +139,31 @@ class CalculatorPlugin implements IPlugin {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               color: Colors.black,
-              child: Align(
-                alignment: Alignment.bottomRight,
-                child: Text(
-                  _display,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 48,
-                    fontWeight: FontWeight.w300,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  // Show operation indicator
+                  if (_state.previousValue.isNotEmpty)
+                    Text(
+                      '${_state.previousValue} ${_state.operation}',
+                      style: TextStyle(
+                        color: Colors.grey[400],
+                        fontSize: 20,
+                      ),
+                    ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _state.display,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 48,
+                      fontWeight: FontWeight.w300,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
+                ],
               ),
             ),
           ),
@@ -109,6 +201,10 @@ class CalculatorPlugin implements IPlugin {
       backgroundColor = Colors.grey[600]!;
     } else if (text == '÷' || text == '×' || text == '-' || text == '+' || text == '=') {
       backgroundColor = Colors.orange;
+      // Highlight active operation
+      if (_state.operation == text && _state.waitingForOperand) {
+        backgroundColor = Colors.orange[300]!;
+      }
     } else {
       backgroundColor = Colors.grey[800]!;
     }
@@ -137,82 +233,83 @@ class CalculatorPlugin implements IPlugin {
   }
 
   void _onButtonPressed(String buttonText) {
-    switch (buttonText) {
-      case 'C':
-        _clear();
-        break;
-      case '±':
-        _toggleSign();
-        break;
-      case '%':
-        _percentage();
-        break;
-      case '÷':
-      case '×':
-      case '-':
-      case '+':
-        _setOperation(buttonText);
-        break;
-      case '=':
-        _calculate();
-        break;
-      case '.':
-        _addDecimal();
-        break;
-      default:
-        _addDigit(buttonText);
-        break;
-    }
+    setState(() {
+      switch (buttonText) {
+        case 'C':
+          _clear();
+          break;
+        case '±':
+          _toggleSign();
+          break;
+        case '%':
+          _percentage();
+          break;
+        case '÷':
+        case '×':
+        case '-':
+        case '+':
+          _setOperation(buttonText);
+          break;
+        case '=':
+          _calculate();
+          break;
+        case '.':
+          _addDecimal();
+          break;
+        default:
+          _addDigit(buttonText);
+          break;
+      }
+    });
     
-    // Save state after each operation
-    _saveState();
+    widget.onStateChanged();
   }
 
   void _clear() {
-    _display = '0';
-    _previousValue = '';
-    _operation = '';
-    _waitingForOperand = false;
+    _state.display = '0';
+    _state.previousValue = '';
+    _state.operation = '';
+    _state.waitingForOperand = false;
   }
 
   void _toggleSign() {
-    if (_display != '0') {
-      if (_display.startsWith('-')) {
-        _display = _display.substring(1);
+    if (_state.display != '0') {
+      if (_state.display.startsWith('-')) {
+        _state.display = _state.display.substring(1);
       } else {
-        _display = '-$_display';
+        _state.display = '-${_state.display}';
       }
     }
   }
 
   void _percentage() {
-    final value = double.tryParse(_display);
+    final value = double.tryParse(_state.display);
     if (value != null) {
-      _display = (value / 100).toString();
-      _waitingForOperand = true;
+      _state.display = _formatResult(value / 100);
+      _state.waitingForOperand = true;
     }
   }
 
   void _setOperation(String operation) {
-    if (_previousValue.isNotEmpty && !_waitingForOperand) {
+    if (_state.previousValue.isNotEmpty && !_state.waitingForOperand) {
       _calculate();
     }
     
-    _previousValue = _display;
-    _operation = operation;
-    _waitingForOperand = true;
+    _state.previousValue = _state.display;
+    _state.operation = operation;
+    _state.waitingForOperand = true;
   }
 
   void _calculate() {
-    if (_previousValue.isEmpty || _operation.isEmpty) return;
+    if (_state.previousValue.isEmpty || _state.operation.isEmpty) return;
     
-    final prev = double.tryParse(_previousValue);
-    final current = double.tryParse(_display);
+    final prev = double.tryParse(_state.previousValue);
+    final current = double.tryParse(_state.display);
     
     if (prev == null || current == null) return;
     
     double result;
-    switch (_operation) {
+    switch (_state.operation) {
       case '+':
         result = prev + current;
         break;
@@ -224,7 +321,9 @@ class CalculatorPlugin implements IPlugin {
         break;
       case '÷':
         if (current == 0) {
-          _display = 'Error';
+          _state.display = 'Error';
+          _state.previousValue = '';
+          _state.operation = '';
           return;
         }
         result = prev / current;
@@ -233,79 +332,48 @@ class CalculatorPlugin implements IPlugin {
         return;
     }
     
-    _display = _formatResult(result);
-    _previousValue = '';
-    _operation = '';
-    _waitingForOperand = true;
+    _state.display = _formatResult(result);
+    _state.previousValue = '';
+    _state.operation = '';
+    _state.waitingForOperand = true;
   }
 
   String _formatResult(double result) {
+    // Handle very large or very small numbers
+    if (result.abs() > 1e12 || (result != 0 && result.abs() < 1e-10)) {
+      return result.toStringAsExponential(6);
+    }
+    
     if (result == result.toInt()) {
       return result.toInt().toString();
     } else {
-      return result.toString();
+      // Limit decimal places to avoid floating point display issues
+      String str = result.toStringAsFixed(10);
+      // Remove trailing zeros
+      str = str.replaceAll(RegExp(r'0+$'), '');
+      str = str.replaceAll(RegExp(r'\.$'), '');
+      return str;
     }
   }
 
   void _addDigit(String digit) {
-    if (_waitingForOperand) {
-      _display = digit;
-      _waitingForOperand = false;
+    if (_state.waitingForOperand) {
+      _state.display = digit;
+      _state.waitingForOperand = false;
     } else {
-      _display = _display == '0' ? digit : _display + digit;
+      // Limit display length
+      if (_state.display.length < 15) {
+        _state.display = _state.display == '0' ? digit : _state.display + digit;
+      }
     }
   }
 
   void _addDecimal() {
-    if (_waitingForOperand) {
-      _display = '0.';
-      _waitingForOperand = false;
-    } else if (!_display.contains('.')) {
-      _display += '.';
+    if (_state.waitingForOperand) {
+      _state.display = '0.';
+      _state.waitingForOperand = false;
+    } else if (!_state.display.contains('.')) {
+      _state.display += '.';
     }
-  }
-
-  Future<void> _saveState() async {
-    final state = {
-      'display': _display,
-      'previousValue': _previousValue,
-      'operation': _operation,
-      'waitingForOperand': _waitingForOperand,
-    };
-    await _context.dataStorage.store('calculator_state', state);
-  }
-
-  @override
-  Future<void> onStateChanged(PluginState state) async {
-    switch (state) {
-      case PluginState.active:
-        // Plugin became active, no special action needed
-        break;
-      case PluginState.paused:
-        // Save state when paused
-        await _saveState();
-        break;
-      case PluginState.inactive:
-        // Plugin becoming inactive, save state
-        await _saveState();
-        break;
-      case PluginState.error:
-        // Handle error state
-        _clear();
-        break;
-      case PluginState.loading:
-        // Plugin is loading, no action needed
-        break;
-    }
-  }
-
-  @override
-  Future<Map<String, dynamic>> getState() async {
-    return {
-      'display': _display,
-      'previousValue': _previousValue,
-      'operation': _operation,
-      'waitingForOperand': _waitingForOperand,
-    };
   }
 }
