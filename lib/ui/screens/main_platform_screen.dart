@@ -5,6 +5,7 @@ import '../../core/models/plugin_models.dart';
 import '../../core/services/platform_core.dart';
 import '../../core/services/plugin_launcher.dart';
 import '../../core/services/desktop_pet_manager.dart';
+import '../../core/extensions/context_extensions.dart';
 
 import '../../core/interfaces/i_plugin.dart';
 import '../../core/interfaces/i_platform_services.dart';
@@ -86,7 +87,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
       });
     } catch (e) {
       setState(() {
-        _error = 'Failed to initialize platform: $e';
+        _error = e.toString();
         _isLoading = false;
       });
     }
@@ -120,9 +121,13 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
       
       // Show mode change notification
       if (mounted) {
+        final l10n = context.l10n;
+        final modeName = event.newMode == OperationMode.online 
+            ? l10n.mode_online 
+            : l10n.mode_local;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Switched to ${event.newMode.name.toUpperCase()} mode'),
+            content: Text(l10n.mode_switchSuccess(modeName)),
             backgroundColor: event.newMode == OperationMode.online ? Colors.green : Colors.blue,
             duration: const Duration(seconds: 2),
           ),
@@ -144,7 +149,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Plugin error: ${event.data?['error'] ?? 'Unknown error'}'),
+              content: Text(context.l10n.plugin_errorDetails(event.data?['error']?.toString() ?? context.l10n.error_unknown)),
               backgroundColor: Colors.red,
               duration: const Duration(seconds: 3),
             ),
@@ -165,11 +170,12 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
   void _handlePluginLaunchEvent(PluginLaunchEvent event) {
     if (!mounted) return;
 
+    final l10n = context.l10n;
     switch (event.type) {
       case PluginLaunchEventType.launched:
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Plugin ${event.pluginId} launched'),
+            content: Text(l10n.plugin_launchSuccess(event.pluginId)),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 2),
           ),
@@ -179,7 +185,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
       case PluginLaunchEventType.switched:
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Switched to plugin ${event.pluginId}'),
+            content: Text(l10n.plugin_switchSuccess(event.pluginId)),
             backgroundColor: Colors.blue,
             duration: const Duration(seconds: 2),
           ),
@@ -189,7 +195,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
       case PluginLaunchEventType.closed:
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Plugin ${event.pluginId} closed'),
+            content: Text(l10n.plugin_closeSuccess(event.pluginId)),
             backgroundColor: Colors.orange,
             duration: const Duration(seconds: 2),
           ),
@@ -199,7 +205,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
       case PluginLaunchEventType.paused:
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Plugin ${event.pluginId} moved to background'),
+            content: Text(l10n.plugin_pauseSuccess(event.pluginId)),
             backgroundColor: Colors.grey,
             duration: const Duration(seconds: 2),
           ),
@@ -212,7 +218,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
       case PluginLaunchEventType.pauseFailed:
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Plugin operation failed: ${event.error ?? 'Unknown error'}'),
+            content: Text(l10n.plugin_operationFailed(event.error ?? l10n.error_unknown)),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),
@@ -233,7 +239,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to switch mode: $e'),
+            content: Text(context.l10n.mode_switchFailed(e.toString())),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),
@@ -249,10 +255,10 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
     if (!DesktopPetManager.isSupported()) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Desktop Pet mode is not supported on this platform'),
+          SnackBar(
+            content: Text(context.l10n.pet_notSupported),
             backgroundColor: Colors.orange,
-            duration: Duration(seconds: 3),
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -264,10 +270,10 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
         await _desktopPetManager.transitionToFullApplication();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Exited Desktop Pet mode'),
+            SnackBar(
+              content: Text(context.l10n.pet_exitSuccess),
               backgroundColor: Colors.blue,
-              duration: Duration(seconds: 2),
+              duration: const Duration(seconds: 2),
             ),
           );
         }
@@ -285,6 +291,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
                   pageBuilder: (context, animation, secondaryAnimation) => DesktopPetScreen(
                     petManager: _desktopPetManager,
                     platformCore: _platformCore,
+                    onLaunchPlugin: _launchPlugin, // 传入插件启动回调
                   ),
                   transitionsBuilder: (context, animation, secondaryAnimation, child) {
                     // 淡入淡出动画
@@ -304,7 +311,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Failed to navigate to Desktop Pet screen: $navigationError'),
+                    content: Text(context.l10n.pet_navFailed(navigationError.toString())),
                     backgroundColor: Colors.orange,
                     duration: const Duration(seconds: 3),
                   ),
@@ -329,7 +336,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to toggle Desktop Pet mode: $e'),
+            content: Text(context.l10n.pet_toggleFailed(e.toString())),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),
@@ -341,40 +348,40 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
   /// 显示Desktop Pet设置对话框
   /// Requirements 7.1, 7.3: Provide user-friendly messages when features are unavailable
   Future<bool?> _showDesktopPetDialog() async {
+    final l10n = context.l10n;
     // 检查平台支持 - Requirements 7.1: Handle web platform limitations
     if (!DesktopPetManager.isSupported()) {
       return showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Row(
+          title: Row(
             children: [
-              Icon(Icons.warning, color: Colors.orange),
-              SizedBox(width: 8),
-              Text('Desktop Pet Not Supported'),
+              const Icon(Icons.warning, color: Colors.orange),
+              const SizedBox(width: 8),
+              Text(l10n.pet_notSupported),
             ],
           ),
-          content: const Column(
+          content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Desktop Pet mode is not available on this platform.'),
-              SizedBox(height: 16),
-              Text('Desktop Pet features require:'),
-              SizedBox(height: 8),
-              Text('• Desktop platform (Windows, macOS, or Linux)'),
-              Text('• Native application environment'),
-              Text('• Window management capabilities'),
-              SizedBox(height: 16),
+              Text(l10n.pet_notSupportedDesc('Web')),
+              const SizedBox(height: 16),
+              Text(l10n.pet_platformInfoDesc),
+              const SizedBox(height: 8),
+              Text('• ${l10n.pet_capabilityDesktop}'),
+              Text('• ${l10n.pet_capabilityWindow}'),
+              const SizedBox(height: 16),
               Text(
-                'On web platforms, desktop pet functionality is disabled for compatibility.',
-                style: TextStyle(fontStyle: FontStyle.italic),
+                l10n.pet_platformNote,
+                style: const TextStyle(fontStyle: FontStyle.italic),
               ),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('OK'),
+              child: Text(l10n.common_ok),
             ),
           ],
         ),
@@ -384,25 +391,25 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.pets, color: Colors.blue),
-            SizedBox(width: 8),
-            Text('Desktop Pet Mode'),
+            const Icon(Icons.pets, color: Colors.blue),
+            const SizedBox(width: 8),
+            Text(l10n.pet_modeTitle),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Enable Desktop Pet mode to have a cute companion on your desktop!'),
+            Text(l10n.pet_modeDesc),
             const SizedBox(height: 16),
-            const Text('Features:', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text(l10n.pet_features, style: const TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            const Text('• Always on top window'),
-            const Text('• Cute animations and interactions'),
-            const Text('• Quick access to plugins'),
-            const Text('• Customizable appearance'),
+            Text(l10n.pet_featureAlwaysOnTop),
+            Text(l10n.pet_featureAnimations),
+            Text(l10n.pet_featureQuickAccess),
+            Text(l10n.pet_featureCustomize),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
@@ -411,14 +418,14 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.info, color: Colors.blue, size: 20),
-                  SizedBox(width: 8),
+                  const Icon(Icons.info, color: Colors.blue, size: 20),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Right-click the pet for quick actions, double-click to return to full app.',
-                      style: TextStyle(fontSize: 12),
+                      l10n.pet_tip,
+                      style: const TextStyle(fontSize: 12),
                     ),
                   ),
                 ],
@@ -429,11 +436,11 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.common_cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Enable Pet Mode'),
+            child: Text(l10n.button_enablePetMode),
           ),
         ],
       ),
@@ -467,7 +474,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to launch plugin: $e'),
+            content: Text(context.l10n.plugin_launchFailed(e.toString())),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),
@@ -502,7 +509,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to switch to plugin: $e'),
+            content: Text(context.l10n.plugin_switchFailed(e.toString())),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),
@@ -521,9 +528,10 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
       }
     } catch (e) {
       if (mounted) {
+        final l10n = context.l10n;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to ${enabled ? 'enable' : 'disable'} plugin: $e'),
+            content: Text(l10n.plugin_operationFailed(e.toString())),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),
@@ -544,16 +552,17 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     // Show loading state
     if (_isLoading) {
-      return const Scaffold(
+      return Scaffold(
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text('Initializing Platform...'),
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              Text(l10n.platform_initializing),
             ],
           ),
         ),
@@ -574,19 +583,19 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
               ),
               const SizedBox(height: 16),
               Text(
-                'Platform Error',
+                l10n.platform_error,
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: 8),
               Text(
-                _error!,
+                l10n.error_platformInit(_error!),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _initializePlatform,
-                child: const Text('Retry'),
+                child: Text(l10n.common_retry),
               ),
             ],
           ),
@@ -597,14 +606,14 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
     // Main platform interface
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Plugin Platform'),
+        title: Text(l10n.appTitle),
         actions: [
           // Desktop Pet切换按钮 - 只在支持的平台上显示
           // Requirements 7.1: Hide desktop pet UI controls on web platform
           if (DesktopPetManager.isSupported())
             IconButton(
               icon: Icon(_desktopPetManager.isDesktopPetMode ? Icons.fullscreen_exit : Icons.pets),
-              tooltip: _desktopPetManager.isDesktopPetMode ? 'Exit Pet Mode' : 'Enter Pet Mode',
+              tooltip: _desktopPetManager.isDesktopPetMode ? l10n.button_exitPetMode : l10n.button_enablePetMode,
               onPressed: _toggleDesktopPetMode,
             ),
           _buildModeIndicator(),
@@ -634,7 +643,9 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
   /// Requirement 7.5: Clearly indicate current mode
   Widget _buildModeIndicator() {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final isOnline = _currentMode == OperationMode.online;
+    final modeName = isOnline ? l10n.mode_online : l10n.mode_local;
     
     return Container(
       margin: const EdgeInsets.only(right: 8),
@@ -657,7 +668,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
           ),
           const SizedBox(width: 4),
           Text(
-            _currentMode.name.toUpperCase(),
+            modeName,
             style: theme.textTheme.bodySmall?.copyWith(
               color: isOnline ? Colors.green : Colors.blue,
               fontWeight: FontWeight.w600,
@@ -672,6 +683,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
   /// Requirement 7.5: Display available features to users
   Widget _buildFeatureAvailabilityBar() {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final features = _availableFeatures.toList()..sort();
     
     if (features.isEmpty) {
@@ -693,7 +705,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Available Features',
+            l10n.platform_availableFeatures,
             style: theme.textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.w600,
               color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
@@ -737,6 +749,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
   /// Build plugin grid view for plugin display and selection
   /// Requirement 1.1: Display available plugins
   Widget _buildPluginGrid() {
+    final l10n = context.l10n;
     if (_availablePlugins.isEmpty) {
       return Center(
         child: Column(
@@ -749,14 +762,14 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
             ),
             const SizedBox(height: 16),
             Text(
-              'No Plugins Available',
+              l10n.platform_noPluginsAvailable,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Install plugins from the management screen',
+              l10n.platform_installFromManagement,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
               ),
@@ -789,7 +802,9 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
   /// Requirement 1.2: Plugin selection functionality
   Widget _buildPluginTile(PluginDescriptor plugin) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final isEnabled = _platformCore.pluginManager.isPluginEnabled(plugin.id);
+    final pluginTypeName = plugin.type == PluginType.tool ? l10n.plugin_typeTool : l10n.plugin_typeGame;
     
     return Card(
       elevation: 2,
@@ -838,7 +853,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
               const SizedBox(height: 4),
               // Plugin version and type
               Text(
-                'v${plugin.version} • ${plugin.type.name.toUpperCase()}',
+                'v${plugin.version} • $pluginTypeName',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
@@ -863,7 +878,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
                     padding: const EdgeInsets.symmetric(vertical: 8),
                   ),
                   child: Text(
-                    isEnabled ? 'Launch' : 'Disabled',
+                    isEnabled ? l10n.button_launch : l10n.plugin_statusDisabled,
                     style: const TextStyle(fontSize: 12),
                   ),
                 ),
@@ -877,6 +892,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
 
   /// Build active plugins view
   Widget _buildActivePluginsView() {
+    final l10n = context.l10n;
     if (_activePlugins.isEmpty) {
       return Center(
         child: Column(
@@ -889,14 +905,14 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
             ),
             const SizedBox(height: 16),
             Text(
-              'No Active Plugins',
+              l10n.platform_activePlugins,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Launch plugins from the Plugins tab',
+              l10n.plugin_installFirst,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
               ),
@@ -920,19 +936,20 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
   /// Requirement 1.2, 1.4: Plugin switching and background management
   Widget _buildActivePluginTile(IPlugin plugin) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final isCurrentPlugin = _currentPlugin?.id == plugin.id;
     final isBackgroundPlugin = _backgroundPlugins.containsKey(plugin.id);
     
     String status;
     Color statusColor;
     if (isCurrentPlugin) {
-      status = 'Active';
+      status = l10n.plugin_statusActive;
       statusColor = Colors.green;
     } else if (isBackgroundPlugin) {
-      status = 'Background';
+      status = l10n.plugin_statusPaused;
       statusColor = Colors.orange;
     } else {
-      status = 'Running';
+      status = l10n.plugin_statusActive;
       statusColor = Colors.blue;
     }
     
@@ -985,7 +1002,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
               IconButton(
                 onPressed: () => _switchToPlugin(plugin.id),
                 icon: const Icon(Icons.launch),
-                tooltip: 'Switch to Plugin',
+                tooltip: context.l10n.tooltip_switchPlugin,
               ),
             ],
             if (isCurrentPlugin) ...[
@@ -994,7 +1011,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
                   await _pluginLauncher?.pauseCurrentPlugin();
                 },
                 icon: const Icon(Icons.pause),
-                tooltip: 'Move to Background',
+                tooltip: context.l10n.tooltip_pausePlugin,
               ),
             ],
             IconButton(
@@ -1006,7 +1023,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
                 }
               },
               icon: const Icon(Icons.stop),
-              tooltip: 'Stop Plugin',
+              tooltip: context.l10n.tooltip_stopPlugin,
             ),
           ],
         ),
@@ -1022,6 +1039,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
   /// Build platform information view
   Widget _buildPlatformInfoView() {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -1036,18 +1054,18 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Platform Information',
+                    l10n.platform_platformInfo,
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   const SizedBox(height: 16),
-                  _buildInfoRow('Platform Type', _platformInfo?.type.name.toUpperCase() ?? 'Unknown'),
-                  _buildInfoRow('Version', _platformInfo?.version ?? 'Unknown'),
-                  _buildInfoRow('Current Mode', _currentMode.name.toUpperCase()),
+                  _buildInfoRow(context.l10n.info_platformType, _platformInfo?.type.name.toUpperCase() ?? context.l10n.info_unknown),
+                  _buildInfoRow(context.l10n.info_version, _platformInfo?.version ?? context.l10n.info_unknown),
+                  _buildInfoRow(context.l10n.info_currentMode, _currentMode.name.toUpperCase()),
                   const SizedBox(height: 16),
                   Text(
-                    'Capabilities',
+                    context.l10n.info_capabilities,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -1058,9 +1076,9 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
                       (entry) => _buildCapabilityRow(entry.key, entry.value),
                     ),
                   // 添加Desktop Pet支持信息 - Requirements 7.1: Display platform capabilities
-                  _buildCapabilityRow('Desktop Pet Support', DesktopPetManager.isSupported()),
-                  _buildCapabilityRow('Always On Top', DesktopPetManager.isSupported()),
-                  _buildCapabilityRow('System Tray', DesktopPetManager.isSupported()),
+                  _buildCapabilityRow(context.l10n.capability_desktopPetSupport, DesktopPetManager.isSupported()),
+                  _buildCapabilityRow(context.l10n.capability_alwaysOnTop, DesktopPetManager.isSupported()),
+                  _buildCapabilityRow(context.l10n.capability_systemTray, DesktopPetManager.isSupported()),
                 ],
               ),
             ),
@@ -1074,15 +1092,15 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Statistics',
+                    context.l10n.info_statistics,
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   const SizedBox(height: 16),
-                  _buildInfoRow('Available Plugins', '${_availablePlugins.length}'),
-                  _buildInfoRow('Active Plugins', '${_activePlugins.length}'),
-                  _buildInfoRow('Available Features', '${_availableFeatures.length}'),
+                  _buildInfoRow(context.l10n.info_availablePlugins, '${_availablePlugins.length}'),
+                  _buildInfoRow(context.l10n.info_activePlugins, '${_activePlugins.length}'),
+                  _buildInfoRow(context.l10n.info_availableFeatures, '${_availableFeatures.length}'),
                 ],
               ),
             ),
@@ -1154,26 +1172,29 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
   /// Build bottom navigation for cross-platform consistency
   /// Requirement 1.5: Consistent navigation and user experience
   Widget _buildBottomNavigation() {
+    final l10n = context.l10n;
     return TabBar(
       controller: _tabController,
-      tabs: const [
-        Tab(icon: Icon(Icons.apps), text: 'Plugins'),
-        Tab(icon: Icon(Icons.play_circle), text: 'Active'),
-        Tab(icon: Icon(Icons.info), text: 'Platform'),
+      tabs: [
+        Tab(icon: const Icon(Icons.apps), text: l10n.nav_plugins),
+        Tab(icon: const Icon(Icons.play_circle), text: l10n.nav_active),
+        Tab(icon: const Icon(Icons.info), text: l10n.nav_info),
       ],
     );
   }
 
   /// Build floating action button for mode switching
   Widget _buildModeSwitchFab() {
+    final l10n = context.l10n;
     final isOnline = _currentMode == OperationMode.online;
+    final targetMode = isOnline ? l10n.mode_local : l10n.mode_online;
     
     return FloatingActionButton.extended(
       onPressed: () => _switchMode(
         isOnline ? OperationMode.local : OperationMode.online,
       ),
       icon: Icon(isOnline ? Icons.offline_bolt : Icons.cloud),
-      label: Text('Switch to ${isOnline ? 'Local' : 'Online'}'),
+      label: Text(l10n.mode_switchSuccess(targetMode)),
       backgroundColor: isOnline ? Colors.blue : Colors.green,
     );
   }
@@ -1261,7 +1282,7 @@ class _PluginViewScreenState extends State<_PluginViewScreen> {
           if (backgroundPlugins.isNotEmpty)
             PopupMenuButton<String>(
               icon: const Icon(Icons.swap_horiz),
-              tooltip: 'Switch Plugin',
+              tooltip: context.l10n.tooltip_switchMode,
               onSelected: (pluginId) async {
                 try {
                   await widget.pluginLauncher.switchToPlugin(pluginId);
@@ -1309,7 +1330,7 @@ class _PluginViewScreenState extends State<_PluginViewScreen> {
               }
             },
             icon: const Icon(Icons.pause),
-            tooltip: 'Move to Background',
+            tooltip: context.l10n.tooltip_pauseMode,
           ),
           // Plugin info button
           IconButton(
@@ -1332,7 +1353,7 @@ class _PluginViewScreenState extends State<_PluginViewScreen> {
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Close'),
+                      child: Text(context.l10n.common_close),
                     ),
                   ],
                 ),

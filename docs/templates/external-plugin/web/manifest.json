@@ -1,0 +1,36 @@
+{
+  "id": "{{PLUGIN_ID}}",
+  "name": "{{PLUGIN_NAME}}",
+  "version": "1.0.0",
+  "type": "tool",
+  "runtimeType": "webApp",
+  "supportedPlatforms": ["windows", "linux", "macos", "web", "android", "ios"],
+  "entryPoints": {
+    "web": "index.html"
+  },
+  "requiredPermissions": ["notifications"],
+  "configuration": {
+    "configurable": true,
+    "settings": {}
+  },
+  "uiIntegration": {
+    "containerType": "embedded",
+    "containerConfig": {
+      "width": 800,
+      "height": 600,
+      "resizable": true
+    },
+    "supportsTheming": true
+  },
+  "security": {
+    "level": "standard",
+    "allowedDomains": []
+  },
+  "metadata": {
+    "description": "{{PLUGIN_DESCRIPTION}}",
+    "author": "{{AUTHOR_NAME}}",
+    "email": "{{AUTHOR_EMAIL}}",
+    "category": "{{PLUGIN_CATEGORY}}",
+    "license": "MIT"
+  }
+}

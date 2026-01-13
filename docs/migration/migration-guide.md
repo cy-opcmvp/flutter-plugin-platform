@@ -85,11 +85,11 @@ mv docs_new docs
 
 ```bash
 # Windows
-tools\install.bat
+setup-cli.bat
 
 # Linux/macOS
-chmod +x tools/install.sh
-./tools/install.sh
+chmod +x setup-cli.sh
+./setup-cli.sh
 ```
 
 ### 5. 验证迁移
@@ -99,10 +99,10 @@ chmod +x tools/install.sh
 find docs -name "*.md" -exec grep -l "docs/" {} \;
 
 # 测试CLI工具
-plugin-cli --help
+dart tools/plugin_cli.dart --help
 
 # 创建测试插件
-plugin-cli create-internal --name "Test Plugin" --type tool
+dart tools/plugin_cli.dart create-internal --name "Test Plugin" --type tool
 ```
 
 ## 文档映射表
@@ -140,7 +140,7 @@ plugin-cli create-internal --name "Test Plugin" --type tool
 ### 创建内部插件
 ```bash
 # 使用CLI创建
-plugin-cli create-internal --name "My Calculator" --type tool --author "Your Name"
+dart tools/plugin_cli.dart create-internal --name "My Calculator" --type tool --author "Your Name"
 
 # 手动使用模板
 cp -r docs/templates/internal-plugin/plugin-template.dart lib/plugins/my_plugin/
@@ -149,10 +149,10 @@ cp -r docs/templates/internal-plugin/plugin-template.dart lib/plugins/my_plugin/
 ### 创建外部插件
 ```bash
 # 创建Dart插件
-plugin-cli create-external --name "Data Processor" --type executable --language dart
+dart tools/plugin_cli.dart create-external --name "Data Processor" --type executable --language dart
 
 # 创建Python插件
-plugin-cli create-external --name "ML Plugin" --type executable --language python
+dart tools/plugin_cli.dart create-external --name "ML Plugin" --type executable --language python
 ```
 
 ### 查看示例

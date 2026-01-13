@@ -649,16 +649,16 @@ class LinuxPlatformAdapter extends PlatformAdapter {
 #### Plugin Generator CLI
 ```bash
 # Create new plugin project
-plugin-cli create --name my-plugin --type executable --language python
+dart tools/plugin_cli.dart create-external --name my-plugin --language python
 
 # Generate plugin package
-plugin-cli package --platform all --output my-plugin.pkg
+dart tools/plugin_cli.dart package --output my-plugin.pkg
 
 # Test plugin locally
-plugin-cli test --plugin my-plugin.pkg --host-version 1.0.0
+dart tools/plugin_cli.dart test --plugin my-plugin.pkg
 
 # Publish plugin
-plugin-cli publish --plugin my-plugin.pkg --registry official
+dart tools/plugin_cli.dart publish --plugin my-plugin.pkg --registry official
 ```
 
 #### Development SDK

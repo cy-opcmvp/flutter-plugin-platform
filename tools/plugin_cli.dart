@@ -1,453 +1,173 @@
-#!/usr/bin/env dart
-
 import 'dart:io';
 import 'dart:convert';
 import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
+import 'package:archive/archive.dart';
+import 'package:crypto/crypto.dart';
 
-/// Flutter插件平台 - 插件CLI工具
-/// 
-/// 提供一键生成内部插件的命令行功能
-void main(List<String> arguments) async {
-  final parser = ArgParser()
-    ..addCommand('create-internal')
-    ..addCommand('create-external')
-    ..addCommand('list-templates')
-    ..addCommand('build')
-    ..addCommand('test')
-    ..addCommand('package')
-    ..addCommand('validate')
-    ..addCommand('publish')
-    ..addFlag('help', abbr: 'h', negatable: false, help: '显示帮助信息')
-    ..addFlag('version', abbr: 'v', negatable: false, help: '显示版本信息');
-
-  // 配置create-internal命令
-  parser.commands['create-internal']!
-    ..addOption('name', abbr: 'n', mandatory: true, help: '插件名称')
-    ..addOption('type', abbr: 't', defaultsTo: 'tool', help: '插件类型 (tool/game)')
-    ..addOption('author', abbr: 'a', help: '作者名称')
-    ..addOption('email', abbr: 'e', help: '作者邮箱')
-    ..addOption('description', abbr: 'd', help: '插件描述')
-    ..addOption('output', abbr: 'o', help: '输出目录');
-
-  // 配置create-external命令
-  parser.commands['create-external']!
-    ..addOption('name', abbr: 'n', mandatory: true, help: '插件名称')
-    ..addOption('type', abbr: 't', defaultsTo: 'executable', help: '插件类型 (executable/web/container)')
-    ..addOption('language', abbr: 'l', defaultsTo: 'dart', help: '编程语言')
-    ..addOption('author', abbr: 'a', help: '作者名称')
-    ..addOption('email', abbr: 'e', help: '作者邮箱');
-
+void main(List<String> args) async {
+  final p = ArgParser()
+    ..addCommand('create-internal')..addCommand('create-external')..addCommand('list-templates')
+    ..addCommand('build')..addCommand('test')..addCommand('package')..addCommand('validate')..addCommand('publish')
+    ..addFlag('help', abbr: 'h', negatable: false)..addFlag('version', abbr: 'v', negatable: false);
+  p.commands['create-internal']!..addOption('name', abbr: 'n', mandatory: true)..addOption('type', abbr: 't', defaultsTo: 'tool')..addOption('author', abbr: 'a')..addOption('output', abbr: 'o');
+  p.commands['create-external']!..addOption('name', abbr: 'n', mandatory: true)..addOption('language', abbr: 'l', defaultsTo: 'dart')..addOption('author', abbr: 'a')..addOption('output', abbr: 'o');
+  p.commands['build']!..addOption('plugin', abbr: 'p')..addOption('platform', defaultsTo: 'current');
+  p.commands['test']!..addOption('plugin', abbr: 'p')..addFlag('verbose', abbr: 'V', negatable: false);
+  p.commands['package']!..addOption('plugin', abbr: 'p')..addOption('output', abbr: 'o')..addOption('platform', defaultsTo: 'all');
+  p.commands['validate']!.addOption('plugin', abbr: 'p', mandatory: true);
+  p.commands['publish']!..addOption('plugin', abbr: 'p', mandatory: true)..addOption('registry', abbr: 'r', defaultsTo: 'local');
   try {
-    final results = parser.parse(arguments);
+    final r = p.parse(args);
+    if (r['help'] as bool) { _help(); return; }
+    if (r['version'] as bool) { print('CLI v1.0.0'); return; }
+    if (r.command == null) { print('Error: specify command'); _help(); exit(1); }
+    await _run(r.command!);
+  } catch (e) { print('Error: $e'); exit(1); }
+}
 
-    if (results['help'] as bool) {
-      printHelp(parser);
-      return;
+String _root() => path.dirname(path.dirname(Platform.script.toFilePath()));
+String _pascal(String s) => s.split(RegExp(r'[_\s-]+')).map((w) => w[0].toUpperCase() + w.substring(1).toLowerCase()).join('');
+String _snake(String s) => s.toLowerCase().replaceAll(RegExp(r'[\s-]+'), '_');
+
+Future<void> _run(ArgResults c) async {
+  switch (c.name) {
+    case 'create-internal': await _createInt(c); break;
+    case 'create-external': await _createExt(c); break;
+    case 'list-templates': print('Templates: internal(tool/game), external(dart/python/web)'); break;
+    case 'build': await _build(c); break;
+    case 'test': await _test(c); break;
+    case 'package': await _pkg(c); break;
+    case 'validate': await _val(c); break;
+    case 'publish': await _pub(c); break;
+  }
+}
+
+Future<void> _createInt(ArgResults a) async {
+  final n = a['name'] as String, t = a['type'] as String, au = a['author'] as String? ?? 'Dev', o = a['output'] as String? ?? 'lib/plugins';
+  print('Creating internal plugin: $n');
+  final id = 'com.example.${_snake(n)}', cls = _pascal(n), f = _snake(n), d = path.join(o, f);
+  await Directory(d).create(recursive: true);
+  await Directory(path.join(d, 'widgets')).create();
+  await Directory(path.join(d, 'models')).create();
+  final td = path.join(_root(), 'docs', 'templates', 'internal-plugin');
+  final pt = File(path.join(td, 'plugin-template.dart')), ft = File(path.join(td, 'factory-template.dart'));
+  if (!await pt.exists() || !await ft.exists()) { print('Template not found'); exit(1); }
+  final r = {'{{PLUGIN_NAME}}': n, '{{PLUGIN_ID}}': id, '{{PLUGIN_CLASS}}': cls, '{{PLUGIN_FILE_NAME}}': f, '{{AUTHOR_NAME}}': au, '{{AUTHOR_EMAIL}}': 'dev@example.com', '{{PLUGIN_DESCRIPTION}}': 'Plugin', '{{PLUGIN_CATEGORY}}': t == 'game' ? 'entertainment' : 'productivity', '{{PLUGIN_TAGS}}': t == 'game' ? "'game'" : "'tool'", '{{PLUGIN_ICON}}': t == 'game' ? 'games' : 'extension', '{{LICENSE}}': 'MIT', '{{CREATION_DATE}}': DateTime.now().toString().split(' ')[0]};
+  var pc = await pt.readAsString(), fc = await ft.readAsString();
+  r.forEach((k, v) { pc = pc.replaceAll(k, v); fc = fc.replaceAll(k, v); });
+  await File(path.join(d, '${f}_plugin.dart')).writeAsString(pc);
+  await File(path.join(d, '${f}_plugin_factory.dart')).writeAsString(fc);
+  await File(path.join(d, 'README.md')).writeAsString('# $n\n');
+  print('Created: $d');
+}
+
+Future<void> _createExt(ArgResults a) async {
+  final n = a['name'] as String, l = a['language'] as String, au = a['author'] as String? ?? 'Dev', o = a['output'] as String? ?? 'external_plugins';
+  print('Creating external plugin: $n ($l)');
+  final id = 'com.example.${_snake(n)}', f = _snake(n), d = path.join(o, f);
+  await Directory(d).create(recursive: true);
+  final ts = l == 'python' ? 'python' : l == 'web' ? 'web' : 'dart';
+  final td = path.join(_root(), 'docs', 'templates', 'external-plugin', ts);
+  if (!await Directory(td).exists()) { print('Template not found: $td'); exit(1); }
+  final r = {'{{PLUGIN_NAME}}': n, '{{PLUGIN_ID}}': id, '{{PLUGIN_FILE_NAME}}': f, '{{PLUGIN_DESCRIPTION}}': 'Plugin', '{{AUTHOR_NAME}}': au, '{{AUTHOR_EMAIL}}': 'dev@example.com', '{{PLUGIN_CATEGORY}}': 'productivity'};
+  await for (final e in Directory(td).list()) {
+    if (e is File) { var c = await e.readAsString(); r.forEach((k, v) { c = c.replaceAll(k, v); }); await File(path.join(d, path.basename(e.path))).writeAsString(c); }
+  }
+  print('Created: $d');
+}
+
+Future<void> _build(ArgResults a) async {
+  final p = a['plugin'] as String? ?? '.', pl = a['platform'] as String;
+  print('Building: $p ($pl)');
+  final mf = File(path.join(p, 'manifest.json'));
+  if (await mf.exists()) {
+    final m = jsonDecode(await mf.readAsString()); print('  ${m['name']} v${m['version']}');
+    if (await File(path.join(p, 'main.dart')).exists()) {
+      await Directory(path.join(p, 'bin')).create(recursive: true);
+      final r = await Process.run('dart', ['compile', 'exe', 'main.dart', '-o', 'bin/plugin'], workingDirectory: p);
+      if (r.exitCode != 0) { print('Failed: ${r.stderr}'); exit(1); }
     }
+    print('Done');
+  } else if (await File(path.join(p, 'pubspec.yaml')).exists()) {
+    final cp = pl == 'current' ? (Platform.isWindows ? 'windows' : Platform.isMacOS ? 'macos' : 'linux') : pl;
+    final r = await Process.run('flutter', ['build', cp]); if (r.exitCode != 0) { print('Failed'); exit(1); }
+    print('Done');
+  } else { print('No manifest.json or pubspec.yaml'); exit(1); }
+}
 
-    if (results['version'] as bool) {
-      printVersion();
-      return;
-    }
+Future<void> _test(ArgResults a) async {
+  final p = a['plugin'] as String?, v = a['verbose'] as bool;
+  print('Testing...');
+  if (p != null && p.endsWith('.pkg')) { await _val(a); }
+  else { final r = await Process.run('flutter', ['test', p ?? 'test', if (v) '--verbose']); print(r.stdout); if (r.exitCode != 0) { print(r.stderr); exit(1); } }
+  print('Passed');
+}
 
-    if (results.command == null) {
-      print('错误: 请指定一个命令\n');
-      printHelp(parser);
-      exit(1);
-    }
-
-    final command = results.command!;
-    
-    switch (command.name) {
-      case 'create-internal':
-        await createInternalPlugin(command);
-        break;
-      case 'create-external':
-        await createExternalPlugin(command);
-        break;
-      case 'list-templates':
-        await listTemplates();
-        break;
-      case 'build':
-        await buildPlugin(command);
-        break;
-      case 'test':
-        await testPlugin(command);
-        break;
-      case 'package':
-        await packagePlugin(command);
-        break;
-      case 'validate':
-        await validatePlugin(command);
-        break;
-      case 'publish':
-        await publishPlugin(command);
-        break;
-      default:
-        print('未知命令: ${command.name}');
-        exit(1);
-    }
-  } catch (e) {
-    print('错误: $e');
-    exit(1);
+Future<void> _pkg(ArgResults a) async {
+  final p = a['plugin'] as String? ?? '.', pl = a['platform'] as String; var o = a['output'] as String?;
+  print('Packaging: $p');
+  final mf = File(path.join(p, 'manifest.json'));
+  if (!await mf.exists()) { print('No manifest.json'); exit(1); }
+  final m = jsonDecode(await mf.readAsString()) as Map<String, dynamic>;
+  final id = m['id'] as String, v = m['version'] as String;
+  o ??= '${id.split('.').last}-$v.pkg';
+  print('  ${m['name']} v$v ($pl)');
+  final arc = Archive();
+  arc.addFile(ArchiveFile('manifest.json', await mf.length(), await mf.readAsBytes()));
+  await for (final e in Directory(p).list(recursive: true)) {
+    if (e is File) { final r = path.relative(e.path, from: p); if (!r.startsWith('.') && !r.contains('/.')) { arc.addFile(ArchiveFile(r, await e.length(), await e.readAsBytes())); } }
   }
+  final h = sha256.convert(utf8.encode(arc.files.map((f) => f.name).join('\n'))).toString();
+  arc.addFile(ArchiveFile('signature.txt', h.length, utf8.encode(h)));
+  final z = ZipEncoder().encode(arc);
+  if (z != null) { await File(o).writeAsBytes(z); print('Done: $o (${(z.length / 1024).toStringAsFixed(1)} KB)'); }
 }
 
-/// 创建内部插件
-Future<void> createInternalPlugin(ArgResults args) async {
-  final pluginName = args['name'] as String;
-  final pluginType = args['type'] as String;
-  final author = args['author'] as String? ?? 'Your Name';
-  final email = args['email'] as String? ?? 'your.email@example.com';
-  final description = args['description'] as String? ?? 'A new plugin';
-  final outputDir = args['output'] as String? ?? 'lib/plugins';
-
-  print('🚀 创建内部插件: $pluginName');
-  print('   类型: $pluginType');
-  print('   作者: $author');
-  print('   输出目录: $outputDir');
-
-  // 生成插件ID和类名
-  final pluginId = 'com.example.${pluginName.toLowerCase().replaceAll(' ', '_')}';
-  final pluginClass = _toPascalCase(pluginName);
-  final pluginFileName = pluginName.toLowerCase().replaceAll(' ', '_');
-
-  // 创建插件目录
-  final pluginDir = path.join(outputDir, pluginFileName);
-  await Directory(pluginDir).create(recursive: true);
-  await Directory(path.join(pluginDir, 'widgets')).create();
-  await Directory(path.join(pluginDir, 'models')).create();
-
-  // 读取模板
-  final templateDir = 'docs_new/templates/internal-plugin';
-  final pluginTemplate = await File(path.join(templateDir, 'plugin-template.dart')).readAsString();
-  final factoryTemplate = await File(path.join(templateDir, 'factory-template.dart')).readAsString();
-
-  // 替换占位符
-  final replacements = {
-    '{{PLUGIN_NAME}}': pluginName,
-    '{{PLUGIN_ID}}': pluginId,
-    '{{PLUGIN_CLASS}}': pluginClass,
-    '{{PLUGIN_FILE_NAME}}': pluginFileName,
-    '{{AUTHOR_NAME}}': author,
-    '{{AUTHOR_EMAIL}}': email,
-    '{{PLUGIN_DESCRIPTION}}': description,
-    '{{AUTHOR_WEBSITE}}': 'https://example.com',
-    '{{PLUGIN_CATEGORY}}': pluginType == 'game' ? 'entertainment' : 'productivity',
-    '{{PLUGIN_TAGS}}': pluginType == 'game' ? "'game', 'entertainment'" : "'tool', 'utility'",
-    '{{PLUGIN_ICON}}': pluginType == 'game' ? 'games' : 'extension',
-    '{{DOCUMENTATION_URL}}': 'https://docs.example.com',
-    '{{SOURCE_CODE_URL}}': 'https://github.com/example/$pluginFileName',
-    '{{LICENSE}}': 'MIT',
-    '{{CREATION_DATE}}': DateTime.now().toString().split(' ')[0],
-  };
-
-  String pluginCode = pluginTemplate;
-  String factoryCode = factoryTemplate;
-
-  replacements.forEach((key, value) {
-    pluginCode = pluginCode.replaceAll(key, value);
-    factoryCode = factoryCode.replaceAll(key, value);
-  });
-
-  // 写入文件
-  await File(path.join(pluginDir, '${pluginFileName}_plugin.dart')).writeAsString(pluginCode);
-  await File(path.join(pluginDir, '${pluginFileName}_plugin_factory.dart')).writeAsString(factoryCode);
-
-  // 创建README
-  final readme = '''
-# $pluginName
-
-$description
-
-## 功能特性
-
-- 功能1
-- 功能2
-- 功能3
-
-## 使用方法
-
-1. 在插件注册表中注册插件
-2. 通过插件管理器加载插件
-3. 使用插件功能
-
-## 开发者
-
-- 作者: $author
-- 邮箱: $email
-
-## 许可证
-
-MIT License
-''';
-
-  await File(path.join(pluginDir, 'README.md')).writeAsString(readme);
-
-  // 创建测试文件
-  await _createTestFile(pluginDir, pluginFileName, pluginClass, pluginId);
-
-  // 生成注册代码提示
-  final registrationCode = '''
-
-// 在 lib/plugins/plugin_registry.dart 中添加以下代码:
-
-import '$pluginFileName/${pluginFileName}_plugin_factory.dart';
-
-// 在 _factories 映射中添加:
-'$pluginId': PluginFactory(
-  createPlugin: ${pluginClass}PluginFactory.createPlugin,
-  getDescriptor: ${pluginClass}PluginFactory.getDescriptor,
-),
-''';
-
-  print('\n✅ 插件创建成功!');
-  print('   插件目录: $pluginDir');
-  print('\n📝 下一步:');
-  print('   1. 查看生成的文件');
-  print('   2. 根据需要修改插件代码');
-  print('   3. 在插件注册表中注册插件');
-  print('\n📋 注册代码:');
-  print(registrationCode);
+Future<void> _val(ArgResults a) async {
+  final p = a['plugin'] as String;
+  print('Validating: $p');
+  if (!await File(p).exists()) { print('File not found'); exit(1); }
+  final errs = <String>[], warns = <String>[];
+  try {
+    final b = await File(p).readAsBytes(), arc = ZipDecoder().decodeBytes(b), ns = arc.files.map((f) => f.name).toSet();
+    if (!ns.contains('manifest.json')) { errs.add('Missing manifest.json'); }
+    else { final mf = arc.files.firstWhere((f) => f.name == 'manifest.json'); final m = jsonDecode(utf8.decode(mf.content as List<int>)) as Map<String, dynamic>;
+      for (final f in ['id', 'name', 'version', 'type', 'runtimeType', 'supportedPlatforms', 'entryPoints']) { if (!m.containsKey(f)) errs.add('Missing: $f'); }
+      print('  ${m['name']} v${m['version']} (${m['runtimeType']})'); }
+    if (!ns.contains('signature.txt')) warns.add('No signature');
+    print('  Files: ${arc.files.length}, Size: ${(b.length / 1024).toStringAsFixed(1)} KB');
+  } catch (e) { errs.add('Parse error: $e'); }
+  if (errs.isNotEmpty) { print('Errors:'); for (final e in errs) { print('  - $e'); } exit(1); }
+  if (warns.isNotEmpty) { print('Warnings:'); for (final w in warns) { print('  - $w'); } }
+  print('Valid');
 }
 
-/// 创建外部插件
-Future<void> createExternalPlugin(ArgResults args) async {
-  final pluginName = args['name'] as String;
-  final pluginType = args['type'] as String;
-  final language = args['language'] as String;
-  final author = args['author'] as String? ?? 'Your Name';
-
-  print('🚀 创建外部插件: $pluginName');
-  print('   类型: $pluginType');
-  print('   语言: $language');
-  print('   作者: $author');
-
-  // TODO: 实现外部插件创建逻辑
-  print('\n⚠️  外部插件创建功能正在开发中...');
+Future<void> _pub(ArgResults a) async {
+  final p = a['plugin'] as String, rg = a['registry'] as String;
+  print('Publishing: $p ($rg)');
+  await _val(a);
+  final b = await File(p).readAsBytes(), arc = ZipDecoder().decodeBytes(b);
+  final mf = arc.files.firstWhere((f) => f.name == 'manifest.json');
+  final m = jsonDecode(utf8.decode(mf.content as List<int>)) as Map<String, dynamic>;
+  final id = m['id'] as String, v = m['version'] as String;
+  if (rg == 'local') {
+    final h = Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'] ?? '.';
+    final rd = path.join(h, '.flutter-plugins', 'registry', id, v);
+    await Directory(rd).create(recursive: true);
+    await File(p).copy(path.join(rd, path.basename(p)));
+    final ix = File(path.join(h, '.flutter-plugins', 'registry', 'index.json'));
+    Map<String, dynamic> idx = {};
+    if (await ix.exists()) idx = jsonDecode(await ix.readAsString());
+    idx[id] ??= {'versions': <String>[]};
+    final vs = (idx[id]['versions'] as List).cast<String>();
+    if (!vs.contains(v)) vs.add(v);
+    idx[id]['latest'] = v; idx[id]['name'] = m['name'];
+    await ix.writeAsString(const JsonEncoder.withIndent('  ').convert(idx));
+    print('Published: $rd');
+  } else { print('Remote publish requires API key'); }
 }
 
-/// 列出可用模板
-Future<void> listTemplates() async {
-  print('📋 可用模板列表:\n');
-  
-  print('内部插件模板:');
-  print('  - basic-tool: 基础工具插件模板');
-  print('  - basic-game: 基础游戏插件模板');
-  print('  - advanced-tool: 高级工具插件模板');
-  print('  - advanced-game: 高级游戏插件模板');
-  
-  print('\n外部插件模板:');
-  print('  - dart-executable: Dart可执行插件模板');
-  print('  - python-executable: Python可执行插件模板');
-  print('  - web-plugin: Web插件模板');
-  print('  - container-plugin: 容器插件模板');
-}
-
-/// 构建插件
-Future<void> buildPlugin(ArgResults args) async {
-  print('🔨 构建插件...');
-  // TODO: 实现构建逻辑
-  print('⚠️  构建功能正在开发中...');
-}
-
-/// 测试插件
-Future<void> testPlugin(ArgResults args) async {
-  print('🧪 测试插件...');
-  // TODO: 实现测试逻辑
-  print('⚠️  测试功能正在开发中...');
-}
-
-/// 打包插件
-Future<void> packagePlugin(ArgResults args) async {
-  print('📦 打包插件...');
-  // TODO: 实现打包逻辑
-  print('⚠️  打包功能正在开发中...');
-}
-
-/// 验证插件
-Future<void> validatePlugin(ArgResults args) async {
-  print('✓ 验证插件...');
-  // TODO: 实现验证逻辑
-  print('⚠️  验证功能正在开发中...');
-}
-
-/// 发布插件
-Future<void> publishPlugin(ArgResults args) async {
-  print('🚀 发布插件...');
-  // TODO: 实现发布逻辑
-  print('⚠️  发布功能正在开发中...');
-}
-
-/// 创建测试文件
-Future<void> _createTestFile(String pluginDir, String pluginFileName, String pluginClass, String pluginId) async {
-  final testContent = '''
-import 'package:flutter_test/flutter_test.dart';
-import 'package:plugin_platform/plugins/$pluginFileName/${pluginFileName}_plugin.dart';
-import 'package:plugin_platform/plugins/$pluginFileName/${pluginFileName}_plugin_factory.dart';
-import 'package:plugin_platform/core/models/plugin_models.dart';
-import 'package:plugin_platform/core/interfaces/i_plugin.dart';
-
-// Mock实现
-class MockPlatformServices implements IPlatformServices {
-  final List<String> notifications = [];
-  
-  @override
-  Future<void> showNotification(String message, {NotificationType? type, bool? persistent}) async {
-    notifications.add(message);
-  }
-  
-  @override
-  Future<bool> requestPermission(Permission permission) async => true;
-  
-  @override
-  Future<bool> hasPermission(Permission permission) async => true;
-}
-
-class MockDataStorage implements IDataStorage {
-  final Map<String, dynamic> _storage = {};
-  
-  @override
-  Future<void> store(String key, dynamic value) async {
-    _storage[key] = value;
-  }
-  
-  @override
-  Future<T?> retrieve<T>(String key) async {
-    return _storage[key] as T?;
-  }
-  
-  @override
-  Future<void> remove(String key) async {
-    _storage.remove(key);
-  }
-  
-  @override
-  Future<void> clear() async {
-    _storage.clear();
-  }
-}
-
-class MockNetworkAccess implements INetworkAccess {
-  @override
-  Future<Map<String, dynamic>> get(String url, {Map<String, String>? headers}) async {
-    return {'status': 'success', 'data': 'mock data'};
-  }
-  
-  @override
-  Future<Map<String, dynamic>> post(String url, {Map<String, dynamic>? body, Map<String, String>? headers}) async {
-    return {'status': 'success'};
-  }
-  
-  @override
-  Future<bool> isConnected() async => true;
-}
-
-void main() {
-  group('$pluginClass Tests', () {
-    late ${pluginClass}Plugin plugin;
-    late MockPlatformServices mockPlatformServices;
-    late MockDataStorage mockDataStorage;
-    late MockNetworkAccess mockNetworkAccess;
-    late PluginContext context;
-
-    setUp(() {
-      plugin = ${pluginClass}Plugin();
-      mockPlatformServices = MockPlatformServices();
-      mockDataStorage = MockDataStorage();
-      mockNetworkAccess = MockNetworkAccess();
-      
-      context = PluginContext(
-        platformServices: mockPlatformServices,
-        dataStorage: mockDataStorage,
-        networkAccess: mockNetworkAccess,
-        configuration: {},
-      );
-    });
-
-    test('Plugin properties should be correct', () {
-      expect(plugin.id, '$pluginId');
-      expect(plugin.name, isNotEmpty);
-      expect(plugin.version, '1.0.0');
-    });
-
-    test('Plugin should initialize successfully', () async {
-      await plugin.initialize(context);
-      expect(mockPlatformServices.notifications, isNotEmpty);
-    });
-
-    test('Plugin should handle state changes', () async {
-      await plugin.initialize(context);
-      await plugin.onStateChanged(PluginState.active);
-      await plugin.onStateChanged(PluginState.paused);
-      await plugin.onStateChanged(PluginState.inactive);
-    });
-
-    test('Plugin should save and restore state', () async {
-      await plugin.initialize(context);
-      final state = await plugin.getState();
-      expect(state, isA<Map<String, dynamic>>());
-      expect(state['version'], '1.0.0');
-    });
-
-    test('Plugin should dispose cleanly', () async {
-      await plugin.initialize(context);
-      await plugin.dispose();
-    });
-  });
-}
-''';
-
-  final testDir = path.join('test', 'plugins');
-  await Directory(testDir).create(recursive: true);
-  await File(path.join(testDir, '${pluginFileName}_test.dart')).writeAsString(testContent);
-}
-
-/// 转换为PascalCase
-String _toPascalCase(String input) {
-  return input
-      .split(RegExp(r'[_\s-]+'))
-      .map((word) => word[0].toUpperCase() + word.substring(1).toLowerCase())
-      .join('');
-}
-
-/// 打印帮助信息
-void printHelp(ArgParser parser) {
-  print('''
-Flutter插件平台 - 插件CLI工具
-
-用法: plugin-cli <command> [options]
-
-可用命令:
-  create-internal    创建内部插件
-  create-external    创建外部插件
-  list-templates     列出可用模板
-  build             构建插件
-  test              测试插件
-  package           打包插件
-  validate          验证插件
-  publish           发布插件
-
-全局选项:
-  -h, --help        显示帮助信息
-  -v, --version     显示版本信息
-
-示例:
-  # 创建内部插件
-  plugin-cli create-internal --name "My Plugin" --type tool --author "John Doe"
-
-  # 创建外部插件
-  plugin-cli create-external --name "My Plugin" --type executable --language dart
-
-  # 列出可用模板
-  plugin-cli list-templates
-
-更多信息请访问: https://docs.flutter-platform.com
-''');
-}
-
-/// 打印版本信息
-void printVersion() {
-  print('Flutter插件平台 CLI工具 v1.0.0');
+void _help() {
+  print('Flutter Plugin CLI v1.0.0\n\nCommands:\n  create-internal -n <name> [-t tool|game]\n  create-external -n <name> [-l dart|python|web]\n  list-templates\n  build [-p dir]\n  test [-p path]\n  package [-p dir] [-o file.pkg]\n  validate -p <file.pkg>\n  publish -p <file.pkg> [-r local]');
 }

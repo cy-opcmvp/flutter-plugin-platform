@@ -29,11 +29,11 @@ A weather information plugin demonstrating Plugin SDK usage with Python.
 3. Configure API key in `config.json`
 4. Build the plugin:
    ```bash
-   plugin-cli build
+   dart tools/plugin_cli.dart build
    ```
 5. Package for distribution:
    ```bash
-   plugin-cli package --platform all --output weather.pkg
+   dart tools/plugin_cli.dart package --output weather.pkg
    ```
 
 ### Configuration
@@ -54,7 +54,7 @@ Create a `config.json` file with your weather API configuration:
 Test the plugin locally:
 
 ```bash
-plugin-cli test --plugin weather.pkg
+dart tools/plugin_cli.dart test --plugin weather.pkg
 ```
 
 ## Code Structure

@@ -3,6 +3,7 @@ import '../../core/interfaces/i_plugin_manager.dart';
 import '../../core/models/plugin_models.dart';
 import '../../core/services/plugin_manager.dart';
 import '../../core/services/platform_services.dart';
+import '../../core/extensions/context_extensions.dart';
 import '../widgets/plugin_card.dart';
 import '../widgets/plugin_details_dialog.dart';
 
@@ -36,7 +37,7 @@ class _PluginManagementScreenState extends State<PluginManagementScreen> {
       await _loadPlugins();
     } catch (e) {
       setState(() {
-        _error = 'Failed to initialize plugin manager: $e';
+        _error = e.toString();
         _isLoading = false;
       });
     }
@@ -66,7 +67,7 @@ class _PluginManagementScreenState extends State<PluginManagementScreen> {
       });
     } catch (e) {
       setState(() {
-        _error = 'Failed to load plugins: $e';
+        _error = e.toString();
         _isLoading = false;
       });
     }
@@ -98,9 +99,10 @@ class _PluginManagementScreenState extends State<PluginManagementScreen> {
       await _loadPlugins();
       
       if (mounted) {
+        final l10n = context.l10n;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(enabled ? 'Plugin enabled' : 'Plugin disabled'),
+            content: Text(enabled ? l10n.plugin_enableSuccess : l10n.plugin_disableSuccess),
             backgroundColor: Colors.green,
           ),
         );
@@ -109,7 +111,7 @@ class _PluginManagementScreenState extends State<PluginManagementScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to ${enabled ? 'enable' : 'disable'} plugin: $e'),
+            content: Text(context.l10n.plugin_operationFailed(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -118,20 +120,21 @@ class _PluginManagementScreenState extends State<PluginManagementScreen> {
   }
 
   Future<void> _uninstallPlugin(String pluginId) async {
+    final l10n = context.l10n;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Uninstall Plugin'),
-        content: const Text('Are you sure you want to uninstall this plugin? This action cannot be undone.'),
+        title: Text(l10n.button_uninstall),
+        content: Text(l10n.dialog_uninstallPlugin),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.common_cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Uninstall'),
+            child: Text(l10n.button_uninstall),
           ),
         ],
       ),
@@ -144,8 +147,8 @@ class _PluginManagementScreenState extends State<PluginManagementScreen> {
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Plugin uninstalled successfully'),
+            SnackBar(
+              content: Text(l10n.plugin_uninstallSuccess),
               backgroundColor: Colors.green,
             ),
           );
@@ -154,7 +157,7 @@ class _PluginManagementScreenState extends State<PluginManagementScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Failed to uninstall plugin: $e'),
+              content: Text(l10n.plugin_operationFailed(e.toString())),
               backgroundColor: Colors.red,
             ),
           );
@@ -201,8 +204,8 @@ class _PluginManagementScreenState extends State<PluginManagementScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Sample plugin installed successfully'),
+          SnackBar(
+            content: Text(context.l10n.plugin_installSuccess),
             backgroundColor: Colors.green,
           ),
         );
@@ -211,7 +214,7 @@ class _PluginManagementScreenState extends State<PluginManagementScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to install sample plugin: $e'),
+            content: Text(context.l10n.plugin_operationFailed(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -221,15 +224,16 @@ class _PluginManagementScreenState extends State<PluginManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Plugin Management'),
+        title: Text(l10n.plugin_title),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           IconButton(
             onPressed: _loadPlugins,
             icon: const Icon(Icons.refresh),
-            tooltip: 'Refresh',
+            tooltip: l10n.common_refresh,
           ),
         ],
       ),
@@ -241,10 +245,10 @@ class _PluginManagementScreenState extends State<PluginManagementScreen> {
             child: Column(
               children: [
                 TextField(
-                  decoration: const InputDecoration(
-                    hintText: 'Search plugins...',
-                    prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    hintText: l10n.hint_searchPlugins,
+                    prefixIcon: const Icon(Icons.search),
+                    border: const OutlineInputBorder(),
                   ),
                   onChanged: (value) {
                     setState(() {
@@ -255,7 +259,7 @@ class _PluginManagementScreenState extends State<PluginManagementScreen> {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    const Text('Filter by type: '),
+                    Text(l10n.plugin_filterByType),
                     const SizedBox(width: 8),
                     DropdownButton<PluginType?>(
                       value: _filterType,
@@ -264,18 +268,18 @@ class _PluginManagementScreenState extends State<PluginManagementScreen> {
                           _filterType = value;
                         });
                       },
-                      items: const [
+                      items: [
                         DropdownMenuItem(
                           value: null,
-                          child: Text('All'),
+                          child: Text(l10n.common_all),
                         ),
                         DropdownMenuItem(
                           value: PluginType.tool,
-                          child: Text('Tools'),
+                          child: Text(l10n.plugin_typeTool),
                         ),
                         DropdownMenuItem(
                           value: PluginType.game,
-                          child: Text('Games'),
+                          child: Text(l10n.plugin_typeGame),
                         ),
                       ],
                     ),
@@ -299,6 +303,7 @@ class _PluginManagementScreenState extends State<PluginManagementScreen> {
   }
 
   Widget _buildPluginList() {
+    final l10n = context.l10n;
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -317,19 +322,19 @@ class _PluginManagementScreenState extends State<PluginManagementScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Error',
+              l10n.common_error,
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
             Text(
-              _error!,
+              l10n.error_loadFailed(_error!),
               style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _loadPlugins,
-              child: const Text('Retry'),
+              child: Text(l10n.common_retry),
             ),
           ],
         ),
@@ -346,20 +351,20 @@ class _PluginManagementScreenState extends State<PluginManagementScreen> {
             Icon(
               Icons.extension_off,
               size: 64,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
               _searchQuery.isNotEmpty || _filterType != null
-                  ? 'No plugins match your search'
-                  : 'No plugins installed',
+                  ? l10n.plugin_noMatch
+                  : l10n.plugin_noPlugins,
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
             Text(
               _searchQuery.isNotEmpty || _filterType != null
-                  ? 'Try adjusting your search or filter criteria'
-                  : 'Install your first plugin to get started',
+                  ? l10n.hint_tryAdjustSearch
+                  : l10n.plugin_installFirst,
               style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),

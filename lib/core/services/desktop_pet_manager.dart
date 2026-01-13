@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
+import 'package:window_manager/window_manager.dart';
 import 'platform_logger.dart';
 
 // Conditional imports for platform detection
@@ -52,11 +53,6 @@ class DesktopPetManager {
     }
     
     try {
-      // 尝试初始化平台特定功能
-      if (_isDesktopPlatform()) {
-        await _initializePlatformSpecific();
-      }
-      
       // 加载用户偏好设置
       await _loadPetPreferences();
       
@@ -93,8 +89,8 @@ class DesktopPetManager {
     }
     
     try {
-      // 尝试使用平台特定实现
-      await _enablePlatformSpecificPetMode();
+      // 使用window_manager创建桌面宠物窗口
+      await _createDesktopPetWindow();
       
       _isDesktopPetMode = true;
       PlatformLogger.instance.logInfo('Desktop Pet mode enabled');
@@ -121,7 +117,7 @@ class DesktopPetManager {
     }
     
     try {
-      await _disablePlatformSpecificPetMode();
+      await _restoreMainWindow();
     } catch (e) {
       PlatformLogger.instance.logError('Desktop Pet Mode', e);
     }
@@ -209,12 +205,8 @@ class DesktopPetManager {
     }
     
     try {
-      // 尝试平滑过渡动画
-      await _channel.invokeMethod('transitionToDesktopPet', {
-        'duration': 500,
-        'target_position': _petPreferences['position'],
-        'target_size': _petPreferences['size'],
-      });
+      // 创建桌面宠物窗口（不隐藏，直接调整大小和属性）
+      await _createDesktopPetWindow();
       
       _isDesktopPetMode = true;
     } catch (e) {
@@ -247,9 +239,7 @@ class DesktopPetManager {
     }
     
     try {
-      await _channel.invokeMethod('transitionToFullApplication', {
-        'duration': 500,
-      });
+      await _restoreMainWindow();
       
       _isDesktopPetMode = false;
       _isAlwaysOnTop = false;
@@ -361,47 +351,80 @@ class DesktopPetManager {
 
   // 私有方法
 
-  Future<void> _initializePlatformSpecific() async {
-    // Web平台跳过平台特定初始化
-    if (kIsWeb) return;
-    
-    // 不支持的平台跳过平台特定初始化
-    if (!_isSupported) return;
+  /// 创建桌面宠物窗口
+  Future<void> _createDesktopPetWindow() async {
+    if (kIsWeb || !_isSupported) return;
     
     try {
-      await _channel.invokeMethod('initialize', {
-        'platform': _getPlatformName(),
-        'capabilities': getPlatformCapabilities(),
-      });
+      final position = _petPreferences['position'] as Map<String, dynamic>? ?? {'x': 100.0, 'y': 100.0};
+      // 宠物窗口大小 - 稍大于宠物本身以容纳菜单
+      const petWindowSize = Size(200.0, 200.0);
+      
+      // 确保窗口管理器已初始化
+      await windowManager.ensureInitialized();
+      
+      // 先设置窗口为完全透明，避免闪烁
+      await windowManager.setOpacity(0.0);
+      
+      // 设置窗口为小尺寸的桌面宠物窗口
+      await windowManager.setSize(petWindowSize);
+      await windowManager.setPosition(Offset(position['x'], position['y']));
+      
+      // 设置窗口属性 - 无边框透明窗口
+      await windowManager.setAlwaysOnTop(true);
+      await windowManager.setSkipTaskbar(true); // 不在任务栏显示
+      await windowManager.setHasShadow(false); // 无阴影
+      await windowManager.setBackgroundColor(const Color(0x00000000)); // 透明背景
+      
+      // 设置窗口标题栏不可见
+      await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
+      
+      // 确保窗口可见
+      await windowManager.show();
+      await windowManager.focus();
+      
+      // 延迟后恢复透明度，让Flutter有时间渲染透明内容
+      await Future.delayed(const Duration(milliseconds: 50));
+      await windowManager.setOpacity(_petPreferences['opacity'] ?? 1.0);
+      
+      _isAlwaysOnTop = true;
+      
+      PlatformLogger.instance.logInfo('Desktop pet window created successfully');
     } catch (e) {
-      // 平台特定初始化失败不影响基本功能
-      PlatformLogger.instance.logWarning('Platform specific initialization failed: $e');
+      PlatformLogger.instance.logError('Failed to create desktop pet window', e);
+      rethrow;
     }
   }
-
-  Future<void> _enablePlatformSpecificPetMode() async {
-    // Web平台跳过平台特定Pet模式
-    if (kIsWeb) return;
+  
+  /// 恢复主窗口
+  Future<void> _restoreMainWindow() async {
+    if (kIsWeb || !_isSupported) return;
     
-    // 不支持的平台跳过平台特定Pet模式
-    if (!_isSupported) return;
-    
-    await _channel.invokeMethod('enableDesktopPetMode', {
-      'position': _petPreferences['position'],
-      'size': _petPreferences['size'],
-      'opacity': _petPreferences['opacity'],
-      'alwaysOnTop': _petPreferences['always_on_top'] ?? true,
-    });
-  }
-
-  Future<void> _disablePlatformSpecificPetMode() async {
-    // Web平台跳过平台特定Pet模式
-    if (kIsWeb) return;
-    
-    // 不支持的平台跳过平台特定Pet模式
-    if (!_isSupported) return;
-    
-    await _channel.invokeMethod('disableDesktopPetMode');
+    try {
+      // 恢复窗口到正常大小和位置
+      await windowManager.setSize(const Size(1200, 800));
+      await windowManager.center();
+      
+      // 恢复窗口属性
+      await windowManager.setAlwaysOnTop(false);
+      await windowManager.setSkipTaskbar(false); // 在任务栏显示
+      await windowManager.setHasShadow(true); // 有阴影
+      await windowManager.setOpacity(1.0);
+      
+      // 恢复标题栏
+      await windowManager.setTitleBarStyle(TitleBarStyle.normal);
+      
+      // 确保窗口可见和聚焦
+      await windowManager.show();
+      await windowManager.focus();
+      
+      _isAlwaysOnTop = false;
+      
+      PlatformLogger.instance.logInfo('Main window restored successfully');
+    } catch (e) {
+      PlatformLogger.instance.logError('Failed to restore main window', e);
+      rethrow;
+    }
   }
 
   Future<void> _applyPetPreferences() async {
@@ -414,12 +437,13 @@ class DesktopPetManager {
     if (!_isSupported) return;
     
     try {
-      await _channel.invokeMethod('updatePetSettings', {
-        'position': _petPreferences['position'],
-        'size': _petPreferences['size'],
-        'opacity': _petPreferences['opacity'],
-        'alwaysOnTop': _petPreferences['always_on_top'] ?? true,
-      });
+      final position = _petPreferences['position'] as Map<String, dynamic>? ?? {'x': 100.0, 'y': 100.0};
+      final size = _petPreferences['size'] as Map<String, dynamic>? ?? {'width': 200.0, 'height': 200.0};
+      
+      await windowManager.setPosition(Offset(position['x'], position['y']));
+      await windowManager.setSize(Size(size['width'], size['height']));
+      await windowManager.setOpacity(_petPreferences['opacity'] ?? 1.0);
+      await windowManager.setAlwaysOnTop(_petPreferences['always_on_top'] ?? true);
     } catch (e) {
       PlatformLogger.instance.logWarning('Failed to apply pet preferences: $e');
     }

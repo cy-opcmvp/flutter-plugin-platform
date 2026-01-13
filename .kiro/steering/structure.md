@@ -8,7 +8,6 @@ flutter_app/
 ├── test/                   # Test files
 ├── docs/                   # Documentation
 ├── tools/                  # CLI tools and utilities
-├── examples/               # Example plugins and code
 ├── android/                # Android platform files
 ├── ios/                    # iOS platform files
 ├── linux/                  # Linux platform files
@@ -157,25 +156,8 @@ docs/
 ```
 tools/
 ├── plugin_cli.dart        # Main CLI tool
-├── plugin-cli.sh          # Unix shell wrapper
-├── plugin-cli.bat         # Windows batch wrapper
-├── install.sh             # Unix installation script
-├── install.bat            # Windows installation script
 ├── pubspec.yaml           # CLI tool dependencies
 └── .dart_tool/            # CLI tool build artifacts
-```
-
-## Examples (`examples/`)
-
-```
-examples/
-├── dart_calculator/       # Dart plugin example
-│   ├── lib/
-│   │   └── main.dart
-│   └── README.md
-└── python_weather/        # Python plugin example
-    ├── main.py
-    └── README.md
 ```
 
 ## File Naming Conventions

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/interfaces/i_plugin_manager.dart';
 import '../../core/models/plugin_models.dart';
+import '../../core/extensions/context_extensions.dart';
 
 /// Dialog that shows detailed information about a plugin
 class PluginDetailsDialog extends StatelessWidget {
@@ -43,7 +44,7 @@ class PluginDetailsDialog extends StatelessWidget {
                     width: 56,
                     height: 56,
                     decoration: BoxDecoration(
-                      color: _getPluginTypeColor(descriptor.type).withOpacity(0.2),
+                      color: _getPluginTypeColor(descriptor.type).withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
@@ -67,7 +68,7 @@ class PluginDetailsDialog extends StatelessWidget {
                         Text(
                           'Version ${descriptor.version}',
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onPrimaryContainer.withOpacity(0.7),
+                            color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.7),
                           ),
                         ),
                       ],
@@ -90,12 +91,12 @@ class PluginDetailsDialog extends StatelessWidget {
                     // Status and basic info
                     _buildInfoSection(
                       context,
-                      'Status',
+                      context.l10n.plugin_detailsStatus,
                       [
-                        _InfoItem('State', _getStateDisplayName(pluginInfo.state)),
-                        _InfoItem('Enabled', pluginInfo.isEnabled ? 'Yes' : 'No'),
-                        _InfoItem('Type', descriptor.type.name.toUpperCase()),
-                        _InfoItem('Plugin ID', descriptor.id),
+                        _InfoItem(context.l10n.plugin_detailsState, _getStateDisplayName(context, pluginInfo.state)),
+                        _InfoItem(context.l10n.plugin_detailsEnabled, pluginInfo.isEnabled ? context.l10n.common_yes : context.l10n.common_no),
+                        _InfoItem(context.l10n.plugin_detailsType, descriptor.type.name.toUpperCase()),
+                        _InfoItem(context.l10n.plugin_detailsPluginId, descriptor.id),
                       ],
                     ),
                     const SizedBox(height: 24),
@@ -104,7 +105,7 @@ class PluginDetailsDialog extends StatelessWidget {
                     if (descriptor.metadata.containsKey('description')) ...[
                       _buildInfoSection(
                         context,
-                        'Description',
+                        context.l10n.plugin_detailsDescription,
                         [_InfoItem('', descriptor.metadata['description'] as String)],
                       ),
                       const SizedBox(height: 24),
@@ -113,12 +114,12 @@ class PluginDetailsDialog extends StatelessWidget {
                     // Installation info
                     _buildInfoSection(
                       context,
-                      'Installation',
+                      context.l10n.plugin_detailsInstallation,
                       [
-                        _InfoItem('Installed', _formatDateTime(pluginInfo.installedAt)),
+                        _InfoItem(context.l10n.plugin_detailsInstalled, _formatDateTime(pluginInfo.installedAt)),
                         if (pluginInfo.lastUsed != null)
-                          _InfoItem('Last Used', _formatDateTime(pluginInfo.lastUsed!)),
-                        _InfoItem('Entry Point', descriptor.entryPoint),
+                          _InfoItem(context.l10n.plugin_detailsLastUsed, _formatDateTime(pluginInfo.lastUsed!)),
+                        _InfoItem(context.l10n.plugin_detailsEntryPoint, descriptor.entryPoint),
                       ],
                     ),
                     const SizedBox(height: 24),
@@ -145,7 +146,7 @@ class PluginDetailsDialog extends StatelessWidget {
                 color: theme.colorScheme.surface,
                 border: Border(
                   top: BorderSide(
-                    color: theme.colorScheme.outline.withOpacity(0.2),
+                    color: theme.colorScheme.outline.withValues(alpha: 0.2),
                   ),
                 ),
               ),
@@ -158,14 +159,14 @@ class PluginDetailsDialog extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    pluginInfo.isEnabled ? 'Enabled' : 'Disabled',
+                    pluginInfo.isEnabled ? context.l10n.plugin_statusEnabled : context.l10n.plugin_statusDisabled,
                     style: theme.textTheme.bodyMedium,
                   ),
                   const Spacer(),
                   // Action buttons
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Close'),
+                    child: Text(context.l10n.common_close),
                   ),
                   const SizedBox(width: 8),
                   TextButton(
@@ -176,7 +177,7 @@ class PluginDetailsDialog extends StatelessWidget {
                     style: TextButton.styleFrom(
                       foregroundColor: theme.colorScheme.error,
                     ),
-                    child: const Text('Uninstall'),
+                    child: Text(context.l10n.button_uninstall),
                   ),
                 ],
               ),
@@ -216,7 +217,7 @@ class PluginDetailsDialog extends StatelessWidget {
                         '${item.label}:',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
-                          color: theme.colorScheme.onSurface.withOpacity(0.7),
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                         ),
                       ),
                     ),
@@ -240,7 +241,7 @@ class PluginDetailsDialog extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Permissions',
+          context.l10n.plugin_detailsPermissions,
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
           ),
@@ -252,7 +253,7 @@ class PluginDetailsDialog extends StatelessWidget {
           children: pluginInfo.descriptor.requiredPermissions.map((permission) {
             return Chip(
               label: Text(
-                _getPermissionDisplayName(permission),
+                _getPermissionDisplayName(context, permission),
                 style: theme.textTheme.bodySmall,
               ),
               backgroundColor: theme.colorScheme.secondaryContainer,
@@ -280,7 +281,7 @@ class PluginDetailsDialog extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Additional Information',
+          context.l10n.plugin_detailsAdditionalInfo,
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
           ),
@@ -297,7 +298,7 @@ class PluginDetailsDialog extends StatelessWidget {
                   '${_capitalizeFirst(entry.key)}:',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w500,
-                    color: theme.colorScheme.onSurface.withOpacity(0.7),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                 ),
               ),
@@ -332,65 +333,65 @@ class PluginDetailsDialog extends StatelessWidget {
     }
   }
 
-  String _getStateDisplayName(PluginState state) {
+  String _getStateDisplayName(BuildContext context, PluginState state) {
     switch (state) {
       case PluginState.active:
-        return 'Active';
+        return context.l10n.plugin_stateActive;
       case PluginState.inactive:
-        return 'Inactive';
+        return context.l10n.plugin_stateInactive;
       case PluginState.loading:
-        return 'Loading';
+        return context.l10n.plugin_stateLoading;
       case PluginState.paused:
-        return 'Paused';
+        return context.l10n.plugin_statePaused;
       case PluginState.error:
-        return 'Error';
+        return context.l10n.plugin_stateError;
     }
   }
 
-  String _getPermissionDisplayName(Permission permission) {
+  String _getPermissionDisplayName(BuildContext context, Permission permission) {
     switch (permission) {
       case Permission.fileAccess:
-        return 'File Access';
+        return context.l10n.plugin_permissionFileAccess;
       case Permission.fileSystemRead:
-        return 'File System Read';
+        return context.l10n.plugin_permissionFileSystemRead;
       case Permission.fileSystemWrite:
-        return 'File System Write';
+        return context.l10n.plugin_permissionFileSystemWrite;
       case Permission.fileSystemExecute:
-        return 'File System Execute';
+        return context.l10n.plugin_permissionFileSystemExecute;
       case Permission.networkAccess:
-        return 'Network Access';
+        return context.l10n.plugin_permissionNetworkAccess;
       case Permission.networkServer:
-        return 'Network Server';
+        return context.l10n.plugin_permissionNetworkServer;
       case Permission.networkClient:
-        return 'Network Client';
+        return context.l10n.plugin_permissionNetworkClient;
       case Permission.notifications:
-        return 'Notifications';
+        return context.l10n.plugin_permissionNotifications;
       case Permission.systemNotifications:
-        return 'System Notifications';
+        return context.l10n.plugin_permissionSystemNotifications;
       case Permission.camera:
-        return 'Camera';
+        return context.l10n.plugin_permissionCamera;
       case Permission.systemCamera:
-        return 'System Camera';
+        return context.l10n.plugin_permissionSystemCamera;
       case Permission.microphone:
-        return 'Microphone';
+        return context.l10n.plugin_permissionMicrophone;
       case Permission.systemMicrophone:
-        return 'System Microphone';
+        return context.l10n.plugin_permissionSystemMicrophone;
       case Permission.location:
-        return 'Location';
+        return context.l10n.plugin_permissionLocation;
       case Permission.storage:
-        return 'Storage';
+        return context.l10n.plugin_permissionStorage;
       case Permission.platformStorage:
-        return 'Platform Storage';
+        return context.l10n.plugin_permissionPlatformStorage;
       case Permission.systemClipboard:
-        return 'System Clipboard';
+        return context.l10n.plugin_permissionSystemClipboard;
       case Permission.platformServices:
-        return 'Platform Services';
+        return context.l10n.plugin_permissionPlatformServices;
       case Permission.platformUI:
-        return 'Platform UI';
+        return context.l10n.plugin_permissionPlatformUI;
       case Permission.pluginCommunication:
-        return 'Plugin Communication';
+        return context.l10n.plugin_permissionPluginCommunication;
       case Permission.pluginDataSharing:
-        return 'Plugin Data Sharing';
+        return context.l10n.plugin_permissionPluginDataSharing;
     }
   }
 

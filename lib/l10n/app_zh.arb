@@ -1,0 +1,430 @@
+{
+  "@@locale": "zh",
+
+  "appTitle": "插件平台",
+  "@appTitle": {
+    "description": "应用标题"
+  },
+
+  "common_confirm": "确认",
+  "common_cancel": "取消",
+  "common_save": "保存",
+  "common_delete": "删除",
+  "common_close": "关闭",
+  "common_retry": "重试",
+  "common_loading": "加载中...",
+  "common_search": "搜索",
+  "common_ok": "确定",
+  "common_yes": "是",
+  "common_no": "否",
+  "common_all": "全部",
+  "common_refresh": "刷新",
+  "common_back": "返回",
+  "common_error": "错误",
+  "common_success": "成功",
+  "common_warning": "警告",
+  "common_info": "信息",
+
+  "error_unknown": "发生未知错误",
+  "error_network": "网络连接失败",
+  "error_loadFailed": "加载失败: {message}",
+  "@error_loadFailed": {
+    "placeholders": {
+      "message": {"type": "String"}
+    }
+  },
+  "error_operationFailed": "操作失败: {message}",
+  "@error_operationFailed": {
+    "placeholders": {
+      "message": {"type": "String"}
+    }
+  },
+  "error_initFailed": "初始化失败: {message}",
+  "@error_initFailed": {
+    "placeholders": {
+      "message": {"type": "String"}
+    }
+  },
+  "error_platformInit": "平台初始化失败: {message}",
+  "@error_platformInit": {
+    "placeholders": {
+      "message": {"type": "String"}
+    }
+  },
+
+  "hint_searchPlugins": "搜索插件...",
+  "hint_searchExternalPlugins": "搜索外部插件...",
+  "hint_inputRequired": "此字段为必填项",
+  "hint_noResults": "没有找到匹配的结果",
+  "hint_tryAdjustSearch": "尝试调整搜索或筛选条件",
+
+  "button_launch": "启动",
+  "button_install": "安装",
+  "button_uninstall": "卸载",
+  "button_enable": "启用",
+  "button_disable": "禁用",
+  "button_update": "更新",
+  "button_rollback": "回滚",
+  "button_remove": "移除",
+  "button_updateAll": "全部更新",
+  "button_removeAll": "全部移除",
+  "button_selectAll": "全选",
+  "button_deselectAll": "取消全选",
+  "button_multiSelect": "多选",
+  "button_enablePetMode": "启用宠物模式",
+  "button_exitPetMode": "退出宠物模式",
+
+  "dialog_confirmTitle": "确认操作",
+  "dialog_uninstallPlugin": "确定要卸载此插件吗？此操作无法撤销。",
+  "dialog_removePlugin": "确定要移除此插件吗？此操作无法撤销。",
+  "dialog_updatePlugin": "确定要更新此插件吗？更新前会创建备份以便回滚。",
+  "dialog_rollbackPlugin": "确定要回滚此插件吗？这将撤销上次更新。",
+  "dialog_batchUpdate": "确定要更新 {count} 个选中的插件吗？",
+  "@dialog_batchUpdate": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "dialog_batchRemove": "确定要移除 {count} 个选中的插件吗？此操作无法撤销。",
+  "@dialog_batchRemove": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+
+  "plugin_title": "插件管理",
+  "plugin_externalTitle": "外部插件",
+  "plugin_statusEnabled": "已启用",
+  "plugin_statusDisabled": "已禁用",
+  "plugin_statusActive": "运行中",
+  "plugin_statusInactive": "未激活",
+  "plugin_statusPaused": "已暂停",
+  "plugin_statusError": "错误",
+  "plugin_typeTool": "工具",
+  "plugin_typeGame": "游戏",
+  "plugin_typeAll": "全部类型",
+  "plugin_stateAll": "全部状态",
+  "plugin_noPlugins": "暂无插件",
+  "plugin_noExternalPlugins": "暂无外部插件",
+  "plugin_installFirst": "安装您的第一个插件开始使用",
+  "plugin_installExternalFirst": "安装您的第一个外部插件开始使用",
+  "plugin_noMatch": "没有匹配的插件",
+  "plugin_filterByType": "按类型筛选: ",
+  "plugin_filterByState": "按状态筛选",
+  "plugin_launchSuccess": "插件 {name} 已启动",
+  "@plugin_launchSuccess": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "plugin_launchFailed": "启动插件失败: {message}",
+  "@plugin_launchFailed": {
+    "placeholders": {
+      "message": {"type": "String"}
+    }
+  },
+  "plugin_switchSuccess": "已切换到插件 {name}",
+  "@plugin_switchSuccess": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "plugin_switchFailed": "切换插件失败: {message}",
+  "@plugin_switchFailed": {
+    "placeholders": {
+      "message": {"type": "String"}
+    }
+  },
+  "plugin_closeSuccess": "插件 {name} 已关闭",
+  "@plugin_closeSuccess": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "plugin_pauseSuccess": "插件 {name} 已移至后台",
+  "@plugin_pauseSuccess": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "plugin_enableSuccess": "插件已启用",
+  "plugin_disableSuccess": "插件已禁用",
+  "plugin_installSuccess": "示例插件安装成功",
+  "plugin_uninstallSuccess": "插件卸载成功",
+  "plugin_updateSuccess": "插件更新成功，可回滚",
+  "plugin_updateFailed": "更新失败并已回滚: {message}",
+  "@plugin_updateFailed": {
+    "placeholders": {
+      "message": {"type": "String"}
+    }
+  },
+  "plugin_rollbackSuccess": "插件回滚成功",
+  "plugin_removeSuccess": "插件移除成功",
+  "plugin_operationFailed": "插件操作失败: {message}",
+  "@plugin_operationFailed": {
+    "placeholders": {
+      "message": {"type": "String"}
+    }
+  },
+  "plugin_batchUpdateResult": "{success} 个更新成功，{failed} 个失败",
+  "@plugin_batchUpdateResult": {
+    "placeholders": {
+      "success": {"type": "int"},
+      "failed": {"type": "int"}
+    }
+  },
+  "plugin_batchRemoveResult": "{success} 个移除成功，{failed} 个失败",
+  "@plugin_batchRemoveResult": {
+    "placeholders": {
+      "success": {"type": "int"},
+      "failed": {"type": "int"}
+    }
+  },
+  "plugin_allUpdateSuccess": "全部 {count} 个插件更新成功",
+  "@plugin_allUpdateSuccess": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "plugin_allRemoveSuccess": "全部 {count} 个插件移除成功",
+  "@plugin_allRemoveSuccess": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "plugin_allUpdateFailed": "全部 {count} 个插件更新失败",
+  "@plugin_allUpdateFailed": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "plugin_allRemoveFailed": "全部 {count} 个插件移除失败",
+  "@plugin_allRemoveFailed": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "plugin_selected": "已选择 {count} 个",
+  "@plugin_selected": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "plugin_updating": "正在更新插件...",
+  "plugin_updatingBatch": "正在更新 {count} 个插件...",
+  "@plugin_updatingBatch": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "plugin_removing": "正在移除插件...",
+  "plugin_removingBatch": "正在移除 {count} 个插件...",
+  "@plugin_removingBatch": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "plugin_rollingBack": "正在回滚插件...",
+  "plugin_errorDetails": "插件错误: {error}",
+  "@plugin_errorDetails": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+
+  "pet_title": "桌面宠物",
+  "pet_notSupported": "桌面宠物不可用",
+  "pet_notSupportedDesc": "桌面宠物功能在 {platform} 平台上不可用。此功能需要桌面环境和窗口管理能力。",
+  "@pet_notSupportedDesc": {
+    "placeholders": {
+      "platform": {"type": "String"}
+    }
+  },
+  "pet_webLimitation": "Web 平台限制",
+  "pet_webLimitationDesc": "Web 浏览器不支持:\n• 桌面窗口管理\n• 置顶窗口\n• 系统托盘集成\n• 原生桌面交互",
+  "pet_enableMode": "启用宠物模式",
+  "pet_exitMode": "退出宠物模式",
+  "pet_exitSuccess": "已退出桌面宠物模式",
+  "pet_returnToApp": "返回主应用",
+  "pet_settings": "宠物设置",
+  "pet_quickActions": "快捷操作",
+  "pet_openFullApp": "打开完整应用",
+  "pet_modeTitle": "桌面宠物模式",
+  "pet_modeDesc": "启用桌面宠物模式，让可爱的伙伴陪伴您！",
+  "pet_features": "功能特点:",
+  "pet_featureAlwaysOnTop": "• 窗口置顶",
+  "pet_featureAnimations": "• 可爱的动画和交互",
+  "pet_featureQuickAccess": "• 快速访问插件",
+  "pet_featureCustomize": "• 可自定义外观",
+  "pet_tip": "右键点击宠物查看快捷操作，双击返回完整应用。",
+  "pet_platformInfo": "平台信息",
+  "pet_platformInfoDesc": "桌面宠物需要以下能力:",
+  "pet_capabilityDesktop": "桌面环境",
+  "pet_capabilityWindow": "窗口管理",
+  "pet_capabilityTray": "系统托盘",
+  "pet_capabilityFileSystem": "文件系统访问",
+  "pet_platformNote": "您当前的平台可能不支持所有这些功能。桌面宠物在 Windows、macOS 和 Linux 桌面环境下效果最佳。",
+  "pet_launchFailed": "启动桌面宠物失败: {message}",
+  "@pet_launchFailed": {
+    "placeholders": {
+      "message": {"type": "String"}
+    }
+  },
+  "pet_toggleFailed": "切换桌面宠物模式失败: {message}",
+  "@pet_toggleFailed": {
+    "placeholders": {
+      "message": {"type": "String"}
+    }
+  },
+  "pet_navFailed": "导航到桌面宠物屏幕失败: {message}",
+  "@pet_navFailed": {
+    "placeholders": {
+      "message": {"type": "String"}
+    }
+  },
+
+  "mode_local": "本地",
+  "mode_online": "在线",
+  "mode_switchSuccess": "已切换到 {mode} 模式",
+  "@mode_switchSuccess": {
+    "placeholders": {
+      "mode": {"type": "String"}
+    }
+  },
+  "mode_switchFailed": "切换模式失败: {message}",
+  "@mode_switchFailed": {
+    "placeholders": {
+      "message": {"type": "String"}
+    }
+  },
+
+  "platform_initializing": "正在初始化平台...",
+  "platform_error": "平台错误",
+  "platform_availableFeatures": "可用功能",
+  "platform_noPluginsAvailable": "暂无可用插件",
+  "platform_installFromManagement": "从管理界面安装插件",
+  "platform_activePlugins": "活动插件",
+  "platform_platformInfo": "平台信息",
+
+  "nav_plugins": "插件",
+  "nav_active": "活动",
+  "nav_info": "信息",
+
+  "settings_language": "语言设置",
+  "settings_theme": "主题设置",
+  "settings_languageChinese": "中文",
+  "settings_languageEnglish": "English",
+
+  "plugin_detailsTitle": "插件详情",
+  "plugin_detailsStatus": "状态",
+  "plugin_detailsState": "状态",
+  "plugin_detailsEnabled": "已启用",
+  "plugin_detailsType": "类型",
+  "plugin_detailsPluginId": "插件ID",
+  "plugin_detailsDescription": "描述",
+  "plugin_detailsInstallation": "安装信息",
+  "plugin_detailsInstalled": "安装时间",
+  "plugin_detailsLastUsed": "最后使用",
+  "plugin_detailsEntryPoint": "入口点",
+  "plugin_detailsPermissions": "权限",
+  "plugin_detailsAdditionalInfo": "附加信息",
+  "plugin_detailsVersion": "版本 {version}",
+  "@plugin_detailsVersion": {
+    "placeholders": {
+      "version": {"type": "String"}
+    }
+  },
+  "plugin_stateActive": "运行中",
+  "plugin_stateInactive": "未激活",
+  "plugin_stateLoading": "加载中",
+  "plugin_statePaused": "已暂停",
+  "plugin_stateError": "错误",
+  "plugin_permissionFileAccess": "文件访问",
+  "plugin_permissionFileSystemRead": "文件系统读取",
+  "plugin_permissionFileSystemWrite": "文件系统写入",
+  "plugin_permissionFileSystemExecute": "文件系统执行",
+  "plugin_permissionNetworkAccess": "网络访问",
+  "plugin_permissionNetworkServer": "网络服务器",
+  "plugin_permissionNetworkClient": "网络客户端",
+  "plugin_permissionNotifications": "通知",
+  "plugin_permissionSystemNotifications": "系统通知",
+  "plugin_permissionCamera": "相机",
+  "plugin_permissionSystemCamera": "系统相机",
+  "plugin_permissionMicrophone": "麦克风",
+  "plugin_permissionSystemMicrophone": "系统麦克风",
+  "plugin_permissionLocation": "位置",
+  "plugin_permissionStorage": "存储",
+  "plugin_permissionPlatformStorage": "平台存储",
+  "plugin_permissionSystemClipboard": "系统剪贴板",
+  "plugin_permissionPlatformServices": "平台服务",
+  "plugin_permissionPlatformUI": "平台UI",
+  "plugin_permissionPluginCommunication": "插件通信",
+  "plugin_permissionPluginDataSharing": "插件数据共享",
+  "plugin_lastUsed": "最后使用: {time}",
+  "@plugin_lastUsed": {
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "plugin_permissionCount": "{count} 个权限",
+  "@plugin_permissionCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "plugin_permissionCountSingle": "1 个权限",
+  "time_daysAgo": "{days}天前",
+  "@time_daysAgo": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "time_hoursAgo": "{hours}小时前",
+  "@time_hoursAgo": {
+    "placeholders": {
+      "hours": {"type": "int"}
+    }
+  },
+  "time_minutesAgo": "{minutes}分钟前",
+  "@time_minutesAgo": {
+    "placeholders": {
+      "minutes": {"type": "int"}
+    }
+  },
+  "time_justNow": "刚刚",
+
+  "pet_openMainApp": "打开主应用",
+  "pet_notAvailable": "不可用",
+  "pet_openFullApp": "打开完整应用",
+  "pet_settingsTitle": "桌面宠物设置",
+  "pet_opacity": "透明度:",
+  "pet_enableAnimations": "启用动画",
+  "pet_animationsSubtitle": "呼吸和眨眼效果",
+  "pet_enableInteractions": "启用交互",
+  "pet_interactionsSubtitle": "点击和拖拽交互",
+  "pet_autoHide": "自动隐藏",
+  "pet_autoHideSubtitle": "不使用时隐藏",
+  "pet_reset": "重置",
+  "pet_done": "完成",
+  "pet_moving": "移动中...",
+
+  "tooltip_switchPlugin": "切换插件",
+  "tooltip_pausePlugin": "移至后台",
+  "tooltip_stopPlugin": "停止插件",
+  "tooltip_switchMode": "切换插件",
+  "tooltip_pauseMode": "移至后台",
+  
+  "info_platformType": "平台类型",
+  "info_version": "版本",
+  "info_currentMode": "当前模式",
+  "info_unknown": "未知",
+  "info_capabilities": "功能特性",
+  "info_statistics": "统计信息",
+  "info_availablePlugins": "可用插件",
+  "info_activePlugins": "活动插件",
+  "info_availableFeatures": "可用功能",
+  
+  "capability_desktopPetSupport": "桌面宠物支持",
+  "capability_alwaysOnTop": "窗口置顶",
+  "capability_systemTray": "系统托盘"
+}

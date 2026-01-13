@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:window_manager/window_manager.dart';
 import 'dart:math' as math;
 import '../../core/services/platform_environment.dart';
 import '../../core/models/platform_models.dart';
+import '../../core/extensions/context_extensions.dart';
 
 /// Desktop Pet Widget - 桌面宠物组件
 class DesktopPetWidget extends StatefulWidget {
@@ -21,7 +23,7 @@ class DesktopPetWidget extends StatefulWidget {
 }
 
 class _DesktopPetWidgetState extends State<DesktopPetWidget> 
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WindowListener {
   AnimationController? _breathingController;
   AnimationController? _blinkController;
   Animation<double>? _breathingAnimation;
@@ -30,9 +32,7 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
   bool _isHovered = false;
   bool _isDragging = false;
   
-  // 位置状态
-  double _positionX = 0.0;
-  double _positionY = 0.0;
+
   
   // Platform capabilities
   late PlatformCapabilities _platformCapabilities;
@@ -52,10 +52,8 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
       return;
     }
     
-    // 初始化位置
-    final position = widget.preferences['position'] as Map<String, dynamic>? ?? {'x': 100.0, 'y': 100.0};
-    _positionX = (position['x'] as num?)?.toDouble() ?? 100.0;
-    _positionY = (position['y'] as num?)?.toDouble() ?? 100.0;
+    // 添加窗口监听器以支持拖拽
+    windowManager.addListener(this);
     
     // 呼吸动画
     _breathingController = AnimationController(
@@ -122,62 +120,50 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
       return _buildWebFallbackWidget(context);
     }
     
-    return Positioned(
-      left: _positionX,
-      top: _positionY,
-      child: Opacity(
-        opacity: _opacity,
-        child: GestureDetector(
-          onDoubleTap: _isInteractionsEnabled ? widget.onDoubleClick : null,
-          onSecondaryTap: _isInteractionsEnabled ? widget.onRightClick : null,
-          onPanStart: _isInteractionsEnabled ? (_) {
-            setState(() {
-              _isDragging = true;
-            });
-          } : null,
-          onPanUpdate: _isInteractionsEnabled ? (details) {
-            setState(() {
-              _positionX += details.delta.dx;
-              _positionY += details.delta.dy;
-              
-              // 确保不会拖拽到屏幕外
-              final screenSize = MediaQuery.of(context).size;
-              _positionX = _positionX.clamp(0.0, screenSize.width - 120);
-              _positionY = _positionY.clamp(0.0, screenSize.height - 120);
-            });
-          } : null,
-          onPanEnd: _isInteractionsEnabled ? (_) {
-            setState(() {
-              _isDragging = false;
-            });
-          } : null,
-          child: MouseRegion(
-            onEnter: (_) {
-              if (_isInteractionsEnabled) {
-                setState(() {
-                  _isHovered = true;
-                });
-              }
-            },
-            onExit: (_) {
-              if (_isInteractionsEnabled) {
-                setState(() {
-                  _isHovered = false;
-                });
-              }
-            },
-            child: _breathingAnimation != null && _blinkAnimation != null 
-                ? AnimatedBuilder(
-                    animation: Listenable.merge([_breathingAnimation!, _blinkAnimation!]),
-                    builder: (context, child) {
-                      return Transform.scale(
-                        scale: _isAnimationsEnabled ? _breathingAnimation!.value : 1.0,
-                        child: _buildPetContainer(),
-                      );
-                    },
-                  )
-                : _buildPetContainer(),
-          ),
+    return Opacity(
+      opacity: _opacity,
+      child: GestureDetector(
+        onDoubleTap: _isInteractionsEnabled ? widget.onDoubleClick : null,
+        onSecondaryTap: _isInteractionsEnabled ? widget.onRightClick : null,
+        onPanStart: _isInteractionsEnabled ? (details) {
+          setState(() {
+            _isDragging = true;
+          });
+          // 使用原生窗口拖拽 - 这是最流畅的方式
+          windowManager.startDragging();
+        } : null,
+        onPanEnd: _isInteractionsEnabled ? (_) {
+          setState(() {
+            _isDragging = false;
+          });
+        } : null,
+        child: MouseRegion(
+          cursor: _isDragging ? SystemMouseCursors.grabbing : SystemMouseCursors.grab,
+          onEnter: (_) {
+            if (_isInteractionsEnabled) {
+              setState(() {
+                _isHovered = true;
+              });
+            }
+          },
+          onExit: (_) {
+            if (_isInteractionsEnabled) {
+              setState(() {
+                _isHovered = false;
+              });
+            }
+          },
+          child: _breathingAnimation != null && _blinkAnimation != null 
+              ? AnimatedBuilder(
+                  animation: Listenable.merge([_breathingAnimation!, _blinkAnimation!]),
+                  builder: (context, child) {
+                    return Transform.scale(
+                      scale: _isAnimationsEnabled ? _breathingAnimation!.value : 1.0,
+                      child: _buildPetContainer(),
+                    );
+                  },
+                )
+              : _buildPetContainer(),
         ),
       ),
     );
@@ -241,11 +227,13 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
                   color: Colors.black54,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Text(
-                  'Moving...',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
+                child: Builder(
+                  builder: (context) => Text(
+                    context.l10n.pet_moving,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                    ),
                   ),
                 ),
               ),
@@ -273,26 +261,25 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
                 color: Colors.blue,
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Desktop Pet Not Available',
-                style: TextStyle(
+              Text(
+                context.l10n.pet_notSupported,
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Desktop pet functionality is not supported on this platform. '
-                'This feature is available on desktop platforms (Windows, macOS, Linux).',
+              Text(
+                context.l10n.pet_notSupportedDesc('Web'),
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.grey,
                 ),
               ),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: widget.onDoubleClick,
-                child: const Text('Open Main App'),
+                child: Text(context.l10n.pet_openMainApp),
               ),
             ],
           ),
@@ -336,6 +323,7 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
   void dispose() {
     // Only dispose controllers if they were initialized (desktop pet supported)
     if (_platformCapabilities.supportsDesktopPet) {
+      windowManager.removeListener(this);
       _breathingController?.dispose();
       _blinkController?.dispose();
     }
@@ -343,7 +331,7 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
   }
 }
 
-/// Desktop Pet 右键菜单
+/// Desktop Pet 右键菜单 - 紧凑版本适合小窗口
 class DesktopPetContextMenu extends StatelessWidget {
   final List<String> quickActions;
   final Function(String) onActionSelected;
@@ -372,22 +360,22 @@ class DesktopPetContextMenu extends StatelessWidget {
       return Card(
         elevation: 8,
         child: Container(
-          width: 200,
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          width: 160,
+          padding: const EdgeInsets.symmetric(vertical: 4),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ListTile(
-                leading: const Icon(Icons.info_outline, size: 20),
-                title: const Text('Desktop Pet Unavailable'),
-                subtitle: const Text('Not supported on this platform'),
-                dense: true,
+              _buildCompactMenuItem(
+                context: context,
+                icon: Icons.info_outline,
+                label: context.l10n.pet_notAvailable,
+                onTap: null,
               ),
               const Divider(height: 1),
-              ListTile(
-                leading: const Icon(Icons.open_in_new, size: 20),
-                title: const Text('Open Full App'),
-                dense: true,
+              _buildCompactMenuItem(
+                context: context,
+                icon: Icons.open_in_new,
+                label: context.l10n.pet_openFullApp,
                 onTap: onOpenFullApp,
               ),
             ],
@@ -399,44 +387,77 @@ class DesktopPetContextMenu extends StatelessWidget {
     return Card(
       elevation: 8,
       child: Container(
-        width: 200,
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        width: 160, // 更紧凑的宽度
+        padding: const EdgeInsets.symmetric(vertical: 4),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // 快速操作
-            ListTile(
-              leading: const Icon(Icons.open_in_new, size: 20),
-              title: const Text('Open Full App'),
-              dense: true,
+            // 快速操作 - 打开完整应用
+            _buildCompactMenuItem(
+              context: context,
+              icon: Icons.open_in_new,
+              label: context.l10n.pet_openFullApp,
               onTap: onOpenFullApp,
             ),
             
             if (quickActions.isNotEmpty) ...[
               const Divider(height: 1),
-              ...quickActions.map((action) => ListTile(
-                leading: Icon(_getActionIcon(action), size: 20),
-                title: Text(action),
-                dense: true,
+              // 只显示前3个插件，避免菜单过长
+              ...quickActions.take(3).map((action) => _buildCompactMenuItem(
+                context: context,
+                icon: _getActionIcon(action),
+                label: action,
                 onTap: () => onActionSelected(action),
               )),
             ],
             
             const Divider(height: 1),
             
-            // 设置和退出
-            ListTile(
-              leading: const Icon(Icons.settings, size: 20),
-              title: const Text('Pet Settings'),
-              dense: true,
+            // 设置 - 会返回完整应用
+            _buildCompactMenuItem(
+              context: context,
+              icon: Icons.settings,
+              label: context.l10n.pet_settings,
               onTap: onSettings,
             ),
             
-            ListTile(
-              leading: const Icon(Icons.exit_to_app, size: 20),
-              title: const Text('Exit Pet Mode'),
-              dense: true,
+            // 退出宠物模式
+            _buildCompactMenuItem(
+              context: context,
+              icon: Icons.exit_to_app,
+              label: context.l10n.pet_exitMode,
               onTap: onExitPetMode,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildCompactMenuItem({
+    required BuildContext context,
+    required IconData icon,
+    required String label,
+    VoidCallback? onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: onTap == null ? Colors.grey : null),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: onTap == null ? Colors.grey : null,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),
@@ -515,9 +536,9 @@ class _DesktopPetSettingsPanelState extends State<DesktopPetSettingsPanel> {
                 children: [
                   const Icon(Icons.info_outline),
                   const SizedBox(width: 8),
-                  const Text(
-                    'Desktop Pet Settings',
-                    style: TextStyle(
+                  Text(
+                    context.l10n.pet_settingsTitle,
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -533,9 +554,9 @@ class _DesktopPetSettingsPanelState extends State<DesktopPetSettingsPanel> {
               
               const SizedBox(height: 16),
               
-              const Text(
-                'Desktop Pet Not Available',
-                style: TextStyle(
+              Text(
+                context.l10n.pet_notSupported,
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
@@ -543,11 +564,9 @@ class _DesktopPetSettingsPanelState extends State<DesktopPetSettingsPanel> {
               
               const SizedBox(height: 8),
               
-              const Text(
-                'Desktop pet functionality is not supported on this platform. '
-                'This feature requires a desktop environment and is available on '
-                'Windows, macOS, and Linux platforms.',
-                style: TextStyle(
+              Text(
+                context.l10n.pet_notSupportedDesc('Web'),
+                style: const TextStyle(
                   color: Colors.grey,
                 ),
               ),
@@ -560,7 +579,7 @@ class _DesktopPetSettingsPanelState extends State<DesktopPetSettingsPanel> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: widget.onClose,
-                      child: const Text('Close'),
+                      child: Text(context.l10n.common_close),
                     ),
                   ),
                 ],
@@ -585,9 +604,9 @@ class _DesktopPetSettingsPanelState extends State<DesktopPetSettingsPanel> {
               children: [
                 const Icon(Icons.pets),
                 const SizedBox(width: 8),
-                const Text(
-                  'Desktop Pet Settings',
-                  style: TextStyle(
+                Text(
+                  context.l10n.pet_settingsTitle,
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -608,9 +627,9 @@ class _DesktopPetSettingsPanelState extends State<DesktopPetSettingsPanel> {
               children: [
                 const Icon(Icons.opacity, size: 20),
                 const SizedBox(width: 8),
-                const Text('Opacity:'),
+                Text(context.l10n.pet_opacity),
                 const Spacer(),
-                Text('${(_preferences['opacity'] * 100).round()}%'),
+                Text('${((_preferences['opacity'] ?? 1.0) * 100).round()}%'),
               ],
             ),
             Slider(
@@ -626,8 +645,8 @@ class _DesktopPetSettingsPanelState extends State<DesktopPetSettingsPanel> {
             // 动画开关
             CheckboxListTile(
               secondary: const Icon(Icons.animation, size: 20),
-              title: const Text('Enable Animations'),
-              subtitle: const Text('Breathing and blinking effects'),
+              title: Text(context.l10n.pet_enableAnimations),
+              subtitle: Text(context.l10n.pet_animationsSubtitle),
               value: _preferences['animations_enabled'] ?? true,
               onChanged: (value) => _updatePreference('animations_enabled', value ?? false),
               dense: true,
@@ -636,8 +655,8 @@ class _DesktopPetSettingsPanelState extends State<DesktopPetSettingsPanel> {
             // 交互开关
             CheckboxListTile(
               secondary: const Icon(Icons.touch_app, size: 20),
-              title: const Text('Enable Interactions'),
-              subtitle: const Text('Click and drag interactions'),
+              title: Text(context.l10n.pet_enableInteractions),
+              subtitle: Text(context.l10n.pet_interactionsSubtitle),
               value: _preferences['interactions_enabled'] ?? true,
               onChanged: (value) => _updatePreference('interactions_enabled', value ?? false),
               dense: true,
@@ -646,8 +665,8 @@ class _DesktopPetSettingsPanelState extends State<DesktopPetSettingsPanel> {
             // 自动隐藏
             CheckboxListTile(
               secondary: const Icon(Icons.visibility_off, size: 20),
-              title: const Text('Auto Hide'),
-              subtitle: const Text('Hide when not in use'),
+              title: Text(context.l10n.pet_autoHide),
+              subtitle: Text(context.l10n.pet_autoHideSubtitle),
               value: _preferences['auto_hide'] ?? false,
               onChanged: (value) => _updatePreference('auto_hide', value ?? false),
               dense: true,
@@ -673,14 +692,14 @@ class _DesktopPetSettingsPanelState extends State<DesktopPetSettingsPanel> {
                       });
                       widget.onPreferencesChanged(defaultPrefs);
                     },
-                    child: const Text('Reset'),
+                    child: Text(context.l10n.pet_reset),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: ElevatedButton(
                     onPressed: widget.onClose,
-                    child: const Text('Done'),
+                    child: Text(context.l10n.pet_done),
                   ),
                 ),
               ],

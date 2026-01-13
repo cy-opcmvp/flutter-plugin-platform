@@ -27,11 +27,11 @@ A simple calculator plugin demonstrating basic Plugin SDK usage with Dart/Flutte
    ```
 3. Build the plugin:
    ```bash
-   plugin-cli build
+   dart tools/plugin_cli.dart build
    ```
 4. Package for distribution:
    ```bash
-   plugin-cli package --platform all --output calculator.pkg
+   dart tools/plugin_cli.dart package --output calculator.pkg
    ```
 
 ### Testing
@@ -39,7 +39,7 @@ A simple calculator plugin demonstrating basic Plugin SDK usage with Dart/Flutte
 Test the plugin locally:
 
 ```bash
-plugin-cli test --plugin calculator.pkg
+dart tools/plugin_cli.dart test --plugin calculator.pkg
 ```
 
 ## Code Structure

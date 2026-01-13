@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/services/external_plugin_manager.dart';
 import '../../core/models/plugin_models.dart';
+import '../../core/extensions/context_extensions.dart';
 
 /// Screen for managing external plugins with lifecycle controls
 class ExternalPluginManagementScreen extends StatefulWidget {
@@ -35,7 +36,7 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
       await _loadPlugins();
     } catch (e) {
       setState(() {
-        _error = 'Failed to initialize external plugin manager: $e';
+        _error = e.toString();
         _isLoading = false;
       });
     }
@@ -56,7 +57,7 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
       });
     } catch (e) {
       setState(() {
-        _error = 'Failed to load external plugins: $e';
+        _error = e.toString();
         _isLoading = false;
       });
     }
@@ -92,10 +93,11 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
   Future<void> _updatePlugin(String pluginId) async {
     if (_isOperationInProgress(pluginId)) return;
 
+    final l10n = context.l10n;
     final confirmed = await _showConfirmationDialog(
-      title: 'Update Plugin',
-      content: 'Are you sure you want to update this plugin to the latest version? A backup will be created for rollback if needed.',
-      confirmText: 'Update',
+      title: l10n.button_update,
+      content: l10n.dialog_updatePlugin,
+      confirmText: l10n.button_update,
       confirmColor: Colors.blue,
     );
 
@@ -108,13 +110,13 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
           showDialog(
             context: context,
             barrierDismissible: false,
-            builder: (context) => const AlertDialog(
+            builder: (context) => AlertDialog(
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('Updating plugin...'),
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
+                  Text(l10n.plugin_updating),
                 ],
               ),
             ),
@@ -129,8 +131,8 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
         if (mounted) {
           Navigator.of(context).pop(); // Close progress dialog
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Plugin updated successfully. Rollback available if needed.'),
+            SnackBar(
+              content: Text(l10n.plugin_updateSuccess),
               backgroundColor: Colors.green,
             ),
           );
@@ -140,7 +142,7 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
           Navigator.of(context).pop(); // Close progress dialog
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Update failed and was rolled back: $e'),
+              content: Text(l10n.plugin_updateFailed(e.toString())),
               backgroundColor: Colors.red,
             ),
           );
@@ -154,10 +156,11 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
   Future<void> _rollbackPlugin(String pluginId) async {
     if (_isOperationInProgress(pluginId)) return;
 
+    final l10n = context.l10n;
     final confirmed = await _showConfirmationDialog(
-      title: 'Rollback Plugin',
-      content: 'Are you sure you want to rollback this plugin to the previous version? This will undo the last update.',
-      confirmText: 'Rollback',
+      title: l10n.button_rollback,
+      content: l10n.dialog_rollbackPlugin,
+      confirmText: l10n.button_rollback,
       confirmColor: Colors.orange,
     );
 
@@ -170,13 +173,13 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
           showDialog(
             context: context,
             barrierDismissible: false,
-            builder: (context) => const AlertDialog(
+            builder: (context) => AlertDialog(
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('Rolling back plugin...'),
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
+                  Text(l10n.plugin_rollingBack),
                 ],
               ),
             ),
@@ -189,8 +192,8 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
         if (mounted) {
           Navigator.of(context).pop(); // Close progress dialog
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Plugin rolled back successfully'),
+            SnackBar(
+              content: Text(l10n.plugin_rollbackSuccess),
               backgroundColor: Colors.green,
             ),
           );
@@ -200,7 +203,7 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
           Navigator.of(context).pop(); // Close progress dialog
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Failed to rollback plugin: $e'),
+              content: Text(l10n.plugin_operationFailed(e.toString())),
               backgroundColor: Colors.red,
             ),
           );
@@ -228,8 +231,8 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Plugin disabled'),
+          SnackBar(
+            content: Text(context.l10n.plugin_disableSuccess),
             backgroundColor: Colors.orange,
           ),
         );
@@ -238,7 +241,7 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to disable plugin: $e'),
+            content: Text(context.l10n.plugin_operationFailed(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -259,8 +262,8 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Plugin enabled'),
+          SnackBar(
+            content: Text(context.l10n.plugin_enableSuccess),
             backgroundColor: Colors.green,
           ),
         );
@@ -269,7 +272,7 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to enable plugin: $e'),
+            content: Text(context.l10n.plugin_operationFailed(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -282,10 +285,11 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
   Future<void> _removePlugin(String pluginId) async {
     if (_isOperationInProgress(pluginId)) return;
 
+    final l10n = context.l10n;
     final confirmed = await _showConfirmationDialog(
-      title: 'Remove Plugin',
-      content: 'Are you sure you want to remove this plugin? This action cannot be undone.',
-      confirmText: 'Remove',
+      title: l10n.button_remove,
+      content: l10n.dialog_removePlugin,
+      confirmText: l10n.button_remove,
       confirmColor: Colors.red,
     );
 
@@ -298,13 +302,13 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
           showDialog(
             context: context,
             barrierDismissible: false,
-            builder: (context) => const AlertDialog(
+            builder: (context) => AlertDialog(
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('Removing plugin...'),
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
+                  Text(l10n.plugin_removing),
                 ],
               ),
             ),
@@ -317,8 +321,8 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
         if (mounted) {
           Navigator.of(context).pop(); // Close progress dialog
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Plugin removed successfully'),
+            SnackBar(
+              content: Text(l10n.plugin_removeSuccess),
               backgroundColor: Colors.green,
             ),
           );
@@ -328,7 +332,7 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
           Navigator.of(context).pop(); // Close progress dialog
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Failed to remove plugin: $e'),
+              content: Text(l10n.plugin_operationFailed(e.toString())),
               backgroundColor: Colors.red,
             ),
           );
@@ -342,10 +346,11 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
   Future<void> _batchUpdatePlugins() async {
     if (_selectedPlugins.isEmpty) return;
 
+    final l10n = context.l10n;
     final confirmed = await _showConfirmationDialog(
-      title: 'Update Selected Plugins',
-      content: 'Are you sure you want to update ${_selectedPlugins.length} selected plugin(s)?',
-      confirmText: 'Update All',
+      title: l10n.button_updateAll,
+      content: l10n.dialog_batchUpdate(_selectedPlugins.length),
+      confirmText: l10n.button_updateAll,
       confirmColor: Colors.blue,
     );
 
@@ -361,7 +366,7 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
               children: [
                 const CircularProgressIndicator(),
                 const SizedBox(height: 16),
-                Text('Updating ${_selectedPlugins.length} plugin(s)...'),
+                Text(l10n.plugin_updatingBatch(_selectedPlugins.length)),
               ],
             ),
           ),
@@ -390,13 +395,13 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
         Color backgroundColor;
         
         if (failureCount == 0) {
-          message = 'All $successCount plugin(s) updated successfully';
+          message = l10n.plugin_allUpdateSuccess(successCount);
           backgroundColor = Colors.green;
         } else if (successCount == 0) {
-          message = 'Failed to update all $failureCount plugin(s)';
+          message = l10n.plugin_allUpdateFailed(failureCount);
           backgroundColor = Colors.red;
         } else {
-          message = '$successCount updated, $failureCount failed';
+          message = l10n.plugin_batchUpdateResult(successCount, failureCount);
           backgroundColor = Colors.orange;
         }
         
@@ -415,10 +420,11 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
   Future<void> _batchRemovePlugins() async {
     if (_selectedPlugins.isEmpty) return;
 
+    final l10n = context.l10n;
     final confirmed = await _showConfirmationDialog(
-      title: 'Remove Selected Plugins',
-      content: 'Are you sure you want to remove ${_selectedPlugins.length} selected plugin(s)? This action cannot be undone.',
-      confirmText: 'Remove All',
+      title: l10n.button_removeAll,
+      content: l10n.dialog_batchRemove(_selectedPlugins.length),
+      confirmText: l10n.button_removeAll,
       confirmColor: Colors.red,
     );
 
@@ -434,7 +440,7 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
               children: [
                 const CircularProgressIndicator(),
                 const SizedBox(height: 16),
-                Text('Removing ${_selectedPlugins.length} plugin(s)...'),
+                Text(l10n.plugin_removingBatch(_selectedPlugins.length)),
               ],
             ),
           ),
@@ -462,13 +468,13 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
         Color backgroundColor;
         
         if (failureCount == 0) {
-          message = 'All $successCount plugin(s) removed successfully';
+          message = l10n.plugin_allRemoveSuccess(successCount);
           backgroundColor = Colors.green;
         } else if (successCount == 0) {
-          message = 'Failed to remove all $failureCount plugin(s)';
+          message = l10n.plugin_allRemoveFailed(failureCount);
           backgroundColor = Colors.red;
         } else {
-          message = '$successCount removed, $failureCount failed';
+          message = l10n.plugin_batchRemoveResult(successCount, failureCount);
           backgroundColor = Colors.orange;
         }
         
@@ -490,6 +496,7 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
     required String confirmText,
     required Color confirmColor,
   }) {
+    final l10n = context.l10n;
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -498,7 +505,7 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.common_cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -563,11 +570,12 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
         title: Text(_isMultiSelectMode 
-            ? '${_selectedPlugins.length} selected'
-            : 'External Plugins'),
+            ? l10n.plugin_selected(_selectedPlugins.length)
+            : l10n.plugin_externalTitle),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         leading: _isMultiSelectMode
             ? IconButton(
@@ -581,25 +589,25 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
               IconButton(
                 onPressed: _selectAllPlugins,
                 icon: const Icon(Icons.select_all),
-                tooltip: 'Select All',
+                tooltip: l10n.button_selectAll,
               ),
             if (_selectedPlugins.isNotEmpty)
               IconButton(
                 onPressed: _deselectAllPlugins,
                 icon: const Icon(Icons.deselect),
-                tooltip: 'Deselect All',
+                tooltip: l10n.button_deselectAll,
               ),
           ] else ...[
             if (_filteredPlugins.isNotEmpty)
               IconButton(
                 onPressed: _enterMultiSelectMode,
                 icon: const Icon(Icons.checklist),
-                tooltip: 'Multi-select',
+                tooltip: l10n.button_multiSelect,
               ),
             IconButton(
               onPressed: _loadPlugins,
               icon: const Icon(Icons.refresh),
-              tooltip: 'Refresh',
+              tooltip: l10n.common_refresh,
             ),
           ],
         ],
@@ -613,10 +621,10 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
               child: Column(
                 children: [
                   TextField(
-                    decoration: const InputDecoration(
-                      hintText: 'Search external plugins...',
-                      prefixIcon: Icon(Icons.search),
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      hintText: l10n.hint_searchExternalPlugins,
+                      prefixIcon: const Icon(Icons.search),
+                      border: const OutlineInputBorder(),
                     ),
                     onChanged: (value) {
                       setState(() {
@@ -629,10 +637,10 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
                     children: [
                       Expanded(
                         child: DropdownButtonFormField<PluginType?>(
-                          decoration: const InputDecoration(
-                            labelText: 'Type',
-                            border: OutlineInputBorder(),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: InputDecoration(
+                            labelText: l10n.plugin_typeAll,
+                            border: const OutlineInputBorder(),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           ),
                           value: _filterType,
                           onChanged: (value) {
@@ -640,18 +648,18 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
                               _filterType = value;
                             });
                           },
-                          items: const [
+                          items: [
                             DropdownMenuItem(
                               value: null,
-                              child: Text('All Types'),
+                              child: Text(l10n.plugin_typeAll),
                             ),
                             DropdownMenuItem(
                               value: PluginType.tool,
-                              child: Text('Tools'),
+                              child: Text(l10n.plugin_typeTool),
                             ),
                             DropdownMenuItem(
                               value: PluginType.game,
-                              child: Text('Games'),
+                              child: Text(l10n.plugin_typeGame),
                             ),
                           ],
                         ),
@@ -659,10 +667,10 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
                       const SizedBox(width: 8),
                       Expanded(
                         child: DropdownButtonFormField<PluginState?>(
-                          decoration: const InputDecoration(
-                            labelText: 'State',
-                            border: OutlineInputBorder(),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: InputDecoration(
+                            labelText: l10n.plugin_stateAll,
+                            border: const OutlineInputBorder(),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           ),
                           value: _filterState,
                           onChanged: (value) {
@@ -670,26 +678,26 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
                               _filterState = value;
                             });
                           },
-                          items: const [
+                          items: [
                             DropdownMenuItem(
                               value: null,
-                              child: Text('All States'),
+                              child: Text(l10n.plugin_stateAll),
                             ),
                             DropdownMenuItem(
                               value: PluginState.active,
-                              child: Text('Active'),
+                              child: Text(l10n.plugin_statusActive),
                             ),
                             DropdownMenuItem(
                               value: PluginState.inactive,
-                              child: Text('Inactive'),
+                              child: Text(l10n.plugin_statusInactive),
                             ),
                             DropdownMenuItem(
                               value: PluginState.paused,
-                              child: Text('Paused'),
+                              child: Text(l10n.plugin_statusPaused),
                             ),
                             DropdownMenuItem(
                               value: PluginState.error,
-                              child: Text('Error'),
+                              child: Text(l10n.plugin_statusError),
                             ),
                           ],
                         ),
@@ -716,7 +724,7 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
                       child: ElevatedButton.icon(
                         onPressed: _batchUpdatePlugins,
                         icon: const Icon(Icons.update),
-                        label: const Text('Update Selected'),
+                        label: Text(l10n.button_updateAll),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue,
                           foregroundColor: Colors.white,
@@ -728,7 +736,7 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
                       child: ElevatedButton.icon(
                         onPressed: _batchRemovePlugins,
                         icon: const Icon(Icons.delete),
-                        label: const Text('Remove Selected'),
+                        label: Text(l10n.button_removeAll),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
                           foregroundColor: Colors.white,
@@ -744,6 +752,7 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
   }
 
   Widget _buildPluginList() {
+    final l10n = context.l10n;
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -762,19 +771,19 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
             ),
             const SizedBox(height: 16),
             Text(
-              'Error',
+              l10n.common_error,
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
             Text(
-              _error!,
+              l10n.error_loadFailed(_error!),
               style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _loadPlugins,
-              child: const Text('Retry'),
+              child: Text(l10n.common_retry),
             ),
           ],
         ),
@@ -791,20 +800,20 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
             Icon(
               Icons.extension_off,
               size: 64,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
               _searchQuery.isNotEmpty || _filterType != null || _filterState != null
-                  ? 'No plugins match your search'
-                  : 'No external plugins installed',
+                  ? l10n.plugin_noMatch
+                  : l10n.plugin_noExternalPlugins,
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
             Text(
               _searchQuery.isNotEmpty || _filterType != null || _filterState != null
-                  ? 'Try adjusting your search or filter criteria'
-                  : 'Install your first external plugin to get started',
+                  ? l10n.hint_tryAdjustSearch
+                  : l10n.plugin_installExternalFirst,
               style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),
