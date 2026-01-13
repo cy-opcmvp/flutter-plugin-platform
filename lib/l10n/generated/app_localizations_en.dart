@@ -676,6 +676,129 @@ class AppLocalizationsEn extends AppLocalizations {
   String get time_justNow => 'Just now';
 
   @override
+  String get worldClock_title => 'World Clock';
+
+  @override
+  String get worldClock_addClock => 'Add Clock';
+
+  @override
+  String get worldClock_addCountdown => 'Add Countdown';
+
+  @override
+  String get worldClock_settings => 'Settings';
+
+  @override
+  String get worldClock_noClocks =>
+      'No clocks available, tap the top right to add';
+
+  @override
+  String get worldClock_noCountdowns =>
+      'No countdowns available, tap the top right to add';
+
+  @override
+  String get worldClock_defaultClock => 'Default';
+
+  @override
+  String get worldClock_deleteClock => 'Delete Clock';
+
+  @override
+  String get worldClock_deleteCountdown => 'Delete Countdown';
+
+  @override
+  String get worldClock_confirmDelete => 'Confirm Delete';
+
+  @override
+  String worldClock_confirmDeleteClock(String cityName) {
+    return 'Are you sure you want to delete the clock for $cityName?';
+  }
+
+  @override
+  String worldClock_confirmDeleteCountdown(String title) {
+    return 'Are you sure you want to delete countdown \"$title\"?';
+  }
+
+  @override
+  String get worldClock_addClockTitle => 'Add Clock';
+
+  @override
+  String get worldClock_cityName => 'City Name';
+
+  @override
+  String get worldClock_cityNameHint => 'Enter city name';
+
+  @override
+  String get worldClock_timeZone => 'Time Zone';
+
+  @override
+  String get worldClock_addCountdownTitle => 'Add Countdown';
+
+  @override
+  String get worldClock_countdownTitle => 'Countdown Title';
+
+  @override
+  String get worldClock_countdownTitleHint => 'Enter reminder content';
+
+  @override
+  String get worldClock_hours => 'Hours';
+
+  @override
+  String get worldClock_minutes => 'Minutes';
+
+  @override
+  String get worldClock_seconds => 'Seconds';
+
+  @override
+  String worldClock_countdownComplete(String title) {
+    return 'Countdown reminder: $title time\'s up!';
+  }
+
+  @override
+  String get worldClock_completed => 'Completed';
+
+  @override
+  String get worldClock_almostComplete => 'Almost complete!';
+
+  @override
+  String worldClock_remaining(String time) {
+    return 'Remaining $time';
+  }
+
+  @override
+  String worldClock_remainingMinutes(int minutes) {
+    return 'Remaining $minutes minutes';
+  }
+
+  @override
+  String worldClock_remainingHours(int hours, int minutes) {
+    return 'Remaining $hours hours $minutes minutes';
+  }
+
+  @override
+  String worldClock_remainingDays(int days, int hours) {
+    return 'Remaining $days days $hours hours';
+  }
+
+  @override
+  String get worldClock_settingsTitle => 'World Clock Settings';
+
+  @override
+  String get worldClock_settingsDesc =>
+      'Settings options will be added in future versions';
+
+  @override
+  String get worldClock_currentFeatures => 'Current features:';
+
+  @override
+  String get worldClock_featureMultipleTimezones =>
+      '• Display multiple timezone times';
+
+  @override
+  String get worldClock_featureCountdown => '• Countdown reminders';
+
+  @override
+  String get worldClock_featureBeijingDefault => '• Default Beijing time';
+
+  @override
   String get pet_openMainApp => 'Open Main App';
 
   @override

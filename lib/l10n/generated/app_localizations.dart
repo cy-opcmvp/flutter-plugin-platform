@@ -1262,6 +1262,216 @@ abstract class AppLocalizations {
   /// **'刚刚'**
   String get time_justNow;
 
+  /// No description provided for @worldClock_title.
+  ///
+  /// In zh, this message translates to:
+  /// **'世界时钟'**
+  String get worldClock_title;
+
+  /// No description provided for @worldClock_addClock.
+  ///
+  /// In zh, this message translates to:
+  /// **'添加时钟'**
+  String get worldClock_addClock;
+
+  /// No description provided for @worldClock_addCountdown.
+  ///
+  /// In zh, this message translates to:
+  /// **'添加倒计时'**
+  String get worldClock_addCountdown;
+
+  /// No description provided for @worldClock_settings.
+  ///
+  /// In zh, this message translates to:
+  /// **'设置'**
+  String get worldClock_settings;
+
+  /// No description provided for @worldClock_noClocks.
+  ///
+  /// In zh, this message translates to:
+  /// **'暂无时钟，点击右上角添加'**
+  String get worldClock_noClocks;
+
+  /// No description provided for @worldClock_noCountdowns.
+  ///
+  /// In zh, this message translates to:
+  /// **'暂无倒计时，点击右上角添加'**
+  String get worldClock_noCountdowns;
+
+  /// No description provided for @worldClock_defaultClock.
+  ///
+  /// In zh, this message translates to:
+  /// **'默认'**
+  String get worldClock_defaultClock;
+
+  /// No description provided for @worldClock_deleteClock.
+  ///
+  /// In zh, this message translates to:
+  /// **'删除时钟'**
+  String get worldClock_deleteClock;
+
+  /// No description provided for @worldClock_deleteCountdown.
+  ///
+  /// In zh, this message translates to:
+  /// **'删除倒计时'**
+  String get worldClock_deleteCountdown;
+
+  /// No description provided for @worldClock_confirmDelete.
+  ///
+  /// In zh, this message translates to:
+  /// **'确认删除'**
+  String get worldClock_confirmDelete;
+
+  /// No description provided for @worldClock_confirmDeleteClock.
+  ///
+  /// In zh, this message translates to:
+  /// **'确定要删除 {cityName} 的时钟吗？'**
+  String worldClock_confirmDeleteClock(String cityName);
+
+  /// No description provided for @worldClock_confirmDeleteCountdown.
+  ///
+  /// In zh, this message translates to:
+  /// **'确定要删除倒计时 \"{title}\" 吗？'**
+  String worldClock_confirmDeleteCountdown(String title);
+
+  /// No description provided for @worldClock_addClockTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'添加时钟'**
+  String get worldClock_addClockTitle;
+
+  /// No description provided for @worldClock_cityName.
+  ///
+  /// In zh, this message translates to:
+  /// **'城市名称'**
+  String get worldClock_cityName;
+
+  /// No description provided for @worldClock_cityNameHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'输入城市名称'**
+  String get worldClock_cityNameHint;
+
+  /// No description provided for @worldClock_timeZone.
+  ///
+  /// In zh, this message translates to:
+  /// **'时区'**
+  String get worldClock_timeZone;
+
+  /// No description provided for @worldClock_addCountdownTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'添加倒计时'**
+  String get worldClock_addCountdownTitle;
+
+  /// No description provided for @worldClock_countdownTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'倒计时标题'**
+  String get worldClock_countdownTitle;
+
+  /// No description provided for @worldClock_countdownTitleHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'输入提醒内容'**
+  String get worldClock_countdownTitleHint;
+
+  /// No description provided for @worldClock_hours.
+  ///
+  /// In zh, this message translates to:
+  /// **'小时'**
+  String get worldClock_hours;
+
+  /// No description provided for @worldClock_minutes.
+  ///
+  /// In zh, this message translates to:
+  /// **'分钟'**
+  String get worldClock_minutes;
+
+  /// No description provided for @worldClock_seconds.
+  ///
+  /// In zh, this message translates to:
+  /// **'秒'**
+  String get worldClock_seconds;
+
+  /// No description provided for @worldClock_countdownComplete.
+  ///
+  /// In zh, this message translates to:
+  /// **'倒计时提醒: {title} 时间到了！'**
+  String worldClock_countdownComplete(String title);
+
+  /// No description provided for @worldClock_completed.
+  ///
+  /// In zh, this message translates to:
+  /// **'已完成'**
+  String get worldClock_completed;
+
+  /// No description provided for @worldClock_almostComplete.
+  ///
+  /// In zh, this message translates to:
+  /// **'即将完成！'**
+  String get worldClock_almostComplete;
+
+  /// No description provided for @worldClock_remaining.
+  ///
+  /// In zh, this message translates to:
+  /// **'剩余 {time}'**
+  String worldClock_remaining(String time);
+
+  /// No description provided for @worldClock_remainingMinutes.
+  ///
+  /// In zh, this message translates to:
+  /// **'剩余 {minutes} 分钟'**
+  String worldClock_remainingMinutes(int minutes);
+
+  /// No description provided for @worldClock_remainingHours.
+  ///
+  /// In zh, this message translates to:
+  /// **'剩余 {hours} 小时 {minutes} 分钟'**
+  String worldClock_remainingHours(int hours, int minutes);
+
+  /// No description provided for @worldClock_remainingDays.
+  ///
+  /// In zh, this message translates to:
+  /// **'剩余 {days} 天 {hours} 小时'**
+  String worldClock_remainingDays(int days, int hours);
+
+  /// No description provided for @worldClock_settingsTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'世界时钟设置'**
+  String get worldClock_settingsTitle;
+
+  /// No description provided for @worldClock_settingsDesc.
+  ///
+  /// In zh, this message translates to:
+  /// **'设置选项将在后续版本中添加'**
+  String get worldClock_settingsDesc;
+
+  /// No description provided for @worldClock_currentFeatures.
+  ///
+  /// In zh, this message translates to:
+  /// **'当前功能：'**
+  String get worldClock_currentFeatures;
+
+  /// No description provided for @worldClock_featureMultipleTimezones.
+  ///
+  /// In zh, this message translates to:
+  /// **'• 显示多个时区时间'**
+  String get worldClock_featureMultipleTimezones;
+
+  /// No description provided for @worldClock_featureCountdown.
+  ///
+  /// In zh, this message translates to:
+  /// **'• 倒计时提醒'**
+  String get worldClock_featureCountdown;
+
+  /// No description provided for @worldClock_featureBeijingDefault.
+  ///
+  /// In zh, this message translates to:
+  /// **'• 默认北京时间'**
+  String get worldClock_featureBeijingDefault;
+
   /// No description provided for @pet_openMainApp.
   ///
   /// In zh, this message translates to:

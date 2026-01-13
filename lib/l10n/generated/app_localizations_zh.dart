@@ -665,6 +665,125 @@ class AppLocalizationsZh extends AppLocalizations {
   String get time_justNow => '刚刚';
 
   @override
+  String get worldClock_title => '世界时钟';
+
+  @override
+  String get worldClock_addClock => '添加时钟';
+
+  @override
+  String get worldClock_addCountdown => '添加倒计时';
+
+  @override
+  String get worldClock_settings => '设置';
+
+  @override
+  String get worldClock_noClocks => '暂无时钟，点击右上角添加';
+
+  @override
+  String get worldClock_noCountdowns => '暂无倒计时，点击右上角添加';
+
+  @override
+  String get worldClock_defaultClock => '默认';
+
+  @override
+  String get worldClock_deleteClock => '删除时钟';
+
+  @override
+  String get worldClock_deleteCountdown => '删除倒计时';
+
+  @override
+  String get worldClock_confirmDelete => '确认删除';
+
+  @override
+  String worldClock_confirmDeleteClock(String cityName) {
+    return '确定要删除 $cityName 的时钟吗？';
+  }
+
+  @override
+  String worldClock_confirmDeleteCountdown(String title) {
+    return '确定要删除倒计时 \"$title\" 吗？';
+  }
+
+  @override
+  String get worldClock_addClockTitle => '添加时钟';
+
+  @override
+  String get worldClock_cityName => '城市名称';
+
+  @override
+  String get worldClock_cityNameHint => '输入城市名称';
+
+  @override
+  String get worldClock_timeZone => '时区';
+
+  @override
+  String get worldClock_addCountdownTitle => '添加倒计时';
+
+  @override
+  String get worldClock_countdownTitle => '倒计时标题';
+
+  @override
+  String get worldClock_countdownTitleHint => '输入提醒内容';
+
+  @override
+  String get worldClock_hours => '小时';
+
+  @override
+  String get worldClock_minutes => '分钟';
+
+  @override
+  String get worldClock_seconds => '秒';
+
+  @override
+  String worldClock_countdownComplete(String title) {
+    return '倒计时提醒: $title 时间到了！';
+  }
+
+  @override
+  String get worldClock_completed => '已完成';
+
+  @override
+  String get worldClock_almostComplete => '即将完成！';
+
+  @override
+  String worldClock_remaining(String time) {
+    return '剩余 $time';
+  }
+
+  @override
+  String worldClock_remainingMinutes(int minutes) {
+    return '剩余 $minutes 分钟';
+  }
+
+  @override
+  String worldClock_remainingHours(int hours, int minutes) {
+    return '剩余 $hours 小时 $minutes 分钟';
+  }
+
+  @override
+  String worldClock_remainingDays(int days, int hours) {
+    return '剩余 $days 天 $hours 小时';
+  }
+
+  @override
+  String get worldClock_settingsTitle => '世界时钟设置';
+
+  @override
+  String get worldClock_settingsDesc => '设置选项将在后续版本中添加';
+
+  @override
+  String get worldClock_currentFeatures => '当前功能：';
+
+  @override
+  String get worldClock_featureMultipleTimezones => '• 显示多个时区时间';
+
+  @override
+  String get worldClock_featureCountdown => '• 倒计时提醒';
+
+  @override
+  String get worldClock_featureBeijingDefault => '• 默认北京时间';
+
+  @override
   String get pet_openMainApp => '打开主应用';
 
   @override

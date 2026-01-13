@@ -81,6 +81,50 @@ lib/
 
 ## 创建新插件
 
+### 重要：插件ID命名规范
+
+在创建插件之前，请务必了解插件ID的命名规范：
+
+#### 插件ID格式要求
+- **格式**: 反向域名记法 (Reverse Domain Notation)
+- **字符限制**: 只能包含小写字母 (a-z) 和数字 (0-9)
+- **分隔符**: 只能使用点号 (.) 分隔
+- **禁止字符**: 不能包含下划线 (_)、连字符 (-)、大写字母或其他特殊字符
+
+#### 有效的插件ID示例
+```
+✅ 正确示例:
+- com.example.calculator
+- com.mycompany.texteditor  
+- org.opensource.musicplayer
+- io.github.username.toolname
+
+❌ 错误示例:
+- com.example.my_plugin        // 包含下划线
+- com.example.My-Plugin        // 包含大写字母和连字符
+- com.example.plugin-name      // 包含连字符
+- com.Example.Calculator       // 包含大写字母
+```
+
+#### 推荐的命名约定
+1. **公司/组织域名**: 使用您的域名反向形式作为前缀
+   - 如果您的域名是 `mycompany.com`，使用 `com.mycompany`
+   - 如果您没有域名，可以使用 `com.yourname` 或 `io.github.username`
+
+2. **插件名称**: 使用描述性的名称，避免过长
+   - 好的例子: `calculator`, `texteditor`, `worldclock`
+   - 避免: `myawesomesupercalculatorapp`
+
+3. **版本控制**: 插件ID在整个生命周期中保持不变，版本通过 `version` 字段管理
+
+#### 验证规则
+系统会自动验证插件ID是否符合以下正则表达式：
+```regex
+^[a-z0-9]+(\.[a-z0-9]+)*$
+```
+
+如果插件ID不符合规范，会出现 "Invalid plugin descriptor" 错误。
+
 ### 步骤1: 创建插件目录结构
 
 ```bash
@@ -110,7 +154,7 @@ class MyAwesomePluginPlugin implements IPlugin {
   bool _isInitialized = false;
 
   @override
-  String get id => 'com.mycompany.my_awesome_plugin';
+  String get id => 'com.mycompany.myawesomeplugin';
 
   @override
   String get name => 'My Awesome Plugin';
@@ -373,7 +417,7 @@ class MyAwesomePluginPluginFactory {
   /// 获取插件描述符
   static PluginDescriptor getDescriptor() {
     return const PluginDescriptor(
-      id: 'com.mycompany.my_awesome_plugin',
+      id: 'com.mycompany.myawesomeplugin',
       name: 'My Awesome Plugin',
       version: '1.0.0',
       type: PluginType.tool,
@@ -682,7 +726,7 @@ void main() {
     });
 
     test('Plugin properties should be correct', () {
-      expect(plugin.id, 'com.mycompany.my_awesome_plugin');
+      expect(plugin.id, 'com.mycompany.myawesomeplugin');
       expect(plugin.name, 'My Awesome Plugin');
       expect(plugin.version, '1.0.0');
       expect(plugin.type, PluginType.tool);
@@ -833,7 +877,7 @@ class ExamplePluginRegistry {
       getDescriptor: NoteTakingPluginFactory.getDescriptor,
     ),
     // 添加新插件
-    'com.mycompany.my_awesome_plugin': PluginFactory(
+    'com.mycompany.myawesomeplugin': PluginFactory(
       createPlugin: MyAwesomePluginPluginFactory.createPlugin,
       getDescriptor: MyAwesomePluginPluginFactory.getDescriptor,
     ),
