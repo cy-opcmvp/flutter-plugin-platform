@@ -547,5 +547,8 @@
   "plugin_calculator_description": "用于基本算术运算的简单计算器工具",
   "plugin_calculator_initialized": "计算器插件已初始化",
   "plugin_calculator_disposed": "计算器插件已销毁",
-  "plugin_calculator_error": "错误"
+  "plugin_calculator_error": "错误",
+
+  "plugin_worldclock_name": "世界时钟",
+  "plugin_worldclock_description": "显示多个时区的时间，支持倒计时提醒功能，默认显示北京时间"
 }

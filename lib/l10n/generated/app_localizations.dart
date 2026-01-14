@@ -1795,6 +1795,48 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'计划于版本 {version} 推出'**
   String feature_planned_for_version(String version);
+
+  /// No description provided for @plugin_calculator_name.
+  ///
+  /// In zh, this message translates to:
+  /// **'计算器'**
+  String get plugin_calculator_name;
+
+  /// No description provided for @plugin_calculator_description.
+  ///
+  /// In zh, this message translates to:
+  /// **'用于基本算术运算的简单计算器工具'**
+  String get plugin_calculator_description;
+
+  /// No description provided for @plugin_calculator_initialized.
+  ///
+  /// In zh, this message translates to:
+  /// **'计算器插件已初始化'**
+  String get plugin_calculator_initialized;
+
+  /// No description provided for @plugin_calculator_disposed.
+  ///
+  /// In zh, this message translates to:
+  /// **'计算器插件已销毁'**
+  String get plugin_calculator_disposed;
+
+  /// No description provided for @plugin_calculator_error.
+  ///
+  /// In zh, this message translates to:
+  /// **'错误'**
+  String get plugin_calculator_error;
+
+  /// No description provided for @plugin_worldclock_name.
+  ///
+  /// In zh, this message translates to:
+  /// **'世界时钟'**
+  String get plugin_worldclock_name;
+
+  /// No description provided for @plugin_worldclock_description.
+  ///
+  /// In zh, this message translates to:
+  /// **'显示多个时区的时间，支持倒计时提醒功能，默认显示北京时间'**
+  String get plugin_worldclock_description;
 }
 
 class _AppLocalizationsDelegate

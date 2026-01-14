@@ -4,7 +4,15 @@
       "Bash(flutter gen-l10n:*)",
       "Bash(flutter run:*)",
       "Bash(flutter build:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git tag:*)",
+      "Bash(flutter analyze:*)",
+      "Bash(dir:*)",
+      "Bash(flutter pub get:*)",
+      "Bash(flutter test)",
+      "Bash(taskkill:*)",
+      "Bash(tasklist:*)"
     ]
   }
 }

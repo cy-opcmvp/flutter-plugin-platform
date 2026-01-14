@@ -355,5 +355,11 @@
   "plugin_calculator_description": "A simple calculator tool for basic arithmetic operations",
   "plugin_calculator_initialized": "Calculator plugin initialized",
   "plugin_calculator_disposed": "Calculator plugin disposed",
-  "plugin_calculator_error": "Error"
+  "plugin_calculator_error": "Error",
+
+  "plugin_worldclock_name": "World Clock",
+  "@plugin_worldclock_name": {
+    "description": "World Clock plugin name"
+  },
+  "plugin_worldclock_description": "Display times from multiple time zones with countdown timer support, showing Beijing time by default"
 }

@@ -966,4 +966,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String feature_planned_for_version(String version) {
     return 'Planned for version $version';
   }
+
+  @override
+  String get plugin_calculator_name => 'Calculator';
+
+  @override
+  String get plugin_calculator_description =>
+      'A simple calculator tool for basic arithmetic operations';
+
+  @override
+  String get plugin_calculator_initialized => 'Calculator plugin initialized';
+
+  @override
+  String get plugin_calculator_disposed => 'Calculator plugin disposed';
+
+  @override
+  String get plugin_calculator_error => 'Error';
+
+  @override
+  String get plugin_worldclock_name => 'World Clock';
+
+  @override
+  String get plugin_worldclock_description =>
+      'Display times from multiple time zones with countdown timer support, showing Beijing time by default';
 }

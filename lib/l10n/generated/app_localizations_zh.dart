@@ -946,4 +946,25 @@ class AppLocalizationsZh extends AppLocalizations {
   String feature_planned_for_version(String version) {
     return '计划于版本 $version 推出';
   }
+
+  @override
+  String get plugin_calculator_name => '计算器';
+
+  @override
+  String get plugin_calculator_description => '用于基本算术运算的简单计算器工具';
+
+  @override
+  String get plugin_calculator_initialized => '计算器插件已初始化';
+
+  @override
+  String get plugin_calculator_disposed => '计算器插件已销毁';
+
+  @override
+  String get plugin_calculator_error => '错误';
+
+  @override
+  String get plugin_worldclock_name => '世界时钟';
+
+  @override
+  String get plugin_worldclock_description => '显示多个时区的时间，支持倒计时提醒功能，默认显示北京时间';
 }

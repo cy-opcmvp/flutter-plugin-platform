@@ -1,5 +1,7 @@
+import 'package:flutter/widgets.dart';
 import '../../core/interfaces/i_plugin.dart';
 import '../../core/models/plugin_models.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import 'world_clock_plugin.dart';
 
 /// 世界时钟插件工厂类，负责创建插件实例和提供插件描述符
@@ -10,36 +12,38 @@ class WorldClockPluginFactory {
   }
 
   /// 获取插件描述符
-  static PluginDescriptor getDescriptor() {
-    return const PluginDescriptor(
+  static PluginDescriptor getDescriptor({BuildContext? context}) {
+    final l10n = context != null ? AppLocalizations.of(context) : null;
+
+    return PluginDescriptor(
       id: 'com.example.worldclock',
-      name: '世界时钟',
+      name: l10n?.plugin_worldclock_name ?? '世界时钟',
       version: '1.0.0',
       type: PluginType.tool,
-      requiredPermissions: [
+      requiredPermissions: const [
         Permission.platformStorage,
         Permission.systemNotifications,
         Permission.platformServices,
       ],
       metadata: {
-        'description': '显示多个时区的时间，支持倒计时提醒功能，默认显示北京时间',
+        'description': l10n?.plugin_worldclock_description ?? '显示多个时区的时间，支持倒计时提醒功能，默认显示北京时间',
         'author': 'Plugin Platform Team',
         'email': 'support@pluginplatform.com',
         'website': 'https://pluginplatform.com',
         'category': 'productivity',
-        'tags': ['clock', 'time', 'timezone', 'countdown', 'timer', 'productivity'],
+        'tags': const ['clock', 'time', 'timezone', 'countdown', 'timer', 'productivity'],
         'icon': 'access_time',
         'minPlatformVersion': '1.0.0',
-        'supportedPlatforms': ['mobile', 'desktop', 'web'],
+        'supportedPlatforms': const ['mobile', 'desktop', 'web'],
         'supportsHotReload': true,
         'configurable': true,
         'documentation': 'https://docs.pluginplatform.com/plugins/world-clock',
         'sourceCode': 'https://github.com/pluginplatform/world-clock-plugin',
         'license': 'MIT',
-        'changelog': {
+        'changelog': const {
           '1.0.0': '初始版本发布 - 支持世界时钟显示和倒计时提醒功能',
         },
-        'features': [
+        'features': const [
           '多时区时间显示',
           '默认北京时间',
           '倒计时提醒功能',
@@ -49,12 +53,12 @@ class WorldClockPluginFactory {
           '简洁美观的界面',
           '支持删除非默认时钟',
         ],
-        'screenshots': [
+        'screenshots': const [
           'assets/screenshots/world_clock_main.png',
           'assets/screenshots/world_clock_countdown.png',
           'assets/screenshots/world_clock_add_dialog.png',
         ],
-        'keywords': [
+        'keywords': const [
           '世界时钟',
           '时区',
           '倒计时',
@@ -64,7 +68,7 @@ class WorldClockPluginFactory {
           '时间管理',
           '生产力工具',
         ],
-        'requirements': {
+        'requirements': const {
           'minFlutterVersion': '3.0.0',
           'minDartVersion': '2.17.0',
           'permissions': [
@@ -73,7 +77,7 @@ class WorldClockPluginFactory {
             'platformServices - 用于访问平台服务',
           ],
         },
-        'configuration': {
+        'configuration': const {
           'defaultTimeZone': 'Asia/Shanghai',
           'updateInterval': 1000,
           'maxClocks': 10,
@@ -81,7 +85,7 @@ class WorldClockPluginFactory {
           'enableNotifications': true,
           'enableAnimations': true,
         },
-        'localization': {
+        'localization': const {
           'supportedLocales': ['zh_CN', 'en_US'],
           'defaultLocale': 'zh_CN',
         },

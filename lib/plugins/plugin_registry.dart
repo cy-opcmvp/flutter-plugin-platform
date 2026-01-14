@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import '../core/interfaces/i_plugin.dart';
 import '../core/models/plugin_models.dart';
 import 'calculator/calculator_plugin_factory.dart';
@@ -17,14 +18,14 @@ class ExamplePluginRegistry {
   };
 
   /// Gets all available example plugin descriptors
-  static List<PluginDescriptor> getAllDescriptors() {
-    return _factories.values.map((factory) => factory.getDescriptor()).toList();
+  static List<PluginDescriptor> getAllDescriptors({BuildContext? context}) {
+    return _factories.values.map((factory) => factory.getDescriptor(context: context)).toList();
   }
 
   /// Gets a specific plugin descriptor by ID
-  static PluginDescriptor? getDescriptor(String pluginId) {
+  static PluginDescriptor? getDescriptor(String pluginId, {BuildContext? context}) {
     final factory = _factories[pluginId];
-    return factory?.getDescriptor();
+    return factory?.getDescriptor(context: context);
   }
 
   /// Creates a plugin instance by ID
@@ -57,7 +58,7 @@ class ExamplePluginRegistry {
 /// Factory interface for creating plugins
 class PluginFactory {
   final IPlugin Function() createPlugin;
-  final PluginDescriptor Function() getDescriptor;
+  final PluginDescriptor Function({BuildContext? context}) getDescriptor;
 
   const PluginFactory({
     required this.createPlugin,

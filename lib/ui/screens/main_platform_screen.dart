@@ -8,6 +8,7 @@ import '../../core/services/plugin_launcher.dart';
 import '../../core/services/desktop_pet_manager.dart';
 import '../../core/services/feature_manager.dart';
 import '../../core/extensions/context_extensions.dart';
+import '../../plugins/plugin_registry.dart';
 
 import '../../core/interfaces/i_plugin.dart';
 import '../../core/interfaces/i_platform_services.dart';
@@ -896,7 +897,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
               const SizedBox(height: 8),
               // Plugin name
               Text(
-                plugin.name,
+                _getLocalizedPluginName(plugin.id),
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -913,15 +914,13 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
               ),
               const Spacer(),
               // Plugin description
-              if (plugin.metadata.containsKey('description')) ...[
-                Text(
-                  plugin.metadata['description'] as String,
-                  style: theme.textTheme.bodySmall,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 8),
-              ],
+              Text(
+                _getLocalizedPluginDescription(plugin.id),
+                style: theme.textTheme.bodySmall,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 8),
               // Launch button
               SizedBox(
                 width: double.infinity,
@@ -1023,7 +1022,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
           ),
         ),
         title: Text(
-          plugin.name,
+          _getLocalizedPluginName(plugin.id),
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
           ),
@@ -1271,6 +1270,18 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
         return Colors.purple;
     }
   }
+
+  /// Get localized plugin name from plugin registry
+  String _getLocalizedPluginName(String pluginId) {
+    final descriptor = ExamplePluginRegistry.getDescriptor(pluginId, context: context);
+    return descriptor?.name ?? pluginId;
+  }
+
+  /// Get localized plugin description from plugin registry
+  String _getLocalizedPluginDescription(String pluginId) {
+    final descriptor = ExamplePluginRegistry.getDescriptor(pluginId, context: context);
+    return descriptor?.metadata['description'] as String? ?? '';
+  }
 }
 
 /// Screen for displaying a running plugin
@@ -1357,7 +1368,7 @@ class _PluginViewScreenState extends State<_PluginViewScreen> {
                     value: plugin.id,
                     child: ListTile(
                       leading: Icon(_getPluginTypeIcon(plugin.type)),
-                      title: Text(plugin.name),
+                      title: Text(_getLocalizedPluginName(plugin.id)),
                       subtitle: Text('v${plugin.version}'),
                       dense: true,
                     ),
@@ -1428,5 +1439,11 @@ class _PluginViewScreenState extends State<_PluginViewScreen> {
       case PluginType.game:
         return Icons.games;
     }
+  }
+
+  /// Get localized plugin name from plugin registry
+  String _getLocalizedPluginName(String pluginId) {
+    final descriptor = ExamplePluginRegistry.getDescriptor(pluginId, context: context);
+    return descriptor?.name ?? pluginId;
   }
 }
