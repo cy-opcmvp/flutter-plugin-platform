@@ -1112,9 +1112,9 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
                     ),
                   ),
                   const SizedBox(height: 16),
-                  _buildInfoRow(context.l10n.info_platformType, _platformInfo?.type.name.toUpperCase() ?? context.l10n.info_unknown),
+                  _buildInfoRow(context.l10n.info_platformType, _getLocalizedPlatformType()),
                   _buildInfoRow(context.l10n.info_version, _platformInfo?.version ?? context.l10n.info_unknown),
-                  _buildInfoRow(context.l10n.info_currentMode, _currentMode.name.toUpperCase()),
+                  _buildModeInfoRow(),
                   const SizedBox(height: 16),
                   Text(
                     context.l10n.info_capabilities,
@@ -1193,29 +1193,49 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
     );
   }
 
-  /// Build capability row showing platform capabilities
-  Widget _buildCapabilityRow(String capability, dynamic value) {
+  /// Build capability row showing platform capabilities with description
+  Widget _buildCapabilityRow(String capabilityKey, dynamic value) {
     final theme = Theme.of(context);
-    final displayName = capability.replaceAll('_', ' ').toUpperCase();
-    
+    final l10n = context.l10n;
+
+    // Get localized name and description
+    final displayName = _getLocalizedCapabilityName(capabilityKey);
+    final description = _getLocalizedCapabilityDescription(capabilityKey);
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            flex: 3,
-            child: Text(
-              displayName,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+          Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: Text(
+                  displayName,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                  ),
+                ),
+              ),
+              Icon(
+                value == true ? Icons.check_circle : Icons.cancel,
+                size: 16,
+                color: value == true ? Colors.green : Colors.red,
+              ),
+            ],
+          ),
+          if (description.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(left: 4, top: 2),
+              child: Text(
+                description,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                  fontSize: 10,
+                ),
               ),
             ),
-          ),
-          Icon(
-            value == true ? Icons.check_circle : Icons.cancel,
-            size: 16,
-            color: value == true ? Colors.green : Colors.red,
-          ),
         ],
       ),
     );
@@ -1281,6 +1301,156 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
   String _getLocalizedPluginDescription(String pluginId) {
     final descriptor = ExamplePluginRegistry.getDescriptor(pluginId, context: context);
     return descriptor?.metadata['description'] as String? ?? '';
+  }
+
+  /// Get localized platform type name
+  String _getLocalizedPlatformType() {
+    final l10n = context.l10n;
+    final type = _platformInfo?.type.name.toLowerCase();
+
+    switch (type) {
+      case 'windows':
+      case 'macos':
+      case 'linux':
+        return l10n.capability_desktop;
+      case 'android':
+      case 'ios':
+        return 'Mobile'; // 如果需要可以添加本地化键
+      default:
+        return type?.toUpperCase() ?? l10n.info_unknown;
+    }
+  }
+
+  /// Build mode information row with description
+  Widget _buildModeInfoRow() {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final isOnline = _currentMode == OperationMode.online;
+    final modeName = isOnline ? l10n.mode_online : l10n.mode_local;
+    final modeDesc = isOnline ? l10n.mode_online_desc : l10n.mode_local_desc;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: Text(
+                  l10n.info_currentMode,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 3,
+                child: Text(
+                  modeName,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: isOnline ? Colors.blue : Colors.green,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 4, top: 2),
+            child: Text(
+              modeDesc,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                fontSize: 11,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Get localized capability name
+  String _getLocalizedCapabilityName(String key) {
+    final l10n = context.l10n;
+
+    // Map capability keys to localization keys
+    final capabilityMap = {
+      'supportsEnvironmentVariables': 'capability_supportsEnvironmentVariables',
+      'supportsFileSystem': 'capability_supportsFileSystem',
+      'touchInput': 'capability_touchInput',
+      'desktopPetSupport': 'capability_desktopPetSupport',
+      'alwaysOnTop': 'capability_alwaysOnTop',
+      'systemTray': 'capability_systemTray',
+      'desktop': 'capability_desktop',
+    };
+
+    final l10nKey = capabilityMap[key];
+    if (l10nKey != null) {
+      // Use reflection-like approach to get the localized string
+      switch (l10nKey) {
+        case 'capability_supportsEnvironmentVariables':
+          return l10n.capability_supportsEnvironmentVariables;
+        case 'capability_supportsFileSystem':
+          return l10n.capability_supportsFileSystem;
+        case 'capability_touchInput':
+          return l10n.capability_touchInput;
+        case 'capability_desktopPetSupport':
+          return l10n.capability_desktopPetSupport;
+        case 'capability_alwaysOnTop':
+          return l10n.capability_alwaysOnTop;
+        case 'capability_systemTray':
+          return l10n.capability_systemTray;
+        case 'capability_desktop':
+          return l10n.capability_desktop;
+      }
+    }
+
+    // Fallback to formatted key
+    return key.replaceAll('_', ' ').split(' ').map((word) =>
+      word[0].toUpperCase() + word.substring(1)
+    ).join(' ');
+  }
+
+  /// Get localized capability description
+  String _getLocalizedCapabilityDescription(String key) {
+    final l10n = context.l10n;
+
+    // Map capability keys to localization description keys
+    final capabilityMap = {
+      'supportsEnvironmentVariables': 'capability_supportsEnvironmentVariables_desc',
+      'supportsFileSystem': 'capability_supportsFileSystem_desc',
+      'touchInput': 'capability_touchInput_desc',
+      'desktopPetSupport': 'capability_desktopPetSupport_desc',
+      'alwaysOnTop': 'capability_alwaysOnTop_desc',
+      'systemTray': 'capability_systemTray_desc',
+      'desktop': 'capability_desktop_desc',
+    };
+
+    final l10nKey = capabilityMap[key];
+    if (l10nKey != null) {
+      // Use reflection-like approach to get the localized string
+      switch (l10nKey) {
+        case 'capability_supportsEnvironmentVariables_desc':
+          return l10n.capability_supportsEnvironmentVariables_desc;
+        case 'capability_supportsFileSystem_desc':
+          return l10n.capability_supportsFileSystem_desc;
+        case 'capability_touchInput_desc':
+          return l10n.capability_touchInput_desc;
+        case 'capability_desktopPetSupport_desc':
+          return l10n.capability_desktopPetSupport_desc;
+        case 'capability_alwaysOnTop_desc':
+          return l10n.capability_alwaysOnTop_desc;
+        case 'capability_systemTray_desc':
+          return l10n.capability_systemTray_desc;
+        case 'capability_desktop_desc':
+          return l10n.capability_desktop_desc;
+      }
+    }
+
+    return '';
   }
 }
 

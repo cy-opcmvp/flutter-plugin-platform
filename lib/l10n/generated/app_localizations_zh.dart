@@ -454,10 +454,10 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get mode_local => '本地';
+  String get mode_local => '本地模式';
 
   @override
-  String get mode_online => '在线';
+  String get mode_online => '在线模式';
 
   @override
   String mode_switchSuccess(String mode) {
@@ -865,13 +865,52 @@ class AppLocalizationsZh extends AppLocalizations {
   String get info_availableFeatures => '可用功能';
 
   @override
-  String get capability_desktopPetSupport => '桌面宠物支持';
+  String get mode_local_desc => '完全离线运行，所有功能在本地设备上执行，无需网络连接';
+
+  @override
+  String get mode_online_desc => '联网模式，可访问云端功能和在线服务，需要稳定的网络连接';
+
+  @override
+  String get capability_desktopPetSupport => '桌面宠物';
+
+  @override
+  String get capability_desktopPetSupport_desc => '在桌面上显示可交互的宠物角色';
 
   @override
   String get capability_alwaysOnTop => '窗口置顶';
 
   @override
+  String get capability_alwaysOnTop_desc => '窗口始终保持最前，不被其他窗口遮挡';
+
+  @override
   String get capability_systemTray => '系统托盘';
+
+  @override
+  String get capability_systemTray_desc => '最小化到系统托盘，在后台运行';
+
+  @override
+  String get capability_supportsEnvironmentVariables => '环境变量';
+
+  @override
+  String get capability_supportsEnvironmentVariables_desc => '可访问和修改系统环境变量配置';
+
+  @override
+  String get capability_supportsFileSystem => '文件系统';
+
+  @override
+  String get capability_supportsFileSystem_desc => '可读写本地文件系统，保存和加载数据';
+
+  @override
+  String get capability_touchInput => '触摸输入';
+
+  @override
+  String get capability_touchInput_desc => '支持触摸屏交互和多点触控操作（仅移动设备和触摸屏）';
+
+  @override
+  String get capability_desktop => '桌面平台';
+
+  @override
+  String get capability_desktop_desc => '运行在桌面操作系统上（Windows、macOS、Linux）';
 
   @override
   String get feature_plugin_management => '插件管理';

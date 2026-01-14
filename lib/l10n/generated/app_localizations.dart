@@ -875,13 +875,13 @@ abstract class AppLocalizations {
   /// No description provided for @mode_local.
   ///
   /// In zh, this message translates to:
-  /// **'本地'**
+  /// **'本地模式'**
   String get mode_local;
 
   /// No description provided for @mode_online.
   ///
   /// In zh, this message translates to:
-  /// **'在线'**
+  /// **'在线模式'**
   String get mode_online;
 
   /// No description provided for @mode_switchSuccess.
@@ -1634,11 +1634,29 @@ abstract class AppLocalizations {
   /// **'可用功能'**
   String get info_availableFeatures;
 
+  /// No description provided for @mode_local_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'完全离线运行，所有功能在本地设备上执行，无需网络连接'**
+  String get mode_local_desc;
+
+  /// No description provided for @mode_online_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'联网模式，可访问云端功能和在线服务，需要稳定的网络连接'**
+  String get mode_online_desc;
+
   /// No description provided for @capability_desktopPetSupport.
   ///
   /// In zh, this message translates to:
-  /// **'桌面宠物支持'**
+  /// **'桌面宠物'**
   String get capability_desktopPetSupport;
+
+  /// No description provided for @capability_desktopPetSupport_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'在桌面上显示可交互的宠物角色'**
+  String get capability_desktopPetSupport_desc;
 
   /// No description provided for @capability_alwaysOnTop.
   ///
@@ -1646,11 +1664,71 @@ abstract class AppLocalizations {
   /// **'窗口置顶'**
   String get capability_alwaysOnTop;
 
+  /// No description provided for @capability_alwaysOnTop_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'窗口始终保持最前，不被其他窗口遮挡'**
+  String get capability_alwaysOnTop_desc;
+
   /// No description provided for @capability_systemTray.
   ///
   /// In zh, this message translates to:
   /// **'系统托盘'**
   String get capability_systemTray;
+
+  /// No description provided for @capability_systemTray_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'最小化到系统托盘，在后台运行'**
+  String get capability_systemTray_desc;
+
+  /// No description provided for @capability_supportsEnvironmentVariables.
+  ///
+  /// In zh, this message translates to:
+  /// **'环境变量'**
+  String get capability_supportsEnvironmentVariables;
+
+  /// No description provided for @capability_supportsEnvironmentVariables_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'可访问和修改系统环境变量配置'**
+  String get capability_supportsEnvironmentVariables_desc;
+
+  /// No description provided for @capability_supportsFileSystem.
+  ///
+  /// In zh, this message translates to:
+  /// **'文件系统'**
+  String get capability_supportsFileSystem;
+
+  /// No description provided for @capability_supportsFileSystem_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'可读写本地文件系统，保存和加载数据'**
+  String get capability_supportsFileSystem_desc;
+
+  /// No description provided for @capability_touchInput.
+  ///
+  /// In zh, this message translates to:
+  /// **'触摸输入'**
+  String get capability_touchInput;
+
+  /// No description provided for @capability_touchInput_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'支持触摸屏交互和多点触控操作（仅移动设备和触摸屏）'**
+  String get capability_touchInput_desc;
+
+  /// No description provided for @capability_desktop.
+  ///
+  /// In zh, this message translates to:
+  /// **'桌面平台'**
+  String get capability_desktop;
+
+  /// No description provided for @capability_desktop_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'运行在桌面操作系统上（Windows、macOS、Linux）'**
+  String get capability_desktop_desc;
 
   /// No description provided for @feature_plugin_management.
   ///

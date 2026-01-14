@@ -273,10 +273,26 @@
   "info_availablePlugins": "Available Plugins",
   "info_activePlugins": "Active Plugins",
   "info_availableFeatures": "Available Features",
-  
-  "capability_desktopPetSupport": "Desktop Pet Support",
+
+  "mode_local": "Local Mode",
+  "mode_online": "Online Mode",
+  "mode_local_desc": "Runs completely offline with all features executing on your local device",
+  "mode_online_desc": "Connected mode with access to cloud features and online services",
+
+  "capability_desktopPetSupport": "Desktop Pet",
+  "capability_desktopPetSupport_desc": "Display interactive pet characters on desktop",
   "capability_alwaysOnTop": "Always On Top",
+  "capability_alwaysOnTop_desc": "Window stays above other windows",
   "capability_systemTray": "System Tray",
+  "capability_systemTray_desc": "Minimize to system tray and run in background",
+  "capability_supportsEnvironmentVariables": "Environment Variables",
+  "capability_supportsEnvironmentVariables_desc": "Access and modify system environment variables",
+  "capability_supportsFileSystem": "File System",
+  "capability_supportsFileSystem_desc": "Read and write local file system for data persistence",
+  "capability_touchInput": "Touch Input",
+  "capability_touchInput_desc": "Support touch screen interactions and multi-touch (mobile/touchscreen only)",
+  "capability_desktop": "Desktop Platform",
+  "capability_desktop_desc": "Running on desktop operating system (Windows, macOS, Linux)",
 
   "feature_plugin_management": "Plugin Management",
   "@feature_plugin_management": {

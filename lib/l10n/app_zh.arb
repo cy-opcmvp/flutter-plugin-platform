@@ -496,10 +496,26 @@
   "info_availablePlugins": "可用插件",
   "info_activePlugins": "活动插件",
   "info_availableFeatures": "可用功能",
-  
-  "capability_desktopPetSupport": "桌面宠物支持",
+
+  "mode_local": "本地模式",
+  "mode_online": "在线模式",
+  "mode_local_desc": "完全离线运行，所有功能在本地设备上执行，无需网络连接",
+  "mode_online_desc": "联网模式，可访问云端功能和在线服务，需要稳定的网络连接",
+
+  "capability_desktopPetSupport": "桌面宠物",
+  "capability_desktopPetSupport_desc": "在桌面上显示可交互的宠物角色",
   "capability_alwaysOnTop": "窗口置顶",
+  "capability_alwaysOnTop_desc": "窗口始终保持最前，不被其他窗口遮挡",
   "capability_systemTray": "系统托盘",
+  "capability_systemTray_desc": "最小化到系统托盘，在后台运行",
+  "capability_supportsEnvironmentVariables": "环境变量",
+  "capability_supportsEnvironmentVariables_desc": "可访问和修改系统环境变量配置",
+  "capability_supportsFileSystem": "文件系统",
+  "capability_supportsFileSystem_desc": "可读写本地文件系统，保存和加载数据",
+  "capability_touchInput": "触摸输入",
+  "capability_touchInput_desc": "支持触摸屏交互和多点触控操作（仅移动设备和触摸屏）",
+  "capability_desktop": "桌面平台",
+  "capability_desktop_desc": "运行在桌面操作系统上（Windows、macOS、Linux）",
 
   "feature_plugin_management": "插件管理",
   "feature_plugin_management_desc": "安装、更新和管理插件",

@@ -464,10 +464,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get mode_local => 'LOCAL';
+  String get mode_local => 'Local Mode';
 
   @override
-  String get mode_online => 'ONLINE';
+  String get mode_online => 'Online Mode';
 
   @override
   String mode_switchSuccess(String mode) {
@@ -880,13 +880,60 @@ class AppLocalizationsEn extends AppLocalizations {
   String get info_availableFeatures => 'Available Features';
 
   @override
-  String get capability_desktopPetSupport => 'Desktop Pet Support';
+  String get mode_local_desc =>
+      'Runs completely offline with all features executing on your local device';
+
+  @override
+  String get mode_online_desc =>
+      'Connected mode with access to cloud features and online services';
+
+  @override
+  String get capability_desktopPetSupport => 'Desktop Pet';
+
+  @override
+  String get capability_desktopPetSupport_desc =>
+      'Display interactive pet characters on desktop';
 
   @override
   String get capability_alwaysOnTop => 'Always On Top';
 
   @override
+  String get capability_alwaysOnTop_desc => 'Window stays above other windows';
+
+  @override
   String get capability_systemTray => 'System Tray';
+
+  @override
+  String get capability_systemTray_desc =>
+      'Minimize to system tray and run in background';
+
+  @override
+  String get capability_supportsEnvironmentVariables => 'Environment Variables';
+
+  @override
+  String get capability_supportsEnvironmentVariables_desc =>
+      'Access and modify system environment variables';
+
+  @override
+  String get capability_supportsFileSystem => 'File System';
+
+  @override
+  String get capability_supportsFileSystem_desc =>
+      'Read and write local file system for data persistence';
+
+  @override
+  String get capability_touchInput => 'Touch Input';
+
+  @override
+  String get capability_touchInput_desc =>
+      'Support touch screen interactions and multi-touch (mobile/touchscreen only)';
+
+  @override
+  String get capability_desktop => 'Desktop Platform';
+
+  @override
+  String get capability_desktop_desc =>
+      'Running on desktop operating system (Windows, macOS, Linux)';
 
   @override
   String get feature_plugin_management => 'Plugin Management';
