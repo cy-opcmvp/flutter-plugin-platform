@@ -6,11 +6,13 @@ import '../models/world_clock_models.dart';
 class WorldClockWidget extends StatefulWidget {
   final WorldClockItem worldClock;
   final VoidCallback? onDelete;
+  final bool showSeconds;
 
   const WorldClockWidget({
     Key? key,
     required this.worldClock,
     this.onDelete,
+    this.showSeconds = true,
   }) : super(key: key);
 
   @override
@@ -41,11 +43,17 @@ class _WorldClockWidgetState extends State<WorldClockWidget> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDefault = widget.worldClock.isDefault;
+    final time = widget.worldClock.currentTime;
+    
+    // 格式化时间显示
+    final timeStr = widget.showSeconds 
+        ? widget.worldClock.formattedTime 
+        : '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8.0),
-      elevation: isDefault ? 4.0 : 2.0,
-      color: isDefault ? theme.primaryColor.withOpacity(0.1) : null,
+      elevation: isDefault ? 3.0 : 1.0,
+      color: isDefault ? theme.colorScheme.primaryContainer.withOpacity(0.3) : null,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
@@ -72,13 +80,13 @@ class _WorldClockWidgetState extends State<WorldClockWidget> {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: theme.primaryColor,
+                            color: theme.colorScheme.primary,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
                             '默认',
                             style: theme.textTheme.labelSmall?.copyWith(
-                              color: Colors.white,
+                              color: theme.colorScheme.onPrimary,
                               fontSize: 10,
                             ),
                           ),
@@ -90,7 +98,7 @@ class _WorldClockWidgetState extends State<WorldClockWidget> {
                   Text(
                     widget.worldClock.timeZone,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.textTheme.bodySmall?.color?.withOpacity(0.7),
+                      color: theme.colorScheme.onSurface.withOpacity(0.6),
                     ),
                   ),
                 ],
@@ -104,11 +112,11 @@ class _WorldClockWidgetState extends State<WorldClockWidget> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    widget.worldClock.formattedTime,
+                    timeStr,
                     style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       fontFamily: 'monospace',
-                      color: isDefault ? theme.primaryColor : null,
+                      color: isDefault ? theme.colorScheme.primary : null,
                     ),
                   ),
                   const SizedBox(height: 4),

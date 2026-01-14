@@ -7,12 +7,14 @@ class CountdownTimerWidget extends StatefulWidget {
   final CountdownTimer countdownTimer;
   final VoidCallback? onDelete;
   final VoidCallback? onComplete;
+  final bool enableAnimations;
 
   const CountdownTimerWidget({
     Key? key,
     required this.countdownTimer,
     this.onDelete,
     this.onComplete,
+    this.enableAnimations = true,
   }) : super(key: key);
 
   @override
@@ -56,7 +58,8 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
         
         // 如果即将完成，开始脉冲动画
         if (widget.countdownTimer.isAlmostComplete && 
-            !widget.countdownTimer.isCompleted) {
+            !widget.countdownTimer.isCompleted &&
+            widget.enableAnimations) {
           if (!_pulseController.isAnimating) {
             _pulseController.repeat(reverse: true);
           }
@@ -85,8 +88,12 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
     return AnimatedBuilder(
       animation: _pulseAnimation,
       builder: (context, child) {
+        final scale = (isAlmostComplete && !isCompleted && widget.enableAnimations) 
+            ? _pulseAnimation.value 
+            : 1.0;
+        
         return Transform.scale(
-          scale: isAlmostComplete && !isCompleted ? _pulseAnimation.value : 1.0,
+          scale: scale,
           child: Card(
             margin: const EdgeInsets.only(bottom: 8.0),
             elevation: isCompleted ? 1.0 : 2.0,
