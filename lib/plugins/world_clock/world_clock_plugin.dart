@@ -835,70 +835,99 @@ class _SettingsDialogState extends State<_SettingsDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('世界时钟设置'),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              '显示选项',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            const SizedBox(height: 8),
-            SwitchListTile(
-              title: const Text('24小时制'),
-              subtitle: const Text('使用24小时时间格式'),
-              value: _show24HourFormat,
-              onChanged: (value) => setState(() => _show24HourFormat = value),
-            ),
-            SwitchListTile(
-              title: const Text('显示秒数'),
-              subtitle: const Text('在时钟中显示秒数'),
-              value: _showSeconds,
-              onChanged: (value) => setState(() => _showSeconds = value),
-            ),
-            const Divider(),
-            const SizedBox(height: 8),
-            const Text(
-              '功能选项',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            const SizedBox(height: 8),
-            SwitchListTile(
-              title: const Text('启用通知'),
-              subtitle: const Text('倒计时完成时显示通知'),
-              value: _enableNotifications,
-              onChanged: (value) => setState(() => _enableNotifications = value),
-            ),
-            SwitchListTile(
-              title: const Text('启用动画'),
-              subtitle: const Text('显示动画效果'),
-              value: _enableAnimations,
-              onChanged: (value) => setState(() => _enableAnimations = value),
-            ),
-          ],
+    return Dialog(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 500),
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '世界时钟设置',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        '显示选项',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                      const SizedBox(height: 8),
+                      SwitchListTile(
+                        title: const Text('24小时制'),
+                        subtitle: const Text('使用24小时时间格式'),
+                        value: _show24HourFormat,
+                        onChanged: (value) => setState(() => _show24HourFormat = value),
+                        controlAffinity: ListTileControlAffinity.trailing,
+                      ),
+                      SwitchListTile(
+                        title: const Text('显示秒数'),
+                        subtitle: const Text('在时钟中显示秒数'),
+                        value: _showSeconds,
+                        onChanged: (value) => setState(() => _showSeconds = value),
+                        controlAffinity: ListTileControlAffinity.trailing,
+                      ),
+                      const Divider(),
+                      const SizedBox(height: 8),
+                      const Text(
+                        '功能选项',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                      const SizedBox(height: 8),
+                      SwitchListTile(
+                        title: const Text('启用通知'),
+                        subtitle: const Text('倒计时完成时显示通知'),
+                        value: _enableNotifications,
+                        onChanged: (value) => setState(() => _enableNotifications = value),
+                        controlAffinity: ListTileControlAffinity.trailing,
+                      ),
+                      SwitchListTile(
+                        title: const Text('启用动画'),
+                        subtitle: const Text('显示动画效果'),
+                        value: _enableAnimations,
+                        onChanged: (value) => setState(() => _enableAnimations = value),
+                        controlAffinity: ListTileControlAffinity.trailing,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('取消'),
+                  ),
+                  const SizedBox(width: 8),
+                  FilledButton(
+                    onPressed: () {
+                      widget.onSave({
+                        'show24HourFormat': _show24HourFormat,
+                        'showSeconds': _showSeconds,
+                        'enableNotifications': _enableNotifications,
+                        'enableAnimations': _enableAnimations,
+                      });
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('保存'),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
-        ),
-        FilledButton(
-          onPressed: () {
-            widget.onSave({
-              'show24HourFormat': _show24HourFormat,
-              'showSeconds': _showSeconds,
-              'enableNotifications': _enableNotifications,
-              'enableAnimations': _enableAnimations,
-            });
-            Navigator.of(context).pop();
-          },
-          child: const Text('保存'),
-        ),
-      ],
     );
   }
 }
