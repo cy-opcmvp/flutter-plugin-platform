@@ -887,4 +887,83 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get capability_systemTray => 'System Tray';
+
+  @override
+  String get feature_plugin_management => 'Plugin Management';
+
+  @override
+  String get feature_plugin_management_desc =>
+      'Install, update, and manage plugins';
+
+  @override
+  String get feature_local_storage => 'Local Storage';
+
+  @override
+  String get feature_local_storage_desc =>
+      'Persistent data storage on your device';
+
+  @override
+  String get feature_offline_plugins => 'Offline Plugins';
+
+  @override
+  String get feature_offline_plugins_desc => 'Access plugins even when offline';
+
+  @override
+  String get feature_local_preferences => 'Local Preferences';
+
+  @override
+  String get feature_local_preferences_desc =>
+      'Personalize your local experience';
+
+  @override
+  String get feature_cloud_sync => 'Cloud Sync';
+
+  @override
+  String get feature_cloud_sync_desc =>
+      'Keep your data synchronized across devices';
+
+  @override
+  String get feature_multiplayer => 'Multiplayer';
+
+  @override
+  String get feature_multiplayer_desc => 'Collaborate with others in real-time';
+
+  @override
+  String get feature_online_plugins => 'Online Plugins';
+
+  @override
+  String get feature_online_plugins_desc => 'Access plugins from the cloud';
+
+  @override
+  String get feature_cloud_storage => 'Cloud Storage';
+
+  @override
+  String get feature_cloud_storage_desc =>
+      'Unlimited cloud storage for your data';
+
+  @override
+  String get feature_remote_config => 'Remote Config';
+
+  @override
+  String get feature_remote_config_desc => 'Configure features remotely';
+
+  @override
+  String get feature_status_implemented => 'Available';
+
+  @override
+  String get feature_status_partial => 'Beta';
+
+  @override
+  String get feature_status_planned => 'Coming Soon';
+
+  @override
+  String get feature_status_deprecated => 'Deprecated';
+
+  @override
+  String get feature_learn_more => 'Learn more';
+
+  @override
+  String feature_planned_for_version(String version) {
+    return 'Planned for version $version';
+  }
 }

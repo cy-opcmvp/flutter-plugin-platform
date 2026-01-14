@@ -1651,6 +1651,150 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'系统托盘'**
   String get capability_systemTray;
+
+  /// No description provided for @feature_plugin_management.
+  ///
+  /// In zh, this message translates to:
+  /// **'插件管理'**
+  String get feature_plugin_management;
+
+  /// No description provided for @feature_plugin_management_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'安装、更新和管理插件'**
+  String get feature_plugin_management_desc;
+
+  /// No description provided for @feature_local_storage.
+  ///
+  /// In zh, this message translates to:
+  /// **'本地存储'**
+  String get feature_local_storage;
+
+  /// No description provided for @feature_local_storage_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'在设备上持久化存储数据'**
+  String get feature_local_storage_desc;
+
+  /// No description provided for @feature_offline_plugins.
+  ///
+  /// In zh, this message translates to:
+  /// **'离线插件'**
+  String get feature_offline_plugins;
+
+  /// No description provided for @feature_offline_plugins_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'无网络时也可使用插件'**
+  String get feature_offline_plugins_desc;
+
+  /// No description provided for @feature_local_preferences.
+  ///
+  /// In zh, this message translates to:
+  /// **'本地设置'**
+  String get feature_local_preferences;
+
+  /// No description provided for @feature_local_preferences_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'自定义本地体验'**
+  String get feature_local_preferences_desc;
+
+  /// No description provided for @feature_cloud_sync.
+  ///
+  /// In zh, this message translates to:
+  /// **'云同步'**
+  String get feature_cloud_sync;
+
+  /// No description provided for @feature_cloud_sync_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'跨设备同步数据'**
+  String get feature_cloud_sync_desc;
+
+  /// No description provided for @feature_multiplayer.
+  ///
+  /// In zh, this message translates to:
+  /// **'多人协作'**
+  String get feature_multiplayer;
+
+  /// No description provided for @feature_multiplayer_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'与他人实时协作'**
+  String get feature_multiplayer_desc;
+
+  /// No description provided for @feature_online_plugins.
+  ///
+  /// In zh, this message translates to:
+  /// **'在线插件'**
+  String get feature_online_plugins;
+
+  /// No description provided for @feature_online_plugins_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'访问云端插件库'**
+  String get feature_online_plugins_desc;
+
+  /// No description provided for @feature_cloud_storage.
+  ///
+  /// In zh, this message translates to:
+  /// **'云存储'**
+  String get feature_cloud_storage;
+
+  /// No description provided for @feature_cloud_storage_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'云端数据无限存储'**
+  String get feature_cloud_storage_desc;
+
+  /// No description provided for @feature_remote_config.
+  ///
+  /// In zh, this message translates to:
+  /// **'远程配置'**
+  String get feature_remote_config;
+
+  /// No description provided for @feature_remote_config_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'远程管理功能配置'**
+  String get feature_remote_config_desc;
+
+  /// No description provided for @feature_status_implemented.
+  ///
+  /// In zh, this message translates to:
+  /// **'可用'**
+  String get feature_status_implemented;
+
+  /// No description provided for @feature_status_partial.
+  ///
+  /// In zh, this message translates to:
+  /// **'测试版'**
+  String get feature_status_partial;
+
+  /// No description provided for @feature_status_planned.
+  ///
+  /// In zh, this message translates to:
+  /// **'即将推出'**
+  String get feature_status_planned;
+
+  /// No description provided for @feature_status_deprecated.
+  ///
+  /// In zh, this message translates to:
+  /// **'已弃用'**
+  String get feature_status_deprecated;
+
+  /// No description provided for @feature_learn_more.
+  ///
+  /// In zh, this message translates to:
+  /// **'了解更多'**
+  String get feature_learn_more;
+
+  /// No description provided for @feature_planned_for_version.
+  ///
+  /// In zh, this message translates to:
+  /// **'计划于版本 {version} 推出'**
+  String feature_planned_for_version(String version);
 }
 
 class _AppLocalizationsDelegate

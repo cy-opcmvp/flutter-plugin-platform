@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import '../../core/models/platform_models.dart';
 import '../../core/models/plugin_models.dart';
+import '../../core/models/feature_metadata.dart';
 import '../../core/services/platform_core.dart';
 import '../../core/services/plugin_launcher.dart';
 import '../../core/services/desktop_pet_manager.dart';
+import '../../core/services/feature_manager.dart';
 import '../../core/extensions/context_extensions.dart';
 
 import '../../core/interfaces/i_plugin.dart';
@@ -68,12 +70,17 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
       
       // Initialize plugin launcher
       _pluginLauncher = PluginLauncher(_platformCore.pluginManager);
-      
+
       // Get platform information
       _platformInfo = _platformCore.platformInfo;
       _currentMode = _platformCore.currentMode;
       _availableFeatures = _platformCore.getAvailableFeatures();
-      
+
+      // Filter to only show implemented features
+      _availableFeatures = FeatureManager.instance.getFeaturesForMode(_availableFeatures)
+          .map((f) => f.id)
+          .toSet();
+
       // Load available plugins
       await _loadPlugins();
       
@@ -117,13 +124,18 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
       setState(() {
         _currentMode = event.newMode;
         _availableFeatures = _platformCore.getAvailableFeatures();
+
+        // Filter to only show implemented features
+        _availableFeatures = FeatureManager.instance.getFeaturesForMode(_availableFeatures)
+            .map((f) => f.id)
+            .toSet();
       });
-      
+
       // Show mode change notification
       if (mounted) {
         final l10n = context.l10n;
-        final modeName = event.newMode == OperationMode.online 
-            ? l10n.mode_online 
+        final modeName = event.newMode == OperationMode.online
+            ? l10n.mode_online
             : l10n.mode_local;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -723,27 +735,68 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
   }
 
   /// Build individual feature chip
-  Widget _buildFeatureChip(String feature) {
+  Widget _buildFeatureChip(String featureId) {
     final theme = Theme.of(context);
-    final displayName = feature.replaceAll('_', ' ').toUpperCase();
-    
+    final l10n = context.l10n;
+    final metadata = FeatureManager.instance.getFeature(featureId);
+
+    if (metadata == null) {
+      return const SizedBox.shrink();
+    }
+
+    final displayName = metadata.getDisplayName(context);
+    final status = metadata.status;
+    final statusText = metadata.getStatusText(context);
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: theme.colorScheme.primary.withValues(alpha: 0.1),
+        color: _getStatusColor(status, theme).withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.3),
+          color: _getStatusColor(status, theme).withOpacity(0.3),
         ),
       ),
-      child: Text(
-        displayName,
-        style: theme.textTheme.bodySmall?.copyWith(
-          color: theme.colorScheme.primary,
-          fontSize: 10,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (status != FeatureStatus.implemented) ...[
+            Text(
+              statusText,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: _getStatusColor(status, theme),
+                fontSize: 8,
+              ),
+            ),
+            const SizedBox(width: 4),
+          ],
+          Text(
+            displayName,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: _getStatusColor(status, theme),
+              fontSize: 10,
+              fontWeight: status == FeatureStatus.planned
+                  ? FontWeight.normal
+                  : FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
+  }
+
+  /// Get status color based on feature status
+  Color _getStatusColor(FeatureStatus status, ThemeData theme) {
+    switch (status) {
+      case FeatureStatus.implemented:
+        return theme.colorScheme.primary;
+      case FeatureStatus.partial:
+        return Colors.orange;
+      case FeatureStatus.planned:
+        return theme.colorScheme.outline;
+      case FeatureStatus.deprecated:
+        return theme.colorScheme.error;
+    }
   }
 
   /// Build plugin grid view for plugin display and selection

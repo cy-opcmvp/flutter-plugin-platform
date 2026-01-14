@@ -499,5 +499,47 @@
   
   "capability_desktopPetSupport": "桌面宠物支持",
   "capability_alwaysOnTop": "窗口置顶",
-  "capability_systemTray": "系统托盘"
+  "capability_systemTray": "系统托盘",
+
+  "feature_plugin_management": "插件管理",
+  "feature_plugin_management_desc": "安装、更新和管理插件",
+
+  "feature_local_storage": "本地存储",
+  "feature_local_storage_desc": "在设备上持久化存储数据",
+
+  "feature_offline_plugins": "离线插件",
+  "feature_offline_plugins_desc": "无网络时也可使用插件",
+
+  "feature_local_preferences": "本地设置",
+  "feature_local_preferences_desc": "自定义本地体验",
+
+  "feature_cloud_sync": "云同步",
+  "feature_cloud_sync_desc": "跨设备同步数据",
+
+  "feature_multiplayer": "多人协作",
+  "feature_multiplayer_desc": "与他人实时协作",
+
+  "feature_online_plugins": "在线插件",
+  "feature_online_plugins_desc": "访问云端插件库",
+
+  "feature_cloud_storage": "云存储",
+  "feature_cloud_storage_desc": "云端数据无限存储",
+
+  "feature_remote_config": "远程配置",
+  "feature_remote_config_desc": "远程管理功能配置",
+
+  "feature_status_implemented": "可用",
+  "feature_status_partial": "测试版",
+  "feature_status_planned": "即将推出",
+  "feature_status_deprecated": "已弃用",
+
+  "feature_learn_more": "了解更多",
+  "feature_planned_for_version": "计划于版本 {version} 推出",
+  "@feature_planned_for_version": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  }
 }

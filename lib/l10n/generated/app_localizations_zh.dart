@@ -872,4 +872,78 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get capability_systemTray => '系统托盘';
+
+  @override
+  String get feature_plugin_management => '插件管理';
+
+  @override
+  String get feature_plugin_management_desc => '安装、更新和管理插件';
+
+  @override
+  String get feature_local_storage => '本地存储';
+
+  @override
+  String get feature_local_storage_desc => '在设备上持久化存储数据';
+
+  @override
+  String get feature_offline_plugins => '离线插件';
+
+  @override
+  String get feature_offline_plugins_desc => '无网络时也可使用插件';
+
+  @override
+  String get feature_local_preferences => '本地设置';
+
+  @override
+  String get feature_local_preferences_desc => '自定义本地体验';
+
+  @override
+  String get feature_cloud_sync => '云同步';
+
+  @override
+  String get feature_cloud_sync_desc => '跨设备同步数据';
+
+  @override
+  String get feature_multiplayer => '多人协作';
+
+  @override
+  String get feature_multiplayer_desc => '与他人实时协作';
+
+  @override
+  String get feature_online_plugins => '在线插件';
+
+  @override
+  String get feature_online_plugins_desc => '访问云端插件库';
+
+  @override
+  String get feature_cloud_storage => '云存储';
+
+  @override
+  String get feature_cloud_storage_desc => '云端数据无限存储';
+
+  @override
+  String get feature_remote_config => '远程配置';
+
+  @override
+  String get feature_remote_config_desc => '远程管理功能配置';
+
+  @override
+  String get feature_status_implemented => '可用';
+
+  @override
+  String get feature_status_partial => '测试版';
+
+  @override
+  String get feature_status_planned => '即将推出';
+
+  @override
+  String get feature_status_deprecated => '已弃用';
+
+  @override
+  String get feature_learn_more => '了解更多';
+
+  @override
+  String feature_planned_for_version(String version) {
+    return '计划于版本 $version 推出';
+  }
 }

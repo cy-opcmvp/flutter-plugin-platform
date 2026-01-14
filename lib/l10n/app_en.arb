@@ -276,5 +276,75 @@
   
   "capability_desktopPetSupport": "Desktop Pet Support",
   "capability_alwaysOnTop": "Always On Top",
-  "capability_systemTray": "System Tray"
+  "capability_systemTray": "System Tray",
+
+  "feature_plugin_management": "Plugin Management",
+  "@feature_plugin_management": {
+    "description": "Manage and control plugins"
+  },
+  "feature_plugin_management_desc": "Install, update, and manage plugins",
+
+  "feature_local_storage": "Local Storage",
+  "@feature_local_storage": {
+    "description": "Store data locally on device"
+  },
+  "feature_local_storage_desc": "Persistent data storage on your device",
+
+  "feature_offline_plugins": "Offline Plugins",
+  "@feature_offline_plugins": {
+    "description": "Use plugins without internet connection"
+  },
+  "feature_offline_plugins_desc": "Access plugins even when offline",
+
+  "feature_local_preferences": "Local Preferences",
+  "@feature_local_preferences": {
+    "description": "Customize local settings"
+  },
+  "feature_local_preferences_desc": "Personalize your local experience",
+
+  "feature_cloud_sync": "Cloud Sync",
+  "@feature_cloud_sync": {
+    "description": "Synchronize data to cloud"
+  },
+  "feature_cloud_sync_desc": "Keep your data synchronized across devices",
+
+  "feature_multiplayer": "Multiplayer",
+  "@feature_multiplayer": {
+    "description": "Multiplayer collaboration features"
+  },
+  "feature_multiplayer_desc": "Collaborate with others in real-time",
+
+  "feature_online_plugins": "Online Plugins",
+  "@feature_online_plugins": {
+    "description": "Cloud-based plugins"
+  },
+  "feature_online_plugins_desc": "Access plugins from the cloud",
+
+  "feature_cloud_storage": "Cloud Storage",
+  "@feature_cloud_storage": {
+    "description": "Store data in cloud"
+  },
+  "feature_cloud_storage_desc": "Unlimited cloud storage for your data",
+
+  "feature_remote_config": "Remote Config",
+  "@feature_remote_config": {
+    "description": "Remote configuration management"
+  },
+  "feature_remote_config_desc": "Configure features remotely",
+
+  "feature_status_implemented": "Available",
+  "feature_status_partial": "Beta",
+  "feature_status_planned": "Coming Soon",
+  "feature_status_deprecated": "Deprecated",
+
+  "feature_learn_more": "Learn more",
+  "feature_planned_for_version": "Planned for version {version}",
+  "@feature_planned_for_version": {
+    "placeholders": {
+      "version": {
+        "type": "String",
+        "example": "2.0.0"
+      }
+    }
+  }
 }
