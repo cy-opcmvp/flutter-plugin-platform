@@ -94,134 +94,227 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
         
         return Transform.scale(
           scale: scale,
-          child: Card(
-            margin: const EdgeInsets.only(bottom: 8.0),
-            elevation: isCompleted ? 1.0 : 2.0,
-            color: _getCardColor(theme, isCompleted, isAlmostComplete),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  // 标题和操作按钮
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          widget.countdownTimer.title,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w500,
-                            color: isCompleted 
-                                ? theme.textTheme.titleMedium?.color?.withOpacity(0.6)
-                                : null,
-                            decoration: isCompleted 
-                                ? TextDecoration.lineThrough 
-                                : null,
-                          ),
-                        ),
-                      ),
-                      if (isCompleted)
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 12.0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              gradient: _getGradient(theme, isCompleted, isAlmostComplete),
+              boxShadow: [
+                BoxShadow(
+                  color: _getShadowColor(theme, isCompleted, isAlmostComplete).withOpacity(0.2),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: _getBorderColor(theme, isCompleted, isAlmostComplete),
+                  width: 1.5,
+                ),
+                color: theme.cardColor.withOpacity(0.95),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  children: [
+                    // 标题和操作按钮
+                    Row(
+                      children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
+                          padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: Colors.green,
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: _getIconGradientColors(theme, isCompleted, isAlmostComplete),
+                            ),
                             borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: _getIconGradientColors(theme, isCompleted, isAlmostComplete)[0].withOpacity(0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
+                          child: Icon(
+                            _getTimerIcon(isCompleted, isAlmostComplete),
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
                           child: Text(
-                            '已完成',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: Colors.white,
-                              fontSize: 10,
+                            widget.countdownTimer.title,
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: isCompleted
+                                  ? theme.colorScheme.onSurface.withOpacity(0.5)
+                                  : _getTimeColor(theme, isCompleted, isAlmostComplete),
+                              decoration: isCompleted
+                                  ? TextDecoration.lineThrough
+                                  : null,
                             ),
                           ),
                         ),
-                      const SizedBox(width: 8),
-                      if (widget.onDelete != null)
-                        IconButton(
-                          icon: const Icon(Icons.delete_outline),
-                          onPressed: () => _showDeleteConfirmation(context),
-                          tooltip: '删除倒计时',
-                          iconSize: 20,
+                        if (isCompleted)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.green.shade400,
+                                  Colors.green.shade600,
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.green.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.check_circle,
+                                  color: Colors.white,
+                                  size: 14,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '已完成',
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        const SizedBox(width: 8),
+                        if (widget.onDelete != null)
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () => _showDeleteConfirmation(context),
+                              borderRadius: BorderRadius.circular(12),
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.error.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  Icons.delete_outline_rounded,
+                                  color: theme.colorScheme.error,
+                                  size: 22,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // 倒计时显示
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.countdownTimer.formattedRemainingTime,
+                                style: theme.textTheme.displaySmall?.copyWith(
+                                  fontFamily: 'monospace',
+                                  fontWeight: FontWeight.bold,
+                                  color: _getTimeColor(theme, isCompleted, isAlmostComplete),
+                                  fontSize: 42,
+                                  letterSpacing: 2,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: _getStatusColor(theme, isCompleted, isAlmostComplete).withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  _getStatusText(isCompleted, remainingTime),
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: _getStatusColor(theme, isCompleted, isAlmostComplete),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                    ],
-                  ),
-                  
-                  const SizedBox(height: 12),
-                  
-                  // 倒计时显示
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              widget.countdownTimer.formattedRemainingTime,
-                              style: theme.textTheme.headlineMedium?.copyWith(
-                                fontFamily: 'monospace',
-                                fontWeight: FontWeight.bold,
-                                color: _getTimeColor(theme, isCompleted, isAlmostComplete),
+
+                        // 圆形进度指示器
+                        SizedBox(
+                          width: 70,
+                          height: 70,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              // 背景圆
+                              Container(
+                                width: 70,
+                                height: 70,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: theme.dividerColor.withOpacity(0.1),
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              _getStatusText(isCompleted, remainingTime),
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: _getStatusColor(theme, isCompleted, isAlmostComplete),
+                              // 进度圆
+                              SizedBox(
+                                width: 70,
+                                height: 70,
+                                child: CircularProgressIndicator(
+                                  value: isCompleted ? 1.0 : _calculateProgress(),
+                                  strokeWidth: 6,
+                                  backgroundColor: Colors.transparent,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    _getProgressColor(theme, isCompleted, isAlmostComplete),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ],
+                              // 中心图标
+                              Center(
+                                child: Icon(
+                                  _getCenterIcon(isCompleted, isAlmostComplete),
+                                  size: 28,
+                                  color: _getProgressColor(theme, isCompleted, isAlmostComplete),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      
-                      // 圆形进度指示器
-                      SizedBox(
-                        width: 60,
-                        height: 60,
-                        child: Stack(
-                          children: [
-                            CircularProgressIndicator(
-                              value: isCompleted ? 1.0 : _calculateProgress(),
-                              strokeWidth: 4,
-                              backgroundColor: theme.dividerColor.withOpacity(0.3),
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                _getProgressColor(theme, isCompleted, isAlmostComplete),
-                              ),
-                            ),
-                            Center(
-                              child: Icon(
-                                isCompleted 
-                                    ? Icons.check_circle
-                                    : isAlmostComplete 
-                                        ? Icons.warning
-                                        : Icons.timer,
-                                color: _getProgressColor(theme, isCompleted, isAlmostComplete),
-                                size: 24,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         );
       },
     );
-  }
-
-  Color? _getCardColor(ThemeData theme, bool isCompleted, bool isAlmostComplete) {
-    if (isCompleted) {
-      return Colors.green.withOpacity(0.1);
-    } else if (isAlmostComplete) {
-      return Colors.orange.withOpacity(0.1);
-    }
-    return null;
   }
 
   Color _getTimeColor(ThemeData theme, bool isCompleted, bool isAlmostComplete) {
@@ -265,12 +358,80 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
     }
   }
 
+  Color? _getCardColor(ThemeData theme, bool isCompleted, bool isAlmostComplete) {
+    // 不再使用，保留以防万一
+    return null;
+  }
+
+  LinearGradient _getGradient(ThemeData theme, bool isCompleted, bool isAlmostComplete) {
+    if (isCompleted) {
+      return LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          Colors.green.withOpacity(0.1),
+          Colors.green.withOpacity(0.05),
+        ],
+      );
+    } else if (isAlmostComplete) {
+      return LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          Colors.orange.withOpacity(0.15),
+          Colors.orange.withOpacity(0.05),
+        ],
+      );
+    }
+    return LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        theme.primaryColor.withOpacity(0.1),
+        theme.primaryColor.withOpacity(0.02),
+      ],
+    );
+  }
+
+  Color _getShadowColor(ThemeData theme, bool isCompleted, bool isAlmostComplete) {
+    if (isCompleted) return Colors.green;
+    if (isAlmostComplete) return Colors.orange;
+    return theme.primaryColor;
+  }
+
+  Color _getBorderColor(ThemeData theme, bool isCompleted, bool isAlmostComplete) {
+    if (isCompleted) return Colors.green.withOpacity(0.5);
+    if (isAlmostComplete) return Colors.orange.withOpacity(0.5);
+    return theme.primaryColor.withOpacity(0.3);
+  }
+
+  List<Color> _getIconGradientColors(ThemeData theme, bool isCompleted, bool isAlmostComplete) {
+    if (isCompleted) {
+      return [Colors.green.shade400, Colors.green.shade600];
+    } else if (isAlmostComplete) {
+      return [Colors.orange.shade400, Colors.orange.shade600];
+    }
+    return [theme.primaryColor, theme.primaryColor.withOpacity(0.7)];
+  }
+
+  IconData _getTimerIcon(bool isCompleted, bool isAlmostComplete) {
+    if (isCompleted) return Icons.check_circle;
+    if (isAlmostComplete) return Icons.timer;
+    return Icons.timer_outlined;
+  }
+
+  IconData _getCenterIcon(bool isCompleted, bool isAlmostComplete) {
+    if (isCompleted) return Icons.check;
+    if (isAlmostComplete) return Icons.notifications_active;
+    return Icons.schedule;
+  }
+
   double _calculateProgress() {
     // 这里需要原始持续时间来计算进度
     // 由于模型中没有存储原始持续时间，我们使用一个简化的计算
     final remaining = widget.countdownTimer.remainingTime;
     if (remaining == Duration.zero) return 1.0;
-    
+
     // 假设最大倒计时为24小时，这是一个简化的实现
     const maxDuration = Duration(hours: 24);
     final elapsed = maxDuration - remaining;
