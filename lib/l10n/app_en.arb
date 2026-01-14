@@ -346,5 +346,14 @@
         "example": "2.0.0"
       }
     }
-  }
+  },
+
+  "plugin_calculator_name": "Calculator",
+  "@plugin_calculator_name": {
+    "description": "Calculator plugin name"
+  },
+  "plugin_calculator_description": "A simple calculator tool for basic arithmetic operations",
+  "plugin_calculator_initialized": "Calculator plugin initialized",
+  "plugin_calculator_disposed": "Calculator plugin disposed",
+  "plugin_calculator_error": "Error"
 }

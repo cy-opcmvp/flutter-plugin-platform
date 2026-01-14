@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/interfaces/i_plugin.dart';
 import '../../core/models/plugin_models.dart';
+import '../../../l10n/generated/app_localizations.dart';
 
 /// A simple calculator plugin that demonstrates tool plugin implementation
 class CalculatorPlugin implements IPlugin {
@@ -24,7 +25,7 @@ class CalculatorPlugin implements IPlugin {
   @override
   Future<void> initialize(PluginContext context) async {
     _context = context;
-    
+
     // Load saved state if available
     final savedState = await _context.dataStorage.retrieve<Map<String, dynamic>>('calculator_state');
     if (savedState != null) {
@@ -34,14 +35,14 @@ class CalculatorPlugin implements IPlugin {
       calculatorState.waitingForOperand = savedState['waitingForOperand'] ?? false;
     }
 
-    // Show notification that calculator is ready
-    await _context.platformServices.showNotification('Calculator plugin initialized');
+    // Note: Notifications skipped as we need BuildContext for localization
+    // In production, you might want to implement a different notification system
   }
 
   @override
   Future<void> dispose() async {
     await _saveState();
-    await _context.platformServices.showNotification('Calculator plugin disposed');
+    // Note: Notifications skipped as we need BuildContext for localization
   }
 
   @override
@@ -125,9 +126,11 @@ class _CalculatorWidgetState extends State<CalculatorWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Calculator'),
+        title: Text(l10n.plugin_calculator_name),
         backgroundColor: Colors.blue,
       ),
       body: Column(
@@ -302,12 +305,12 @@ class _CalculatorWidgetState extends State<CalculatorWidget> {
 
   void _calculate() {
     if (_state.previousValue.isEmpty || _state.operation.isEmpty) return;
-    
+
     final prev = double.tryParse(_state.previousValue);
     final current = double.tryParse(_state.display);
-    
+
     if (prev == null || current == null) return;
-    
+
     double result;
     switch (_state.operation) {
       case '+':
@@ -321,7 +324,8 @@ class _CalculatorWidgetState extends State<CalculatorWidget> {
         break;
       case '÷':
         if (current == 0) {
-          _state.display = 'Error';
+          final l10n = AppLocalizations.of(context);
+          _state.display = l10n?.plugin_calculator_error ?? 'Error';
           _state.previousValue = '';
           _state.operation = '';
           return;
@@ -331,7 +335,7 @@ class _CalculatorWidgetState extends State<CalculatorWidget> {
       default:
         return;
     }
-    
+
     _state.display = _formatResult(result);
     _state.previousValue = '';
     _state.operation = '';

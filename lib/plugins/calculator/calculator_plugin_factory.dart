@@ -1,5 +1,7 @@
+import 'package:flutter/material.dart';
 import '../../core/interfaces/i_plugin.dart';
 import '../../core/models/plugin_models.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import 'calculator_plugin.dart';
 
 /// Factory class for creating calculator plugin instances
@@ -10,21 +12,23 @@ class CalculatorPluginFactory {
   }
 
   /// Gets the plugin descriptor for the calculator
-  static PluginDescriptor getDescriptor() {
-    return const PluginDescriptor(
+  static PluginDescriptor getDescriptor({BuildContext? context}) {
+    final l10n = context != null ? AppLocalizations.of(context) : null;
+
+    return PluginDescriptor(
       id: 'com.example.calculator',
-      name: 'Calculator',
+      name: l10n?.plugin_calculator_name ?? 'Calculator',
       version: '1.0.0',
       type: PluginType.tool,
-      requiredPermissions: [Permission.notifications],
+      requiredPermissions: const [Permission.notifications],
       metadata: {
-        'description': 'A simple calculator tool for basic arithmetic operations',
+        'description': l10n?.plugin_calculator_description ?? 'A simple calculator tool for basic arithmetic operations',
         'author': 'Example Developer',
         'category': 'Utility',
-        'tags': ['calculator', 'math', 'arithmetic', 'tool'],
+        'tags': const ['calculator', 'math', 'arithmetic', 'tool'],
         'icon': 'calculate',
         'minPlatformVersion': '1.0.0',
-        'supportedPlatforms': ['mobile', 'desktop', 'steam'],
+        'supportedPlatforms': const ['mobile', 'desktop', 'steam'],
       },
       entryPoint: 'lib/plugins/calculator/calculator_plugin.dart',
     );

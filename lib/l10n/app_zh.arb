@@ -541,5 +541,11 @@
         "type": "String"
       }
     }
-  }
+  },
+
+  "plugin_calculator_name": "计算器",
+  "plugin_calculator_description": "用于基本算术运算的简单计算器工具",
+  "plugin_calculator_initialized": "计算器插件已初始化",
+  "plugin_calculator_disposed": "计算器插件已销毁",
+  "plugin_calculator_error": "错误"
 }
