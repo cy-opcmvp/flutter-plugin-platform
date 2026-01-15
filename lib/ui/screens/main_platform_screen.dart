@@ -14,6 +14,7 @@ import '../../core/interfaces/i_plugin.dart';
 import '../../core/interfaces/i_platform_services.dart';
 import 'desktop_pet_screen.dart';
 import 'service_test_screen.dart';
+import 'settings_screen.dart';
 
 /// Main platform interface that displays plugins and manages navigation
 /// Implements requirements 1.1, 1.2, 1.5, 7.5
@@ -622,6 +623,19 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
       appBar: AppBar(
         title: Text(l10n.appTitle),
         actions: [
+          // Settings button
+          IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: l10n.settings_title,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SettingsScreen(),
+                ),
+              );
+            },
+          ),
           // Service Test button - for testing platform services
           IconButton(
             icon: const Icon(Icons.science),

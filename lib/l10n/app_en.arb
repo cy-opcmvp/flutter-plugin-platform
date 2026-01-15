@@ -155,10 +155,19 @@
   "nav_active": "Active",
   "nav_info": "Info",
 
+  "settings_title": "Settings",
   "settings_language": "Language",
   "settings_theme": "Theme",
   "settings_languageChinese": "中文",
   "settings_languageEnglish": "English",
+  "settings_currentLanguage": "Current Language",
+  "settings_changeLanguage": "Change Language",
+  "settings_languageChanged": "Language changed to {language}",
+  "@settings_languageChanged": {
+    "placeholders": {
+      "language": {"type": "String"}
+    }
+  },
 
   "plugin_detailsTitle": "Plugin Details",
   "plugin_detailsStatus": "Status",
@@ -377,5 +386,97 @@
   "@plugin_worldclock_name": {
     "description": "World Clock plugin name"
   },
-  "plugin_worldclock_description": "Display times from multiple time zones with countdown timer support, showing Beijing time by default"
+  "plugin_worldclock_description": "Display times from multiple time zones with countdown timer support, showing Beijing time by default",
+
+  "serviceTest_title": "Platform Services Test",
+  "serviceTest_notifications": "Notifications",
+  "serviceTest_audio": "Audio",
+  "serviceTest_tasks": "Tasks",
+  "serviceTest_activityLog": "Activity Log",
+  "serviceTest_clear": "Clear",
+  "serviceTest_copyAll": "Copy All",
+  "serviceTest_copied": "Copied",
+  "serviceTest_logCopied": "Log entry copied to clipboard",
+  "serviceTest_allLogsCopied": "All logs copied to clipboard",
+
+  "serviceTest_permissionGranted": "Notification Permission Granted",
+  "serviceTest_permissionNotGranted": "Notification Permission Not Granted",
+  "serviceTest_requestPermission": "Request Permission",
+
+  "serviceTest_windowsPlatform": "Windows Platform",
+  "serviceTest_windowsNotice": "Scheduled notifications will appear immediately on Windows. Use the Countdown Timer in the Task tab for timed notifications.",
+
+  "serviceTest_notificationTitle": "Notification Title",
+  "serviceTest_notificationBody": "Notification Body",
+  "serviceTest_defaultNotificationTitle": "Test Notification",
+  "serviceTest_defaultNotificationBody": "This is a test notification from the platform services!",
+  "serviceTest_showNow": "Show Now",
+  "serviceTest_schedule": "Schedule (5s)",
+  "serviceTest_cancelAll": "Cancel All",
+
+  "serviceTest_testAudioFeatures": "Test various audio playback features",
+  "serviceTest_audioNotAvailable": "Audio service is not available on this platform. Some features may be disabled.",
+
+  "serviceTest_notificationSound": "Notification Sound",
+  "serviceTest_successSound": "Success Sound",
+  "serviceTest_errorSound": "Error Sound",
+  "serviceTest_warningSound": "Warning Sound",
+  "serviceTest_clickSound": "Click Sound",
+
+  "serviceTest_globalVolume": "Global Volume",
+  "serviceTest_stopAllAudio": "Stop All Audio",
+
+  "serviceTest_countdownTimer": "Countdown Timer",
+  "serviceTest_seconds": "Seconds",
+  "serviceTest_start": "Start",
+  "serviceTest_cancel": "Cancel",
+
+  "serviceTest_periodicTask": "Periodic Task",
+  "serviceTest_interval": "Interval",
+
+  "serviceTest_activeTasks": "Active Tasks",
+  "serviceTest_tasks": "tasks",
+  "serviceTest_noActiveTasks": "No active tasks",
+  "serviceTest_at": "At",
+  "serviceTest_every": "Every",
+
+  "serviceTest_countdownComplete": "Countdown Complete!",
+  "serviceTest_countdownFinished": "Your countdown has finished.",
+
+  "serviceTest_error": "Error",
+  "serviceTest_errorPlayingSound": "Error playing sound",
+  "serviceTest_audioServiceNotAvailable": "Audio service is not available on this platform",
+  "serviceTest_enterValidSeconds": "Please enter a valid number of seconds",
+  "serviceTest_enterValidInterval": "Please enter a valid interval",
+
+  "serviceTest_notificationShown": "Notification shown",
+  "serviceTest_errorShowingNotification": "Error showing notification",
+  "serviceTest_notificationScheduled": "Notification scheduled for 5 seconds from now",
+  "serviceTest_errorSchedulingNotification": "Error scheduling notification",
+  "serviceTest_allNotificationsCancelled": "All notifications cancelled",
+  "serviceTest_errorCancellingNotifications": "Error cancelling notifications",
+
+  "serviceTest_countdownStarted": "Countdown started: {seconds} seconds",
+  "serviceTest_errorStartingCountdown": "Error starting countdown",
+  "serviceTest_countdownCancelled": "Countdown cancelled",
+  "serviceTest_errorCancellingCountdown": "Error cancelling countdown",
+
+  "serviceTest_periodicTaskStarted": "Periodic task started: every {interval} seconds",
+  "serviceTest_errorStartingPeriodicTask": "Error starting periodic task",
+  "serviceTest_periodicTaskCancelled": "Periodic task cancelled",
+  "serviceTest_errorCancellingPeriodicTask": "Error cancelling periodic task",
+  "serviceTest_periodicTaskExecuted": "Periodic task executed",
+  "serviceTest_taskCompleted": "Task completed",
+  "serviceTest_taskFailed": "Task failed",
+  "serviceTest_taskCancelled": "Task cancelled",
+  "serviceTest_couldNotPlaySound": "Could not play sound",
+  "serviceTest_volumeSet": "Volume set to {percent}%",
+  "serviceTest_stoppedAllAudio": "Stopped all audio playback",
+  "serviceTest_notificationPermission": "Notification permission {status}",
+  "serviceTest_granted": "granted",
+  "serviceTest_denied": "denied",
+  "serviceTest_audioServiceUnavailable": "Audio service is not available",
+  "serviceTest_serviceTestInitialized": "Service Test Screen initialized",
+  "serviceTest_errorMessage": "Error message",
+  "serviceTest_copy": "Copy"
 }

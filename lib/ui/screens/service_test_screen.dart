@@ -3,12 +3,15 @@
 /// A comprehensive test UI for all platform services.
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' as flutter_services;
 import 'package:plugin_platform/core/services/platform_service_manager.dart';
 import 'package:plugin_platform/core/interfaces/services/i_notification_service.dart';
 import 'package:plugin_platform/core/interfaces/services/i_audio_service.dart';
 import 'package:plugin_platform/core/interfaces/services/i_task_scheduler_service.dart';
+import 'package:plugin_platform/l10n/generated/app_localizations.dart';
 
 /// Service Test Screen
 ///
@@ -24,10 +27,8 @@ class ServiceTestScreen extends StatefulWidget {
 }
 
 class _ServiceTestScreenState extends State<ServiceTestScreen> {
-  final TextEditingController _notificationTitleController =
-      TextEditingController(text: 'Test Notification');
-  final TextEditingController _notificationBodyController =
-      TextEditingController(text: 'This is a test notification from the platform services!');
+  late final TextEditingController _notificationTitleController;
+  late final TextEditingController _notificationBodyController;
   final TextEditingController _countdownSecondsController =
       TextEditingController(text: '10');
   final TextEditingController _taskIntervalController =
@@ -41,19 +42,42 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
   String? _activeTaskId;
   List<ScheduledTask> _activeTasks = [];
 
+  // Stream subscriptions to cancel on dispose
+  StreamSubscription<NotificationEvent>? _notificationClickSubscription;
+  StreamSubscription<TaskEvent>? _taskCompleteSubscription;
+  StreamSubscription<TaskEvent>? _taskFailedSubscription;
+
   @override
   void initState() {
     super.initState();
+    // 初始化文本控制器（使用默认值，避免 late 初始化错误）
+    _notificationTitleController = TextEditingController();
+    _notificationBodyController = TextEditingController();
+
+    // 在第一帧后设置国际化文本
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final l10n = AppLocalizations.of(context);
+      if (l10n != null) {
+        _notificationTitleController.text = l10n.serviceTest_defaultNotificationTitle;
+        _notificationBodyController.text = l10n.serviceTest_defaultNotificationBody;
+        _addLog(l10n.serviceTest_serviceTestInitialized);
+      }
+    });
+
     _checkPermissions();
     _setupTaskListeners();
     _setupNotificationListener();
-    _addLog('Service Test Screen initialized');
     // Delay task refresh to after init
     Future.microtask(() => _refreshActiveTasks());
   }
 
   @override
   void dispose() {
+    // Cancel stream subscriptions
+    _notificationClickSubscription?.cancel();
+    _taskCompleteSubscription?.cancel();
+    _taskFailedSubscription?.cancel();
+
     _notificationTitleController.dispose();
     _notificationBodyController.dispose();
     _countdownSecondsController.dispose();
@@ -70,19 +94,32 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
   }
 
   void _setupTaskListeners() {
-    PlatformServiceManager.taskScheduler.onTaskComplete.listen((event) {
-      _addLog('✅ Task completed: ${event.taskId}');
+    _taskCompleteSubscription = PlatformServiceManager.taskScheduler.onTaskComplete.listen((event) {
+      if (!mounted) return;
+
+      final l10n = AppLocalizations.of(context);
+      if (l10n != null) {
+        _addLog('✅ ${l10n.serviceTest_taskCompleted}: ${event.taskId}');
+      }
       _refreshActiveTasks();
     });
 
-    PlatformServiceManager.taskScheduler.onTaskFailed.listen((event) {
-      _addLog('❌ Task failed: ${event.taskId} - ${event.error}');
+    _taskFailedSubscription = PlatformServiceManager.taskScheduler.onTaskFailed.listen((event) {
+      if (!mounted) return;
+
+      final l10n = AppLocalizations.of(context);
+      if (l10n != null) {
+        _addLog('❌ ${l10n.serviceTest_taskFailed}: ${event.taskId} - ${event.error}');
+      }
       _refreshActiveTasks();
     });
   }
 
   void _setupNotificationListener() {
-    PlatformServiceManager.notification.onNotificationClick.listen((event) {
+    _notificationClickSubscription = PlatformServiceManager.notification.onNotificationClick.listen((event) {
+      // Check if widget is still mounted before using context
+      if (!mounted) return;
+
       // On Windows, show notification as SnackBar
       if (Theme.of(context).platform == TargetPlatform.windows) {
         final payload = event.payload;
@@ -101,7 +138,11 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
   void _showNotificationSnackBar(String title, String body) {
     if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
+    // 获取 ScaffoldMessenger 和关闭按钮文本的引用
+    final messenger = ScaffoldMessenger.of(context);
+    final closeLabel = AppLocalizations.of(context)!.common_close;
+
+    messenger.showSnackBar(
       SnackBar(
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -118,10 +159,11 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
         backgroundColor: Colors.blue,
         duration: const Duration(seconds: 4),
         action: SnackBarAction(
-          label: '关闭',
+          label: closeLabel,
           textColor: Colors.white,
           onPressed: () {
-            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            // 使用捕获的 messenger 引用而不是 context
+            messenger.hideCurrentSnackBar();
           },
         ),
       ),
@@ -154,16 +196,18 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return DefaultTabController(
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Platform Services Test'),
-          bottom: const TabBar(
+          title: Text(l10n.serviceTest_title),
+          bottom: TabBar(
             tabs: [
-              Tab(text: 'Notifications', icon: Icon(Icons.notifications)),
-              Tab(text: 'Audio', icon: Icon(Icons.volume_up)),
-              Tab(text: 'Tasks', icon: Icon(Icons.schedule)),
+              Tab(text: l10n.serviceTest_notifications, icon: const Icon(Icons.notifications)),
+              Tab(text: l10n.serviceTest_audio, icon: const Icon(Icons.volume_up)),
+              Tab(text: l10n.serviceTest_tasks, icon: const Icon(Icons.schedule)),
             ],
           ),
         ),
@@ -172,20 +216,20 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
             Expanded(
               child: TabBarView(
                 children: [
-                  _buildNotificationTab(),
-                  _buildAudioTab(),
-                  _buildTaskTab(),
+                  _buildNotificationTab(l10n),
+                  _buildAudioTab(l10n),
+                  _buildTaskTab(l10n),
                 ],
               ),
             ),
-            _buildLogPanel(),
+            _buildLogPanel(l10n),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildNotificationTab() {
+  Widget _buildNotificationTab(AppLocalizations l10n) {
     final isWindows = Theme.of(context).platform == TargetPlatform.windows;
 
     return Padding(
@@ -211,8 +255,8 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                       const SizedBox(width: 8),
                       Text(
                         _notificationPermissionGranted
-                            ? 'Notification Permission Granted'
-                            : 'Notification Permission Not Granted',
+                            ? l10n.serviceTest_permissionGranted
+                            : l10n.serviceTest_permissionNotGranted,
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                     ],
@@ -222,7 +266,7 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                     ElevatedButton.icon(
                       onPressed: _requestNotificationPermission,
                       icon: const Icon(Icons.security),
-                      label: const Text('Request Permission'),
+                      label: Text(l10n.serviceTest_requestPermission),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
                         foregroundColor: Colors.white,
@@ -248,7 +292,7 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Windows Platform',
+                            l10n.serviceTest_windowsPlatform,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.blue.shade900,
@@ -256,8 +300,7 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Scheduled notifications will appear immediately on Windows. '
-                            'Use the Countdown Timer in the Task tab for timed notifications.',
+                            l10n.serviceTest_windowsNotice,
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.blue.shade900,
@@ -273,17 +316,17 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
           if (isWindows) const SizedBox(height: 16),
           TextField(
             controller: _notificationTitleController,
-            decoration: const InputDecoration(
-              labelText: 'Notification Title',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l10n.serviceTest_notificationTitle,
+              border: const OutlineInputBorder(),
             ),
           ),
           const SizedBox(height: 16),
           TextField(
             controller: _notificationBodyController,
-            decoration: const InputDecoration(
-              labelText: 'Notification Body',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l10n.serviceTest_notificationBody,
+              border: const OutlineInputBorder(),
             ),
             maxLines: 3,
           ),
@@ -295,17 +338,17 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
               ElevatedButton.icon(
                 onPressed: _showImmediateNotification,
                 icon: const Icon(Icons.send),
-                label: const Text('Show Now'),
+                label: Text(l10n.serviceTest_showNow),
               ),
               ElevatedButton.icon(
                 onPressed: _showScheduledNotification,
                 icon: const Icon(Icons.schedule),
-                label: const Text('Schedule (5s)'),
+                label: Text(l10n.serviceTest_schedule),
               ),
               ElevatedButton.icon(
                 onPressed: _cancelAllNotifications,
                 icon: const Icon(Icons.delete_sweep),
-                label: const Text('Cancel All'),
+                label: Text(l10n.serviceTest_cancelAll),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
                   foregroundColor: Colors.white,
@@ -313,12 +356,13 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
               ),
             ],
           ),
+          const SizedBox(height: 56), // 底部间距，留出空间给日志面板
         ],
       ),
     );
   }
 
-  Widget _buildAudioTab() {
+  Widget _buildAudioTab(AppLocalizations l10n) {
     final audioServiceAvailable = PlatformServiceManager.isServiceAvailable<IAudioService>();
 
     return Padding(
@@ -331,9 +375,9 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Test various audio playback features',
-                    style: TextStyle(fontSize: 16),
+                  Text(
+                    l10n.serviceTest_testAudioFeatures,
+                    style: const TextStyle(fontSize: 16),
                   ),
                   const SizedBox(height: 8),
                   if (!audioServiceAvailable)
@@ -349,8 +393,7 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'Audio service is not available on this platform. '
-                              'Some features may be disabled.',
+                              l10n.serviceTest_audioNotAvailable,
                               style: TextStyle(color: Colors.orange.shade900),
                             ),
                           ),
@@ -363,34 +406,39 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
           ),
           const SizedBox(height: 16),
           _buildSoundButton(
-            'Notification Sound',
+            l10n.serviceTest_notificationSound,
             Icons.notifications,
             SystemSoundType.notification,
             Colors.blue,
+            l10n,
           ),
           _buildSoundButton(
-            'Success Sound',
+            l10n.serviceTest_successSound,
             Icons.check_circle,
             SystemSoundType.success,
             Colors.green,
+            l10n,
           ),
           _buildSoundButton(
-            'Error Sound',
+            l10n.serviceTest_errorSound,
             Icons.error,
             SystemSoundType.error,
             Colors.red,
+            l10n,
           ),
           _buildSoundButton(
-            'Warning Sound',
+            l10n.serviceTest_warningSound,
             Icons.warning,
             SystemSoundType.warning,
             Colors.orange,
+            l10n,
           ),
           _buildSoundButton(
-            'Click Sound',
+            l10n.serviceTest_clickSound,
             Icons.touch_app,
             SystemSoundType.click,
             Colors.purple,
+            l10n,
           ),
           const SizedBox(height: 16),
           Card(
@@ -404,7 +452,7 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Global Volume'),
+                        Text(l10n.serviceTest_globalVolume),
                         Slider(
                           value: 0.8,
                           divisions: 10,
@@ -412,7 +460,7 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                           onChanged: PlatformServiceManager.isServiceAvailable<IAudioService>()
                               ? (value) {
                                   PlatformServiceManager.audio.setGlobalVolume(value);
-                                  _addLog('Volume set to ${(value * 100).toInt()}%');
+                                  _addLog(l10n.serviceTest_volumeSet((value * 100).toInt()));
                                 }
                               : null,
                         ),
@@ -428,16 +476,17 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
             onPressed: PlatformServiceManager.isServiceAvailable<IAudioService>()
                 ? () {
                     PlatformServiceManager.audio.stopAll();
-                    _addLog('Stopped all audio playback');
+                    _addLog(l10n.serviceTest_stoppedAllAudio);
                   }
                 : null,
             icon: const Icon(Icons.stop),
-            label: const Text('Stop All Audio'),
+            label: Text(l10n.serviceTest_stopAllAudio),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
           ),
+          const SizedBox(height: 56), // 底部间距，留出空间给日志面板
         ],
       ),
     );
@@ -448,6 +497,7 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
     IconData icon,
     SystemSoundType soundType,
     Color color,
+    AppLocalizations l10n,
   ) {
     return Card(
       child: ListTile(
@@ -458,21 +508,21 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
             ? () async {
                 try {
                   await PlatformServiceManager.audio.playSystemSound(soundType: soundType);
-                  _addLog('Played $label');
+                  _addLog('✅ ${l10n.serviceTest_copied}: $label');
                 } catch (e) {
-                  _addLog('Error playing $label: $e');
-                  _showErrorDialog('Error playing sound: $e');
+                  _addLog('❌ ${l10n.serviceTest_errorPlayingSound}: $e');
+                  _showErrorDialog('${l10n.serviceTest_errorPlayingSound}: $e', l10n);
                 }
               }
             : () {
-                _addLog('⚠️ Audio service is not available');
-                _showErrorDialog('Audio service is not available on this platform');
+                _addLog('⚠️ ${l10n.serviceTest_audioServiceUnavailable}');
+                _showErrorDialog(l10n.serviceTest_audioServiceNotAvailable, l10n);
               },
       ),
     );
   }
 
-  Widget _buildTaskTab() {
+  Widget _buildTaskTab(AppLocalizations l10n) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: ListView(
@@ -489,13 +539,13 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Countdown Timer',
+                          l10n.serviceTest_countdownTimer,
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                       ),
                       if (_activeCountdown != null)
                         Chip(
-                          label: Text('$_activeCountdown s'),
+                          label: Text('$_activeCountdown ${l10n.serviceTest_seconds}'),
                           backgroundColor: Colors.blue.shade100,
                         ),
                     ],
@@ -503,10 +553,10 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                   const SizedBox(height: 16),
                   TextField(
                     controller: _countdownSecondsController,
-                    decoration: const InputDecoration(
-                      labelText: 'Seconds',
-                      border: OutlineInputBorder(),
-                      suffixText: 's',
+                    decoration: InputDecoration(
+                      labelText: l10n.serviceTest_seconds,
+                      border: const OutlineInputBorder(),
+                      suffixText: l10n.serviceTest_seconds.substring(0, 1),
                     ),
                     keyboardType: TextInputType.number,
                   ),
@@ -520,14 +570,14 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                             ? _startCountdown
                             : null,
                         icon: const Icon(Icons.play_arrow),
-                        label: const Text('Start'),
+                        label: Text(l10n.serviceTest_start),
                       ),
                       ElevatedButton.icon(
                         onPressed: _activeCountdown != null
                             ? _cancelCountdown
                             : null,
                         icon: const Icon(Icons.cancel),
-                        label: const Text('Cancel'),
+                        label: Text(l10n.serviceTest_cancel),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.orange,
                           foregroundColor: Colors.white,
@@ -552,7 +602,7 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Periodic Task',
+                          l10n.serviceTest_periodicTask,
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                       ),
@@ -561,10 +611,10 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                   const SizedBox(height: 16),
                   TextField(
                     controller: _taskIntervalController,
-                    decoration: const InputDecoration(
-                      labelText: 'Interval',
-                      border: OutlineInputBorder(),
-                      suffixText: 's',
+                    decoration: InputDecoration(
+                      labelText: l10n.serviceTest_interval,
+                      border: const OutlineInputBorder(),
+                      suffixText: l10n.serviceTest_seconds.substring(0, 1),
                     ),
                     keyboardType: TextInputType.number,
                   ),
@@ -578,14 +628,14 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                             ? _startPeriodicTask
                             : null,
                         icon: const Icon(Icons.play_arrow),
-                        label: const Text('Start'),
+                        label: Text(l10n.serviceTest_start),
                       ),
                       ElevatedButton.icon(
                         onPressed: _activeTaskId != null
                             ? _cancelPeriodicTask
                             : null,
                         icon: const Icon(Icons.cancel),
-                        label: const Text('Stop'),
+                        label: Text(l10n.serviceTest_cancel),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.orange,
                           foregroundColor: Colors.white,
@@ -598,7 +648,11 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          Card(
+          // 去掉 Card 的白色背景，使用 Container 替代
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.transparent, // 透明背景
+            ),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -608,17 +662,17 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Active Tasks',
+                        l10n.serviceTest_activeTasks,
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
-                      Text('${_activeTasks.length} tasks'),
+                      Text('${_activeTasks.length} ${l10n.serviceTest_tasks}'),
                     ],
                   ),
                   const SizedBox(height: 8),
                   if (_activeTasks.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Text('No active tasks'),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(l10n.serviceTest_noActiveTasks),
                     )
                   else
                     ..._activeTasks.map((task) => ListTile(
@@ -626,14 +680,14 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                           title: Text(task.id),
                           subtitle: Text(
                               task.type == 'one_shot'
-                                  ? 'At ${task.scheduledTime}'
-                                  : 'Every ${task.interval}'),
+                                  ? '${l10n.serviceTest_at} ${task.scheduledTime}'
+                                  : '${l10n.serviceTest_every} ${task.interval}'),
                           trailing: IconButton(
                             icon: const Icon(Icons.cancel),
                             onPressed: () async {
                               await PlatformServiceManager.taskScheduler
                                   .cancelTask(task.id);
-                              _addLog('Cancelled task: ${task.id}');
+                              _addLog('✅ ${l10n.serviceTest_taskCancelled}: ${task.id}');
                               await _refreshActiveTasks();
                             },
                           ),
@@ -642,14 +696,16 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
               ),
             ),
           ),
+          const SizedBox(height: 56), // 底部间距，留出空间给日志面板
         ],
       ),
     );
   }
 
-  Widget _buildLogPanel() {
+  Widget _buildLogPanel(AppLocalizations l10n) {
     return Container(
-      height: 200,
+      height: 150, // 活动日志面板高度
+      margin: const EdgeInsets.only(top: 16), // 往下移动，与上方内容拉开距离
       decoration: BoxDecoration(
         color: Colors.grey.shade900,
         border: Border(top: BorderSide(color: Colors.grey.shade700)),
@@ -664,9 +720,9 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Activity Log',
-                  style: TextStyle(
+                Text(
+                  l10n.serviceTest_activityLog,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),
@@ -678,8 +734,8 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                     });
                   },
                   icon: const Icon(Icons.clear, size: 16, color: Colors.white70),
-                  label: const Text('Clear',
-                      style: TextStyle(color: Colors.white70)),
+                  label: Text(l10n.serviceTest_clear,
+                      style: const TextStyle(color: Colors.white70)),
                 ),
                 TextButton.icon(
                   onPressed: _logs.isEmpty
@@ -688,15 +744,15 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                           final logText = _logs.join('\n');
                           flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: logText));
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('All logs copied to clipboard'),
-                              duration: Duration(seconds: 2),
+                            SnackBar(
+                              content: Text(l10n.serviceTest_allLogsCopied),
+                              duration: const Duration(seconds: 2),
                             ),
                           );
                         },
                   icon: const Icon(Icons.copy_all, size: 16, color: Colors.white70),
-                  label: const Text('Copy All',
-                      style: TextStyle(color: Colors.white70)),
+                  label: Text(l10n.serviceTest_copyAll,
+                      style: const TextStyle(color: Colors.white70)),
                 ),
               ],
             ),
@@ -713,7 +769,7 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                     flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: _logs[index]));
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Log entry copied'),
+                        content: Text(l10n.serviceTest_logCopied),
                         duration: const Duration(seconds: 1),
                       ),
                     );
@@ -722,9 +778,9 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                     // Copy single log entry on long press
                     flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: _logs[index]));
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Log entry copied'),
-                        duration: Duration(seconds: 1),
+                      SnackBar(
+                        content: Text(l10n.serviceTest_logCopied),
+                        duration: const Duration(seconds: 1),
                       ),
                     );
                   },
@@ -751,15 +807,18 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
   }
 
   Future<void> _requestNotificationPermission() async {
+    final l10n = AppLocalizations.of(context)!;
     final granted = await PlatformServiceManager.notification
         .requestPermissions();
     setState(() {
       _notificationPermissionGranted = granted;
     });
-    _addLog('Notification permission ${granted ? "granted" : "denied"}');
+    _addLog(l10n.serviceTest_notificationPermission(
+        granted ? l10n.serviceTest_granted : l10n.serviceTest_denied));
   }
 
   Future<void> _showImmediateNotification() async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       await PlatformServiceManager.notification.showNotification(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -767,14 +826,15 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
         body: _notificationBodyController.text,
         priority: NotificationPriority.high,
       );
-      _addLog('✅ Notification shown');
+      _addLog('✅ ${l10n.serviceTest_notificationShown}');
     } catch (e) {
-      _addLog('❌ Error showing notification: $e');
-      _showErrorDialog('Error showing notification: $e');
+      _addLog('❌ ${l10n.serviceTest_errorShowingNotification}: $e');
+      _showErrorDialog('${l10n.serviceTest_errorShowingNotification}: $e', l10n);
     }
   }
 
   Future<void> _showScheduledNotification() async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       final scheduledTime = DateTime.now().add(const Duration(seconds: 5));
       await PlatformServiceManager.notification.scheduleNotification(
@@ -784,27 +844,29 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
         scheduledTime: scheduledTime,
         priority: NotificationPriority.high,
       );
-      _addLog('✅ Notification scheduled for 5 seconds from now');
+      _addLog('✅ ${l10n.serviceTest_notificationScheduled}');
     } catch (e) {
-      _addLog('❌ Error scheduling notification: $e');
-      _showErrorDialog('Error scheduling notification: $e');
+      _addLog('❌ ${l10n.serviceTest_errorSchedulingNotification}: $e');
+      _showErrorDialog('${l10n.serviceTest_errorSchedulingNotification}: $e', l10n);
     }
   }
 
   Future<void> _cancelAllNotifications() async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       await PlatformServiceManager.notification.cancelAllNotifications();
-      _addLog('✅ All notifications cancelled');
+      _addLog('✅ ${l10n.serviceTest_allNotificationsCancelled}');
     } catch (e) {
-      _addLog('❌ Error cancelling notifications: $e');
-      _showErrorDialog('Error cancelling notifications: $e');
+      _addLog('❌ ${l10n.serviceTest_errorCancellingNotifications}: $e');
+      _showErrorDialog('${l10n.serviceTest_errorCancellingNotifications}: $e', l10n);
     }
   }
 
   Future<void> _startCountdown() async {
+    final l10n = AppLocalizations.of(context)!;
     final seconds = int.tryParse(_countdownSecondsController.text);
     if (seconds == null || seconds < 1) {
-      _showErrorDialog('Please enter a valid number of seconds');
+      _showErrorDialog(l10n.serviceTest_enterValidSeconds, l10n);
       return;
     }
 
@@ -822,15 +884,15 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
               await PlatformServiceManager.audio
                   .playSystemSound(soundType: SystemSoundType.notification);
             } catch (e) {
-              _addLog('⚠️ Could not play sound: $e');
+              _addLog('⚠️ ${l10n.serviceTest_couldNotPlaySound}: $e');
             }
           }
 
           // Show notification
           await PlatformServiceManager.notification.showNotification(
             id: DateTime.now().millisecondsSinceEpoch.toString(),
-            title: 'Countdown Complete!',
-            body: 'Your countdown has finished.',
+            title: l10n.serviceTest_countdownComplete,
+            body: l10n.serviceTest_countdownFinished,
             priority: NotificationPriority.high,
           );
 
@@ -844,7 +906,7 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
         _activeCountdown = seconds;
       });
 
-      _addLog('✅ Countdown started: $seconds seconds');
+      _addLog('✅ ${l10n.serviceTest_countdownStarted(seconds)}');
 
       // Update countdown display
       for (int i = seconds; i > 0; i--) {
@@ -858,12 +920,13 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
         }
       }
     } catch (e) {
-      _addLog('❌ Error starting countdown: $e');
-      _showErrorDialog('Error starting countdown: $e');
+      _addLog('❌ ${l10n.serviceTest_errorStartingCountdown}: $e');
+      _showErrorDialog('${l10n.serviceTest_errorStartingCountdown}: $e', l10n);
     }
   }
 
   Future<void> _cancelCountdown() async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       // Cancel all countdown tasks
       final tasks = await PlatformServiceManager.taskScheduler.getActiveTasks();
@@ -877,17 +940,18 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
         _activeCountdown = null;
       });
 
-      _addLog('✅ Countdown cancelled');
+      _addLog('✅ ${l10n.serviceTest_countdownCancelled}');
     } catch (e) {
-      _addLog('❌ Error cancelling countdown: $e');
-      _showErrorDialog('Error cancelling countdown: $e');
+      _addLog('❌ ${l10n.serviceTest_errorCancellingCountdown}: $e');
+      _showErrorDialog('${l10n.serviceTest_errorCancellingCountdown}: $e', l10n);
     }
   }
 
   Future<void> _startPeriodicTask() async {
+    final l10n = AppLocalizations.of(context)!;
     final interval = int.tryParse(_taskIntervalController.text);
     if (interval == null || interval < 1) {
-      _showErrorDialog('Please enter a valid interval');
+      _showErrorDialog(l10n.serviceTest_enterValidInterval, l10n);
       return;
     }
 
@@ -903,10 +967,10 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
               await PlatformServiceManager.audio
                   .playSystemSound(soundType: SystemSoundType.click);
             } catch (e) {
-              _addLog('⚠️ Could not play sound: $e');
+              _addLog('⚠️ ${l10n.serviceTest_couldNotPlaySound}: $e');
             }
           }
-          _addLog('🔄 Periodic task executed');
+          _addLog('🔄 ${l10n.serviceTest_periodicTaskExecuted}');
         },
       );
 
@@ -915,14 +979,15 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
       });
 
       await _refreshActiveTasks();
-      _addLog('✅ Periodic task started: every $interval seconds');
+      _addLog('✅ ${l10n.serviceTest_periodicTaskStarted(interval)}');
     } catch (e) {
-      _addLog('❌ Error starting periodic task: $e');
-      _showErrorDialog('Error starting periodic task: $e');
+      _addLog('❌ ${l10n.serviceTest_errorStartingPeriodicTask}: $e');
+      _showErrorDialog('${l10n.serviceTest_errorStartingPeriodicTask}: $e', l10n);
     }
   }
 
   Future<void> _cancelPeriodicTask() async {
+    final l10n = AppLocalizations.of(context)!;
     if (_activeTaskId == null) return;
 
     try {
@@ -933,18 +998,18 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
       });
 
       await _refreshActiveTasks();
-      _addLog('✅ Periodic task cancelled');
+      _addLog('✅ ${l10n.serviceTest_periodicTaskCancelled}');
     } catch (e) {
-      _addLog('❌ Error cancelling periodic task: $e');
-      _showErrorDialog('Error cancelling periodic task: $e');
+      _addLog('❌ ${l10n.serviceTest_errorCancellingPeriodicTask}: $e');
+      _showErrorDialog('${l10n.serviceTest_errorCancellingPeriodicTask}: $e', l10n);
     }
   }
 
-  void _showErrorDialog(String message) {
+  void _showErrorDialog(String message, AppLocalizations l10n) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Error'),
+        title: Text(l10n.serviceTest_error),
         content: SelectionArea(
           child: Text(message),
         ),
@@ -953,14 +1018,14 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
             onPressed: () {
               flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: message));
               Navigator.of(context).pop();
-              _addLog('✅ Error message copied to clipboard');
+              _addLog('✅ ${l10n.serviceTest_errorMessage}');
             },
             icon: const Icon(Icons.copy),
-            label: const Text('Copy'),
+            label: Text(l10n.serviceTest_copy),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+            child: Text(l10n.common_ok),
           ),
         ],
       ),

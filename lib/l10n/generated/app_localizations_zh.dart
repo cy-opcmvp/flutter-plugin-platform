@@ -500,6 +500,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get nav_info => '信息';
 
   @override
+  String get settings_title => '设置';
+
+  @override
   String get settings_language => '语言设置';
 
   @override
@@ -510,6 +513,17 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_languageEnglish => 'English';
+
+  @override
+  String get settings_currentLanguage => '当前语言';
+
+  @override
+  String get settings_changeLanguage => '更改语言';
+
+  @override
+  String settings_languageChanged(String language) {
+    return '语言已更改为 $language';
+  }
 
   @override
   String get plugin_detailsTitle => '插件详情';
@@ -1006,4 +1020,241 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get plugin_worldclock_description => '显示多个时区的时间，支持倒计时提醒功能，默认显示北京时间';
+
+  @override
+  String get serviceTest_title => '平台服务测试';
+
+  @override
+  String get serviceTest_notifications => '通知';
+
+  @override
+  String get serviceTest_audio => '音频';
+
+  @override
+  String get serviceTest_tasks => '任务';
+
+  @override
+  String get serviceTest_activityLog => '活动日志';
+
+  @override
+  String get serviceTest_clear => '清空';
+
+  @override
+  String get serviceTest_copyAll => '复制全部';
+
+  @override
+  String get serviceTest_copied => '已复制';
+
+  @override
+  String get serviceTest_logCopied => '日志已复制到剪贴板';
+
+  @override
+  String get serviceTest_allLogsCopied => '所有日志已复制到剪贴板';
+
+  @override
+  String get serviceTest_permissionGranted => '通知权限已授予';
+
+  @override
+  String get serviceTest_permissionNotGranted => '通知权限未授予';
+
+  @override
+  String get serviceTest_requestPermission => '请求权限';
+
+  @override
+  String get serviceTest_windowsPlatform => 'Windows 平台';
+
+  @override
+  String get serviceTest_windowsNotice =>
+      '计划通知将在 Windows 上立即显示。请使用任务标签页中的倒计时定时器来实现定时通知。';
+
+  @override
+  String get serviceTest_notificationTitle => '通知标题';
+
+  @override
+  String get serviceTest_notificationBody => '通知内容';
+
+  @override
+  String get serviceTest_defaultNotificationTitle => '测试通知';
+
+  @override
+  String get serviceTest_defaultNotificationBody => '这是来自平台服务的测试通知！';
+
+  @override
+  String get serviceTest_showNow => '立即显示';
+
+  @override
+  String get serviceTest_schedule => '计划 (5秒)';
+
+  @override
+  String get serviceTest_cancelAll => '全部取消';
+
+  @override
+  String get serviceTest_testAudioFeatures => '测试各种音频播放功能';
+
+  @override
+  String get serviceTest_audioNotAvailable => '此平台上音频服务不可用。某些功能可能被禁用。';
+
+  @override
+  String get serviceTest_notificationSound => '通知音效';
+
+  @override
+  String get serviceTest_successSound => '成功音效';
+
+  @override
+  String get serviceTest_errorSound => '错误音效';
+
+  @override
+  String get serviceTest_warningSound => '警告音效';
+
+  @override
+  String get serviceTest_clickSound => '点击音效';
+
+  @override
+  String get serviceTest_globalVolume => '全局音量';
+
+  @override
+  String get serviceTest_stopAllAudio => '停止所有音频';
+
+  @override
+  String get serviceTest_countdownTimer => '倒计时定时器';
+
+  @override
+  String get serviceTest_seconds => '秒';
+
+  @override
+  String get serviceTest_start => '开始';
+
+  @override
+  String get serviceTest_cancel => '取消';
+
+  @override
+  String get serviceTest_periodicTask => '周期性任务';
+
+  @override
+  String get serviceTest_interval => '间隔';
+
+  @override
+  String get serviceTest_activeTasks => '活动任务';
+
+  @override
+  String get serviceTest_noActiveTasks => '没有活动任务';
+
+  @override
+  String get serviceTest_at => '在';
+
+  @override
+  String get serviceTest_every => '每';
+
+  @override
+  String get serviceTest_countdownComplete => '倒计时完成！';
+
+  @override
+  String get serviceTest_countdownFinished => '您的倒计时已结束。';
+
+  @override
+  String get serviceTest_error => '错误';
+
+  @override
+  String get serviceTest_errorPlayingSound => '播放音效时出错';
+
+  @override
+  String get serviceTest_audioServiceNotAvailable => '音频服务在此平台上不可用';
+
+  @override
+  String get serviceTest_enterValidSeconds => '请输入有效的秒数';
+
+  @override
+  String get serviceTest_enterValidInterval => '请输入有效的间隔';
+
+  @override
+  String get serviceTest_notificationShown => '通知已显示';
+
+  @override
+  String get serviceTest_errorShowingNotification => '显示通知时出错';
+
+  @override
+  String get serviceTest_notificationScheduled => '通知已计划在 5 秒后显示';
+
+  @override
+  String get serviceTest_errorSchedulingNotification => '计划通知时出错';
+
+  @override
+  String get serviceTest_allNotificationsCancelled => '所有通知已取消';
+
+  @override
+  String get serviceTest_errorCancellingNotifications => '取消通知时出错';
+
+  @override
+  String serviceTest_countdownStarted(Object seconds) {
+    return '倒计时已开始：$seconds 秒';
+  }
+
+  @override
+  String get serviceTest_errorStartingCountdown => '启动倒计时出错';
+
+  @override
+  String get serviceTest_countdownCancelled => '倒计时已取消';
+
+  @override
+  String get serviceTest_errorCancellingCountdown => '取消倒计时出错';
+
+  @override
+  String serviceTest_periodicTaskStarted(Object interval) {
+    return '周期性任务已启动：每 $interval 秒';
+  }
+
+  @override
+  String get serviceTest_errorStartingPeriodicTask => '启动周期性任务出错';
+
+  @override
+  String get serviceTest_periodicTaskCancelled => '周期性任务已取消';
+
+  @override
+  String get serviceTest_errorCancellingPeriodicTask => '取消周期性任务出错';
+
+  @override
+  String get serviceTest_periodicTaskExecuted => '周期性任务已执行';
+
+  @override
+  String get serviceTest_taskCompleted => '任务已完成';
+
+  @override
+  String get serviceTest_taskFailed => '任务失败';
+
+  @override
+  String get serviceTest_taskCancelled => '任务已取消';
+
+  @override
+  String get serviceTest_couldNotPlaySound => '无法播放音效';
+
+  @override
+  String serviceTest_volumeSet(Object percent) {
+    return '音量设置为 $percent%';
+  }
+
+  @override
+  String get serviceTest_stoppedAllAudio => '已停止所有音频播放';
+
+  @override
+  String serviceTest_notificationPermission(Object status) {
+    return '通知权限 $status';
+  }
+
+  @override
+  String get serviceTest_granted => '已授予';
+
+  @override
+  String get serviceTest_denied => '已拒绝';
+
+  @override
+  String get serviceTest_audioServiceUnavailable => '音频服务不可用';
+
+  @override
+  String get serviceTest_serviceTestInitialized => '服务测试屏幕已初始化';
+
+  @override
+  String get serviceTest_errorMessage => '错误信息';
+
+  @override
+  String get serviceTest_copy => '复制';
 }

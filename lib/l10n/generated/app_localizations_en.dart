@@ -511,6 +511,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nav_info => 'Info';
 
   @override
+  String get settings_title => 'Settings';
+
+  @override
   String get settings_language => 'Language';
 
   @override
@@ -521,6 +524,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_languageEnglish => 'English';
+
+  @override
+  String get settings_currentLanguage => 'Current Language';
+
+  @override
+  String get settings_changeLanguage => 'Change Language';
+
+  @override
+  String settings_languageChanged(String language) {
+    return 'Language changed to $language';
+  }
 
   @override
   String get plugin_detailsTitle => 'Plugin Details';
@@ -1036,4 +1050,257 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get plugin_worldclock_description =>
       'Display times from multiple time zones with countdown timer support, showing Beijing time by default';
+
+  @override
+  String get serviceTest_title => 'Platform Services Test';
+
+  @override
+  String get serviceTest_notifications => 'Notifications';
+
+  @override
+  String get serviceTest_audio => 'Audio';
+
+  @override
+  String get serviceTest_tasks => 'tasks';
+
+  @override
+  String get serviceTest_activityLog => 'Activity Log';
+
+  @override
+  String get serviceTest_clear => 'Clear';
+
+  @override
+  String get serviceTest_copyAll => 'Copy All';
+
+  @override
+  String get serviceTest_copied => 'Copied';
+
+  @override
+  String get serviceTest_logCopied => 'Log entry copied to clipboard';
+
+  @override
+  String get serviceTest_allLogsCopied => 'All logs copied to clipboard';
+
+  @override
+  String get serviceTest_permissionGranted => 'Notification Permission Granted';
+
+  @override
+  String get serviceTest_permissionNotGranted =>
+      'Notification Permission Not Granted';
+
+  @override
+  String get serviceTest_requestPermission => 'Request Permission';
+
+  @override
+  String get serviceTest_windowsPlatform => 'Windows Platform';
+
+  @override
+  String get serviceTest_windowsNotice =>
+      'Scheduled notifications will appear immediately on Windows. Use the Countdown Timer in the Task tab for timed notifications.';
+
+  @override
+  String get serviceTest_notificationTitle => 'Notification Title';
+
+  @override
+  String get serviceTest_notificationBody => 'Notification Body';
+
+  @override
+  String get serviceTest_defaultNotificationTitle => 'Test Notification';
+
+  @override
+  String get serviceTest_defaultNotificationBody =>
+      'This is a test notification from the platform services!';
+
+  @override
+  String get serviceTest_showNow => 'Show Now';
+
+  @override
+  String get serviceTest_schedule => 'Schedule (5s)';
+
+  @override
+  String get serviceTest_cancelAll => 'Cancel All';
+
+  @override
+  String get serviceTest_testAudioFeatures =>
+      'Test various audio playback features';
+
+  @override
+  String get serviceTest_audioNotAvailable =>
+      'Audio service is not available on this platform. Some features may be disabled.';
+
+  @override
+  String get serviceTest_notificationSound => 'Notification Sound';
+
+  @override
+  String get serviceTest_successSound => 'Success Sound';
+
+  @override
+  String get serviceTest_errorSound => 'Error Sound';
+
+  @override
+  String get serviceTest_warningSound => 'Warning Sound';
+
+  @override
+  String get serviceTest_clickSound => 'Click Sound';
+
+  @override
+  String get serviceTest_globalVolume => 'Global Volume';
+
+  @override
+  String get serviceTest_stopAllAudio => 'Stop All Audio';
+
+  @override
+  String get serviceTest_countdownTimer => 'Countdown Timer';
+
+  @override
+  String get serviceTest_seconds => 'Seconds';
+
+  @override
+  String get serviceTest_start => 'Start';
+
+  @override
+  String get serviceTest_cancel => 'Cancel';
+
+  @override
+  String get serviceTest_periodicTask => 'Periodic Task';
+
+  @override
+  String get serviceTest_interval => 'Interval';
+
+  @override
+  String get serviceTest_activeTasks => 'Active Tasks';
+
+  @override
+  String get serviceTest_noActiveTasks => 'No active tasks';
+
+  @override
+  String get serviceTest_at => 'At';
+
+  @override
+  String get serviceTest_every => 'Every';
+
+  @override
+  String get serviceTest_countdownComplete => 'Countdown Complete!';
+
+  @override
+  String get serviceTest_countdownFinished => 'Your countdown has finished.';
+
+  @override
+  String get serviceTest_error => 'Error';
+
+  @override
+  String get serviceTest_errorPlayingSound => 'Error playing sound';
+
+  @override
+  String get serviceTest_audioServiceNotAvailable =>
+      'Audio service is not available on this platform';
+
+  @override
+  String get serviceTest_enterValidSeconds =>
+      'Please enter a valid number of seconds';
+
+  @override
+  String get serviceTest_enterValidInterval => 'Please enter a valid interval';
+
+  @override
+  String get serviceTest_notificationShown => 'Notification shown';
+
+  @override
+  String get serviceTest_errorShowingNotification =>
+      'Error showing notification';
+
+  @override
+  String get serviceTest_notificationScheduled =>
+      'Notification scheduled for 5 seconds from now';
+
+  @override
+  String get serviceTest_errorSchedulingNotification =>
+      'Error scheduling notification';
+
+  @override
+  String get serviceTest_allNotificationsCancelled =>
+      'All notifications cancelled';
+
+  @override
+  String get serviceTest_errorCancellingNotifications =>
+      'Error cancelling notifications';
+
+  @override
+  String serviceTest_countdownStarted(Object seconds) {
+    return 'Countdown started: $seconds seconds';
+  }
+
+  @override
+  String get serviceTest_errorStartingCountdown => 'Error starting countdown';
+
+  @override
+  String get serviceTest_countdownCancelled => 'Countdown cancelled';
+
+  @override
+  String get serviceTest_errorCancellingCountdown =>
+      'Error cancelling countdown';
+
+  @override
+  String serviceTest_periodicTaskStarted(Object interval) {
+    return 'Periodic task started: every $interval seconds';
+  }
+
+  @override
+  String get serviceTest_errorStartingPeriodicTask =>
+      'Error starting periodic task';
+
+  @override
+  String get serviceTest_periodicTaskCancelled => 'Periodic task cancelled';
+
+  @override
+  String get serviceTest_errorCancellingPeriodicTask =>
+      'Error cancelling periodic task';
+
+  @override
+  String get serviceTest_periodicTaskExecuted => 'Periodic task executed';
+
+  @override
+  String get serviceTest_taskCompleted => 'Task completed';
+
+  @override
+  String get serviceTest_taskFailed => 'Task failed';
+
+  @override
+  String get serviceTest_taskCancelled => 'Task cancelled';
+
+  @override
+  String get serviceTest_couldNotPlaySound => 'Could not play sound';
+
+  @override
+  String serviceTest_volumeSet(Object percent) {
+    return 'Volume set to $percent%';
+  }
+
+  @override
+  String get serviceTest_stoppedAllAudio => 'Stopped all audio playback';
+
+  @override
+  String serviceTest_notificationPermission(Object status) {
+    return 'Notification permission $status';
+  }
+
+  @override
+  String get serviceTest_granted => 'granted';
+
+  @override
+  String get serviceTest_denied => 'denied';
+
+  @override
+  String get serviceTest_audioServiceUnavailable =>
+      'Audio service is not available';
+
+  @override
+  String get serviceTest_serviceTestInitialized =>
+      'Service Test Screen initialized';
+
+  @override
+  String get serviceTest_errorMessage => 'Error message';
+
+  @override
+  String get serviceTest_copy => 'Copy';
 }

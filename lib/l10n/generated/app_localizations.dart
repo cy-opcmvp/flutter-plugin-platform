@@ -956,6 +956,12 @@ abstract class AppLocalizations {
   /// **'信息'**
   String get nav_info;
 
+  /// No description provided for @settings_title.
+  ///
+  /// In zh, this message translates to:
+  /// **'设置'**
+  String get settings_title;
+
   /// No description provided for @settings_language.
   ///
   /// In zh, this message translates to:
@@ -979,6 +985,24 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'English'**
   String get settings_languageEnglish;
+
+  /// No description provided for @settings_currentLanguage.
+  ///
+  /// In zh, this message translates to:
+  /// **'当前语言'**
+  String get settings_currentLanguage;
+
+  /// No description provided for @settings_changeLanguage.
+  ///
+  /// In zh, this message translates to:
+  /// **'更改语言'**
+  String get settings_changeLanguage;
+
+  /// No description provided for @settings_languageChanged.
+  ///
+  /// In zh, this message translates to:
+  /// **'语言已更改为 {language}'**
+  String settings_languageChanged(String language);
 
   /// No description provided for @plugin_detailsTitle.
   ///
@@ -1915,6 +1939,462 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'显示多个时区的时间，支持倒计时提醒功能，默认显示北京时间'**
   String get plugin_worldclock_description;
+
+  /// No description provided for @serviceTest_title.
+  ///
+  /// In zh, this message translates to:
+  /// **'平台服务测试'**
+  String get serviceTest_title;
+
+  /// No description provided for @serviceTest_notifications.
+  ///
+  /// In zh, this message translates to:
+  /// **'通知'**
+  String get serviceTest_notifications;
+
+  /// No description provided for @serviceTest_audio.
+  ///
+  /// In zh, this message translates to:
+  /// **'音频'**
+  String get serviceTest_audio;
+
+  /// No description provided for @serviceTest_tasks.
+  ///
+  /// In zh, this message translates to:
+  /// **'任务'**
+  String get serviceTest_tasks;
+
+  /// No description provided for @serviceTest_activityLog.
+  ///
+  /// In zh, this message translates to:
+  /// **'活动日志'**
+  String get serviceTest_activityLog;
+
+  /// No description provided for @serviceTest_clear.
+  ///
+  /// In zh, this message translates to:
+  /// **'清空'**
+  String get serviceTest_clear;
+
+  /// No description provided for @serviceTest_copyAll.
+  ///
+  /// In zh, this message translates to:
+  /// **'复制全部'**
+  String get serviceTest_copyAll;
+
+  /// No description provided for @serviceTest_copied.
+  ///
+  /// In zh, this message translates to:
+  /// **'已复制'**
+  String get serviceTest_copied;
+
+  /// No description provided for @serviceTest_logCopied.
+  ///
+  /// In zh, this message translates to:
+  /// **'日志已复制到剪贴板'**
+  String get serviceTest_logCopied;
+
+  /// No description provided for @serviceTest_allLogsCopied.
+  ///
+  /// In zh, this message translates to:
+  /// **'所有日志已复制到剪贴板'**
+  String get serviceTest_allLogsCopied;
+
+  /// No description provided for @serviceTest_permissionGranted.
+  ///
+  /// In zh, this message translates to:
+  /// **'通知权限已授予'**
+  String get serviceTest_permissionGranted;
+
+  /// No description provided for @serviceTest_permissionNotGranted.
+  ///
+  /// In zh, this message translates to:
+  /// **'通知权限未授予'**
+  String get serviceTest_permissionNotGranted;
+
+  /// No description provided for @serviceTest_requestPermission.
+  ///
+  /// In zh, this message translates to:
+  /// **'请求权限'**
+  String get serviceTest_requestPermission;
+
+  /// No description provided for @serviceTest_windowsPlatform.
+  ///
+  /// In zh, this message translates to:
+  /// **'Windows 平台'**
+  String get serviceTest_windowsPlatform;
+
+  /// No description provided for @serviceTest_windowsNotice.
+  ///
+  /// In zh, this message translates to:
+  /// **'计划通知将在 Windows 上立即显示。请使用任务标签页中的倒计时定时器来实现定时通知。'**
+  String get serviceTest_windowsNotice;
+
+  /// No description provided for @serviceTest_notificationTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'通知标题'**
+  String get serviceTest_notificationTitle;
+
+  /// No description provided for @serviceTest_notificationBody.
+  ///
+  /// In zh, this message translates to:
+  /// **'通知内容'**
+  String get serviceTest_notificationBody;
+
+  /// No description provided for @serviceTest_defaultNotificationTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'测试通知'**
+  String get serviceTest_defaultNotificationTitle;
+
+  /// No description provided for @serviceTest_defaultNotificationBody.
+  ///
+  /// In zh, this message translates to:
+  /// **'这是来自平台服务的测试通知！'**
+  String get serviceTest_defaultNotificationBody;
+
+  /// No description provided for @serviceTest_showNow.
+  ///
+  /// In zh, this message translates to:
+  /// **'立即显示'**
+  String get serviceTest_showNow;
+
+  /// No description provided for @serviceTest_schedule.
+  ///
+  /// In zh, this message translates to:
+  /// **'计划 (5秒)'**
+  String get serviceTest_schedule;
+
+  /// No description provided for @serviceTest_cancelAll.
+  ///
+  /// In zh, this message translates to:
+  /// **'全部取消'**
+  String get serviceTest_cancelAll;
+
+  /// No description provided for @serviceTest_testAudioFeatures.
+  ///
+  /// In zh, this message translates to:
+  /// **'测试各种音频播放功能'**
+  String get serviceTest_testAudioFeatures;
+
+  /// No description provided for @serviceTest_audioNotAvailable.
+  ///
+  /// In zh, this message translates to:
+  /// **'此平台上音频服务不可用。某些功能可能被禁用。'**
+  String get serviceTest_audioNotAvailable;
+
+  /// No description provided for @serviceTest_notificationSound.
+  ///
+  /// In zh, this message translates to:
+  /// **'通知音效'**
+  String get serviceTest_notificationSound;
+
+  /// No description provided for @serviceTest_successSound.
+  ///
+  /// In zh, this message translates to:
+  /// **'成功音效'**
+  String get serviceTest_successSound;
+
+  /// No description provided for @serviceTest_errorSound.
+  ///
+  /// In zh, this message translates to:
+  /// **'错误音效'**
+  String get serviceTest_errorSound;
+
+  /// No description provided for @serviceTest_warningSound.
+  ///
+  /// In zh, this message translates to:
+  /// **'警告音效'**
+  String get serviceTest_warningSound;
+
+  /// No description provided for @serviceTest_clickSound.
+  ///
+  /// In zh, this message translates to:
+  /// **'点击音效'**
+  String get serviceTest_clickSound;
+
+  /// No description provided for @serviceTest_globalVolume.
+  ///
+  /// In zh, this message translates to:
+  /// **'全局音量'**
+  String get serviceTest_globalVolume;
+
+  /// No description provided for @serviceTest_stopAllAudio.
+  ///
+  /// In zh, this message translates to:
+  /// **'停止所有音频'**
+  String get serviceTest_stopAllAudio;
+
+  /// No description provided for @serviceTest_countdownTimer.
+  ///
+  /// In zh, this message translates to:
+  /// **'倒计时定时器'**
+  String get serviceTest_countdownTimer;
+
+  /// No description provided for @serviceTest_seconds.
+  ///
+  /// In zh, this message translates to:
+  /// **'秒'**
+  String get serviceTest_seconds;
+
+  /// No description provided for @serviceTest_start.
+  ///
+  /// In zh, this message translates to:
+  /// **'开始'**
+  String get serviceTest_start;
+
+  /// No description provided for @serviceTest_cancel.
+  ///
+  /// In zh, this message translates to:
+  /// **'取消'**
+  String get serviceTest_cancel;
+
+  /// No description provided for @serviceTest_periodicTask.
+  ///
+  /// In zh, this message translates to:
+  /// **'周期性任务'**
+  String get serviceTest_periodicTask;
+
+  /// No description provided for @serviceTest_interval.
+  ///
+  /// In zh, this message translates to:
+  /// **'间隔'**
+  String get serviceTest_interval;
+
+  /// No description provided for @serviceTest_activeTasks.
+  ///
+  /// In zh, this message translates to:
+  /// **'活动任务'**
+  String get serviceTest_activeTasks;
+
+  /// No description provided for @serviceTest_noActiveTasks.
+  ///
+  /// In zh, this message translates to:
+  /// **'没有活动任务'**
+  String get serviceTest_noActiveTasks;
+
+  /// No description provided for @serviceTest_at.
+  ///
+  /// In zh, this message translates to:
+  /// **'在'**
+  String get serviceTest_at;
+
+  /// No description provided for @serviceTest_every.
+  ///
+  /// In zh, this message translates to:
+  /// **'每'**
+  String get serviceTest_every;
+
+  /// No description provided for @serviceTest_countdownComplete.
+  ///
+  /// In zh, this message translates to:
+  /// **'倒计时完成！'**
+  String get serviceTest_countdownComplete;
+
+  /// No description provided for @serviceTest_countdownFinished.
+  ///
+  /// In zh, this message translates to:
+  /// **'您的倒计时已结束。'**
+  String get serviceTest_countdownFinished;
+
+  /// No description provided for @serviceTest_error.
+  ///
+  /// In zh, this message translates to:
+  /// **'错误'**
+  String get serviceTest_error;
+
+  /// No description provided for @serviceTest_errorPlayingSound.
+  ///
+  /// In zh, this message translates to:
+  /// **'播放音效时出错'**
+  String get serviceTest_errorPlayingSound;
+
+  /// No description provided for @serviceTest_audioServiceNotAvailable.
+  ///
+  /// In zh, this message translates to:
+  /// **'音频服务在此平台上不可用'**
+  String get serviceTest_audioServiceNotAvailable;
+
+  /// No description provided for @serviceTest_enterValidSeconds.
+  ///
+  /// In zh, this message translates to:
+  /// **'请输入有效的秒数'**
+  String get serviceTest_enterValidSeconds;
+
+  /// No description provided for @serviceTest_enterValidInterval.
+  ///
+  /// In zh, this message translates to:
+  /// **'请输入有效的间隔'**
+  String get serviceTest_enterValidInterval;
+
+  /// No description provided for @serviceTest_notificationShown.
+  ///
+  /// In zh, this message translates to:
+  /// **'通知已显示'**
+  String get serviceTest_notificationShown;
+
+  /// No description provided for @serviceTest_errorShowingNotification.
+  ///
+  /// In zh, this message translates to:
+  /// **'显示通知时出错'**
+  String get serviceTest_errorShowingNotification;
+
+  /// No description provided for @serviceTest_notificationScheduled.
+  ///
+  /// In zh, this message translates to:
+  /// **'通知已计划在 5 秒后显示'**
+  String get serviceTest_notificationScheduled;
+
+  /// No description provided for @serviceTest_errorSchedulingNotification.
+  ///
+  /// In zh, this message translates to:
+  /// **'计划通知时出错'**
+  String get serviceTest_errorSchedulingNotification;
+
+  /// No description provided for @serviceTest_allNotificationsCancelled.
+  ///
+  /// In zh, this message translates to:
+  /// **'所有通知已取消'**
+  String get serviceTest_allNotificationsCancelled;
+
+  /// No description provided for @serviceTest_errorCancellingNotifications.
+  ///
+  /// In zh, this message translates to:
+  /// **'取消通知时出错'**
+  String get serviceTest_errorCancellingNotifications;
+
+  /// No description provided for @serviceTest_countdownStarted.
+  ///
+  /// In zh, this message translates to:
+  /// **'倒计时已开始：{seconds} 秒'**
+  String serviceTest_countdownStarted(Object seconds);
+
+  /// No description provided for @serviceTest_errorStartingCountdown.
+  ///
+  /// In zh, this message translates to:
+  /// **'启动倒计时出错'**
+  String get serviceTest_errorStartingCountdown;
+
+  /// No description provided for @serviceTest_countdownCancelled.
+  ///
+  /// In zh, this message translates to:
+  /// **'倒计时已取消'**
+  String get serviceTest_countdownCancelled;
+
+  /// No description provided for @serviceTest_errorCancellingCountdown.
+  ///
+  /// In zh, this message translates to:
+  /// **'取消倒计时出错'**
+  String get serviceTest_errorCancellingCountdown;
+
+  /// No description provided for @serviceTest_periodicTaskStarted.
+  ///
+  /// In zh, this message translates to:
+  /// **'周期性任务已启动：每 {interval} 秒'**
+  String serviceTest_periodicTaskStarted(Object interval);
+
+  /// No description provided for @serviceTest_errorStartingPeriodicTask.
+  ///
+  /// In zh, this message translates to:
+  /// **'启动周期性任务出错'**
+  String get serviceTest_errorStartingPeriodicTask;
+
+  /// No description provided for @serviceTest_periodicTaskCancelled.
+  ///
+  /// In zh, this message translates to:
+  /// **'周期性任务已取消'**
+  String get serviceTest_periodicTaskCancelled;
+
+  /// No description provided for @serviceTest_errorCancellingPeriodicTask.
+  ///
+  /// In zh, this message translates to:
+  /// **'取消周期性任务出错'**
+  String get serviceTest_errorCancellingPeriodicTask;
+
+  /// No description provided for @serviceTest_periodicTaskExecuted.
+  ///
+  /// In zh, this message translates to:
+  /// **'周期性任务已执行'**
+  String get serviceTest_periodicTaskExecuted;
+
+  /// No description provided for @serviceTest_taskCompleted.
+  ///
+  /// In zh, this message translates to:
+  /// **'任务已完成'**
+  String get serviceTest_taskCompleted;
+
+  /// No description provided for @serviceTest_taskFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'任务失败'**
+  String get serviceTest_taskFailed;
+
+  /// No description provided for @serviceTest_taskCancelled.
+  ///
+  /// In zh, this message translates to:
+  /// **'任务已取消'**
+  String get serviceTest_taskCancelled;
+
+  /// No description provided for @serviceTest_couldNotPlaySound.
+  ///
+  /// In zh, this message translates to:
+  /// **'无法播放音效'**
+  String get serviceTest_couldNotPlaySound;
+
+  /// No description provided for @serviceTest_volumeSet.
+  ///
+  /// In zh, this message translates to:
+  /// **'音量设置为 {percent}%'**
+  String serviceTest_volumeSet(Object percent);
+
+  /// No description provided for @serviceTest_stoppedAllAudio.
+  ///
+  /// In zh, this message translates to:
+  /// **'已停止所有音频播放'**
+  String get serviceTest_stoppedAllAudio;
+
+  /// No description provided for @serviceTest_notificationPermission.
+  ///
+  /// In zh, this message translates to:
+  /// **'通知权限 {status}'**
+  String serviceTest_notificationPermission(Object status);
+
+  /// No description provided for @serviceTest_granted.
+  ///
+  /// In zh, this message translates to:
+  /// **'已授予'**
+  String get serviceTest_granted;
+
+  /// No description provided for @serviceTest_denied.
+  ///
+  /// In zh, this message translates to:
+  /// **'已拒绝'**
+  String get serviceTest_denied;
+
+  /// No description provided for @serviceTest_audioServiceUnavailable.
+  ///
+  /// In zh, this message translates to:
+  /// **'音频服务不可用'**
+  String get serviceTest_audioServiceUnavailable;
+
+  /// No description provided for @serviceTest_serviceTestInitialized.
+  ///
+  /// In zh, this message translates to:
+  /// **'服务测试屏幕已初始化'**
+  String get serviceTest_serviceTestInitialized;
+
+  /// No description provided for @serviceTest_errorMessage.
+  ///
+  /// In zh, this message translates to:
+  /// **'错误信息'**
+  String get serviceTest_errorMessage;
+
+  /// No description provided for @serviceTest_copy.
+  ///
+  /// In zh, this message translates to:
+  /// **'复制'**
+  String get serviceTest_copy;
 }
 
 class _AppLocalizationsDelegate

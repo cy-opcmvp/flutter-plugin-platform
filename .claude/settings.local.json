@@ -23,7 +23,11 @@
       "Bash(powershell:*)",
       "Bash(nuget sources:*)",
       "Skill(glm-plan-usage:usage-query-skill)",
-      "Skill(glm-plan-usage:usage-query-skill:*)"
+      "Skill(glm-plan-usage:usage-query-skill:*)",
+      "Bash(timeout:*)",
+      "Bash(ping:*)",
+      "Bash(flutter pub deps:*)",
+      "Bash(start:*)"
     ]
   }
 }

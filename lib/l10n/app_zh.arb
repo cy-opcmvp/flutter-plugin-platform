@@ -310,10 +310,19 @@
   "nav_active": "活动",
   "nav_info": "信息",
 
+  "settings_title": "设置",
   "settings_language": "语言设置",
   "settings_theme": "主题设置",
   "settings_languageChinese": "中文",
   "settings_languageEnglish": "English",
+  "settings_currentLanguage": "当前语言",
+  "settings_changeLanguage": "更改语言",
+  "settings_languageChanged": "语言已更改为 {language}",
+  "@settings_languageChanged": {
+    "placeholders": {
+      "language": {"type": "String"}
+    }
+  },
 
   "plugin_detailsTitle": "插件详情",
   "plugin_detailsStatus": "状态",
@@ -566,5 +575,97 @@
   "plugin_calculator_error": "错误",
 
   "plugin_worldclock_name": "世界时钟",
-  "plugin_worldclock_description": "显示多个时区的时间，支持倒计时提醒功能，默认显示北京时间"
+  "plugin_worldclock_description": "显示多个时区的时间，支持倒计时提醒功能，默认显示北京时间",
+
+  "serviceTest_title": "平台服务测试",
+  "serviceTest_notifications": "通知",
+  "serviceTest_audio": "音频",
+  "serviceTest_tasks": "任务",
+  "serviceTest_activityLog": "活动日志",
+  "serviceTest_clear": "清空",
+  "serviceTest_copyAll": "复制全部",
+  "serviceTest_copied": "已复制",
+  "serviceTest_logCopied": "日志已复制到剪贴板",
+  "serviceTest_allLogsCopied": "所有日志已复制到剪贴板",
+
+  "serviceTest_permissionGranted": "通知权限已授予",
+  "serviceTest_permissionNotGranted": "通知权限未授予",
+  "serviceTest_requestPermission": "请求权限",
+
+  "serviceTest_windowsPlatform": "Windows 平台",
+  "serviceTest_windowsNotice": "计划通知将在 Windows 上立即显示。请使用任务标签页中的倒计时定时器来实现定时通知。",
+
+  "serviceTest_notificationTitle": "通知标题",
+  "serviceTest_notificationBody": "通知内容",
+  "serviceTest_defaultNotificationTitle": "测试通知",
+  "serviceTest_defaultNotificationBody": "这是来自平台服务的测试通知！",
+  "serviceTest_showNow": "立即显示",
+  "serviceTest_schedule": "计划 (5秒)",
+  "serviceTest_cancelAll": "全部取消",
+
+  "serviceTest_testAudioFeatures": "测试各种音频播放功能",
+  "serviceTest_audioNotAvailable": "此平台上音频服务不可用。某些功能可能被禁用。",
+
+  "serviceTest_notificationSound": "通知音效",
+  "serviceTest_successSound": "成功音效",
+  "serviceTest_errorSound": "错误音效",
+  "serviceTest_warningSound": "警告音效",
+  "serviceTest_clickSound": "点击音效",
+
+  "serviceTest_globalVolume": "全局音量",
+  "serviceTest_stopAllAudio": "停止所有音频",
+
+  "serviceTest_countdownTimer": "倒计时定时器",
+  "serviceTest_seconds": "秒",
+  "serviceTest_start": "开始",
+  "serviceTest_cancel": "取消",
+
+  "serviceTest_periodicTask": "周期性任务",
+  "serviceTest_interval": "间隔",
+
+  "serviceTest_activeTasks": "活动任务",
+  "serviceTest_tasks": "任务",
+  "serviceTest_noActiveTasks": "没有活动任务",
+  "serviceTest_at": "在",
+  "serviceTest_every": "每",
+
+  "serviceTest_countdownComplete": "倒计时完成！",
+  "serviceTest_countdownFinished": "您的倒计时已结束。",
+
+  "serviceTest_error": "错误",
+  "serviceTest_errorPlayingSound": "播放音效时出错",
+  "serviceTest_audioServiceNotAvailable": "音频服务在此平台上不可用",
+  "serviceTest_enterValidSeconds": "请输入有效的秒数",
+  "serviceTest_enterValidInterval": "请输入有效的间隔",
+
+  "serviceTest_notificationShown": "通知已显示",
+  "serviceTest_errorShowingNotification": "显示通知时出错",
+  "serviceTest_notificationScheduled": "通知已计划在 5 秒后显示",
+  "serviceTest_errorSchedulingNotification": "计划通知时出错",
+  "serviceTest_allNotificationsCancelled": "所有通知已取消",
+  "serviceTest_errorCancellingNotifications": "取消通知时出错",
+
+  "serviceTest_countdownStarted": "倒计时已开始：{seconds} 秒",
+  "serviceTest_errorStartingCountdown": "启动倒计时出错",
+  "serviceTest_countdownCancelled": "倒计时已取消",
+  "serviceTest_errorCancellingCountdown": "取消倒计时出错",
+
+  "serviceTest_periodicTaskStarted": "周期性任务已启动：每 {interval} 秒",
+  "serviceTest_errorStartingPeriodicTask": "启动周期性任务出错",
+  "serviceTest_periodicTaskCancelled": "周期性任务已取消",
+  "serviceTest_errorCancellingPeriodicTask": "取消周期性任务出错",
+  "serviceTest_periodicTaskExecuted": "周期性任务已执行",
+  "serviceTest_taskCompleted": "任务已完成",
+  "serviceTest_taskFailed": "任务失败",
+  "serviceTest_taskCancelled": "任务已取消",
+  "serviceTest_couldNotPlaySound": "无法播放音效",
+  "serviceTest_volumeSet": "音量设置为 {percent}%",
+  "serviceTest_stoppedAllAudio": "已停止所有音频播放",
+  "serviceTest_notificationPermission": "通知权限 {status}",
+  "serviceTest_granted": "已授予",
+  "serviceTest_denied": "已拒绝",
+  "serviceTest_audioServiceUnavailable": "音频服务不可用",
+  "serviceTest_serviceTestInitialized": "服务测试屏幕已初始化",
+  "serviceTest_errorMessage": "错误信息",
+  "serviceTest_copy": "复制"
 }
