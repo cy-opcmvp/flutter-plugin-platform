@@ -183,8 +183,9 @@ class ServiceLocator {
     _services.clear();
     _factories.clear();
 
-    // Reset the singleton instance
-    _instance = null;
+    // NOTE: Don't reset _instance to null here.
+    // This allows the service locator to be reused if needed,
+    // and prevents LateInitializationError when accessed after disposal.
   }
 
   /// Get all registered service types
