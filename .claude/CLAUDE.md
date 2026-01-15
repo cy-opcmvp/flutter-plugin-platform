@@ -114,6 +114,14 @@ lib/plugins/            # 插件实现
 - 技术规范放在 `.kiro/specs/` 目录
 - 插件详细文档放在 `docs/plugins/{plugin-name}/`，代码目录只保留简短的 README
 
+### 版本控制规则
+
+严格遵守 `.claude/rules/VERSION_CONTROL_RULES.md`:
+- **每次对话都必须记录**：修改的文件、创建的文件、删除的文件、重构的内容
+- **每次 push 前必须检查**：确认所有变更已提交、更新 CHANGELOG.md、运行测试
+- **tag 创建规范**：详细的 tag 注释、完整的发布文档、版本历史记录
+- **所有操作都要追溯**：在 `.claude/rules/VERSION_CONTROL_HISTORY.md` 中记录
+
 ### 国际化 (i18n)
 
 项目已实现完整的国际化支持（中文/英文）：
