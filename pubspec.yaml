@@ -77,6 +77,9 @@ dependencies:
   # System tray (desktop only)
   tray_manager: ^0.2.2
 
+  # Screenshot plugin dependencies
+  image: ^4.1.7
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

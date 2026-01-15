@@ -2395,6 +2395,342 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'复制'**
   String get serviceTest_copy;
+
+  /// 智能截图插件名称
+  ///
+  /// In zh, this message translates to:
+  /// **'智能截图'**
+  String get plugin_screenshot_name;
+
+  /// 智能截图插件描述
+  ///
+  /// In zh, this message translates to:
+  /// **'类似 Snipaste 的专业截图工具，支持区域截图、全屏截图、窗口截图、图片标注和编辑'**
+  String get plugin_screenshot_description;
+
+  /// No description provided for @screenshot_region.
+  ///
+  /// In zh, this message translates to:
+  /// **'区域截图'**
+  String get screenshot_region;
+
+  /// No description provided for @screenshot_fullScreen.
+  ///
+  /// In zh, this message translates to:
+  /// **'全屏截图'**
+  String get screenshot_fullScreen;
+
+  /// No description provided for @screenshot_window.
+  ///
+  /// In zh, this message translates to:
+  /// **'窗口截图'**
+  String get screenshot_window;
+
+  /// No description provided for @screenshot_history.
+  ///
+  /// In zh, this message translates to:
+  /// **'截图历史'**
+  String get screenshot_history;
+
+  /// No description provided for @screenshot_settings.
+  ///
+  /// In zh, this message translates to:
+  /// **'截图设置'**
+  String get screenshot_settings;
+
+  /// No description provided for @screenshot_savePath.
+  ///
+  /// In zh, this message translates to:
+  /// **'保存路径'**
+  String get screenshot_savePath;
+
+  /// No description provided for @screenshot_filenameFormat.
+  ///
+  /// In zh, this message translates to:
+  /// **'文件名格式'**
+  String get screenshot_filenameFormat;
+
+  /// No description provided for @screenshot_autoCopy.
+  ///
+  /// In zh, this message translates to:
+  /// **'自动复制到剪贴板'**
+  String get screenshot_autoCopy;
+
+  /// No description provided for @screenshot_showPreview.
+  ///
+  /// In zh, this message translates to:
+  /// **'显示预览窗口'**
+  String get screenshot_showPreview;
+
+  /// No description provided for @screenshot_saveHistory.
+  ///
+  /// In zh, this message translates to:
+  /// **'保存历史记录'**
+  String get screenshot_saveHistory;
+
+  /// No description provided for @screenshot_maxHistoryCount.
+  ///
+  /// In zh, this message translates to:
+  /// **'最大历史记录数'**
+  String get screenshot_maxHistoryCount;
+
+  /// No description provided for @screenshot_imageFormat.
+  ///
+  /// In zh, this message translates to:
+  /// **'图片格式'**
+  String get screenshot_imageFormat;
+
+  /// No description provided for @screenshot_imageQuality.
+  ///
+  /// In zh, this message translates to:
+  /// **'图片质量'**
+  String get screenshot_imageQuality;
+
+  /// No description provided for @screenshot_shortcuts.
+  ///
+  /// In zh, this message translates to:
+  /// **'快捷键'**
+  String get screenshot_shortcuts;
+
+  /// No description provided for @screenshot_pinSettings.
+  ///
+  /// In zh, this message translates to:
+  /// **'钉图设置'**
+  String get screenshot_pinSettings;
+
+  /// No description provided for @screenshot_alwaysOnTop.
+  ///
+  /// In zh, this message translates to:
+  /// **'始终置顶'**
+  String get screenshot_alwaysOnTop;
+
+  /// No description provided for @screenshot_defaultOpacity.
+  ///
+  /// In zh, this message translates to:
+  /// **'默认透明度'**
+  String get screenshot_defaultOpacity;
+
+  /// No description provided for @screenshot_enableDrag.
+  ///
+  /// In zh, this message translates to:
+  /// **'启用拖拽'**
+  String get screenshot_enableDrag;
+
+  /// No description provided for @screenshot_enableResize.
+  ///
+  /// In zh, this message translates to:
+  /// **'启用调整大小'**
+  String get screenshot_enableResize;
+
+  /// No description provided for @screenshot_quickActions.
+  ///
+  /// In zh, this message translates to:
+  /// **'快速操作'**
+  String get screenshot_quickActions;
+
+  /// No description provided for @screenshot_recentScreenshots.
+  ///
+  /// In zh, this message translates to:
+  /// **'最近截图'**
+  String get screenshot_recentScreenshots;
+
+  /// No description provided for @screenshot_statistics.
+  ///
+  /// In zh, this message translates to:
+  /// **'统计信息'**
+  String get screenshot_statistics;
+
+  /// No description provided for @screenshot_noScreenshots.
+  ///
+  /// In zh, this message translates to:
+  /// **'暂无截图记录'**
+  String get screenshot_noScreenshots;
+
+  /// No description provided for @screenshot_clickToStart.
+  ///
+  /// In zh, this message translates to:
+  /// **'点击上方按钮开始截图'**
+  String get screenshot_clickToStart;
+
+  /// No description provided for @screenshot_totalScreenshots.
+  ///
+  /// In zh, this message translates to:
+  /// **'总截图数'**
+  String get screenshot_totalScreenshots;
+
+  /// No description provided for @screenshot_todayScreenshots.
+  ///
+  /// In zh, this message translates to:
+  /// **'今日截图'**
+  String get screenshot_todayScreenshots;
+
+  /// No description provided for @screenshot_storageUsed.
+  ///
+  /// In zh, this message translates to:
+  /// **'占用空间'**
+  String get screenshot_storageUsed;
+
+  /// No description provided for @screenshot_preview.
+  ///
+  /// In zh, this message translates to:
+  /// **'截图预览'**
+  String get screenshot_preview;
+
+  /// No description provided for @screenshot_confirmDelete.
+  ///
+  /// In zh, this message translates to:
+  /// **'确认删除'**
+  String get screenshot_confirmDelete;
+
+  /// No description provided for @screenshot_confirmDeleteMessage.
+  ///
+  /// In zh, this message translates to:
+  /// **'确定要删除这张截图吗？'**
+  String get screenshot_confirmDeleteMessage;
+
+  /// No description provided for @screenshot_deleted.
+  ///
+  /// In zh, this message translates to:
+  /// **'截图已删除'**
+  String get screenshot_deleted;
+
+  /// No description provided for @screenshot_deleteFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'删除截图失败'**
+  String get screenshot_deleteFailed;
+
+  /// No description provided for @screenshot_saved.
+  ///
+  /// In zh, this message translates to:
+  /// **'截图已保存'**
+  String get screenshot_saved;
+
+  /// No description provided for @screenshot_copied.
+  ///
+  /// In zh, this message translates to:
+  /// **'已复制到剪贴板'**
+  String get screenshot_copied;
+
+  /// No description provided for @screenshot_error.
+  ///
+  /// In zh, this message translates to:
+  /// **'截图失败'**
+  String get screenshot_error;
+
+  /// No description provided for @screenshot_unsupportedPlatform.
+  ///
+  /// In zh, this message translates to:
+  /// **'平台功能受限'**
+  String get screenshot_unsupportedPlatform;
+
+  /// No description provided for @screenshot_unsupportedPlatformDesc.
+  ///
+  /// In zh, this message translates to:
+  /// **'此平台暂不完全支持截图功能。支持的平台：Windows、macOS、Linux'**
+  String get screenshot_unsupportedPlatformDesc;
+
+  /// No description provided for @screenshot_featureNotImplemented.
+  ///
+  /// In zh, this message translates to:
+  /// **'此功能待实现'**
+  String get screenshot_featureNotImplemented;
+
+  /// No description provided for @screenshot_tool_pen.
+  ///
+  /// In zh, this message translates to:
+  /// **'画笔'**
+  String get screenshot_tool_pen;
+
+  /// No description provided for @screenshot_tool_rectangle.
+  ///
+  /// In zh, this message translates to:
+  /// **'矩形'**
+  String get screenshot_tool_rectangle;
+
+  /// No description provided for @screenshot_tool_arrow.
+  ///
+  /// In zh, this message translates to:
+  /// **'箭头'**
+  String get screenshot_tool_arrow;
+
+  /// No description provided for @screenshot_tool_text.
+  ///
+  /// In zh, this message translates to:
+  /// **'文字'**
+  String get screenshot_tool_text;
+
+  /// No description provided for @screenshot_tool_mosaic.
+  ///
+  /// In zh, this message translates to:
+  /// **'马赛克'**
+  String get screenshot_tool_mosaic;
+
+  /// No description provided for @screenshot_undo.
+  ///
+  /// In zh, this message translates to:
+  /// **'撤销'**
+  String get screenshot_undo;
+
+  /// No description provided for @screenshot_redo.
+  ///
+  /// In zh, this message translates to:
+  /// **'重做'**
+  String get screenshot_redo;
+
+  /// No description provided for @screenshot_save.
+  ///
+  /// In zh, this message translates to:
+  /// **'保存'**
+  String get screenshot_save;
+
+  /// No description provided for @screenshot_cancel.
+  ///
+  /// In zh, this message translates to:
+  /// **'取消'**
+  String get screenshot_cancel;
+
+  /// No description provided for @screenshot_type_fullScreen.
+  ///
+  /// In zh, this message translates to:
+  /// **'全屏'**
+  String get screenshot_type_fullScreen;
+
+  /// No description provided for @screenshot_type_region.
+  ///
+  /// In zh, this message translates to:
+  /// **'区域'**
+  String get screenshot_type_region;
+
+  /// No description provided for @screenshot_type_window.
+  ///
+  /// In zh, this message translates to:
+  /// **'窗口'**
+  String get screenshot_type_window;
+
+  /// No description provided for @screenshot_justNow.
+  ///
+  /// In zh, this message translates to:
+  /// **'刚刚'**
+  String get screenshot_justNow;
+
+  /// No description provided for @screenshot_minutesAgo.
+  ///
+  /// In zh, this message translates to:
+  /// **'{minutes} 分钟前'**
+  String screenshot_minutesAgo(int minutes);
+
+  /// No description provided for @screenshot_hoursAgo.
+  ///
+  /// In zh, this message translates to:
+  /// **'{hours} 小时前'**
+  String screenshot_hoursAgo(int hours);
+
+  /// No description provided for @screenshot_daysAgo.
+  ///
+  /// In zh, this message translates to:
+  /// **'{days} 天前'**
+  String screenshot_daysAgo(int days);
 }
 
 class _AppLocalizationsDelegate

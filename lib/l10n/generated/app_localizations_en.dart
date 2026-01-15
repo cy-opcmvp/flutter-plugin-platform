@@ -1303,4 +1303,183 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get serviceTest_copy => 'Copy';
+
+  @override
+  String get plugin_screenshot_name => 'Smart Screenshot';
+
+  @override
+  String get plugin_screenshot_description =>
+      'Professional screenshot tool like Snipaste, supporting region, fullscreen, window capture and image annotation';
+
+  @override
+  String get screenshot_region => 'Region Capture';
+
+  @override
+  String get screenshot_fullScreen => 'Full Screen';
+
+  @override
+  String get screenshot_window => 'Window Capture';
+
+  @override
+  String get screenshot_history => 'History';
+
+  @override
+  String get screenshot_settings => 'Settings';
+
+  @override
+  String get screenshot_savePath => 'Save Path';
+
+  @override
+  String get screenshot_filenameFormat => 'Filename Format';
+
+  @override
+  String get screenshot_autoCopy => 'Auto Copy to Clipboard';
+
+  @override
+  String get screenshot_showPreview => 'Show Preview';
+
+  @override
+  String get screenshot_saveHistory => 'Save History';
+
+  @override
+  String get screenshot_maxHistoryCount => 'Max History Count';
+
+  @override
+  String get screenshot_imageFormat => 'Image Format';
+
+  @override
+  String get screenshot_imageQuality => 'Image Quality';
+
+  @override
+  String get screenshot_shortcuts => 'Shortcuts';
+
+  @override
+  String get screenshot_pinSettings => 'Pin Settings';
+
+  @override
+  String get screenshot_alwaysOnTop => 'Always on Top';
+
+  @override
+  String get screenshot_defaultOpacity => 'Default Opacity';
+
+  @override
+  String get screenshot_enableDrag => 'Enable Drag';
+
+  @override
+  String get screenshot_enableResize => 'Enable Resize';
+
+  @override
+  String get screenshot_quickActions => 'Quick Actions';
+
+  @override
+  String get screenshot_recentScreenshots => 'Recent Screenshots';
+
+  @override
+  String get screenshot_statistics => 'Statistics';
+
+  @override
+  String get screenshot_noScreenshots => 'No screenshots yet';
+
+  @override
+  String get screenshot_clickToStart =>
+      'Click buttons above to start capturing';
+
+  @override
+  String get screenshot_totalScreenshots => 'Total Screenshots';
+
+  @override
+  String get screenshot_todayScreenshots => 'Today';
+
+  @override
+  String get screenshot_storageUsed => 'Storage Used';
+
+  @override
+  String get screenshot_preview => 'Screenshot Preview';
+
+  @override
+  String get screenshot_confirmDelete => 'Confirm Delete';
+
+  @override
+  String get screenshot_confirmDeleteMessage =>
+      'Are you sure you want to delete this screenshot?';
+
+  @override
+  String get screenshot_deleted => 'Screenshot deleted';
+
+  @override
+  String get screenshot_deleteFailed => 'Failed to delete screenshot';
+
+  @override
+  String get screenshot_saved => 'Screenshot saved';
+
+  @override
+  String get screenshot_copied => 'Copied to clipboard';
+
+  @override
+  String get screenshot_error => 'Screenshot failed';
+
+  @override
+  String get screenshot_unsupportedPlatform => 'Platform Functionality Limited';
+
+  @override
+  String get screenshot_unsupportedPlatformDesc =>
+      'Screenshot functionality is not fully supported on this platform. Supported platforms: Windows, macOS, Linux';
+
+  @override
+  String get screenshot_featureNotImplemented =>
+      'This feature is not yet implemented';
+
+  @override
+  String get screenshot_tool_pen => 'Pen';
+
+  @override
+  String get screenshot_tool_rectangle => 'Rectangle';
+
+  @override
+  String get screenshot_tool_arrow => 'Arrow';
+
+  @override
+  String get screenshot_tool_text => 'Text';
+
+  @override
+  String get screenshot_tool_mosaic => 'Mosaic';
+
+  @override
+  String get screenshot_undo => 'Undo';
+
+  @override
+  String get screenshot_redo => 'Redo';
+
+  @override
+  String get screenshot_save => 'Save';
+
+  @override
+  String get screenshot_cancel => 'Cancel';
+
+  @override
+  String get screenshot_type_fullScreen => 'Full Screen';
+
+  @override
+  String get screenshot_type_region => 'Region';
+
+  @override
+  String get screenshot_type_window => 'Window';
+
+  @override
+  String get screenshot_justNow => 'Just now';
+
+  @override
+  String screenshot_minutesAgo(int minutes) {
+    return '$minutes minutes ago';
+  }
+
+  @override
+  String screenshot_hoursAgo(int hours) {
+    return '$hours hours ago';
+  }
+
+  @override
+  String screenshot_daysAgo(int days) {
+    return '$days days ago';
+  }
 }

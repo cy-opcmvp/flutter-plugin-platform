@@ -27,7 +27,10 @@
       "Bash(timeout:*)",
       "Bash(ping:*)",
       "Bash(flutter pub deps:*)",
-      "Bash(start:*)"
+      "Bash(start:*)",
+      "mcp__web-reader__webReader",
+      "mcp__web-search-prime__webSearchPrime",
+      "Bash(buildwindowsx64runnerDebugflutter_app.exe)"
     ]
   }
 }

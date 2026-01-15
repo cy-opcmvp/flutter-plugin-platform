@@ -1257,4 +1257,180 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get serviceTest_copy => '复制';
+
+  @override
+  String get plugin_screenshot_name => '智能截图';
+
+  @override
+  String get plugin_screenshot_description =>
+      '类似 Snipaste 的专业截图工具，支持区域截图、全屏截图、窗口截图、图片标注和编辑';
+
+  @override
+  String get screenshot_region => '区域截图';
+
+  @override
+  String get screenshot_fullScreen => '全屏截图';
+
+  @override
+  String get screenshot_window => '窗口截图';
+
+  @override
+  String get screenshot_history => '截图历史';
+
+  @override
+  String get screenshot_settings => '截图设置';
+
+  @override
+  String get screenshot_savePath => '保存路径';
+
+  @override
+  String get screenshot_filenameFormat => '文件名格式';
+
+  @override
+  String get screenshot_autoCopy => '自动复制到剪贴板';
+
+  @override
+  String get screenshot_showPreview => '显示预览窗口';
+
+  @override
+  String get screenshot_saveHistory => '保存历史记录';
+
+  @override
+  String get screenshot_maxHistoryCount => '最大历史记录数';
+
+  @override
+  String get screenshot_imageFormat => '图片格式';
+
+  @override
+  String get screenshot_imageQuality => '图片质量';
+
+  @override
+  String get screenshot_shortcuts => '快捷键';
+
+  @override
+  String get screenshot_pinSettings => '钉图设置';
+
+  @override
+  String get screenshot_alwaysOnTop => '始终置顶';
+
+  @override
+  String get screenshot_defaultOpacity => '默认透明度';
+
+  @override
+  String get screenshot_enableDrag => '启用拖拽';
+
+  @override
+  String get screenshot_enableResize => '启用调整大小';
+
+  @override
+  String get screenshot_quickActions => '快速操作';
+
+  @override
+  String get screenshot_recentScreenshots => '最近截图';
+
+  @override
+  String get screenshot_statistics => '统计信息';
+
+  @override
+  String get screenshot_noScreenshots => '暂无截图记录';
+
+  @override
+  String get screenshot_clickToStart => '点击上方按钮开始截图';
+
+  @override
+  String get screenshot_totalScreenshots => '总截图数';
+
+  @override
+  String get screenshot_todayScreenshots => '今日截图';
+
+  @override
+  String get screenshot_storageUsed => '占用空间';
+
+  @override
+  String get screenshot_preview => '截图预览';
+
+  @override
+  String get screenshot_confirmDelete => '确认删除';
+
+  @override
+  String get screenshot_confirmDeleteMessage => '确定要删除这张截图吗？';
+
+  @override
+  String get screenshot_deleted => '截图已删除';
+
+  @override
+  String get screenshot_deleteFailed => '删除截图失败';
+
+  @override
+  String get screenshot_saved => '截图已保存';
+
+  @override
+  String get screenshot_copied => '已复制到剪贴板';
+
+  @override
+  String get screenshot_error => '截图失败';
+
+  @override
+  String get screenshot_unsupportedPlatform => '平台功能受限';
+
+  @override
+  String get screenshot_unsupportedPlatformDesc =>
+      '此平台暂不完全支持截图功能。支持的平台：Windows、macOS、Linux';
+
+  @override
+  String get screenshot_featureNotImplemented => '此功能待实现';
+
+  @override
+  String get screenshot_tool_pen => '画笔';
+
+  @override
+  String get screenshot_tool_rectangle => '矩形';
+
+  @override
+  String get screenshot_tool_arrow => '箭头';
+
+  @override
+  String get screenshot_tool_text => '文字';
+
+  @override
+  String get screenshot_tool_mosaic => '马赛克';
+
+  @override
+  String get screenshot_undo => '撤销';
+
+  @override
+  String get screenshot_redo => '重做';
+
+  @override
+  String get screenshot_save => '保存';
+
+  @override
+  String get screenshot_cancel => '取消';
+
+  @override
+  String get screenshot_type_fullScreen => '全屏';
+
+  @override
+  String get screenshot_type_region => '区域';
+
+  @override
+  String get screenshot_type_window => '窗口';
+
+  @override
+  String get screenshot_justNow => '刚刚';
+
+  @override
+  String screenshot_minutesAgo(int minutes) {
+    return '$minutes 分钟前';
+  }
+
+  @override
+  String screenshot_hoursAgo(int hours) {
+    return '$hours 小时前';
+  }
+
+  @override
+  String screenshot_daysAgo(int days) {
+    return '$days 天前';
+  }
 }

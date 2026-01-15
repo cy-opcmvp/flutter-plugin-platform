@@ -3,6 +3,7 @@ import '../core/interfaces/i_plugin.dart';
 import '../core/models/plugin_models.dart';
 import 'calculator/calculator_plugin_factory.dart';
 import 'world_clock/world_clock_plugin_factory.dart';
+import 'screenshot/screenshot_plugin_factory.dart';
 
 /// Registry for example plugins included with the platform
 class ExamplePluginRegistry {
@@ -14,6 +15,10 @@ class ExamplePluginRegistry {
     'com.example.worldclock': PluginFactory(
       createPlugin: WorldClockPluginFactory.createPlugin,
       getDescriptor: WorldClockPluginFactory.getDescriptor,
+    ),
+    'com.example.screenshot': PluginFactory(
+      createPlugin: ScreenshotPluginFactory.createPlugin,
+      getDescriptor: ScreenshotPluginFactory.getDescriptor,
     ),
   };
 

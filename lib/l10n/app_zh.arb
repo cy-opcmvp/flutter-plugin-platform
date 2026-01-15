@@ -667,5 +667,87 @@
   "serviceTest_audioServiceUnavailable": "音频服务不可用",
   "serviceTest_serviceTestInitialized": "服务测试屏幕已初始化",
   "serviceTest_errorMessage": "错误信息",
-  "serviceTest_copy": "复制"
+  "serviceTest_copy": "复制",
+
+  "plugin_screenshot_name": "智能截图",
+  "@plugin_screenshot_name": {
+    "description": "智能截图插件名称"
+  },
+  "plugin_screenshot_description": "类似 Snipaste 的专业截图工具，支持区域截图、全屏截图、窗口截图、图片标注和编辑",
+  "@plugin_screenshot_description": {
+    "description": "智能截图插件描述"
+  },
+
+  "screenshot_region": "区域截图",
+  "screenshot_fullScreen": "全屏截图",
+  "screenshot_window": "窗口截图",
+  "screenshot_history": "截图历史",
+  "screenshot_settings": "截图设置",
+  "screenshot_savePath": "保存路径",
+  "screenshot_filenameFormat": "文件名格式",
+  "screenshot_autoCopy": "自动复制到剪贴板",
+  "screenshot_showPreview": "显示预览窗口",
+  "screenshot_saveHistory": "保存历史记录",
+  "screenshot_maxHistoryCount": "最大历史记录数",
+  "screenshot_imageFormat": "图片格式",
+  "screenshot_imageQuality": "图片质量",
+  "screenshot_shortcuts": "快捷键",
+  "screenshot_pinSettings": "钉图设置",
+  "screenshot_alwaysOnTop": "始终置顶",
+  "screenshot_defaultOpacity": "默认透明度",
+  "screenshot_enableDrag": "启用拖拽",
+  "screenshot_enableResize": "启用调整大小",
+
+  "screenshot_quickActions": "快速操作",
+  "screenshot_recentScreenshots": "最近截图",
+  "screenshot_statistics": "统计信息",
+  "screenshot_noScreenshots": "暂无截图记录",
+  "screenshot_clickToStart": "点击上方按钮开始截图",
+  "screenshot_totalScreenshots": "总截图数",
+  "screenshot_todayScreenshots": "今日截图",
+  "screenshot_storageUsed": "占用空间",
+  "screenshot_preview": "截图预览",
+  "screenshot_confirmDelete": "确认删除",
+  "screenshot_confirmDeleteMessage": "确定要删除这张截图吗？",
+  "screenshot_deleted": "截图已删除",
+  "screenshot_deleteFailed": "删除截图失败",
+  "screenshot_saved": "截图已保存",
+  "screenshot_copied": "已复制到剪贴板",
+  "screenshot_error": "截图失败",
+  "screenshot_unsupportedPlatform": "平台功能受限",
+  "screenshot_unsupportedPlatformDesc": "此平台暂不完全支持截图功能。支持的平台：Windows、macOS、Linux",
+  "screenshot_featureNotImplemented": "此功能待实现",
+
+  "screenshot_tool_pen": "画笔",
+  "screenshot_tool_rectangle": "矩形",
+  "screenshot_tool_arrow": "箭头",
+  "screenshot_tool_text": "文字",
+  "screenshot_tool_mosaic": "马赛克",
+  "screenshot_undo": "撤销",
+  "screenshot_redo": "重做",
+  "screenshot_save": "保存",
+  "screenshot_cancel": "取消",
+
+  "screenshot_type_fullScreen": "全屏",
+  "screenshot_type_region": "区域",
+  "screenshot_type_window": "窗口",
+  "screenshot_justNow": "刚刚",
+  "screenshot_minutesAgo": "{minutes} 分钟前",
+  "screenshot_hoursAgo": "{hours} 小时前",
+  "screenshot_daysAgo": "{days} 天前",
+  "@screenshot_minutesAgo": {
+    "placeholders": {
+      "minutes": {"type": "int"}
+    }
+  },
+  "@screenshot_hoursAgo": {
+    "placeholders": {
+      "hours": {"type": "int"}
+    }
+  },
+  "@screenshot_daysAgo": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  }
 }

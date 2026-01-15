@@ -1,0 +1,102 @@
+library;
+
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import '../models/screenshot_models.dart';
+import '../platform/screenshot_platform_interface.dart';
+import 'screenshot_capture_service.dart';
+
+/// 截图服务
+///
+/// 提供统一的截图功能接口，优先使用平台特定实现，降级到 Flutter 实现
+class ScreenshotService {
+  late ScreenshotPlatformInterface _platformService;
+  ScreenshotCaptureService? _flutterCaptureService;
+
+  ScreenshotService() {
+    _platformService = ScreenshotPlatformInterface.instance;
+    // 如果平台服务不可用，使用 Flutter 实现
+    if (!_platformService.isAvailable) {
+      _flutterCaptureService = ScreenshotCaptureService();
+    }
+  }
+
+  /// 检查服务是否可用
+  bool get isAvailable => _platformService.isAvailable || _flutterCaptureService != null;
+
+  /// 捕获全屏截图
+  Future<Uint8List?> captureFullScreen() async {
+    if (!isAvailable) {
+      throw UnsupportedError('Screenshot is not supported on this platform');
+    }
+
+    // 优先使用平台实现
+    if (_platformService.isAvailable) {
+      return await _platformService.captureFullScreen();
+    }
+
+    // 降级到 Flutter 实现
+    return await _flutterCaptureService?.captureFullScreen();
+  }
+
+  /// 捕获指定区域截图
+  Future<Uint8List?> captureRegion(Rect rect) async {
+    if (!isAvailable) {
+      throw UnsupportedError('Screenshot is not supported on this platform');
+    }
+
+    // 优先使用平台实现
+    if (_platformService.isAvailable) {
+      return await _platformService.captureRegion(rect);
+    }
+
+    // 降级到 Flutter 实现
+    return await _flutterCaptureService?.captureRegion(rect);
+  }
+
+  /// 捕获指定窗口截图
+  Future<Uint8List?> captureWindow(String windowId) async {
+    if (!isAvailable) {
+      throw UnsupportedError('Screenshot is not supported on this platform');
+    }
+
+    // 只有平台实现支持窗口截图
+    if (_platformService.isAvailable) {
+      return await _platformService.captureWindow(windowId);
+    }
+
+    throw UnsupportedError('Window capture is not supported in Flutter implementation');
+  }
+
+  /// 获取所有可用窗口列表
+  Future<List<WindowInfo>> getAvailableWindows() async {
+    if (!isAvailable) {
+      return [];
+    }
+
+    return await _platformService.getAvailableWindows();
+  }
+
+  /// 获取主屏幕尺寸
+  Future<Rect?> getPrimaryScreenSize() async {
+    if (!isAvailable) {
+      return null;
+    }
+
+    // 优先使用平台实现
+    if (_platformService.isAvailable) {
+      return await _platformService.getPrimaryScreenSize();
+    }
+
+    // 降级到 Flutter 实现
+    return await _flutterCaptureService?.getPrimaryScreenSize();
+  }
+
+  /// 设置 Flutter 截图捕获服务的 context
+  /// 这需要在有 BuildContext 的地方调用
+  void setContext(BuildContext context) {
+    // Flutter 实现需要 context，这里可以存储供后续使用
+    // 实际实现可能需要更复杂的上下文管理
+  }
+}
