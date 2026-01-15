@@ -4,15 +4,17 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:window_manager/window_manager.dart';
 import './l10n/generated/app_localizations.dart';
 import './core/services/locale_provider.dart';
+import './core/services/platform_service_manager.dart';
 import './ui/screens/main_platform_screen.dart';
+import './ui/screens/service_test_screen.dart' show ServiceTestScreen;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // 初始化window_manager（仅在桌面平台）
   if (!kIsWeb) {
     await windowManager.ensureInitialized();
-    
+
     WindowOptions windowOptions = const WindowOptions(
       size: Size(1200, 800),
       center: true,
@@ -20,17 +22,23 @@ void main() async {
       skipTaskbar: false,
       titleBarStyle: TitleBarStyle.normal,
     );
-    
+
     windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();
       await windowManager.focus();
     });
   }
-  
+
+  // 初始化平台服务
+  final servicesInitialized = await PlatformServiceManager.initialize();
+  if (kDebugMode) {
+    print('Platform services initialized: $servicesInitialized');
+  }
+
   // 初始化语言设置
   final localeProvider = LocaleProvider();
   await localeProvider.loadSavedLocale();
-  
+
   runApp(PluginPlatformApp(localeProvider: localeProvider));
 }
 

@@ -13,6 +13,7 @@ import '../../plugins/plugin_registry.dart';
 import '../../core/interfaces/i_plugin.dart';
 import '../../core/interfaces/i_platform_services.dart';
 import 'desktop_pet_screen.dart';
+import 'service_test_screen.dart';
 
 /// Main platform interface that displays plugins and manages navigation
 /// Implements requirements 1.1, 1.2, 1.5, 7.5
@@ -621,6 +622,19 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
       appBar: AppBar(
         title: Text(l10n.appTitle),
         actions: [
+          // Service Test button - for testing platform services
+          IconButton(
+            icon: const Icon(Icons.science),
+            tooltip: 'Service Test',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ServiceTestScreen(),
+                ),
+              );
+            },
+          ),
           // Desktop Pet切换按钮 - 只在支持的平台上显示
           // Requirements 7.1: Hide desktop pet UI controls on web platform
           if (DesktopPetManager.isSupported())

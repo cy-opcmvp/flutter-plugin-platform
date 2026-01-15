@@ -4,15 +4,26 @@
       "Bash(flutter gen-l10n:*)",
       "Bash(flutter run:*)",
       "Bash(flutter build:*)",
+      "Bash(flutter clean:*)",
+      "Bash(flutter analyze:*)",
+      "Bash(flutter pub get:*)",
+      "Bash(flutter test:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git tag:*)",
-      "Bash(flutter analyze:*)",
+      "Bash(git pull:*)",
+      "Bash(git push:*)",
+      "Bash(git config:*)",
       "Bash(dir:*)",
-      "Bash(flutter pub get:*)",
-      "Bash(flutter test)",
+      "Bash(move:*)",
+      "Bash(tree:*)",
       "Bash(taskkill:*)",
-      "Bash(tasklist:*)"
+      "Bash(tasklist:*)",
+      "Bash(findstr:*)",
+      "Bash(powershell:*)",
+      "Bash(nuget sources:*)",
+      "Skill(glm-plan-usage:usage-query-skill)",
+      "Skill(glm-plan-usage:usage-query-skill:*)"
     ]
   }
 }

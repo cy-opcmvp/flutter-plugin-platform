@@ -2,7 +2,11 @@
 
 欢迎来到Flutter插件平台文档中心！这里包含了开发、部署和管理插件所需的所有信息。
 
-📋 **快速导航**: [文档索引](index.md) | [快速入门](guides/getting-started.md) | [CLI工具](tools/plugin-cli.md)
+📋 **快速导航**:
+- 📍 [文档主索引](MASTER_INDEX.md) - **推荐从这里开始** - 完整的文档导航中心
+- 🤖 [AI 编码规则](../.claude/rules.md) - Claude Code 和其他 AI 助手必须遵守的编码规范
+- 🚀 [快速入门](guides/getting-started.md)
+- 🛠️ [CLI工具](tools/plugin-cli.md)
 
 ## � 文档结构(
 
@@ -41,6 +45,28 @@
 
 ### 🔧 故障排除 (troubleshooting/)
 - [Desktop Pet修复说明](troubleshooting/desktop-pet-fix.md) - Desktop Pet功能问题解决方案
+
+### 🔌 插件文档 (plugins/)
+- [世界时钟插件](plugins/world-clock/README.md) - 世界时钟插件完整文档
+  - [实现文档](plugins/world-clock/IMPLEMENTATION.md)
+  - [更新说明 v1.1](plugins/world-clock/UPDATE_v1.1.md)
+
+### 📦 发布文档 (releases/)
+- [v0.2.1 发布说明](releases/RELEASE_NOTES_v0.2.1.md) - 世界时钟插件发布说明
+
+### 📊 实施报告 (reports/)
+- [平台服务阶段0完成](reports/PLATFORM_SERVICES_PHASE0_COMPLETE.md)
+- [平台服务阶段1完成](reports/PLATFORM_SERVICES_PHASE1_COMPLETE.md)
+- [平台服务实施完成](reports/PLATFORM_SERVICES_IMPLEMENTATION_COMPLETE.md)
+- [世界时钟修复报告](reports/FIXES_WORLD_CLOCK_v1.1.md)
+- [插件ID修复报告](reports/PLUGIN_ID_FIX_SUMMARY.md)
+
+### 🔧 平台服务 (platform-services/)
+- [平台服务文档中心](platform-services/README.md) - 平台通用服务文档
+- [快速开始](platform-services/PLATFORM_SERVICES_README.md)
+- [用户指南](guides/PLATFORM_SERVICES_USER_GUIDE.md)
+- [文档结构](platform-services/STRUCTURE.md)
+- [导航指南](platform-services/DOCS_NAVIGATION.md)
 
 ## 🚀 快速开始
 

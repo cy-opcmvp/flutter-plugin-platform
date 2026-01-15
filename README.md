@@ -36,16 +36,28 @@ flutter run
 
 ## 📚 文档
 
-完整文档请查看 [docs/README.md](docs/README.md)
+完整文档请查看 [文档主索引](docs/MASTER_INDEX.md) | [文档中心](docs/README.md)
 
 ### 快速链接
 
+#### 入门指南
 - [快速入门指南](docs/guides/getting-started.md)
+- [项目结构说明](docs/project-structure.md)
+
+#### 开发指南
 - [内部插件开发](docs/guides/internal-plugin-development.md)
 - [外部插件开发](docs/guides/external-plugin-development.md)
+- [插件SDK指南](docs/guides/plugin-sdk-guide.md)
+
+#### 平台服务
+- [平台服务快速开始](docs/platform-services/PLATFORM_SERVICES_README.md)
+- [平台服务用户指南](docs/guides/PLATFORM_SERVICES_USER_GUIDE.md)
+
+#### 其他资源
 - [CLI工具使用](docs/tools/plugin-cli.md)
 - [示例代码](docs/examples/)
 - [插件模板](docs/templates/)
+- [变更日志](CHANGELOG.md)
 
 ## 🎯 插件类型
 
