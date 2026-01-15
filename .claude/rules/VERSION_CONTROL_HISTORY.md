@@ -104,6 +104,50 @@ fc55179 feat: add Windows platform notice in notification test tab
 
 ---
 
+## 对话历史记录
+
+### 2026-01-15 - 建立版本控制规则体系
+
+#### 对话主题
+建立版本控制规则体系，完善 tag 管理流程
+
+#### 操作内容
+1. **创建版本控制规则体系**:
+   - 版本控制与 Tag 管理规范 (VERSION_CONTROL_RULES.md)
+   - 版本控制历史记录 (VERSION_CONTROL_HISTORY.md)
+   - 规则文档索引 (README.md)
+
+2. **Tag 管理操作**:
+   - 删除错误的 v0.3.3 tag
+   - 创建正确的 v0.3.2 tag
+   - 准备 tag 注释和版本说明
+
+3. **文档完善**:
+   - 更新主指导文档 (CLAUDE.md)
+   - 创建规则索引 (README.md)
+   - 更新 CHANGELOG.md
+
+#### Git 提交
+```
+f9342ce docs: 建立版本控制规则体系，完善 tag 管理流程
+e6df091 docs: 更新 CHANGELOG.md，记录 v0.3.2 版本变更
+```
+
+#### 创建的文件
+- `.claude/rules/VERSION_CONTROL_RULES.md` - 版本控制与 Tag 管理规范
+- `.claude/rules/VERSION_CONTROL_HISTORY.md` - 版本控制历史记录
+- `.claude/rules/README.md` - 规则文档索引
+
+#### 修改的文件
+- `.claude/CLAUDE.md` - 添加版本控制规则说明
+- `CHANGELOG.md` - 添加 v0.3.2 版本记录
+
+#### Push 状态
+- ✅ 已提交 2 个提交
+- ⏳ 尚未 push 到远程
+
+---
+
 ## 统计信息
 
 ### 版本发布频率
@@ -113,10 +157,19 @@ fc55179 feat: add Windows platform notice in notification test tab
 ### 提交类型分布
 - Bug 修复: 2 个 (v0.3.1, v0.3.2)
 - 新功能: 1 个 (v0.3.0)
+- 文档更新: 2 个 (f9342ce, e6df091)
+
+### 对话记录
+- 本次对话: 2026-01-15
+- 主题: 建立版本控制规则体系
+- 提交数: 2 个
+- 文件创建: 3 个
+- 文件修改: 2 个
 
 ---
 
 **维护说明**: 每次 tag 创建或重要 push 操作后，都需要更新此文档。
 
-**文档版本**: v1.0.0
+**文档版本**: v1.1.0
 **最后更新**: 2026-01-15
+
