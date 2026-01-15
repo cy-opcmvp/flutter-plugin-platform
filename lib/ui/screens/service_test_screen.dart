@@ -138,6 +138,8 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
   }
 
   Widget _buildNotificationTab() {
+    final isWindows = Theme.of(context).platform == TargetPlatform.windows;
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: ListView(
@@ -183,6 +185,44 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
             ),
           ),
           const SizedBox(height: 16),
+          // Windows platform notice
+          if (isWindows)
+            Card(
+              color: Colors.blue.shade50,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Colors.blue.shade700),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Windows Platform',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue.shade900,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Scheduled notifications will appear immediately on Windows. '
+                            'Use the Countdown Timer in the Task tab for timed notifications.',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.blue.shade900,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          if (isWindows) const SizedBox(height: 16),
           TextField(
             controller: _notificationTitleController,
             decoration: const InputDecoration(
