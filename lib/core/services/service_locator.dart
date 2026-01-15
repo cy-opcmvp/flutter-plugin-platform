@@ -50,7 +50,8 @@ class ServiceLocator {
 
   /// Get the singleton instance of ServiceLocator
   static ServiceLocator get instance {
-    return _instance ??= ServiceLocator._();
+    _instance ??= ServiceLocator._();
+    return _instance!;
   }
 
   /// Service registry for singleton instances
