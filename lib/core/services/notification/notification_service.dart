@@ -57,11 +57,18 @@ class NotificationServiceImpl extends platform.INotificationService
         defaultActionName: 'Open notification',
       );
 
+      // Windows initialization settings
+      const windowsSettings = WindowsInitializationSettings(
+        appName: 'Plugin Platform',
+        appUserModelId: 'com.plugin_platform.app',
+      );
+
       // Initialization settings
       const initializationSettings = InitializationSettings(
         android: androidSettings,
         iOS: iosSettings,
         linux: linuxSettings,
+        windows: windowsSettings,
       );
 
       // Initialize the plugin
@@ -196,6 +203,24 @@ class NotificationServiceImpl extends platform.INotificationService
 
     final notificationDetails = _buildNotificationDetails(priority, sound);
 
+    // Windows doesn't support zonedSchedule, use schedule instead
+    if (defaultTargetPlatform == TargetPlatform.windows) {
+      await _plugin.schedule(
+        int.tryParse(id) ?? 0,
+        title,
+        body,
+        scheduledTime,
+        notificationDetails,
+        payload: payload,
+      );
+
+      if (kDebugMode) {
+        print('NotificationService: Scheduled notification $id for $scheduledTime (Windows)');
+      }
+      return;
+    }
+
+    // For mobile platforms, use zonedSchedule with timezone support
     final scheduledDate = tz.TZDateTime.from(scheduledTime, tz.local);
 
     await _plugin.zonedSchedule(
