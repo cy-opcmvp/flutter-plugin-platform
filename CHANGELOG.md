@@ -7,33 +7,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.2] - 2026-01-15
 
+### Added - 配置页面与国际化
+- ⚙️ **新增配置页面** - 实现应用配置管理功能
+  - 新增 SettingsScreen，提供统一的应用设置入口
+  - 实现语言切换功能，支持中文/英文即时切换
+  - 友好的语言选择界面，显示当前语言状态
+  - 为未来的主题、通知等设置预留扩展空间
+- 🌍 **国际化完善** - 测试和配置页面完整国际化
+  - 测试页面所有文本支持中英文切换
+  - 配置页面所有文本支持中英文切换
+  - 新增国际化翻译条目 30+ 条
+  - 语言显示名称本地化（如"简体中文"、"English"）
+- 🛠️ **开发工具** - 新增国际化更新脚本
+  - `scripts/update-i18n.bat` - 一键生成国际化文件
+  - 简化国际化工作流程，提高开发效率
+
+### Changed
+- 🎨 **用户体验优化**
+  - 语言切换后即时生效，无需重启应用
+  - 界面统一使用国际化文本，消除硬编码
+  - 主平台屏幕添加配置页面入口
+
 ### Fixed
 - 🐛 **语言切换修复** - 修复语言切换后 SnackBar 无法关闭的问题
+  - 解决了 widget 重建导致的 context 失效问题
+  - 提前捕获 ScaffoldMessenger 引用
   - 确保语言切换后通知提示框可以正常关闭
-  - 提升用户界面交互体验
 
 ### Technical Details
-- 📁 修改文件：
-  - `lib/ui/widgets/app_shell.dart` - SnackBar 状态管理
-- 🏷️ Tag 管理：
-  - 删除错误的 v0.3.3 tag
-  - 创建正确的 v0.3.2 tag
-  - 完善版本控制规则体系
+- 📁 新增文件：
+  - `lib/ui/screens/settings_screen.dart` - 配置页面（150+ 行）
+  - `scripts/update-i18n.bat` - 国际化更新脚本
+  - `docs/releases/RELEASE_NOTES_v0.3.1.md` - v0.3.1 发布说明
+- 📝 修改文件：
+  - `lib/ui/screens/main_platform_screen.dart` - 添加配置页面入口
+  - `lib/ui/screens/service_test_screen.dart` - 测试页面国际化
+  - `lib/l10n/app_zh.arb` - 中文翻译新增 30+ 条
+  - `lib/l10n/app_en.arb` - 英文翻译新增 30+ 条
+  - `lib/l10n/generated/*` - 自动生成的国际化代码
 
-### Documentation
-- 📚 新增文档：
-  - `.claude/rules/VERSION_CONTROL_RULES.md` - 版本控制与 Tag 管理规范
-  - `.claude/rules/VERSION_CONTROL_HISTORY.md` - 版本控制历史记录
-  - `.claude/rules/README.md` - 规则文档索引
-- 📝 更新文档：
-  - `.claude/CLAUDE.md` - 添加版本控制规则说明
-
-### Process Improvements
-- ✨ 建立版本控制规则体系：
-  - 每次对话必须记录所有修改
-  - 每次 push 前必须检查代码质量
-  - Tag 创建必须有详细注释和发布文档
-  - 所有操作必须在版本历史中追溯
+### Developer Experience
+- ✨ **国际化工作流改进**
+  - 新增自动化脚本，简化国际化文件生成
+  - 统一的翻译管理，易于维护
+  - 清晰的文件组织，便于添加新语言
 
 ---
 

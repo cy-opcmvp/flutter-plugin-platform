@@ -16,38 +16,92 @@
 - **版本号**: v0.3.2
 - **提交**: fbc2838
 - **创建时间**: 2026-01-15
-- **创建者**: Claude Code
-- **类型**: Patch 版本（Bug 修复）
+- **创建者**: cyamz
+- **类型**: Minor 版本（新功能）
 
 ### 变更内容
-- 修复语言切换后 SnackBar 无法关闭的问题
+- **新增配置页面** - 实现应用配置管理功能
+  - 新增 SettingsScreen，提供统一的应用设置入口
+  - 实现语言切换功能，支持中文/英文即时切换
+  - 友好的语言选择界面，显示当前语言状态
+- **国际化完善** - 测试和配置页面完整国际化
+  - 测试页面所有文本支持中英文切换
+  - 配置页面所有文本支持中英文切换
+  - 新增国际化翻译条目 30+ 条
+- **开发工具** - 新增国际化更新脚本
+  - `scripts/update-i18n.bat` - 一键生成国际化文件
+- **Bug 修复** - 修复语言切换后 SnackBar 无法关闭的问题
 
 ### 对话记录
 - **对话时间**: 2026-01-15
-- **对话主题**: Tag 管理 - 创建 v0.3.2 并删除 v0.3.3
+- **对话主题 1**: Tag 管理 - 创建 v0.3.2 并删除 v0.3.3
+- **对话主题 2**: 更新 v0.3.2 tag 注释，补充完整功能说明
 - **操作内容**:
   - 删除错误的 v0.3.3 tag
-  - 创建正确的 v0.3.2 tag
-  - 准备 tag 注释和版本说明
+  - 创建 v0.3.2 tag
+  - 更新 tag 注释，包含完整的功能变更
+  - 更新 CHANGELOG.md，准确反映版本内容
 
 ### Git 提交
 ```
 fbc2838 fix: 修复语言切换后 SnackBar 无法关闭的问题
 ```
 
-### 修改的文件
-- 无新文件修改（tag 基于已有提交）
+### 新增文件
+- `lib/ui/screens/settings_screen.dart` - 配置页面（150+ 行）
+- `scripts/update-i18n.bat` - 国际化更新脚本
+- `docs/releases/RELEASE_NOTES_v0.3.1.md` - v0.3.1 发布说明
+
+### 修改文件
+- `lib/ui/screens/main_platform_screen.dart` - 添加配置页面入口
+- `lib/ui/screens/service_test_screen.dart` - 测试页面国际化
+- `lib/l10n/app_zh.arb` - 中文翻译新增 30+ 条
+- `lib/l10n/app_en.arb` - 英文翻译新增 30+ 条
+- `lib/l10n/generated/*` - 自动生成的国际化代码
 
 ### Tag 注释
 ```
 Release v0.3.2
 
-## 修复内容
+## ✨ 新增功能
+### 配置页面
+- 新增应用配置页面 (SettingsScreen)
+- 支持语言切换功能
+- 提供友好的语言选择界面
+- 为未来的主题设置预留扩展空间
+
+### 国际化完善
+- 测试页面完整国际化
+- 配置页面完整国际化
+- 新增国际化相关翻译条目
+
+## 🔧 改进
+### 用户体验优化
+- 语言切换后即时生效，无需重启应用
+- 界面统一使用国际化文本
+- 语言显示名称本地化
+
+### 开发工具
+- 新增国际化更新脚本 (update-i18n.bat)
+- 简化国际化工作流程
+
+## 🐛 Bug 修复
 - 修复语言切换后 SnackBar 无法关闭的问题
 
-该版本修复了用户界面中的一个关键问题，确保语言切换后通知提示框可以正常关闭，提升用户体验。
+## 📁 技术细节
+### 新增文件
+- lib/ui/screens/settings_screen.dart - 配置页面
+- scripts/update-i18n.bat - 国际化更新脚本
+- docs/releases/RELEASE_NOTES_v0.3.1.md - v0.3.1 发布说明
 
-完整提交历史:
+### 修改文件
+- lib/ui/screens/main_platform_screen.dart - 添加配置页面入口
+- lib/ui/screens/service_test_screen.dart - 测试页面国际化
+- lib/l10n/app_zh.arb - 中文翻译更新
+- lib/l10n/app_en.arb - 英文翻译更新
+- lib/l10n/generated/* - 自动生成的国际化代码
+
+## 📝 完整提交历史
 - fbc2838 fix: 修复语言切换后 SnackBar 无法关闭的问题
 ```
 
