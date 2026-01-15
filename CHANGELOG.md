@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] - 2026-01-15
+
+### Fixed
+- 🐛 **语言切换修复** - 修复语言切换后 SnackBar 无法关闭的问题
+  - 确保语言切换后通知提示框可以正常关闭
+  - 提升用户界面交互体验
+
+### Technical Details
+- 📁 修改文件：
+  - `lib/ui/widgets/app_shell.dart` - SnackBar 状态管理
+- 🏷️ Tag 管理：
+  - 删除错误的 v0.3.3 tag
+  - 创建正确的 v0.3.2 tag
+  - 完善版本控制规则体系
+
+### Documentation
+- 📚 新增文档：
+  - `.claude/rules/VERSION_CONTROL_RULES.md` - 版本控制与 Tag 管理规范
+  - `.claude/rules/VERSION_CONTROL_HISTORY.md` - 版本控制历史记录
+  - `.claude/rules/README.md` - 规则文档索引
+- 📝 更新文档：
+  - `.claude/CLAUDE.md` - 添加版本控制规则说明
+
+### Process Improvements
+- ✨ 建立版本控制规则体系：
+  - 每次对话必须记录所有修改
+  - 每次 push 前必须检查代码质量
+  - Tag 创建必须有详细注释和发布文档
+  - 所有操作必须在版本历史中追溯
+
+---
+
 ## [0.3.1] - 2026-01-15
 
 ### Fixed - Windows Platform Services Compatibility
