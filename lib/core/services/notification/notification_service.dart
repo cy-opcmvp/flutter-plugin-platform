@@ -38,7 +38,17 @@ class NotificationServiceImpl extends platform.INotificationService
     }
 
     try {
-      // Initialize timezone database
+      // Windows platform: flutter_local_notifications 17.x doesn't properly support Windows
+      // Skip initialization and mark as successful to prevent crashes
+      if (defaultTargetPlatform == TargetPlatform.windows) {
+        if (kDebugMode) {
+          print('NotificationService: Windows platform detected - using UI notifications');
+        }
+        _isInitialized = true;
+        return true;
+      }
+
+      // Initialize timezone database for other platforms
       tz_data.initializeTimeZones();
 
       // Android initialization settings
@@ -79,9 +89,10 @@ class NotificationServiceImpl extends platform.INotificationService
       }
 
       return _isInitialized;
-    } catch (e) {
+    } catch (e, stackTrace) {
       if (kDebugMode) {
         print('NotificationService: Initialization failed: $e');
+        print('StackTrace: $stackTrace');
       }
       _isInitialized = false;
       return false;
@@ -158,6 +169,22 @@ class NotificationServiceImpl extends platform.INotificationService
   }) async {
     if (!_isInitialized) {
       throw StateError('NotificationService not initialized');
+    }
+
+    // Windows platform: Emit notification event for UI to handle
+    if (defaultTargetPlatform == TargetPlatform.windows) {
+      if (kDebugMode) {
+        print('NotificationService: [Windows] Emitting notification event: $title - $body');
+      }
+
+      // Emit event so UI can display SnackBar or similar
+      _notificationClickController.add(platform.NotificationEvent(
+        id: id,
+        payload: '$title|$body',  // Encode title and body in payload
+        timestamp: DateTime.now(),
+      ));
+
+      return;
     }
 
     try {
@@ -247,6 +274,14 @@ class NotificationServiceImpl extends platform.INotificationService
       throw StateError('NotificationService not initialized');
     }
 
+    // Windows platform: No-op since notifications aren't supported
+    if (defaultTargetPlatform == TargetPlatform.windows) {
+      if (kDebugMode) {
+        print('NotificationService: [Windows] Cancel notification $id (no-op)');
+      }
+      return;
+    }
+
     try {
       await _plugin.cancel(int.tryParse(id) ?? 0);
 
@@ -266,6 +301,14 @@ class NotificationServiceImpl extends platform.INotificationService
   Future<void> cancelAllNotifications() async {
     if (!_isInitialized) {
       throw StateError('NotificationService not initialized');
+    }
+
+    // Windows platform: No-op since notifications aren't supported
+    if (defaultTargetPlatform == TargetPlatform.windows) {
+      if (kDebugMode) {
+        print('NotificationService: [Windows] Cancel all notifications (no-op)');
+      }
+      return;
     }
 
     try {

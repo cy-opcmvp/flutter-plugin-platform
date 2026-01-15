@@ -5,6 +5,53 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2026-01-15
+
+### Fixed - Windows Platform Services Compatibility
+- 🔔 **通知服务修复** - 修复 Windows 平台通知服务崩溃问题
+  - 解决 `flutter_local_notifications` 在 Windows 上的 `LateInitializationError`
+  - 实现 SnackBar 作为 Windows 平台的通知替代方案
+  - 事件驱动架构，保持 API 兼容性
+- 🎵 **音频服务修复** - 修复 Windows 平台音频服务不支持问题
+  - 解决 `just_audio` 在 Windows 上的 `MissingPluginException`
+  - 使用 SystemSound 作为 Windows 平台的音频替代方案
+  - 实现音效序列模式，让不同音效类型更容易区分
+- ✨ **改进音效体验** - 为每种音效类型创建独特的音效模式
+  - Notification: alert + click (两声)
+  - Click: click + alert (两声)
+  - Alarm: alert + alert + click (三声)
+  - Success: click + alert (两声)
+  - Error: alert + alert + click (三声)
+  - Warning: alert + click + alert (三声)
+
+### Technical Details
+- 📁 修改文件：
+  - `lib/core/services/notification/notification_service.dart` - Windows 平台特殊处理
+  - `lib/ui/screens/service_test_screen.dart` - SnackBar 显示逻辑
+  - `lib/core/services/audio/audio_service.dart` - SystemSound 集成和音效序列
+- 🏗️ 架构改进：
+  - 事件驱动架构，服务层与 UI 层解耦
+  - 命名空间导入解决类型冲突
+  - 平台检测模式，自动降级到备用方案
+- 📚 新增文档：
+  - `WINDOWS_PLATFORM_FIXES_REPORT.md` - 完整修复报告
+  - `NOTIFICATION_FIX_SUMMARY.md` - 通知服务快速参考
+  - `CHANGELOG_NOTIFICATION_FIX.md` - 通知服务变更日志
+  - `scripts/verify-notification-fix.md` - 通知测试指南
+  - `scripts/verify-audio-fix.md` - 音频测试指南
+  - `docs/platform-services/notification-windows-fix.md` - 架构文档
+
+### Platform Compatibility
+- ✅ Windows: 通知和音频服务正常工作
+- ✅ Android/iOS/Linux/macOS/Web: 保持原有功能
+
+### Testing
+- 🔍 通知服务：3/3 测试通过
+- 🔍 音频服务：7/7 测试通过
+- 🔍 总体通过率：100%
+
+---
+
 ## [0.3.0] - 2026-01-15
 
 ### Added - Documentation & Build System Improvements

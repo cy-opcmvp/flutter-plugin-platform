@@ -1,28 +1,65 @@
 /// Audio Service Implementation
 ///
-/// Cross-platform audio playback service using just_audio.
+/// Cross-platform audio playback service using just_audio
+/// and fallback to SystemSound for Windows.
 library;
 
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart' as flutter_services;  // For SystemSound on Windows
 import 'package:just_audio/just_audio.dart';
-import 'package:plugin_platform/core/interfaces/services/i_audio_service.dart';
+import 'package:plugin_platform/core/interfaces/services/i_audio_service.dart' as platform;
 import 'package:plugin_platform/core/services/disposable.dart';
 
 /// Audio service implementation
-class AudioServiceImpl extends IAudioService implements Disposable {
-  final Map<String, AudioPlayer> _players = {};
-  final Map<SystemSoundType, String> _systemSoundPaths = {
-    SystemSoundType.notification: 'assets/audio/notification.mp3',
-    SystemSoundType.alarm: 'assets/audio/alarm.mp3',
-    SystemSoundType.click: 'assets/audio/click.mp3',
-    SystemSoundType.success: 'assets/audio/success.mp3',
-    SystemSoundType.error: 'assets/audio/error.mp3',
-    SystemSoundType.warning: 'assets/audio/warning.mp3',
+class AudioServiceImpl extends platform.IAudioService implements Disposable {
+  final Map<String, dynamic> _players = {};  // Use dynamic for platform-specific players
+  final Map<platform.SystemSoundType, String> _systemSoundPaths = {
+    platform.SystemSoundType.notification: 'assets/audio/notification.mp3',
+    platform.SystemSoundType.alarm: 'assets/audio/alarm.mp3',
+    platform.SystemSoundType.click: 'assets/audio/click.mp3',
+    platform.SystemSoundType.success: 'assets/audio/success.mp3',
+    platform.SystemSoundType.error: 'assets/audio/error.mp3',
+    platform.SystemSoundType.warning: 'assets/audio/warning.mp3',
+  };
+
+  // Windows system sound mapping
+  // Note: Flutter's SystemSoundType only has: click and alert
+  // Since click often has no sound on Windows, we use alert for most sounds
+  // but vary the pattern to make them distinguishable
+  final Map<platform.SystemSoundType, List<flutter_services.SystemSoundType>> _windowsSystemSounds = {
+    platform.SystemSoundType.notification: [
+      flutter_services.SystemSoundType.alert,
+      flutter_services.SystemSoundType.click,
+    ],
+    platform.SystemSoundType.click: [
+      flutter_services.SystemSoundType.click,
+      flutter_services.SystemSoundType.alert,
+    ],
+    platform.SystemSoundType.alarm: [
+      flutter_services.SystemSoundType.alert,
+      flutter_services.SystemSoundType.alert,
+      flutter_services.SystemSoundType.click,
+    ],
+    platform.SystemSoundType.success: [
+      flutter_services.SystemSoundType.click,
+      flutter_services.SystemSoundType.alert,
+    ],
+    platform.SystemSoundType.error: [
+      flutter_services.SystemSoundType.alert,
+      flutter_services.SystemSoundType.alert,
+      flutter_services.SystemSoundType.click,
+    ],
+    platform.SystemSoundType.warning: [
+      flutter_services.SystemSoundType.alert,
+      flutter_services.SystemSoundType.click,
+      flutter_services.SystemSoundType.alert,
+    ],
   };
 
   double _globalVolume = 1.0;
   bool _isInitialized = false;
+  bool _useJustAudio = true;  // Flag to determine which audio system to use
 
   @override
   bool get isInitialized => _isInitialized;
@@ -35,18 +72,42 @@ class AudioServiceImpl extends IAudioService implements Disposable {
     }
 
     try {
-      // Pre-warm the audio system by creating one player
-      final player = AudioPlayer();
-      await player.setVolume(_globalVolume);
-      _players['_warmup'] = player;
+      // Windows platform: just_audio not supported, use SystemSound instead
+      if (defaultTargetPlatform == TargetPlatform.windows) {
+        _useJustAudio = false;
+        _isInitialized = true;
 
-      _isInitialized = true;
+        if (kDebugMode) {
+          print('AudioService: Windows platform detected - using SystemSound');
+        }
 
-      if (kDebugMode) {
-        print('AudioService: Initialized successfully (using just_audio)');
+        return true;
       }
 
-      return true;
+      // Other platforms: Use just_audio
+      try {
+        // Pre-warm the audio system by creating one player
+        final player = AudioPlayer();
+        await player.setVolume(_globalVolume);
+        _players['_warmup'] = player;
+
+        _isInitialized = true;
+
+        if (kDebugMode) {
+          print('AudioService: Initialized successfully (using just_audio)');
+        }
+
+        return true;
+      } catch (e) {
+        if (kDebugMode) {
+          print('AudioService: just_audio initialization failed: $e');
+          print('AudioService: Falling back to SystemSound');
+        }
+        // Fallback to SystemSound
+        _useJustAudio = false;
+        _isInitialized = true;
+        return true;
+      }
     } catch (e) {
       if (kDebugMode) {
         print('AudioService: Initialization failed: $e');
@@ -67,6 +128,17 @@ class AudioServiceImpl extends IAudioService implements Disposable {
       throw StateError('AudioService not initialized');
     }
 
+    // Windows platform: Limited support - use SystemSound for notification-like sounds
+    if (!_useJustAudio) {
+      if (kDebugMode) {
+        print('AudioService: [Windows] Custom sound playback not supported, using SystemSound instead');
+      }
+      // Fallback to system click sound
+      flutter_services.SystemSound.play(flutter_services.SystemSoundType.click);
+      return;
+    }
+
+    // Other platforms: Use just_audio
     try {
       final player = await _getPlayer();
       final adjustedVolume = (volume * _globalVolume).clamp(0.0, 1.0);
@@ -100,13 +172,46 @@ class AudioServiceImpl extends IAudioService implements Disposable {
   /// Play a system sound
   @override
   Future<void> playSystemSound({
-    required SystemSoundType soundType,
+    required platform.SystemSoundType soundType,
     double volume = 1.0,
   }) async {
     if (!_isInitialized) {
       throw StateError('AudioService not initialized');
     }
 
+    // Windows platform: Use SystemSound.play() with patterned sequences
+    if (!_useJustAudio) {
+      try {
+        final soundSequence = _windowsSystemSounds[soundType];
+        if (soundSequence != null && soundSequence.isNotEmpty) {
+          // Play the sequence with small delays to create distinctive patterns
+          for (int i = 0; i < soundSequence.length; i++) {
+            await Future.delayed(Duration(milliseconds: i * 100), () {
+              flutter_services.SystemSound.play(soundSequence[i]);
+            });
+          }
+
+          if (kDebugMode) {
+            print('AudioService: [Windows] Playing sound pattern for $soundType (${soundSequence.length} sounds)');
+          }
+        } else {
+          // Fallback
+          flutter_services.SystemSound.play(flutter_services.SystemSoundType.alert);
+          if (kDebugMode) {
+            print('AudioService: [Windows] Playing fallback sound for $soundType');
+          }
+        }
+        return;
+      } catch (e) {
+        if (kDebugMode) {
+          print('AudioService: [Windows] Error playing system sound: $e');
+        }
+        // Silently fail on Windows
+        return;
+      }
+    }
+
+    // Other platforms: Use just_audio
     final soundPath = _systemSoundPaths[soundType];
     if (soundPath == null) {
       if (kDebugMode) {
@@ -246,6 +351,14 @@ class AudioServiceImpl extends IAudioService implements Disposable {
   Future<void> setGlobalVolume(double volume) async {
     _globalVolume = volume.clamp(0.0, 1.0);
 
+    // Windows: SystemSound doesn't support volume control
+    if (!_useJustAudio) {
+      if (kDebugMode) {
+        print('AudioService: [Windows] Volume control not supported for SystemSound');
+      }
+      return;
+    }
+
     // Update volume for all active players
     for (final player in _players.values) {
       try {
@@ -265,6 +378,14 @@ class AudioServiceImpl extends IAudioService implements Disposable {
   /// Stop all audio playback
   @override
   Future<void> stopAll() async {
+    // Windows: SystemSound plays once and doesn't need stopping
+    if (!_useJustAudio) {
+      if (kDebugMode) {
+        print('AudioService: [Windows] Stop all - no active players to stop');
+      }
+      return;
+    }
+
     final playerIds = _players.keys.toList();
 
     for (final playerId in playerIds) {

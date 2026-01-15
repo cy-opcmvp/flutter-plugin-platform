@@ -46,6 +46,7 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
     super.initState();
     _checkPermissions();
     _setupTaskListeners();
+    _setupNotificationListener();
     _addLog('Service Test Screen initialized');
     // Delay task refresh to after init
     Future.microtask(() => _refreshActiveTasks());
@@ -78,6 +79,53 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
       _addLog('❌ Task failed: ${event.taskId} - ${event.error}');
       _refreshActiveTasks();
     });
+  }
+
+  void _setupNotificationListener() {
+    PlatformServiceManager.notification.onNotificationClick.listen((event) {
+      // On Windows, show notification as SnackBar
+      if (Theme.of(context).platform == TargetPlatform.windows) {
+        final payload = event.payload;
+        if (payload != null && payload.contains('|')) {
+          final parts = payload.split('|');
+          if (parts.length >= 2) {
+            final title = parts[0];
+            final body = parts[1];
+            _showNotificationSnackBar(title, body);
+          }
+        }
+      }
+    });
+  }
+
+  void _showNotificationSnackBar(String title, String body) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 4),
+            Text(body),
+          ],
+        ),
+        backgroundColor: Colors.blue,
+        duration: const Duration(seconds: 4),
+        action: SnackBarAction(
+          label: '关闭',
+          textColor: Colors.white,
+          onPressed: () {
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          },
+        ),
+      ),
+    );
   }
 
   Future<void> _refreshActiveTasks() async {
