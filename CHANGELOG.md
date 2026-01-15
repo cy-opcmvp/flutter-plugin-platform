@@ -5,6 +5,128 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-01-15
+
+### Added - Documentation & Build System Improvements
+- 📚 **完整的文档体系** - 重组和整理所有项目文档
+- 🤖 **AI 编码规则** - 建立 Claude Code 和 AI 助手的编码规范
+- 📁 **文件组织规范** - 明确的文件分类和组织规则
+- 🔧 **Windows 构建修复** - 解决 Windows 平台构建问题
+- 📋 **文档主索引** - 创建完整的文档导航中心
+
+### Documentation
+- [文档主索引](docs/MASTER_INDEX.md) - 50+ 个文档的导航中心
+- [文档重组记录](docs/DOCS_REORGANIZATION.md) - 文档组织说明
+- [AI 编码规则](.claude/rules.md) - Claude Code 编码规范主入口
+- [项目概览](.claude/PROJECT_OVERVIEW.md) - AI 助手项目理解指南
+- [文件组织规范](.claude/rules/FILE_ORGANIZATION_RULES.md) - 详细的文件组织规则
+- [Windows 分发指南](docs/WINDOWS_DISTRIBUTION_GUIDE.md) - Windows 平台产品化指南
+- [Windows 构建修复](docs/troubleshooting/WINDOWS_BUILD_FIX.md) - Windows 构建问题解决方案
+
+### Changes
+- 📂 移动所有根目录临时文档到合理的子目录
+  - 插件文档 → `docs/plugins/{plugin-name}/`
+  - 发布文档 → `docs/releases/`
+  - 实施报告 → `docs/reports/`
+  - 脚本文件 → `scripts/`
+  - 故障排除 → `docs/troubleshooting/`
+- 🔗 建立 `.claude/` 和 `.kiro/` 的关联
+- ✅ 根目录保持简洁，只保留核心文件
+
+### Build System
+- ✅ 修复 Windows 构建依赖问题
+- ✅ 创建 NuGet 包修复脚本
+- ✅ 临时禁用有问题的依赖（audioplayers, permission_handler）
+- ✅ 应用成功在 Windows 上运行
+
+### Developer Experience
+- 📖 更新 CHANGELOG.md，添加完整版本历史
+- 🤖 建立 AI 编码助手工作流程
+- 📋 创建文件组织决策树
+- ✨ 改进文档导航和交叉引用
+
+## [1.0.0] - 2026-01-15
+
+### Added - Platform Services Complete
+- 🔧 **平台通用服务系统** - 完整的跨平台服务架构
+- ✅ **通知服务** - 即时通知、定时通知、权限管理
+- 🔊 **音频服务** - 系统音效、背景音乐、音量控制
+- ⏰ **任务调度服务** - 倒计时、周期性任务、任务持久化
+- 📍 **服务定位器模式** - 统一的服务注册和管理
+- 🧪 **服务测试界面** - 内置的测试和验证界面
+
+### Features
+- 服务接口定义（INotificationService, IAudioService, ITaskSchedulerService）
+- 跨平台支持（Windows, macOS, Linux, Android, iOS）
+- 事件驱动架构（使用 Dart Streams）
+- 资源生命周期管理
+- 完整的单元测试（28个测试用例全部通过）
+
+### Documentation
+- [平台服务架构设计](.kiro/specs/platform-services/design.md)
+- [平台服务实施计划](.kiro/specs/platform-services/implementation-plan.md)
+- [平台服务测试文档](.kiro/specs/platform-services/testing-validation.md)
+- [平台服务快速开始](docs/platform-services/PLATFORM_SERVICES_README.md)
+- [平台服务用户指南](docs/guides/PLATFORM_SERVICES_USER_GUIDE.md)
+- [实施完成报告](docs/reports/PLATFORM_SERVICES_IMPLEMENTATION_COMPLETE.md)
+
+### Technical Implementation
+- 5000+ 行核心代码
+- 服务管理器（PlatformServiceManager）
+- 通知服务实现（flutter_local_notifications）
+- 音频服务实现（audioplayers）
+- 任务调度实现（Timer + SharedPreferences）
+
+## [0.2.1] - 2026-01-13
+
+### Added
+- 🌍 **世界时钟插件** - 功能完整的世界时钟和倒计时应用
+  - 多时区显示（10+预定义时区）
+  - 倒计时提醒功能
+  - 实时时间更新
+  - 完成通知
+  - 数据持久化
+- 🎨 **Material Design 3** UI改进
+- 🌐 **国际化支持** - 中文和英文
+- ⚙️ **设置功能** - 24小时制、显示秒数、通知开关、动画开关
+
+### Fixed
+- 🐛 修复世界时钟插件ID验证问题（com.example.world_clock → com.example.worldclock）
+- 🐛 修复添加时钟/倒计时按钮无法点击的问题
+- 🐛 修复UI状态管理问题
+- 📝 统一文档示例与插件ID验证规则
+
+### Documentation
+- [世界时钟实现文档](docs/plugins/world-clock/IMPLEMENTATION.md)
+- [世界时钟更新说明](docs/plugins/world-clock/UPDATE_v1.1.md)
+- [插件ID修复报告](docs/reports/PLUGIN_ID_FIX_SUMMARY.md)
+- [v0.2.1 发布说明](docs/releases/RELEASE_NOTES_v0.2.1.md)
+- 增强内部插件开发指南（添加插件ID命名规范章节）
+
+### Test Coverage
+- 完整的单元测试（test/plugins/world_clock_test.dart）
+- 插件生命周期测试
+- 数据模型序列化测试
+- 时区处理测试
+
+## [0.2.0] - 2026-01-10
+
+### Added
+- 🔧 **平台服务架构基础**
+  - 服务定位器（ServiceLocator）
+  - 可释放资源接口（Disposable）
+  - 依赖注入支持
+- 📚 **文档体系重组**
+  - 创建文档主索引（docs/MASTER_INDEX.md）
+  - 重组所有文档到合理目录结构
+  - 新增50+个技术文档
+
+### Documentation
+- 完整的文档导航系统
+- 插件文档、发布文档、实施报告分类
+- 技术规范文档（.kiro/specs/）
+- 交叉引用更新
+
 ## [0.1.0] - 2026-01-05
 
 ### Added
@@ -43,16 +165,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Plugin templates and examples
 
 ### Documentation
-- Getting started guide
-- Internal plugin development guide
-- External plugin development guide
-- Plugin SDK documentation
-- Desktop Pet guide
-- CLI tools documentation
-- Migration guides
-- Troubleshooting documentation
-- API reference
-- Code examples
+- [文档主索引](docs/MASTER_INDEX.md) - 完整的文档导航中心
+- [Getting started guide](docs/guides/getting-started.md)
+- [Internal plugin development guide](docs/guides/internal-plugin-development.md)
+- [External plugin development guide](docs/guides/external-plugin-development.md)
+- [Plugin SDK documentation](docs/guides/plugin-sdk-guide.md)
+- [Desktop Pet guide](docs/guides/desktop-pet-guide.md)
+- [CLI tools documentation](docs/tools/plugin-cli.md)
+- [Migration guides](docs/migration/)
+- [Troubleshooting documentation](docs/troubleshooting/)
+- [API reference](docs/reference/)
+- [Code examples](docs/examples/)
 
 ### Supported Platforms
 - ✅ Windows (full support including Desktop Pet)
@@ -63,4 +186,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ✅ iOS (mobile-optimized features)
 - ✅ Steam (desktop integration)
 
+[0.3.0]: https://github.com/your-username/flutter-plugin-platform/releases/tag/v0.3.0
+[1.0.0]: https://github.com/your-username/flutter-plugin-platform/releases/tag/v1.0.0
+[0.2.1]: https://github.com/your-username/flutter-plugin-platform/releases/tag/v0.2.1
+[0.2.0]: https://github.com/your-username/flutter-plugin-platform/releases/tag/v0.2.0
 [0.1.0]: https://github.com/your-username/flutter-plugin-platform/releases/tag/v0.1.0

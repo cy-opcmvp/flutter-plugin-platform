@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git pull:*)",
+      "Bash(flutter pub get:*)",
+      "Bash(flutter test:*)",
+      "Bash(flutter analyze:*)",
+      "Bash(move:*)",
+      "Skill(glm-plan-usage:usage-query-skill)",
+      "Skill(glm-plan-usage:usage-query-skill:*)",
+      "Bash(flutter clean:*)",
+      "Bash(powershell:*)",
+      "Bash(flutter build:*)",
+      "Bash(git config:*)",
+      "Bash(nuget sources:*)",
+      "Bash(tree:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}
