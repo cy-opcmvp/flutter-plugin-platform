@@ -57,18 +57,11 @@ class NotificationServiceImpl extends platform.INotificationService
         defaultActionName: 'Open notification',
       );
 
-      // Windows initialization settings
-      const windowsSettings = WindowsInitializationSettings(
-        appName: 'Plugin Platform',
-        appUserModelId: 'com.plugin_platform.app',
-      );
-
       // Initialization settings
       const initializationSettings = InitializationSettings(
         android: androidSettings,
         iOS: iosSettings,
         linux: linuxSettings,
-        windows: windowsSettings,
       );
 
       // Initialize the plugin
@@ -167,18 +160,25 @@ class NotificationServiceImpl extends platform.INotificationService
       throw StateError('NotificationService not initialized');
     }
 
-    final notificationDetails = _buildNotificationDetails(priority, sound);
+    try {
+      final notificationDetails = _buildNotificationDetails(priority, sound);
 
-    await _plugin.show(
-      int.tryParse(id) ?? 0,
-      title,
-      body,
-      notificationDetails,
-      payload: payload,
-    );
+      await _plugin.show(
+        int.tryParse(id) ?? 0,
+        title,
+        body,
+        notificationDetails,
+        payload: payload,
+      );
 
-    if (kDebugMode) {
-      print('NotificationService: Showed notification $id');
+      if (kDebugMode) {
+        print('NotificationService: Showed notification $id');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('NotificationService: Error showing notification: $e');
+      }
+      rethrow;
     }
   }
 
@@ -201,24 +201,25 @@ class NotificationServiceImpl extends platform.INotificationService
       throw ArgumentError('scheduledTime must be in the future');
     }
 
-    final notificationDetails = _buildNotificationDetails(priority, sound);
-
-    // Windows doesn't support zonedSchedule, use schedule instead
+    // Windows doesn't support scheduled notifications in flutter_local_notifications 17.x
+    // Use task scheduler instead
     if (defaultTargetPlatform == TargetPlatform.windows) {
-      await _plugin.schedule(
-        int.tryParse(id) ?? 0,
-        title,
-        body,
-        scheduledTime,
-        notificationDetails,
-        payload: payload,
-      );
-
       if (kDebugMode) {
-        print('NotificationService: Scheduled notification $id for $scheduledTime (Windows)');
+        print('NotificationService: Scheduled notifications not supported on Windows, showing immediately');
       }
+      // Fall back to immediate notification
+      await showNotification(
+        id: id,
+        title: title,
+        body: body,
+        payload: payload,
+        priority: priority,
+        sound: sound,
+      );
       return;
     }
+
+    final notificationDetails = _buildNotificationDetails(priority, sound);
 
     // For mobile platforms, use zonedSchedule with timezone support
     final scheduledDate = tz.TZDateTime.from(scheduledTime, tz.local);
@@ -246,10 +247,17 @@ class NotificationServiceImpl extends platform.INotificationService
       throw StateError('NotificationService not initialized');
     }
 
-    await _plugin.cancel(int.tryParse(id) ?? 0);
+    try {
+      await _plugin.cancel(int.tryParse(id) ?? 0);
 
-    if (kDebugMode) {
-      print('NotificationService: Cancelled notification $id');
+      if (kDebugMode) {
+        print('NotificationService: Cancelled notification $id');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('NotificationService: Error cancelling notification: $e');
+      }
+      rethrow;
     }
   }
 
@@ -260,10 +268,17 @@ class NotificationServiceImpl extends platform.INotificationService
       throw StateError('NotificationService not initialized');
     }
 
-    await _plugin.cancelAll();
+    try {
+      await _plugin.cancelAll();
 
-    if (kDebugMode) {
-      print('NotificationService: Cancelled all notifications');
+      if (kDebugMode) {
+        print('NotificationService: Cancelled all notifications');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('NotificationService: Error cancelling all notifications: $e');
+      }
+      rethrow;
     }
   }
 
