@@ -230,16 +230,45 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
   }
 
   Widget _buildAudioTab() {
+    final audioServiceAvailable = PlatformServiceManager.isServiceAvailable<IAudioService>();
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: ListView(
         children: [
-          const Card(
+          Card(
             child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text(
-                'Test various audio playback features',
-                style: TextStyle(fontSize: 16),
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Test various audio playback features',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(height: 8),
+                  if (!audioServiceAvailable)
+                    Container(
+                      padding: const EdgeInsets.all(8.0),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade100,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.info_outline, color: Colors.orange.shade700),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Audio service is not available on this platform. '
+                              'Some features may be disabled.',
+                              style: TextStyle(color: Colors.orange.shade900),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
               ),
             ),
           ),
@@ -291,10 +320,12 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                           value: 0.8,
                           divisions: 10,
                           label: '80%',
-                          onChanged: (value) {
-                            PlatformServiceManager.audio.setGlobalVolume(value);
-                            _addLog('Volume set to ${(value * 100).toInt()}%');
-                          },
+                          onChanged: PlatformServiceManager.isServiceAvailable<IAudioService>()
+                              ? (value) {
+                                  PlatformServiceManager.audio.setGlobalVolume(value);
+                                  _addLog('Volume set to ${(value * 100).toInt()}%');
+                                }
+                              : null,
                         ),
                       ],
                     ),
@@ -305,10 +336,12 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
           ),
           const SizedBox(height: 16),
           ElevatedButton.icon(
-            onPressed: () {
-              PlatformServiceManager.audio.stopAll();
-              _addLog('Stopped all audio playback');
-            },
+            onPressed: PlatformServiceManager.isServiceAvailable<IAudioService>()
+                ? () {
+                    PlatformServiceManager.audio.stopAll();
+                    _addLog('Stopped all audio playback');
+                  }
+                : null,
             icon: const Icon(Icons.stop),
             label: const Text('Stop All Audio'),
             style: ElevatedButton.styleFrom(
@@ -332,15 +365,20 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
         leading: Icon(icon, color: color),
         title: Text(label),
         trailing: const Icon(Icons.play_arrow),
-        onTap: () async {
-          try {
-            await PlatformServiceManager.audio.playSystemSound(soundType: soundType);
-            _addLog('Played $label');
-          } catch (e) {
-            _addLog('Error playing $label: $e');
-            _showErrorDialog('Error playing sound: $e');
-          }
-        },
+        onTap: PlatformServiceManager.isServiceAvailable<IAudioService>()
+            ? () async {
+                try {
+                  await PlatformServiceManager.audio.playSystemSound(soundType: soundType);
+                  _addLog('Played $label');
+                } catch (e) {
+                  _addLog('Error playing $label: $e');
+                  _showErrorDialog('Error playing sound: $e');
+                }
+              }
+            : () {
+                _addLog('⚠️ Audio service is not available');
+                _showErrorDialog('Audio service is not available on this platform');
+              },
       ),
     );
   }
@@ -648,9 +686,15 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
         taskId: taskId,
         scheduledTime: scheduledTime,
         callback: (data) async {
-          // Play notification sound
-          await PlatformServiceManager.audio
-              .playSystemSound(soundType: SystemSoundType.notification);
+          // Play notification sound (if available)
+          if (PlatformServiceManager.isServiceAvailable<IAudioService>()) {
+            try {
+              await PlatformServiceManager.audio
+                  .playSystemSound(soundType: SystemSoundType.notification);
+            } catch (e) {
+              _addLog('⚠️ Could not play sound: $e');
+            }
+          }
 
           // Show notification
           await PlatformServiceManager.notification.showNotification(
@@ -723,9 +767,15 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
         taskId: 'periodic_${DateTime.now().millisecondsSinceEpoch}',
         interval: Duration(seconds: interval),
         callback: (data) async {
-          // Play a short sound
-          await PlatformServiceManager.audio
-              .playSystemSound(soundType: SystemSoundType.click);
+          // Play a short sound (if available)
+          if (PlatformServiceManager.isServiceAvailable<IAudioService>()) {
+            try {
+              await PlatformServiceManager.audio
+                  .playSystemSound(soundType: SystemSoundType.click);
+            } catch (e) {
+              _addLog('⚠️ Could not play sound: $e');
+            }
+          }
           _addLog('🔄 Periodic task executed');
         },
       );
