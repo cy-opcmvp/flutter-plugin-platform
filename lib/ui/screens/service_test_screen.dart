@@ -4,6 +4,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:plugin_platform/core/services/platform_service_manager.dart';
 import 'package:plugin_platform/core/interfaces/services/i_notification_service.dart';
 import 'package:plugin_platform/core/interfaces/services/i_audio_service.dart';
@@ -592,6 +593,23 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                   label: const Text('Clear',
                       style: TextStyle(color: Colors.white70)),
                 ),
+                TextButton.icon(
+                  onPressed: _logs.isEmpty
+                      ? null
+                      : () {
+                          final logText = _logs.join('\n');
+                          Clipboard.setData(ClipboardData(text: logText));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('All logs copied to clipboard'),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                  icon: const Icon(Icons.copy_all, size: 16, color: Colors.white70),
+                  label: const Text('Copy All',
+                      style: TextStyle(color: Colors.white70)),
+                ),
               ],
             ),
           ),
@@ -601,14 +619,38 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
               padding: const EdgeInsets.all(8),
               itemCount: _logs.length,
               itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2),
-                  child: Text(
-                    _logs[index],
-                    style: const TextStyle(
-                      fontFamily: 'monospace',
-                      fontSize: 12,
-                      color: Colors.green,
+                return InkWell(
+                  onTap: () {
+                    // Copy single log entry on tap
+                    Clipboard.setData(ClipboardData(text: _logs[index]));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Log entry copied'),
+                        duration: const Duration(seconds: 1),
+                      ),
+                    );
+                  },
+                  onLongPress: () {
+                    // Copy single log entry on long press
+                    Clipboard.setData(ClipboardData(text: _logs[index]));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Log entry copied'),
+                        duration: Duration(seconds: 1),
+                      ),
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    child: SelectionArea(
+                      child: Text(
+                        _logs[index],
+                        style: const TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 12,
+                          color: Colors.green,
+                        ),
+                      ),
                     ),
                   ),
                 );
@@ -815,8 +857,19 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Error'),
-        content: Text(message),
+        content: SelectionArea(
+          child: Text(message),
+        ),
         actions: [
+          TextButton.icon(
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: message));
+              Navigator.of(context).pop();
+              _addLog('✅ Error message copied to clipboard');
+            },
+            icon: const Icon(Icons.copy),
+            label: const Text('Copy'),
+          ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('OK'),
