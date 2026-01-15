@@ -9,7 +9,7 @@ import 'package:plugin_platform/core/interfaces/services/i_notification_service.
 import 'package:plugin_platform/core/interfaces/services/i_audio_service.dart';
 import 'package:plugin_platform/core/interfaces/services/i_task_scheduler_service.dart';
 import 'package:plugin_platform/core/services/notification/notification_service.dart';
-// import 'package:plugin_platform/core/services/audio/audio_service.dart'; // Temporarily disabled
+import 'package:plugin_platform/core/services/audio/audio_service.dart';
 import 'package:plugin_platform/core/services/task_scheduler/task_scheduler_service.dart';
 
 /// Platform Service Manager
@@ -57,13 +57,10 @@ class PlatformServiceManager {
       NotificationServiceImpl(),
     );
 
-    // Register audio service - temporarily disabled for Windows build
-    // TODO: Implement Windows-specific audio playback
-    /*
+    // Register audio service
     locator.registerSingleton<IAudioService>(
       AudioServiceImpl(),
     );
-    */
 
     // Register task scheduler service
     locator.registerSingleton<ITaskSchedulerService>(
@@ -88,15 +85,12 @@ class PlatformServiceManager {
       print('$_tag: Notification service initialized: $notificationInitialized');
     }
 
-    // Initialize audio service - temporarily disabled for Windows build
-    // TODO: Implement Windows-specific audio playback
-    /*
+    // Initialize audio service
     final audioService = locator.get<IAudioService>();
     final audioInitialized = await audioService.initialize();
     if (kDebugMode) {
       print('$_tag: Audio service initialized: $audioInitialized');
     }
-    */
 
     // Initialize task scheduler service
     final taskSchedulerService = locator.get<ITaskSchedulerService>();

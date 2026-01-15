@@ -63,9 +63,8 @@ dependencies:
   # Local notifications
   flutter_local_notifications: ^17.2.3
 
-  # Audio playback - temporarily disabled for Windows build
-  # TODO: Implement Windows-specific audio playback using Win32 API or find alternative package
-  # audioplayers: ^5.2.1
+  # Audio playback - using just_audio for better Windows compatibility
+  just_audio: ^0.9.36
 
   # Permission management - temporarily disabled for Windows build
   # TODO: Re-enable when needed for mobile platforms

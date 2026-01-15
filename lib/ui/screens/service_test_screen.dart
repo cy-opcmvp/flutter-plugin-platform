@@ -4,7 +4,7 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/services.dart' as flutter_services;
 import 'package:plugin_platform/core/services/platform_service_manager.dart';
 import 'package:plugin_platform/core/interfaces/services/i_notification_service.dart';
 import 'package:plugin_platform/core/interfaces/services/i_audio_service.dart';
@@ -598,7 +598,7 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                       ? null
                       : () {
                           final logText = _logs.join('\n');
-                          Clipboard.setData(ClipboardData(text: logText));
+                          flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: logText));
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('All logs copied to clipboard'),
@@ -622,7 +622,7 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                 return InkWell(
                   onTap: () {
                     // Copy single log entry on tap
-                    Clipboard.setData(ClipboardData(text: _logs[index]));
+                    flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: _logs[index]));
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('Log entry copied'),
@@ -632,7 +632,7 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                   },
                   onLongPress: () {
                     // Copy single log entry on long press
-                    Clipboard.setData(ClipboardData(text: _logs[index]));
+                    flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: _logs[index]));
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Log entry copied'),
@@ -863,7 +863,7 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
         actions: [
           TextButton.icon(
             onPressed: () {
-              Clipboard.setData(ClipboardData(text: message));
+              flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: message));
               Navigator.of(context).pop();
               _addLog('✅ Error message copied to clipboard');
             },

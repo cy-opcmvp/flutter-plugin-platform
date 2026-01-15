@@ -1,11 +1,11 @@
 /// Audio Service Implementation
 ///
-/// Cross-platform audio playback service using audioplayers.
+/// Cross-platform audio playback service using just_audio.
 library;
 
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:audioplayers/audioplayers.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:plugin_platform/core/interfaces/services/i_audio_service.dart';
 import 'package:plugin_platform/core/services/disposable.dart';
 
@@ -43,7 +43,7 @@ class AudioServiceImpl extends IAudioService implements Disposable {
       _isInitialized = true;
 
       if (kDebugMode) {
-        print('AudioService: Initialized successfully');
+        print('AudioService: Initialized successfully (using just_audio)');
       }
 
       return true;
@@ -71,14 +71,23 @@ class AudioServiceImpl extends IAudioService implements Disposable {
       final player = await _getPlayer();
       final adjustedVolume = (volume * _globalVolume).clamp(0.0, 1.0);
 
+      // Determine if it's an asset or URL
+      if (soundPath.startsWith('http')) {
+        await player.setUrl(soundPath);
+      } else {
+        await player.setAsset(soundPath);
+      }
+
       await player.setVolume(adjustedVolume);
-      await player.play(
-        AssetSource(soundPath),
-        mode: PlayerMode.lowLatency,
-      );
+
+      if (loop) {
+        await player.setLoopMode(LoopMode.one);
+      }
+
+      await player.play();
 
       if (kDebugMode) {
-        print('AudioService: Playing sound $soundPath');
+        print('AudioService: Playing sound $soundPath (loop: $loop)');
       }
     } catch (e) {
       if (kDebugMode) {
@@ -100,13 +109,28 @@ class AudioServiceImpl extends IAudioService implements Disposable {
 
     final soundPath = _systemSoundPaths[soundType];
     if (soundPath == null) {
-      throw ArgumentError('Unknown system sound type: $soundType');
+      if (kDebugMode) {
+        print('AudioService: No sound path for $soundType');
+      }
+      return;
     }
 
-    await playSound(soundPath: soundPath, volume: volume);
+    try {
+      final player = await _getPlayer();
+      final adjustedVolume = (volume * _globalVolume).clamp(0.0, 1.0);
 
-    if (kDebugMode) {
-      print('AudioService: Playing system sound $soundType');
+      await player.setVolume(adjustedVolume);
+      await player.setAsset(soundPath);
+      await player.play();
+
+      if (kDebugMode) {
+        print('AudioService: Playing system sound $soundType');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('AudioService: Error playing system sound: $e');
+      }
+      rethrow;
     }
   }
 
@@ -122,20 +146,27 @@ class AudioServiceImpl extends IAudioService implements Disposable {
     }
 
     try {
-      final playerId = 'music_${DateTime.now().millisecondsSinceEpoch}';
-      final player = await _getPlayer(playerId);
+      final playerId = DateTime.now().millisecondsSinceEpoch.toString();
+      final player = AudioPlayer();
 
-      final adjustedVolume = (volume * _globalVolume).clamp(0.0, 1.0);
-      await player.setVolume(adjustedVolume);
-      await player.setReleaseMode(loop ? ReleaseMode.loop : ReleaseMode.release);
+      if (musicPath.startsWith('http')) {
+        await player.setUrl(musicPath);
+      } else {
+        await player.setAsset(musicPath);
+      }
 
-      await player.play(
-        AssetSource(musicPath),
-        mode: PlayerMode.mediaPlayer,
-      );
+      await player.setVolume((volume * _globalVolume).clamp(0.0, 1.0));
+
+      if (loop) {
+        await player.setLoopMode(LoopMode.one);
+      }
+
+      await player.play();
+
+      _players[playerId] = player;
 
       if (kDebugMode) {
-        print('AudioService: Playing music $musicPath (player: $playerId)');
+        print('AudioService: Playing music $musicPath (loop: $loop)');
       }
 
       return playerId;
@@ -147,37 +178,47 @@ class AudioServiceImpl extends IAudioService implements Disposable {
     }
   }
 
-  /// Stop music playback
+  /// Stop a specific sound
   @override
-  Future<void> stopMusic(String playerId) async {
-    if (!_isInitialized) {
-      throw StateError('AudioService not initialized');
-    }
-
-    final player = _players[playerId];
+  Future<void> stopSound(String soundId) async {
+    final player = _players[soundId];
     if (player != null) {
-      await player.stop();
-      await _releasePlayer(playerId);
+      try {
+        await player.stop();
+        await player.dispose();
+        _players.remove(soundId);
 
-      if (kDebugMode) {
-        print('AudioService: Stopped music player $playerId');
+        if (kDebugMode) {
+          print('AudioService: Stopped sound $soundId');
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('AudioService: Error stopping sound: $e');
+        }
       }
     }
+  }
+
+  /// Stop background music
+  @override
+  Future<void> stopMusic(String musicId) async {
+    await stopSound(musicId);
   }
 
   /// Pause music playback
   @override
   Future<void> pauseMusic(String playerId) async {
-    if (!_isInitialized) {
-      throw StateError('AudioService not initialized');
-    }
-
     final player = _players[playerId];
     if (player != null) {
-      await player.pause();
-
-      if (kDebugMode) {
-        print('AudioService: Paused music player $playerId');
+      try {
+        await player.pause();
+        if (kDebugMode) {
+          print('AudioService: Paused music $playerId');
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('AudioService: Error pausing music: $e');
+        }
       }
     }
   }
@@ -185,99 +226,119 @@ class AudioServiceImpl extends IAudioService implements Disposable {
   /// Resume music playback
   @override
   Future<void> resumeMusic(String playerId) async {
-    if (!_isInitialized) {
-      throw StateError('AudioService not initialized');
-    }
-
     final player = _players[playerId];
     if (player != null) {
-      await player.resume();
-
-      if (kDebugMode) {
-        print('AudioService: Resumed music player $playerId');
+      try {
+        await player.play();
+        if (kDebugMode) {
+          print('AudioService: Resumed music $playerId');
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('AudioService: Error resuming music: $e');
+        }
       }
     }
   }
 
-  /// Set global volume for all audio
+  /// Set global volume
   @override
   Future<void> setGlobalVolume(double volume) async {
-    final clampedVolume = volume.clamp(0.0, 1.0);
-    _globalVolume = clampedVolume;
+    _globalVolume = volume.clamp(0.0, 1.0);
 
     // Update volume for all active players
     for (final player in _players.values) {
-      await player.setVolume(_globalVolume);
+      try {
+        await player.setVolume(_globalVolume);
+      } catch (e) {
+        if (kDebugMode) {
+          print('AudioService: Error setting volume: $e');
+        }
+      }
     }
 
     if (kDebugMode) {
-      print('AudioService: Set global volume to $_globalVolume');
+      print('AudioService: Global volume set to $_globalVolume');
     }
   }
 
   /// Stop all audio playback
   @override
   Future<void> stopAll() async {
-    if (!_isInitialized) {
-      return;
-    }
+    final playerIds = _players.keys.toList();
 
-    final players = List<String>.from(_players.keys);
+    for (final playerId in playerIds) {
+      if (playerId == '_warmup') continue;
 
-    for (final playerId in players) {
-      if (playerId != '_warmup') {
-        await stopMusic(playerId);
+      final player = _players[playerId];
+      if (player != null) {
+        try {
+          await player.stop();
+          await player.dispose();
+        } catch (e) {
+          if (kDebugMode) {
+            print('AudioService: Error stopping player $playerId: $e');
+          }
+        }
       }
     }
 
+    _players.clear();
+
+    // Recreate warmup player
+    final warmupPlayer = AudioPlayer();
+    await warmupPlayer.setVolume(_globalVolume);
+    _players['_warmup'] = warmupPlayer;
+
     if (kDebugMode) {
-      print('AudioService: Stopped all audio');
+      print('AudioService: Stopped all audio playback');
     }
   }
 
   /// Get or create a player
-  Future<AudioPlayer> _getPlayer([String? playerId]) async {
-    final id = playerId ?? 'sound_${DateTime.now().millisecondsSinceEpoch}';
+  Future<AudioPlayer> _getPlayer() async {
+    // Try to find an available player
+    for (final entry in _players.entries) {
+      if (entry.key == '_warmup') continue;
 
-    if (!_players.containsKey(id)) {
-      final player = AudioPlayer();
-      _players[id] = player;
-
-      // Listen for completion to auto-release
-      player.onPlayerComplete.listen((_) {
-        if (id.startsWith('sound_')) {
-          _releasePlayer(id);
+      final player = entry.value;
+      // Check if player is not playing
+      try {
+        if (player.playerState.playing == false) {
+          return player;
         }
-      });
+      } catch (e) {
+        // Player might be disposed, continue
+        continue;
+      }
     }
 
-    return _players[id]!;
+    // Create a new player if none available
+    final newPlayer = AudioPlayer();
+    final newId = DateTime.now().millisecondsSinceEpoch.toString();
+    _players[newId] = newPlayer;
+
+    return newPlayer;
   }
 
-  /// Release a player
-  Future<void> _releasePlayer(String playerId) async {
-    final player = _players.remove(playerId);
-    if (player != null) {
-      await player.dispose();
-    }
-  }
-
-  /// Dispose of resources
+  /// Dispose the audio service
   @override
   Future<void> dispose() async {
-    await stopAll();
-
-    // Dispose all players
-    final players = List<AudioPlayer>.from(_players.values);
-    for (final player in players) {
-      await player.dispose();
+    for (final player in _players.values) {
+      try {
+        await player.dispose();
+      } catch (e) {
+        if (kDebugMode) {
+          print('AudioService: Error disposing player: $e');
+        }
+      }
     }
 
     _players.clear();
     _isInitialized = false;
 
     if (kDebugMode) {
-      print('AudioService: Disposed');
+      print('AudioService: Disposed (using just_audio)');
     }
   }
 }
