@@ -1,10 +1,12 @@
 library;
 
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../screenshot_plugin.dart';
 import '../models/screenshot_models.dart';
 import 'screenshot_overlay.dart';
+import 'screenshot_window.dart';
 import 'settings_screen.dart';
 import 'history_screen.dart';
 
@@ -335,14 +337,20 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
 
   /// 开始区域截图
   void _startRegionCapture() async {
+    debugPrint('===== 开始区域截图 =====');
+
     try {
-      // 先捕获全屏作为背景
-      final bytes = await widget.plugin.captureFullScreenBytes();
-      if (bytes == null) {
+      // 使用原生窗口进行区域选择（桌面级）
+      debugPrint('调用 showNativeRegionCapture...');
+      final success = await widget.plugin.showNativeRegionCapture();
+      debugPrint('showNativeRegionCapture 返回: $success');
+
+      if (!success) {
+        debugPrint('无法打开原生截图窗口');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('无法捕获屏幕截图'),
+              content: Text('无法打开原生截图窗口'),
               duration: Duration(seconds: 2),
             ),
           );
@@ -350,31 +358,11 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
         return;
       }
 
-      // 显示截图覆盖层
-      if (mounted) {
-        final result = await Navigator.of(context).push<Rect>(
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) {
-              return ScreenshotOverlay(
-                screenshotBytes: bytes,
-                onRegionSelected: (rect) {
-                  Navigator.of(context).pop(rect);
-                },
-                onCancel: () {
-                  Navigator.of(context).pop();
-                },
-              );
-            },
-            opaque: false,
-          ),
-        );
-
-        // 如果用户选择了区域，捕获该区域
-        if (result != null) {
-          await widget.plugin.captureRegion(result);
-        }
-      }
+      debugPrint('原生窗口已显示，开始轮询结果...');
+      // 轮询获取选择结果
+      _pollForResult();
     } catch (e) {
+      debugPrint('区域截图异常: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -384,6 +372,44 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
         );
       }
     }
+  }
+
+  /// 轮询获取区域选择结果
+  void _pollForResult() async {
+    const maxPolls = 300; // 最多轮询 30 秒（每 100ms 一次）
+    int polls = 0;
+
+    debugPrint('开始轮询，最多 $maxPolls 次...');
+
+    while (polls < maxPolls) {
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      final result = await widget.plugin.getRegionSelectionResult();
+      polls++;
+
+      // 每 10 次轮询打印一次日志
+      if (polls % 10 == 0) {
+        debugPrint('轮询第 $polls 次，result = $result');
+      }
+
+      if (result != null) {
+        debugPrint('收到选择结果: ${result.x}, ${result.y}, ${result.width}x${result.height}');
+        // 用户选择了区域
+        final rect = result.toRect();
+        debugPrint('开始捕获区域: $rect');
+        await widget.plugin.captureRegion(rect);
+        debugPrint('区域捕获完成');
+        return;
+      }
+
+      // 注意：如果用户取消，result 也会是 null
+      // 我们可以通过多次连续返回 null 来判断取消（原生窗口会设置 completed 标志）
+      // 但当前实现无法区分"还未完成"和"已取消"
+      // 简单的做法是设置超时时间
+    }
+
+    // 超时，假设用户取消了
+    debugPrint('===== 区域截图超时，假设用户取消 =====');
   }
 
   /// 捕获全屏截图
@@ -443,7 +469,15 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
   void _viewScreenshot(ScreenshotRecord record) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => _ScreenshotPreviewScreen(record: record),
+        builder: (context) => _ScreenshotPreviewScreen(
+          record: record,
+          onDelete: () async {
+            await widget.plugin.deleteScreenshot(record.id);
+            if (mounted) {
+              setState(() {});
+            }
+          },
+        ),
       ),
     );
   }
@@ -706,11 +740,66 @@ class _WindowListDialog extends StatelessWidget {
   }
 }
 
-/// 截图预览界面（简化版）
-class _ScreenshotPreviewScreen extends StatelessWidget {
+/// 截图预览界面
+class _ScreenshotPreviewScreen extends StatefulWidget {
   final ScreenshotRecord record;
+  final VoidCallback? onDelete;
 
-  const _ScreenshotPreviewScreen({required this.record});
+  const _ScreenshotPreviewScreen({
+    required this.record,
+    this.onDelete,
+  });
+
+  @override
+  State<_ScreenshotPreviewScreen> createState() => _ScreenshotPreviewScreenState();
+}
+
+class _ScreenshotPreviewScreenState extends State<_ScreenshotPreviewScreen> {
+  bool _isLoading = true;
+  Uint8List? _imageBytes;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadImage();
+  }
+
+  Future<void> _loadImage() async {
+    try {
+      final file = File(widget.record.filePath);
+      if (await file.exists()) {
+        final bytes = await file.readAsBytes();
+        if (mounted) {
+          setState(() {
+            _imageBytes = bytes;
+            _isLoading = false;
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('截图文件不存在')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('加载图片失败: $e')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -718,11 +807,103 @@ class _ScreenshotPreviewScreen extends StatelessWidget {
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black87,
-        title: Text(_formatDate(record.createdAt)),
+        foregroundColor: Colors.white,
+        title: Text(_formatDate(widget.record.createdAt)),
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () => Navigator.of(context).pop(),
+          tooltip: '关闭',
+        ),
+        actions: [
+          if (_imageBytes != null)
+            IconButton(
+              icon: const Icon(Icons.copy),
+              onPressed: _copyToClipboard,
+              tooltip: '复制到剪贴板',
+            ),
+          if (_imageBytes != null)
+            IconButton(
+              icon: const Icon(Icons.share),
+              onPressed: _shareImage,
+              tooltip: '分享',
+            ),
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: _confirmDelete,
+            tooltip: '删除',
+          ),
+        ],
       ),
-      body: Center(
-        child: Image.file(
-          File(record.filePath),
+      body: Stack(
+        children: [
+          // 图片预览
+          _buildBody(),
+
+          // 底部关闭按钮（更明显）
+          Positioned(
+            bottom: 20,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: ElevatedButton.icon(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.close),
+                label: const Text('关闭预览'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_isLoading) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(color: Colors.white),
+            SizedBox(height: 16),
+            Text(
+              '加载中...',
+              style: TextStyle(color: Colors.white, fontSize: 16),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_imageBytes == null) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.broken_image, size: 80, color: Colors.grey),
+            SizedBox(height: 16),
+            Text(
+              '无法加载图片',
+              style: TextStyle(color: Colors.grey, fontSize: 18),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Center(
+      child: InteractiveViewer(
+        minScale: 0.5,
+        maxScale: 4.0,
+        child: Image.memory(
+          _imageBytes!,
           fit: BoxFit.contain,
           errorBuilder: (context, error, stackTrace) {
             return const Column(
@@ -738,6 +919,73 @@ class _ScreenshotPreviewScreen extends StatelessWidget {
             );
           },
         ),
+      ),
+    );
+  }
+
+  Future<void> _copyToClipboard() async {
+    if (_imageBytes == null) return;
+
+    try {
+      // 将图片复制到剪贴板需要额外的剪贴板服务
+      // 这里我们使用一个简化的方式：保存到临时文件
+      final tempDir = await Directory.systemTemp.createTemp();
+      final tempFile = File('${tempDir.path}/screenshot.png');
+      await tempFile.writeAsBytes(_imageBytes!);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('图片已保存到临时文件夹'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('复制失败: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _shareImage() async {
+    if (_imageBytes == null) return;
+
+    // TODO: 实现分享功能
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('分享功能待实现'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  void _confirmDelete() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('确认删除'),
+        content: const Text('确定要删除这张截图吗？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              Navigator.of(context).pop(); // 关闭对话框
+              widget.onDelete?.call();
+              if (mounted) {
+                Navigator.of(context).pop(); // 关闭预览界面
+              }
+            },
+            child: const Text('删除'),
+          ),
+        ],
       ),
     );
   }

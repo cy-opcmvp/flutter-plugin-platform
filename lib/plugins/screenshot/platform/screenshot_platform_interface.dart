@@ -5,6 +5,23 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import '../models/screenshot_models.dart';
 
+/// 区域选择事件
+class RegionSelectedEvent {
+  final int x;
+  final int y;
+  final int width;
+  final int height;
+
+  const RegionSelectedEvent({
+    required this.x,
+    required this.y,
+    required this.width,
+    required this.height,
+  });
+
+  Rect toRect() => Rect.fromLTWH(x.toDouble(), y.toDouble(), width.toDouble(), height.toDouble());
+}
+
 /// 截图平台接口抽象
 ///
 /// 定义了跨平台截图功能的统一接口
@@ -60,13 +77,24 @@ abstract class ScreenshotPlatformInterface {
   ///
   /// 返回主屏幕的矩形区域
   Future<Rect?> getPrimaryScreenSize();
+
+  /// 显示原生区域截图窗口（桌面级）
+  ///
+  /// 返回 true 如果成功显示窗口
+  Future<bool> showNativeRegionCapture();
+
+  /// 获取区域选择结果（用于轮询）
+  ///
+  /// 返回 null 如果还未完成，返回 RegionSelectedEvent 如果已选择，
+  /// 返回 null 的单次调用表示用户取消
+  Future<RegionSelectedEvent?> getRegionSelectionResult();
 }
 
 /// Windows 平台截图服务实现
 class WindowsScreenshotService implements ScreenshotPlatformInterface {
   static const MethodChannel _channel = MethodChannel('com.example.screenshot/screenshot');
 
-  const WindowsScreenshotService();
+  WindowsScreenshotService();
 
   @override
   bool get isAvailable => Platform.isWindows;
@@ -157,6 +185,39 @@ class WindowsScreenshotService implements ScreenshotPlatformInterface {
       return null;
     }
   }
+
+  @override
+  Future<bool> showNativeRegionCapture() async {
+    try {
+      final result = await _channel.invokeMethod('showNativeRegionCapture');
+      return result == true;
+    } catch (e) {
+      print('Failed to show native region capture: $e');
+      return false;
+    }
+  }
+
+  @override
+  Future<RegionSelectedEvent?> getRegionSelectionResult() async {
+    try {
+      final result = await _channel.invokeMethod('getRegionSelectionResult');
+      if (result == null) {
+        // 还未完成或用户取消（无法区分，需要通过多次 null 调用来判断取消）
+        return null;
+      }
+
+      final Map<dynamic, dynamic> map = result as Map<dynamic, dynamic>;
+      return RegionSelectedEvent(
+        x: map['x'] as int,
+        y: map['y'] as int,
+        width: map['width'] as int,
+        height: map['height'] as int,
+      );
+    } catch (e) {
+      print('Failed to get region selection result: $e');
+      return null;
+    }
+  }
 }
 
 /// macOS 平台截图服务实现
@@ -196,6 +257,16 @@ class MacOSScreenshotService implements ScreenshotPlatformInterface {
   Future<Rect?> getPrimaryScreenSize() async {
     // TODO: 实现 macOS 获取屏幕尺寸
     return null;
+  }
+
+  @override
+  Future<bool> showNativeRegionCapture() async {
+    throw UnimplementedError('macOS native window capture not yet implemented');
+  }
+
+  @override
+  Future<RegionSelectedEvent?> getRegionSelectionResult() async {
+    throw UnimplementedError('macOS native window capture not yet implemented');
   }
 }
 
@@ -237,6 +308,16 @@ class LinuxScreenshotService implements ScreenshotPlatformInterface {
     // TODO: 实现 Linux 获取屏幕尺寸
     return null;
   }
+
+  @override
+  Future<bool> showNativeRegionCapture() async {
+    throw UnimplementedError('Linux native window capture not yet implemented');
+  }
+
+  @override
+  Future<RegionSelectedEvent?> getRegionSelectionResult() async {
+    throw UnimplementedError('Linux native window capture not yet implemented');
+  }
 }
 
 /// 降级处理服务（用于不支持的平台）
@@ -269,5 +350,15 @@ class FallbackScreenshotService implements ScreenshotPlatformInterface {
   @override
   Future<Rect?> getPrimaryScreenSize() async {
     return null;
+  }
+
+  @override
+  Future<bool> showNativeRegionCapture() async {
+    throw UnsupportedError('Native window capture is not supported on this platform');
+  }
+
+  @override
+  Future<RegionSelectedEvent?> getRegionSelectionResult() async {
+    throw UnsupportedError('Native window capture is not supported on this platform');
   }
 }

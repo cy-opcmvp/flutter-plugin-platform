@@ -1,7 +1,6 @@
 library;
 
 import 'dart:typed_data';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/screenshot_models.dart';
@@ -29,8 +28,7 @@ class _ScreenshotOverlayState extends State<ScreenshotOverlay> {
   Offset? _startPosition;
   Offset? _currentPosition;
   final double _borderWidth = 2.0;
-  final Color _borderColor = Colors.red;
-  final Color _fillColor = Colors.red.withOpacity(0.1);
+  final double _handleSize = 10.0;
   final double _minimumSize = 10.0;
 
   @override
@@ -53,16 +51,18 @@ class _ScreenshotOverlayState extends State<ScreenshotOverlay> {
       color: Colors.transparent,
       child: Stack(
         children: [
-          // 背景截图（半透明）
+          // 背景截图（完全清晰）
           Positioned.fill(
-            child: Opacity(
-              opacity: 0.5,
-              child: Image.memory(
-                widget.screenshotBytes,
-                fit: BoxFit.cover,
-                gaplessPlayback: true,
-              ),
+            child: Image.memory(
+              widget.screenshotBytes,
+              fit: BoxFit.cover,
+              gaplessPlayback: true,
             ),
+          ),
+
+          // 半透明蒙版层（在选择区域外显示）
+          Positioned.fill(
+            child: _buildDimOverlay(),
           ),
 
           // 手势检测层
@@ -72,10 +72,7 @@ class _ScreenshotOverlayState extends State<ScreenshotOverlay> {
               onPanUpdate: _handlePanUpdate,
               onPanEnd: _handlePanEnd,
               behavior: HitTestBehavior.translucent,
-              child: Container(
-                color: Colors.black26,
-                child: _buildSelectionIndicator(),
-              ),
+              child: _buildSelectionContent(),
             ),
           ),
 
@@ -86,31 +83,111 @@ class _ScreenshotOverlayState extends State<ScreenshotOverlay> {
     );
   }
 
-  /// 构建选择区域指示器
-  Widget? _buildSelectionIndicator() {
+  /// 构建半透明蒙版（在选择区域外显示）
+  Widget _buildDimOverlay() {
     if (_startPosition == null || _currentPosition == null) {
-      return null;
+      // 没有选择时，整个屏幕半透明
+      return Container(color: Colors.black.withOpacity(0.3));
     }
 
     final rect = _calculateRect(_startPosition!, _currentPosition!);
     if (rect.width < _minimumSize || rect.height < _minimumSize) {
-      return null;
+      return Container(color: Colors.black.withOpacity(0.3));
     }
 
-    return Positioned(
-      left: rect.left,
-      top: rect.top,
-      child: Container(
-        width: rect.width,
-        height: rect.height,
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: _borderColor,
-            width: _borderWidth,
-          ),
-          color: _fillColor,
+    // 有选择时，使用 Stack 在选择区域外显示蒙版
+    // 我们使用四个半透明容器来覆盖非选择区域
+    return Stack(
+      children: [
+        // 上方区域
+        Positioned(
+          left: 0,
+          top: 0,
+          right: 0,
+          height: rect.top,
+          child: Container(color: Colors.black.withOpacity(0.5)),
         ),
-        child: _buildSizeLabel(rect),
+        // 下方区域
+        Positioned(
+          left: 0,
+          top: rect.bottom,
+          right: 0,
+          bottom: 0,
+          child: Container(color: Colors.black.withOpacity(0.5)),
+        ),
+        // 左侧区域
+        Positioned(
+          left: 0,
+          top: rect.top,
+          width: rect.left,
+          height: rect.height,
+          child: Container(color: Colors.black.withOpacity(0.5)),
+        ),
+        // 右侧区域
+        Positioned(
+          left: rect.right,
+          top: rect.top,
+          right: 0,
+          height: rect.height,
+          child: Container(color: Colors.black.withOpacity(0.5)),
+        ),
+      ],
+    );
+  }
+
+  /// 构建选择区域内容
+  Widget _buildSelectionContent() {
+    if (_startPosition == null || _currentPosition == null) {
+      return const SizedBox.shrink();
+    }
+
+    final rect = _calculateRect(_startPosition!, _currentPosition!);
+    if (rect.width < _minimumSize || rect.height < _minimumSize) {
+      return const SizedBox.shrink();
+    }
+
+    return Stack(
+      children: [
+        // 选择框边框
+        Positioned(
+          left: rect.left,
+          top: rect.top,
+          child: Container(
+            width: rect.width,
+            height: rect.height,
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Colors.red,
+                width: _borderWidth,
+              ),
+            ),
+          ),
+        ),
+
+        // 四个角的调整手柄
+        _buildHandle(rect.left, rect.top), // 左上
+        _buildHandle(rect.right, rect.top), // 右上
+        _buildHandle(rect.left, rect.bottom), // 左下
+        _buildHandle(rect.right, rect.bottom), // 右下
+
+        // 尺寸标签
+        _buildSizeLabel(rect),
+      ],
+    );
+  }
+
+  /// 构建调整手柄
+  Widget _buildHandle(double x, double y) {
+    return Positioned(
+      left: x - _handleSize,
+      top: y - _handleSize,
+      child: Container(
+        width: _handleSize * 2,
+        height: _handleSize * 2,
+        decoration: const BoxDecoration(
+          color: Colors.red,
+          shape: BoxShape.circle,
+        ),
       ),
     );
   }
@@ -118,15 +195,13 @@ class _ScreenshotOverlayState extends State<ScreenshotOverlay> {
   /// 构建尺寸标签
   Widget _buildSizeLabel(Rect rect) {
     return Positioned(
-      top: 0,
-      left: 0,
+      left: rect.left,
+      top: rect.top - 30,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-          color: _borderColor,
-          borderRadius: const BorderRadius.only(
-            bottomRight: Radius.circular(4),
-          ),
+          color: Colors.red,
+          borderRadius: BorderRadius.circular(4),
         ),
         child: Text(
           '${rect.width.toInt()} x ${rect.height.toInt()}',

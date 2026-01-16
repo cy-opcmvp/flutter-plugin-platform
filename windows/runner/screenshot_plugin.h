@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <tuple>
+#include <gdiplus.h>
 
 // Initialize GDI+ (call once at startup)
 void InitializeGDIPlus();
@@ -33,5 +34,8 @@ std::vector<std::tuple<std::string, std::string>> EnumerateWindows();
 
 // Convert HWND from string representation
 HWND HwndFromString(const std::string& str);
+
+// Helper function to get encoder CLSID for image format
+int GetEncoderClsid(const WCHAR* format, CLSID* pClsid);
 
 #endif  // RUNNER_SCREENSHOT_PLUGIN_H_

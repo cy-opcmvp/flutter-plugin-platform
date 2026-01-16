@@ -4,7 +4,9 @@
 #include <flutter/dart_project.h>
 #include <flutter/flutter_view_controller.h>
 #include <flutter/method_channel.h>
+#include <flutter/event_channel.h>
 #include <flutter/encodable_value.h>
+#include <flutter/event_sink.h>
 
 #include <memory>
 
@@ -31,10 +33,16 @@ class FlutterWindow : public Win32Window {
   // The Flutter instance hosted by this window.
   std::unique_ptr<flutter::FlutterViewController> flutter_controller_;
 
+  // Screenshot event sink for communicating region selection back to Flutter
+  std::unique_ptr<flutter::EventSink<flutter::EncodableValue>> screenshot_event_sink_;
+
   // Handle screenshot method calls from Flutter
   void HandleScreenshotMethodCall(
       const flutter::MethodCall<flutter::EncodableValue>& call,
       std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+
+  // Handle screenshot event channel registration
+  void RegisterScreenshotEventChannel();
 };
 
 #endif  // RUNNER_FLUTTER_WINDOW_H_

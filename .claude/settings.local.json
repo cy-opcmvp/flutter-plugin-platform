@@ -30,7 +30,10 @@
       "Bash(start:*)",
       "mcp__web-reader__webReader",
       "mcp__web-search-prime__webSearchPrime",
-      "Bash(buildwindowsx64runnerDebugflutter_app.exe)"
+      "Bash(buildwindowsx64runnerDebugflutter_app.exe)",
+      "Bash(printf '\\\\xEF\\\\xBB\\\\xBF')",
+      "Bash(Select-Object:*)",
+      "Bash(exit:*)"
     ]
   }
 }

@@ -205,6 +205,18 @@ class ScreenshotPlugin implements IPlugin {
     _onStateChanged?.call();
   }
 
+  /// 显示原生区域截图窗口（桌面级）
+  ///
+  /// 返回 true 如果成功显示窗口
+  Future<bool> showNativeRegionCapture() {
+    return _screenshotService.showNativeRegionCapture();
+  }
+
+  /// 获取区域选择结果（用于轮询）
+  Future<RegionSelectedEvent?> getRegionSelectionResult() {
+    return _screenshotService.getRegionSelectionResult();
+  }
+
   /// 处理截图
   Future<void> _processScreenshot(
     Uint8List bytes,

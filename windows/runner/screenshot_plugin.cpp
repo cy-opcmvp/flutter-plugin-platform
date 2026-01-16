@@ -89,37 +89,103 @@ std::vector<uint8_t> CaptureFullScreen() {
     // Select old bitmap back
     SelectObject(hdcMem, hOldBitmap);
 
-    // Convert to GDI+ bitmap
-    Bitmap* bitmap = new Bitmap(hBitmap, (HPALETTE)GetStockObject(DEFAULT_PALETTE));
+    // Convert to GDI+ bitmap - use Bitmap constructor with width, height, and pixel data
+    BITMAP bitmapInfo;
+    GetObject(hBitmap, sizeof(BITMAP), &bitmapInfo);
+
+    Bitmap* gdiBitmap = new Bitmap(bitmapInfo.bmWidth, bitmapInfo.bmHeight, PixelFormat32bppARGB);
+
+    // Get bitmap data
+    BitmapData bitmapData;
+    Rect rect(0, 0, bitmapInfo.bmWidth, bitmapInfo.bmHeight);
+    Gdiplus::Status status = gdiBitmap->LockBits(&rect, ImageLockModeWrite, PixelFormat32bppARGB, &bitmapData);
+
+    if (status == Gdiplus::Ok) {
+        // Get the bitmap bits from the HBITMAP
+        BYTE* pBits = (BYTE*)bitmapInfo.bmBits;
+        if (pBits == NULL) {
+            // If bmBits is NULL, we need to use GetDIBits
+            BITMAPINFO bmi = {};
+            bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+            bmi.bmiHeader.biWidth = bitmapInfo.bmWidth;
+            bmi.bmiHeader.biHeight = -bitmapInfo.bmHeight;  // Negative for top-down DIB
+            bmi.bmiHeader.biPlanes = 1;
+            bmi.bmiHeader.biBitCount = 32;
+            bmi.bmiHeader.biCompression = BI_RGB;
+
+            GetDIBits(hdcScreen, hBitmap, 0, bitmapInfo.bmHeight,
+                     (BYTE*)bitmapData.Scan0, &bmi, DIB_RGB_COLORS);
+        } else {
+            // Copy the bitmap data
+            memcpy(bitmapData.Scan0, pBits, bitmapData.Stride * bitmapInfo.bmHeight);
+        }
+
+        gdiBitmap->UnlockBits(&bitmapData);
+    }
 
     // Create IStream
     IStream* stream = NULL;
     CreateStreamOnHGlobal(NULL, TRUE, &stream);
 
     // Save to PNG format
-    bitmap->Save(stream, &ImageFormatPNG);
+    CLSID pngClsid;
+    GetEncoderClsid(L"image/png", &pngClsid);
+    status = gdiBitmap->Save(stream, &pngClsid);
 
-    // Get stream size
-    STATSTG statstg;
-    stream->Stat(&statstg, STATFLAG_NONAME);
+    std::vector<uint8_t> result;
 
-    // Read stream data
-    LARGE_INTEGER pos;
-    pos.QuadPart = 0;
-    stream->Seek(pos, STREAM_SEEK_SET, NULL);
+    if (status == Gdiplus::Ok) {
+        // Get stream size
+        STATSTG statstg;
+        stream->Stat(&statstg, STATFLAG_NONAME);
 
-    std::vector<uint8_t> result(statstg.cbSize.LowPart);
-    ULONG bytesRead;
-    stream->Read(result.data(), statstg.cbSize.LowPart, &bytesRead);
+        // Read stream data
+        LARGE_INTEGER pos;
+        pos.QuadPart = 0;
+        stream->Seek(pos, STREAM_SEEK_SET, NULL);
+
+        result.resize(statstg.cbSize.LowPart);
+        ULONG bytesRead;
+        stream->Read(result.data(), statstg.cbSize.LowPart, &bytesRead);
+    }
 
     // Cleanup
     stream->Release();
-    delete bitmap;
+    delete gdiBitmap;
     DeleteObject(hBitmap);
     DeleteDC(hdcMem);
     ReleaseDC(NULL, hdcScreen);
 
     return result;
+}
+
+// Helper function to get encoder CLSID
+int GetEncoderClsid(const WCHAR* format, CLSID* pClsid) {
+    UINT  num = 0;          // number of image encoders
+    UINT  size = 0;         // size of the image encoder array in bytes
+
+    ImageCodecInfo* pImageCodecInfo = NULL;
+
+    GetImageEncodersSize(&num, &size);
+    if(size == 0)
+        return -1;  // Failure
+
+    pImageCodecInfo = (ImageCodecInfo*)(malloc(size));
+    if(pImageCodecInfo == NULL)
+        return -1;  // Failure
+
+    GetImageEncoders(num, size, pImageCodecInfo);
+
+    for(UINT j = 0; j < num; ++j) {
+        if( wcscmp(pImageCodecInfo[j].MimeType, format) == 0 ) {
+            *pClsid = pImageCodecInfo[j].Clsid;
+            free(pImageCodecInfo);
+            return j;  // Success
+        }
+    }
+
+    free(pImageCodecInfo);
+    return -1;  // Failure
 }
 
 // Capture specific window
@@ -146,31 +212,60 @@ std::vector<uint8_t> CaptureWindow(HWND hwnd) {
     SelectObject(hdcMem, hOldBitmap);
 
     // Convert to GDI+ bitmap
-    Bitmap* bitmap = new Bitmap(hBitmap, (HPALETTE)GetStockObject(DEFAULT_PALETTE));
+    BITMAP bitmapInfo;
+    GetObject(hBitmap, sizeof(BITMAP), &bitmapInfo);
+
+    Bitmap* gdiBitmap = new Bitmap(bitmapInfo.bmWidth, bitmapInfo.bmHeight, PixelFormat32bppARGB);
+
+    // Get bitmap data
+    BitmapData bitmapData;
+    Rect gdiRect(0, 0, bitmapInfo.bmWidth, bitmapInfo.bmHeight);
+    Gdiplus::Status status = gdiBitmap->LockBits(&gdiRect, ImageLockModeWrite, PixelFormat32bppARGB, &bitmapData);
+
+    if (status == Gdiplus::Ok) {
+        BITMAPINFO bmi = {};
+        bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+        bmi.bmiHeader.biWidth = bitmapInfo.bmWidth;
+        bmi.bmiHeader.biHeight = -bitmapInfo.bmHeight;
+        bmi.bmiHeader.biPlanes = 1;
+        bmi.bmiHeader.biBitCount = 32;
+        bmi.bmiHeader.biCompression = BI_RGB;
+
+        GetDIBits(hdcScreen, hBitmap, 0, bitmapInfo.bmHeight,
+                 (BYTE*)bitmapData.Scan0, &bmi, DIB_RGB_COLORS);
+
+        gdiBitmap->UnlockBits(&bitmapData);
+    }
 
     // Create IStream
     IStream* stream = NULL;
     CreateStreamOnHGlobal(NULL, TRUE, &stream);
 
     // Save to PNG format
-    bitmap->Save(stream, &ImageFormatPNG);
+    CLSID pngClsid;
+    GetEncoderClsid(L"image/png", &pngClsid);
+    status = gdiBitmap->Save(stream, &pngClsid);
 
-    // Get stream size
-    STATSTG statstg;
-    stream->Stat(&statstg, STATFLAG_NONAME);
+    std::vector<uint8_t> result;
 
-    // Read stream data
-    LARGE_INTEGER pos;
-    pos.QuadPart = 0;
-    stream->Seek(pos, STREAM_SEEK_SET, NULL);
+    if (status == Gdiplus::Ok) {
+        // Get stream size
+        STATSTG statstg;
+        stream->Stat(&statstg, STATFLAG_NONAME);
 
-    std::vector<uint8_t> result(statstg.cbSize.LowPart);
-    ULONG bytesRead;
-    stream->Read(result.data(), statstg.cbSize.LowPart, &bytesRead);
+        // Read stream data
+        LARGE_INTEGER pos;
+        pos.QuadPart = 0;
+        stream->Seek(pos, STREAM_SEEK_SET, NULL);
+
+        result.resize(statstg.cbSize.LowPart);
+        ULONG bytesRead;
+        stream->Read(result.data(), statstg.cbSize.LowPart, &bytesRead);
+    }
 
     // Cleanup
     stream->Release();
-    delete bitmap;
+    delete gdiBitmap;
     DeleteObject(hBitmap);
     DeleteDC(hdcMem);
     ReleaseDC(hwnd, hdcWindow);
@@ -196,31 +291,60 @@ std::vector<uint8_t> CaptureRegion(int x, int y, int width, int height) {
     SelectObject(hdcMem, hOldBitmap);
 
     // Convert to GDI+ bitmap
-    Bitmap* bitmap = new Bitmap(hBitmap, (HPALETTE)GetStockObject(DEFAULT_PALETTE));
+    BITMAP bitmapInfo;
+    GetObject(hBitmap, sizeof(BITMAP), &bitmapInfo);
+
+    Bitmap* gdiBitmap = new Bitmap(bitmapInfo.bmWidth, bitmapInfo.bmHeight, PixelFormat32bppARGB);
+
+    // Get bitmap data
+    BitmapData bitmapData;
+    Rect rect(0, 0, bitmapInfo.bmWidth, bitmapInfo.bmHeight);
+    Gdiplus::Status status = gdiBitmap->LockBits(&rect, ImageLockModeWrite, PixelFormat32bppARGB, &bitmapData);
+
+    if (status == Gdiplus::Ok) {
+        BITMAPINFO bmi = {};
+        bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+        bmi.bmiHeader.biWidth = bitmapInfo.bmWidth;
+        bmi.bmiHeader.biHeight = -bitmapInfo.bmHeight;
+        bmi.bmiHeader.biPlanes = 1;
+        bmi.bmiHeader.biBitCount = 32;
+        bmi.bmiHeader.biCompression = BI_RGB;
+
+        GetDIBits(hdcScreen, hBitmap, 0, bitmapInfo.bmHeight,
+                 (BYTE*)bitmapData.Scan0, &bmi, DIB_RGB_COLORS);
+
+        gdiBitmap->UnlockBits(&bitmapData);
+    }
 
     // Create IStream
     IStream* stream = NULL;
     CreateStreamOnHGlobal(NULL, TRUE, &stream);
 
     // Save to PNG format
-    bitmap->Save(stream, &ImageFormatPNG);
+    CLSID pngClsid;
+    GetEncoderClsid(L"image/png", &pngClsid);
+    status = gdiBitmap->Save(stream, &pngClsid);
 
-    // Get stream size
-    STATSTG statstg;
-    stream->Stat(&statstg, STATFLAG_NONAME);
+    std::vector<uint8_t> result;
 
-    // Read stream data
-    LARGE_INTEGER pos;
-    pos.QuadPart = 0;
-    stream->Seek(pos, STREAM_SEEK_SET, NULL);
+    if (status == Gdiplus::Ok) {
+        // Get stream size
+        STATSTG statstg;
+        stream->Stat(&statstg, STATFLAG_NONAME);
 
-    std::vector<uint8_t> result(statstg.cbSize.LowPart);
-    ULONG bytesRead;
-    stream->Read(result.data(), statstg.cbSize.LowPart, &bytesRead);
+        // Read stream data
+        LARGE_INTEGER pos;
+        pos.QuadPart = 0;
+        stream->Seek(pos, STREAM_SEEK_SET, NULL);
+
+        result.resize(statstg.cbSize.LowPart);
+        ULONG bytesRead;
+        stream->Read(result.data(), statstg.cbSize.LowPart, &bytesRead);
+    }
 
     // Cleanup
     stream->Release();
-    delete bitmap;
+    delete gdiBitmap;
     DeleteObject(hBitmap);
     DeleteDC(hdcMem);
     ReleaseDC(NULL, hdcScreen);

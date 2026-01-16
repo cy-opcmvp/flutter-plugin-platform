@@ -7,6 +7,9 @@ import '../models/screenshot_models.dart';
 import '../platform/screenshot_platform_interface.dart';
 import 'screenshot_capture_service.dart';
 
+// Export RegionSelectedEvent for convenience
+export '../platform/screenshot_platform_interface.dart' show RegionSelectedEvent;
+
 /// 截图服务
 ///
 /// 提供统一的截图功能接口，优先使用平台特定实现，降级到 Flutter 实现
@@ -98,5 +101,34 @@ class ScreenshotService {
   void setContext(BuildContext context) {
     // Flutter 实现需要 context，这里可以存储供后续使用
     // 实际实现可能需要更复杂的上下文管理
+  }
+
+  /// 显示原生区域截图窗口（桌面级）
+  ///
+  /// 返回 true 如果成功显示窗口
+  Future<bool> showNativeRegionCapture() {
+    if (!isAvailable) {
+      throw UnsupportedError('Screenshot is not supported on this platform');
+    }
+
+    // 只有 Windows 原生实现支持
+    if (_platformService.isAvailable) {
+      return _platformService.showNativeRegionCapture();
+    }
+
+    throw UnsupportedError('Native window capture is not supported');
+  }
+
+  /// 获取区域选择结果（用于轮询）
+  Future<RegionSelectedEvent?> getRegionSelectionResult() {
+    if (!isAvailable) {
+      throw UnsupportedError('Screenshot is not supported on this platform');
+    }
+
+    if (_platformService.isAvailable) {
+      return _platformService.getRegionSelectionResult();
+    }
+
+    throw UnsupportedError('Native window capture is not supported');
   }
 }
