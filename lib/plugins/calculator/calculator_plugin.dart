@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import '../../core/interfaces/i_plugin.dart';
+import '../../core/interfaces/i_platform_plugin.dart';
 import '../../core/models/plugin_models.dart';
+import '../../core/utils/platform_capability_helper.dart';
 import '../../../l10n/generated/app_localizations.dart';
 
 /// A simple calculator plugin that demonstrates tool plugin implementation
-class CalculatorPlugin implements IPlugin {
+///
+/// 平台支持：
+/// - 所有平台: 完整支持（纯 Dart 实现）
+class CalculatorPlugin implements IPlatformPlugin {
   late PluginContext _context;
-  
+
   // Calculator state - shared with the widget
   final CalculatorState calculatorState = CalculatorState();
 
@@ -21,6 +26,21 @@ class CalculatorPlugin implements IPlugin {
 
   @override
   PluginType get type => PluginType.tool;
+
+  @override
+  PluginPlatformCapabilities get platformCapabilities =>
+      _platformCapabilities ??= _createPlatformCapabilities();
+
+  static PluginPlatformCapabilities? _platformCapabilities;
+
+  /// 创建平台能力配置
+  PluginPlatformCapabilities _createPlatformCapabilities() {
+    return PlatformCapabilityHelper.fullySupported(
+      pluginId: id,
+      description: '支持基本计算功能（纯 Dart 实现）',
+      hideIfUnsupported: false,
+    );
+  }
 
   @override
   Future<void> initialize(PluginContext context) async {

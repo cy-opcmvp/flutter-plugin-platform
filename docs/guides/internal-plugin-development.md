@@ -586,6 +586,266 @@ class PluginDataManager {
   }
 }
 ```
+
+### 配置文件管理
+
+#### 概述
+
+从 v0.3.4 开始，项目引入了统一的配置文件管理系统。所有插件都必须使用 ConfigManager 管理其配置，而不是直接使用 IDataStorage 或硬编码配置。
+
+#### 配置文件架构
+
+**配置文件位置**:
+- 全局配置: `{application_documents_directory}/config/global_config.json`
+- 插件配置: `{application_documents_directory}/config/plugin_{pluginId}.json`
+
+**三层架构**:
+1. **ConfigService** - 底层文件 I/O 服务（`lib/core/services/config_service.dart`）
+2. **ConfigManager** - 高级配置管理 API（`lib/core/services/config_manager.dart`）
+3. **配置模型** - 类型安全的配置类（`lib/core/models/`）
+
+#### 插件配置文件开发流程
+
+**1. 创建配置模型类**
+
+在 `lib/core/models/` 中创建插件配置模型：
+
+```dart
+// lib/core/models/my_plugin_config.dart
+library;
+
+/// 我的插件配置
+class MyPluginConfig {
+  final String apiKey;
+  final int maxItems;
+  final bool enableFeature;
+
+  const MyPluginConfig({
+    required this.apiKey,
+    required this.maxItems,
+    required this.enableFeature,
+  });
+
+  /// 从 JSON 创建实例
+  factory MyPluginConfig.fromJson(Map<String, dynamic> json) {
+    return MyPluginConfig(
+      apiKey: json['apiKey'] as String? ?? '',
+      maxItems: json['maxItems'] as int? ?? 10,
+      enableFeature: json['enableFeature'] as bool? ?? true,
+    );
+  }
+
+  /// 转换为 JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'apiKey': apiKey,
+      'maxItems': maxItems,
+      'enableFeature': enableFeature,
+    };
+  }
+
+  /// 获取默认配置
+  static MyPluginConfig get defaultConfig => MyPluginConfig(
+    apiKey: '',
+    maxItems: 10,
+    enableFeature: true,
+  );
+
+  /// 复制并修改部分配置
+  MyPluginConfig copyWith({
+    String? apiKey,
+    int? maxItems,
+    bool? enableFeature,
+  }) {
+    return MyPluginConfig(
+      apiKey: apiKey ?? this.apiKey,
+      maxItems: maxItems ?? this.maxItems,
+      enableFeature: enableFeature ?? this.enableFeature,
+    );
+  }
+}
+```
+
+**2. 在插件中使用 ConfigManager**
+
+```dart
+import '../../core/services/config_manager.dart';
+import '../../core/models/my_plugin_config.dart';
+
+class MyPlugin implements IPlugin {
+  late PluginContext _context;
+  late MyPluginConfig _config;
+
+  @override
+  String get id => 'com.example.myplugin';
+
+  @override
+  Future<void> initialize(PluginContext context) async {
+    _context = context;
+
+    // 加载插件配置
+    final configData = await ConfigManager.instance.loadPluginConfig(id);
+
+    // 如果配置为空，使用默认配置
+    if (configData.isEmpty) {
+      _config = MyPluginConfig.defaultConfig;
+      // 保存默认配置
+      await ConfigManager.instance.savePluginConfig(id, _config.toJson());
+    } else {
+      _config = MyPluginConfig.fromJson(configData);
+    }
+
+    // 使用配置初始化插件
+    if (_config.apiKey.isEmpty) {
+      // 提示用户配置 API 密钥
+    }
+  }
+
+  @override
+  Future<void> dispose() async {
+    // 在 dispose 时自动保存配置（如果需要）
+  }
+
+  /// 更新配置
+  Future<void> updateConfig(MyPluginConfig newConfig) async {
+    _config = newConfig;
+    await ConfigManager.instance.savePluginConfig(id, _config.toJson());
+  }
+
+  /// 更新单个配置项
+  Future<void> updateApiKey(String newApiKey) async {
+    final newConfig = _config.copyWith(apiKey: newApiKey);
+    await updateConfig(newConfig);
+  }
+}
+```
+
+**3. 在设置页面添加配置 UI**
+
+在 `lib/ui/screens/settings_screen.dart` 中添加插件配置入口：
+
+```dart
+// 在插件配置部分添加 ListTile
+ListTile(
+  leading: const Icon(Icons.extension),
+  title: const Text('My Plugin'),
+  subtitle: const Text('Configure my plugin settings'),
+  trailing: const Icon(Icons.chevron_right),
+  onTap: () => _showMyPluginConfigScreen(context),
+),
+```
+
+创建插件配置页面：
+
+```dart
+class MyPluginConfigScreen extends StatefulWidget {
+  final Map<String, dynamic> config;
+  final Future<void> Function(Map<String, dynamic>) onSave;
+
+  const MyPluginConfigScreen({
+    Key? key,
+    required this.config,
+    required this.onSave,
+  }) : super(key: key);
+
+  @override
+  State<MyPluginConfigScreen> createState() => _MyPluginConfigScreenState();
+}
+
+class _MyPluginConfigScreenState extends State<MyPluginConfigScreen> {
+  late TextEditingController _apiKeyController;
+  late int _maxItems;
+  late bool _enableFeature;
+
+  @override
+  void initState() {
+    super.initState();
+    _apiKeyController = TextEditingController(text: widget.config['apiKey'] ?? '');
+    _maxItems = widget.config['maxItems'] ?? 10;
+    _enableFeature = widget.config['enableFeature'] ?? true;
+  }
+
+  @override
+  void dispose() {
+    _apiKeyController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('My Plugin Config'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.save),
+            onPressed: _saveConfig,
+          ),
+        ],
+      ),
+      body: ListView(
+        children: [
+          TextField(
+            controller: _apiKeyController,
+            decoration: const InputDecoration(labelText: 'API Key'),
+          ),
+          SwitchListTile(
+            title: const Text('Enable Feature'),
+            value: _enableFeature,
+            onChanged: (value) => setState(() => _enableFeature = value),
+          ),
+          // 更多配置项...
+        ],
+      ),
+    );
+  }
+
+  Future<void> _saveConfig() async {
+    final config = {
+      'apiKey': _apiKeyController.text,
+      'maxItems': _maxItems,
+      'enableFeature': _enableFeature,
+    };
+    await widget.onSave(config);
+    if (mounted) Navigator.of(context).pop();
+  }
+}
+```
+
+#### 配置文件最佳实践
+
+1. **类型安全** - 始终使用配置模型类，避免直接操作 Map
+2. **默认值** - 为所有配置项提供合理的默认值
+3. **验证** - 在配置模型中添加 `isValid()` 方法进行验证
+4. **不可变性** - 配置类应该是不可变的（final 字段），使用 copyWith 更新
+5. **文档化** - 为每个配置项添加注释说明其用途
+6. **迁移** - 当配置结构变更时，提供迁移逻辑
+
+#### 配置文件迁移
+
+当插件配置结构需要变更时，在 `fromJson` 方法中处理旧版本配置：
+
+```dart
+factory MyPluginConfig.fromJson(Map<String, dynamic> json) {
+  // 处理版本迁移
+  if (json.containsKey('oldKeyName')) {
+    // 从 v1 迁移到 v2
+    return MyPluginConfig(
+      apiKey: json['oldKeyName'] as String? ?? '',
+      maxItems: json['maxItems'] as int? ?? 10,
+      enableFeature: json['enableFeature'] as bool? ?? true,
+    );
+  }
+
+  // 当前版本
+  return MyPluginConfig(
+    apiKey: json['apiKey'] as String? ?? '',
+    maxItems: json['maxItems'] as int? ?? 10,
+    enableFeature: json['enableFeature'] as bool? ?? true,
+  );
+}
+```
+
 ### 网络访问
 
 #### HTTP 请求

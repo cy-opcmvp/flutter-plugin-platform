@@ -227,6 +227,50 @@ lib/
    - `lib/plugins/world_clock/README.md` (简短，指向详细文档)
    - `docs/plugins/world-clock/README.md` (详细文档)
 
+5. **⚠️ 在代码中硬编码用户可见文本**（最高优先级违规）
+
+   ```dart
+   // ❌ 绝对禁止：硬编码用户可见文本
+   Text('Screenshot Plugin Config')
+   const Text('General Settings')
+   title: 'Behavior'
+   ElevatedButton(child: Text('Save'))
+   AlertDialog(title: Text('Error'))
+
+   // ✅ 正确做法：使用国际化
+   Text(l10n.screenshot_config_title)
+   Text(l10n.settings_general)
+   title: l10n.settings_behavior
+   ElevatedButton(child: Text(l10n.common_save))
+   AlertDialog(title: Text(l10n.error_title))
+   ```
+
+   **国际化开发流程**（必须按顺序执行）：
+   1. **第一步**：编写 UI 前，先在 `lib/l10n/app_zh.arb` 和 `lib/l10n/app_en.arb` 添加翻译键
+   2. **第二步**：运行 `flutter gen-l10n` 生成本地化代码
+   3. **第三步**：在代码中使用 `AppLocalizations.of(context)!` 获取 `l10n` 实例
+   4. **第四步**：使用 `l10n.xxx` 访问翻译文本
+   5. **第五步**：在中英文环境下都测试 UI 显示
+
+   **提交前检查清单**（必须全部满足）：
+   - [ ] 所有用户可见文本都使用了 `l10n.xxx`
+   - [ ] 没有硬编码的中文字符串
+   - [ ] 没有硬编码的英文字符串
+   - [ ] 中文和英文翻译都已添加到 `.arb` 文件
+   - [ ] 已运行 `flutter gen-l10n` 生成代码
+   - [ ] 在中英文环境下都测试过 UI 显示
+
+   **例外情况**（极少数，需谨慎评估）：
+   - 技术标识符：`"Ctrl+Shift+A"` 快捷键显示
+   - 路径占位符：`"{documents}/Screenshots"`
+   - 日志输出：`debugPrint()` 中的文本（但用户可见的日志需国际化）
+   - API 返回的原始数据
+
+   **违规后果**：
+   - ⛔ 代码审查不通过
+   - ⛔ 标记为技术债务，必须立即修复
+   - ⛔ 禁止合并到主分支
+
 ## 📝 文件命名规范
 
 ### 文档文件

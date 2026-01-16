@@ -323,6 +323,36 @@
       "language": {"type": "String"}
     }
   },
+  "settings_global": "全局配置",
+  "settings_app": "应用设置",
+  "settings_features": "功能设置",
+  "settings_services": "服务设置",
+  "settings_advanced": "高级设置",
+  "settings_plugins": "插件配置",
+  "settings_appName": "应用名称",
+  "settings_appVersion": "应用版本",
+  "settings_autoStart": "开机自启",
+  "settings_minimizeToTray": "最小化到托盘",
+  "settings_showDesktopPet": "显示桌面宠物",
+  "settings_enableNotifications": "启用通知",
+  "settings_debugMode": "调试模式",
+  "settings_logLevel": "日志级别",
+  "settings_savePath": "保存路径",
+  "settings_filenameFormat": "文件名格式",
+  "settings_imageFormat": "图片格式",
+  "settings_imageQuality": "图片质量",
+  "settings_autoCopyToClipboard": "自动复制到剪贴板",
+  "settings_showPreview": "显示预览窗口",
+  "settings_saveHistory": "保存历史记录",
+  "settings_maxHistoryCount": "最大历史记录数",
+  "settings_shortcuts": "快捷键设置",
+  "settings_regionCapture": "区域截图",
+  "settings_fullScreenCapture": "全屏截图",
+  "settings_windowCapture": "窗口截图",
+  "settings_configSaved": "配置已保存",
+  "settings_configSaveFailed": "配置保存失败",
+  "settings_resetToDefaults": "恢复默认设置",
+  "settings_resetConfirm": "确定要恢复默认设置吗？此操作不可撤销。",
 
   "plugin_detailsTitle": "插件详情",
   "plugin_detailsStatus": "状态",
@@ -748,6 +778,53 @@
   "@screenshot_daysAgo": {
     "placeholders": {
       "days": {"type": "int"}
+    }
+  },
+
+  "settings_general": "常规设置",
+  "settings_behavior": "行为",
+  "screenshot_config_title": "截图插件配置",
+
+  "plugin_version": "版本",
+  "plugin_type_label": "类型",
+  "plugin_id_label": "ID",
+  "plugin_background_plugins": "后台插件",
+  "plugin_pauseFailed": "暂停插件失败: {message}",
+  "@plugin_pauseFailed": {
+    "placeholders": {
+      "message": {"type": "String"}
+    }
+  },
+
+  "plugin_update_label": "更新",
+  "plugin_rollback_label": "回滚",
+  "plugin_remove_label": "移除",
+
+  "screenshot_select_window": "选择窗口",
+  "screenshot_close_preview": "关闭预览",
+  "screenshot_share_not_implemented": "分享功能待实现",
+  "screenshot_saved_to_temp": "已保存到临时文件",
+  "screenshot_copy_failed": "复制到剪贴板失败",
+  "screenshot_image_load_failed": "图片加载失败",
+  "screenshot_file_not_exists": "文件不存在",
+  "screenshot_window_not_available": "窗口选择不可用",
+  "screenshot_region_failed": "区域截图失败: {error}",
+  "@screenshot_region_failed": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "screenshot_fullscreen_failed": "全屏截图失败: {error}",
+  "@screenshot_fullscreen_failed": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "screenshot_native_window_failed": "无法打开原生截图窗口",
+  "screenshot_window_failed": "窗口截图失败: {error}",
+  "@screenshot_window_failed": {
+    "placeholders": {
+      "error": {"type": "String"}
     }
   }
 }

@@ -1004,6 +1004,186 @@ abstract class AppLocalizations {
   /// **'语言已更改为 {language}'**
   String settings_languageChanged(String language);
 
+  /// No description provided for @settings_global.
+  ///
+  /// In zh, this message translates to:
+  /// **'全局配置'**
+  String get settings_global;
+
+  /// No description provided for @settings_app.
+  ///
+  /// In zh, this message translates to:
+  /// **'应用设置'**
+  String get settings_app;
+
+  /// No description provided for @settings_features.
+  ///
+  /// In zh, this message translates to:
+  /// **'功能设置'**
+  String get settings_features;
+
+  /// No description provided for @settings_services.
+  ///
+  /// In zh, this message translates to:
+  /// **'服务设置'**
+  String get settings_services;
+
+  /// No description provided for @settings_advanced.
+  ///
+  /// In zh, this message translates to:
+  /// **'高级设置'**
+  String get settings_advanced;
+
+  /// No description provided for @settings_plugins.
+  ///
+  /// In zh, this message translates to:
+  /// **'插件配置'**
+  String get settings_plugins;
+
+  /// No description provided for @settings_appName.
+  ///
+  /// In zh, this message translates to:
+  /// **'应用名称'**
+  String get settings_appName;
+
+  /// No description provided for @settings_appVersion.
+  ///
+  /// In zh, this message translates to:
+  /// **'应用版本'**
+  String get settings_appVersion;
+
+  /// No description provided for @settings_autoStart.
+  ///
+  /// In zh, this message translates to:
+  /// **'开机自启'**
+  String get settings_autoStart;
+
+  /// No description provided for @settings_minimizeToTray.
+  ///
+  /// In zh, this message translates to:
+  /// **'最小化到托盘'**
+  String get settings_minimizeToTray;
+
+  /// No description provided for @settings_showDesktopPet.
+  ///
+  /// In zh, this message translates to:
+  /// **'显示桌面宠物'**
+  String get settings_showDesktopPet;
+
+  /// No description provided for @settings_enableNotifications.
+  ///
+  /// In zh, this message translates to:
+  /// **'启用通知'**
+  String get settings_enableNotifications;
+
+  /// No description provided for @settings_debugMode.
+  ///
+  /// In zh, this message translates to:
+  /// **'调试模式'**
+  String get settings_debugMode;
+
+  /// No description provided for @settings_logLevel.
+  ///
+  /// In zh, this message translates to:
+  /// **'日志级别'**
+  String get settings_logLevel;
+
+  /// No description provided for @settings_savePath.
+  ///
+  /// In zh, this message translates to:
+  /// **'保存路径'**
+  String get settings_savePath;
+
+  /// No description provided for @settings_filenameFormat.
+  ///
+  /// In zh, this message translates to:
+  /// **'文件名格式'**
+  String get settings_filenameFormat;
+
+  /// No description provided for @settings_imageFormat.
+  ///
+  /// In zh, this message translates to:
+  /// **'图片格式'**
+  String get settings_imageFormat;
+
+  /// No description provided for @settings_imageQuality.
+  ///
+  /// In zh, this message translates to:
+  /// **'图片质量'**
+  String get settings_imageQuality;
+
+  /// No description provided for @settings_autoCopyToClipboard.
+  ///
+  /// In zh, this message translates to:
+  /// **'自动复制到剪贴板'**
+  String get settings_autoCopyToClipboard;
+
+  /// No description provided for @settings_showPreview.
+  ///
+  /// In zh, this message translates to:
+  /// **'显示预览窗口'**
+  String get settings_showPreview;
+
+  /// No description provided for @settings_saveHistory.
+  ///
+  /// In zh, this message translates to:
+  /// **'保存历史记录'**
+  String get settings_saveHistory;
+
+  /// No description provided for @settings_maxHistoryCount.
+  ///
+  /// In zh, this message translates to:
+  /// **'最大历史记录数'**
+  String get settings_maxHistoryCount;
+
+  /// No description provided for @settings_shortcuts.
+  ///
+  /// In zh, this message translates to:
+  /// **'快捷键设置'**
+  String get settings_shortcuts;
+
+  /// No description provided for @settings_regionCapture.
+  ///
+  /// In zh, this message translates to:
+  /// **'区域截图'**
+  String get settings_regionCapture;
+
+  /// No description provided for @settings_fullScreenCapture.
+  ///
+  /// In zh, this message translates to:
+  /// **'全屏截图'**
+  String get settings_fullScreenCapture;
+
+  /// No description provided for @settings_windowCapture.
+  ///
+  /// In zh, this message translates to:
+  /// **'窗口截图'**
+  String get settings_windowCapture;
+
+  /// No description provided for @settings_configSaved.
+  ///
+  /// In zh, this message translates to:
+  /// **'配置已保存'**
+  String get settings_configSaved;
+
+  /// No description provided for @settings_configSaveFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'配置保存失败'**
+  String get settings_configSaveFailed;
+
+  /// No description provided for @settings_resetToDefaults.
+  ///
+  /// In zh, this message translates to:
+  /// **'恢复默认设置'**
+  String get settings_resetToDefaults;
+
+  /// No description provided for @settings_resetConfirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'确定要恢复默认设置吗？此操作不可撤销。'**
+  String get settings_resetConfirm;
+
   /// No description provided for @plugin_detailsTitle.
   ///
   /// In zh, this message translates to:
@@ -2731,6 +2911,144 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'{days} 天前'**
   String screenshot_daysAgo(int days);
+
+  /// No description provided for @settings_general.
+  ///
+  /// In zh, this message translates to:
+  /// **'常规设置'**
+  String get settings_general;
+
+  /// No description provided for @settings_behavior.
+  ///
+  /// In zh, this message translates to:
+  /// **'行为'**
+  String get settings_behavior;
+
+  /// No description provided for @screenshot_config_title.
+  ///
+  /// In zh, this message translates to:
+  /// **'截图插件配置'**
+  String get screenshot_config_title;
+
+  /// No description provided for @plugin_version.
+  ///
+  /// In zh, this message translates to:
+  /// **'版本'**
+  String get plugin_version;
+
+  /// No description provided for @plugin_type_label.
+  ///
+  /// In zh, this message translates to:
+  /// **'类型'**
+  String get plugin_type_label;
+
+  /// No description provided for @plugin_id_label.
+  ///
+  /// In zh, this message translates to:
+  /// **'ID'**
+  String get plugin_id_label;
+
+  /// No description provided for @plugin_background_plugins.
+  ///
+  /// In zh, this message translates to:
+  /// **'后台插件'**
+  String get plugin_background_plugins;
+
+  /// No description provided for @plugin_pauseFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'暂停插件失败: {message}'**
+  String plugin_pauseFailed(String message);
+
+  /// No description provided for @plugin_update_label.
+  ///
+  /// In zh, this message translates to:
+  /// **'更新'**
+  String get plugin_update_label;
+
+  /// No description provided for @plugin_rollback_label.
+  ///
+  /// In zh, this message translates to:
+  /// **'回滚'**
+  String get plugin_rollback_label;
+
+  /// No description provided for @plugin_remove_label.
+  ///
+  /// In zh, this message translates to:
+  /// **'移除'**
+  String get plugin_remove_label;
+
+  /// No description provided for @screenshot_select_window.
+  ///
+  /// In zh, this message translates to:
+  /// **'选择窗口'**
+  String get screenshot_select_window;
+
+  /// No description provided for @screenshot_close_preview.
+  ///
+  /// In zh, this message translates to:
+  /// **'关闭预览'**
+  String get screenshot_close_preview;
+
+  /// No description provided for @screenshot_share_not_implemented.
+  ///
+  /// In zh, this message translates to:
+  /// **'分享功能待实现'**
+  String get screenshot_share_not_implemented;
+
+  /// No description provided for @screenshot_saved_to_temp.
+  ///
+  /// In zh, this message translates to:
+  /// **'已保存到临时文件'**
+  String get screenshot_saved_to_temp;
+
+  /// No description provided for @screenshot_copy_failed.
+  ///
+  /// In zh, this message translates to:
+  /// **'复制到剪贴板失败'**
+  String get screenshot_copy_failed;
+
+  /// No description provided for @screenshot_image_load_failed.
+  ///
+  /// In zh, this message translates to:
+  /// **'图片加载失败'**
+  String get screenshot_image_load_failed;
+
+  /// No description provided for @screenshot_file_not_exists.
+  ///
+  /// In zh, this message translates to:
+  /// **'文件不存在'**
+  String get screenshot_file_not_exists;
+
+  /// No description provided for @screenshot_window_not_available.
+  ///
+  /// In zh, this message translates to:
+  /// **'窗口选择不可用'**
+  String get screenshot_window_not_available;
+
+  /// No description provided for @screenshot_region_failed.
+  ///
+  /// In zh, this message translates to:
+  /// **'区域截图失败: {error}'**
+  String screenshot_region_failed(String error);
+
+  /// No description provided for @screenshot_fullscreen_failed.
+  ///
+  /// In zh, this message translates to:
+  /// **'全屏截图失败: {error}'**
+  String screenshot_fullscreen_failed(String error);
+
+  /// No description provided for @screenshot_native_window_failed.
+  ///
+  /// In zh, this message translates to:
+  /// **'无法打开原生截图窗口'**
+  String get screenshot_native_window_failed;
+
+  /// No description provided for @screenshot_window_failed.
+  ///
+  /// In zh, this message translates to:
+  /// **'窗口截图失败: {error}'**
+  String screenshot_window_failed(String error);
 }
 
 class _AppLocalizationsDelegate

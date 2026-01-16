@@ -18,6 +18,7 @@ docs/
 ├── index.md                           # 📑 详细索引
 ├── project-structure.md               # 🏗️ 项目结构说明
 ├── DOCS_REORGANIZATION.md             # 📋 文档重组记录
+├── PLATFORM_DECOUPLING_DESIGN.md      # 🏗️ 平台解耦架构设计
 
 scripts/                               # 🔧 开发脚本
 ├── README.md                          # 脚本说明文档
@@ -42,6 +43,10 @@ scripts/                               # 🔧 开发脚本
 │   └── DOCS_NAVIGATION.md           # 导航指南
 │
 ├── plugins/                          # 🔌 插件文档
+│   ├── screenshot/                  # 截图插件
+│   │   ├── README.md                # 插件概述
+│   │   ├── PLATFORM_SUPPORT_ANALYSIS.md  # 平台支持分析
+│   │   └── PLATFORM_TODO.md         # 平台实现任务
 │   └── world-clock/                 # 世界时钟插件
 │       ├── README.md                # 插件概述
 │       ├── IMPLEMENTATION.md        # 实现文档
@@ -121,9 +126,11 @@ scripts/                               # 🔧 开发脚本
 👉 [平台服务文档中心](platform-services/README.md)
 
 #### 查看特定插件文档
+👉 [截图插件](plugins/screenshot/README.md)
 👉 [世界时钟插件](plugins/world-clock/README.md)
 
 #### 了解技术设计
+👉 [平台解耦架构设计](PLATFORM_DECOUPLING_DESIGN.md)
 👉 [插件平台架构](../.kiro/specs/plugin-platform/design.md)
 👉 [平台服务架构](../.kiro/specs/platform-services/design.md)
 👉 [外部插件系统](../.kiro/specs/external-plugin-system/design.md)
@@ -176,6 +183,7 @@ scripts/                               # 🔧 开发脚本
 
 ### 3. 技术规范
 **适合**: 架构师、高级开发者
+- [平台解耦架构设计](PLATFORM_DECOUPLING_DESIGN.md)
 - [插件平台架构](../.kiro/specs/plugin-platform/design.md)
 - [平台服务架构](../.kiro/specs/platform-services/design.md)
 - [外部插件系统](../.kiro/specs/external-plugin-system/design.md)
@@ -255,16 +263,31 @@ scripts/                               # 🔧 开发脚本
 - [使用指南](guides/desktop-pet-usage.md)
 - [平台支持](guides/desktop-pet-platform-support.md)
 
+### 截图插件
+**位置**: [plugins/screenshot/](plugins/screenshot/)
+
+支持平台：
+- ✅ Windows (完整支持)
+- 🔴 Linux (待实现)
+- 🔴 macOS (待实现)
+- 🟡 Android/iOS (受限支持)
+- ❌ Web (不支持)
+
+**快速链接**:
+- [插件概述](plugins/screenshot/README.md)
+- [平台支持分析](plugins/screenshot/PLATFORM_SUPPORT_ANALYSIS.md)
+- [实现任务](plugins/screenshot/PLATFORM_TODO.md)
+
 ## 📊 文档统计
 
 ### 按类型
 - **用户指南**: 8个文档
-- **技术规范**: 15个文档
+- **技术规范**: 16个文档（新增平台解耦架构设计）
 - **实施报告**: 7个文档
-- **插件文档**: 3个文档
+- **插件文档**: 6个文档
 - **平台服务文档**: 4个文档
 - **发布文档**: 2个文档
-- **其他**: 8个文档
+- **其他**: 9个文档
 
 ### 按语言
 - **中文**: 主导语言
@@ -313,8 +336,8 @@ scripts/                               # 🔧 开发脚本
 
 ---
 
-**文档版本**: v1.0.0
-**最后更新**: 2026-01-15
+**文档版本**: v1.2.0
+**最后更新**: 2026-01-16
 **维护者**: Flutter Plugin Platform 团队
 
 ---

@@ -890,7 +890,8 @@ class _ExternalPluginCard extends StatelessWidget {
     final descriptor = runtimeInfo.descriptor;
     final state = runtimeInfo.stateManager.currentState;
     final theme = Theme.of(context);
-    
+    final l10n = AppLocalizations.of(context)!;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       color: isSelected ? theme.colorScheme.primaryContainer.withOpacity(0.3) : null,
@@ -998,7 +999,7 @@ class _ExternalPluginCard extends StatelessWidget {
                       ElevatedButton.icon(
                         onPressed: isOperationInProgress ? null : (state == PluginState.active ? onDisable : onEnable),
                         icon: Icon(state == PluginState.active ? Icons.pause : Icons.play_arrow),
-                        label: Text(state == PluginState.active ? 'Disable' : 'Enable'),
+                        label: Text(state == PluginState.active ? l10n.button_disable : l10n.button_enable),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: state == PluginState.active ? Colors.orange : Colors.green,
                           foregroundColor: Colors.white,
@@ -1010,7 +1011,7 @@ class _ExternalPluginCard extends StatelessWidget {
                     ElevatedButton.icon(
                       onPressed: isOperationInProgress ? null : onUpdate,
                       icon: const Icon(Icons.update),
-                      label: const Text('Update'),
+                      label: Text(l10n.plugin_update_label),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue,
                         foregroundColor: Colors.white,
@@ -1022,7 +1023,7 @@ class _ExternalPluginCard extends StatelessWidget {
                       ElevatedButton.icon(
                         onPressed: isOperationInProgress ? null : onRollback,
                         icon: const Icon(Icons.undo),
-                        label: const Text('Rollback'),
+                        label: Text(l10n.plugin_rollback_label),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.orange,
                           foregroundColor: Colors.white,
@@ -1226,7 +1227,7 @@ class _ExternalPluginDetailsDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Close'),
+          child: Text(l10n.common_close),
         ),
         if (state == PluginState.active || state == PluginState.paused)
           TextButton(
@@ -1238,14 +1239,14 @@ class _ExternalPluginDetailsDialog extends StatelessWidget {
                 onEnable?.call();
               }
             },
-            child: Text(state == PluginState.active ? 'Disable' : 'Enable'),
+            child: Text(state == PluginState.active ? l10n.button_disable : l10n.button_enable),
           ),
         TextButton(
           onPressed: isOperationInProgress ? null : () {
             Navigator.of(context).pop();
             onUpdate?.call();
           },
-          child: const Text('Update'),
+          child: Text(l10n.plugin_update_label),
         ),
         if (onRollback != null)
           TextButton(
@@ -1254,7 +1255,7 @@ class _ExternalPluginDetailsDialog extends StatelessWidget {
               onRollback?.call();
             },
             style: TextButton.styleFrom(foregroundColor: Colors.orange),
-            child: const Text('Rollback'),
+            child: Text(l10n.plugin_rollback_label),
           ),
         TextButton(
           onPressed: isOperationInProgress ? null : () {
@@ -1262,7 +1263,7 @@ class _ExternalPluginDetailsDialog extends StatelessWidget {
             onRemove?.call();
           },
           style: TextButton.styleFrom(foregroundColor: Colors.red),
-          child: const Text('Remove'),
+          child: Text(l10n.plugin_remove_label),
         ),
       ],
     );

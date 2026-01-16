@@ -186,6 +186,94 @@ if (PlatformServiceManager.isServiceAvailable<IAudioService>()) {
 - 数据模型提供 `fromJson()`/`toJson()` 方法
 - 验证逻辑放在模型的 `isValid()` 方法中
 
+### 国际化约定（最高优先级）
+
+**⚠️ 重要：国际化优先级高于所有其他开发任务，任何情况下都不可以跳过或延后。**
+
+#### 基本规则
+1. **所有面向用户的文本必须国际化** - 包括但不限于：
+   - UI 标题和标签
+   - 按钮文本
+   - 提示信息
+   - 错误消息
+   - 对话框内容
+   - 菜单项
+   - 工具提示
+
+2. **禁止硬编码文本** - 以下写法是**绝对禁止**的：
+   ```dart
+   // ❌ 错误：硬编码文本
+   Text('Screenshot Plugin Config')
+   const Text('General Settings')
+   title: 'Behavior'
+
+   // ✅ 正确：使用国际化
+   Text(l10n.screenshot_config_title)
+   Text(l10n.settings_general)
+   title: l10n.settings_behavior
+   ```
+
+3. **开发流程要求**：
+   - **第一步**：编写 UI 前先在 `lib/l10n/app_zh.arb` 和 `lib/l10n/app_en.arb` 添加翻译键
+   - **第二步**：运行 `flutter gen-l10n` 生成本地化代码
+   - **第三步**：在代码中使用 `AppLocalizations.of(context)!` 获取 `l10n` 实例
+   - **第四步**：使用 `l10n.xxx` 访问翻译文本
+
+4. **翻译键命名规范**：
+   - 使用下划线分隔的小写字母：`settings_save_path`
+   - 按功能分组：`screenshot_config_title`, `screenshot_config_save_path`
+   - 通用命名：`common_save`, `common_cancel`, `common_confirm`
+   - 错误消息：`error_network`, `error_load_failed`
+
+5. **检查清单**（提交代码前必须确认）：
+   - [ ] 所有用户可见的文本都使用了 `l10n.xxx`
+   - [ ] 没有硬编码的中文字符串
+   - [ ] 没有硬编码的英文字符串
+   - [ ] 中文和英文翻译都已添加到 `.arb` 文件
+   - [ ] 已运行 `flutter gen-l10n` 生成代码
+   - [ ] 在中英文环境下都测试过 UI 显示
+
+6. **例外情况**（极少数，需谨慎评估）：
+   - 技术标识符：如 `"Ctrl+Shift+A"` 快捷键显示
+   - 路径占位符：如 `"{documents}/Screenshots"`
+   - 日志输出：`debugPrint()` 中的文本（但用户可见的日志需国际化）
+   - API 返回的原始数据
+
+#### 国际化代码示例
+```dart
+// 1. 在 .arb 文件中添加翻译
+// app_zh.arb:
+"settings_title": "设置",
+"screenshot_config_title": "截图插件配置"
+
+// app_en.arb:
+"settings_title": "Settings",
+"screenshot_config_title": "Screenshot Plugin Config"
+
+// 2. 在代码中使用
+class MyWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(l10n.screenshot_config_title),  // ✅ 国际化
+      ),
+      body: ElevatedButton(
+        onPressed: () {},
+        child: Text(l10n.common_save),  // ✅ 国际化
+      ),
+    );
+  }
+}
+```
+
+#### 违规后果
+- **代码审查不通过** - 任何国际化问题都会导致 PR 被拒绝
+- **技术债务标记** - 硬编码文本会被标记为技术债务，必须立即修复
+- **禁止合并** - 未完成国际化的功能禁止合并到主分支
+
 ### 提交信息
 - 使用中文提交信息
 - 遵循约定式提交: `feat:`, `fix:`, `docs:`, `refactor:`, `test:` 等

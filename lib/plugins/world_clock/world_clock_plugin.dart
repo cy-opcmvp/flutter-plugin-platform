@@ -1,13 +1,18 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../core/interfaces/i_plugin.dart';
+import '../../core/interfaces/i_platform_plugin.dart';
 import '../../core/models/plugin_models.dart';
+import '../../core/utils/platform_capability_helper.dart';
 import 'models/world_clock_models.dart';
 import 'widgets/world_clock_widget.dart';
 import 'widgets/countdown_timer_widget.dart';
 
 /// 世界时钟插件 - 显示多个时区时间并支持倒计时提醒
-class WorldClockPlugin implements IPlugin {
+///
+/// 平台支持：
+/// - 所有平台: 完整支持（纯 Dart 实现）
+class WorldClockPlugin implements IPlatformPlugin {
   late PluginContext _context;
   
   // 插件状态变量
@@ -37,6 +42,21 @@ class WorldClockPlugin implements IPlugin {
 
   @override
   PluginType get type => PluginType.tool;
+
+  @override
+  PluginPlatformCapabilities get platformCapabilities =>
+      _platformCapabilities ??= _createPlatformCapabilities();
+
+  static PluginPlatformCapabilities? _platformCapabilities;
+
+  /// 创建平台能力配置
+  PluginPlatformCapabilities _createPlatformCapabilities() {
+    return PlatformCapabilityHelper.fullySupported(
+      pluginId: id,
+      description: '支持多时区显示和倒计时提醒功能（纯 Dart 实现）',
+      hideIfUnsupported: false,
+    );
+  }
 
   @override
   Future<void> initialize(PluginContext context) async {

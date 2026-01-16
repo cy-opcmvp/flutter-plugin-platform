@@ -2,14 +2,19 @@ library;
 
 import 'dart:async';
 import 'dart:typed_data';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide TargetPlatform;
 import '../../core/interfaces/i_plugin.dart';
+import '../../core/interfaces/i_platform_plugin.dart';
 import '../../core/models/plugin_models.dart';
+import '../../core/services/config_manager.dart';
+import '../../core/utils/platform_capability_helper.dart';
+import '../../core/models/screenshot_config.dart';
 import 'models/screenshot_models.dart';
-import 'models/screenshot_settings.dart';
+import 'models/screenshot_settings.dart' as ss;
 import 'services/screenshot_service.dart';
 import 'services/file_manager_service.dart';
 import 'services/clipboard_service.dart';
+import 'services/hotkey_service.dart';
 import 'widgets/screenshot_main_widget.dart';
 
 /// 智能截图插件
@@ -18,18 +23,26 @@ import 'widgets/screenshot_main_widget.dart';
 /// - 区域截图、全屏截图、窗口截图
 /// - 图片标注和编辑
 /// - 复制到剪贴板、保存到文件、钉在桌面
-class ScreenshotPlugin implements IPlugin {
+///
+/// 平台支持：
+/// - Windows: 完整支持（已实现）
+/// - Linux: 待实现（需要 X11/Wayland 支持）
+/// - macOS: 待实现（需要 Quartz API 支持）
+/// - Android/iOS: 部分支持（只能实现应用内截图）
+/// - Web: 不支持（浏览器安全限制）
+class ScreenshotPlugin implements IPlatformPlugin {
   late PluginContext _context;
 
   // 插件状态变量
   bool _isInitialized = false;
   final List<ScreenshotRecord> _screenshots = [];
-  ScreenshotSettings _settings = ScreenshotSettings.defaultSettings();
+  ss.ScreenshotSettings _settings = ss.ScreenshotSettings.defaultSettings();
 
   // 服务
   late ScreenshotService _screenshotService;
   late FileManagerService _fileManager;
   late ClipboardService _clipboard;
+  late HotkeyService _hotkeyService;
 
   // 用于触发UI更新的回调
   VoidCallback? _onStateChanged;
@@ -47,6 +60,54 @@ class ScreenshotPlugin implements IPlugin {
   PluginType get type => PluginType.tool;
 
   @override
+  PluginPlatformCapabilities get platformCapabilities =>
+      _platformCapabilities ??= _createPlatformCapabilities();
+
+  static PluginPlatformCapabilities? _platformCapabilities;
+
+  /// 创建平台能力配置
+  PluginPlatformCapabilities _createPlatformCapabilities() {
+    return PluginPlatformCapabilities.custom(
+      pluginId: id,
+      capabilities: {
+        // Windows - 完整支持
+        TargetPlatform.windows: PlatformCapability.fullSupported(
+          TargetPlatform.windows,
+          '支持全屏截图、区域截图、窗口截图和原生桌面级区域选择',
+        ),
+        // Linux - 计划中
+        TargetPlatform.linux: PlatformCapability.planned(
+          TargetPlatform.linux,
+          '计划支持 X11 和 Wayland 显示服务器',
+        ),
+        // macOS - 计划中
+        TargetPlatform.macos: PlatformCapability.planned(
+          TargetPlatform.macos,
+          '计划支持 Quartz API',
+        ),
+        // Android - 部分支持
+        TargetPlatform.android: PlatformCapability.partialSupported(
+          TargetPlatform.android,
+          '应用内截图',
+          '只能截取本应用内容，无法实现真正的桌面级截图',
+        ),
+        // iOS - 部分支持
+        TargetPlatform.ios: PlatformCapability.partialSupported(
+          TargetPlatform.ios,
+          '应用内截图',
+          '只能截取本应用内容，无法实现真正的桌面级截图',
+        ),
+        // Web - 不支持
+        TargetPlatform.web: PlatformCapability.unsupported(
+          TargetPlatform.web,
+          '浏览器安全策略限制，无法访问操作系统屏幕',
+        ),
+      },
+      hideIfUnsupported: true, // 不支持的平台隐藏插件
+    );
+  }
+
+  @override
   Future<void> initialize(PluginContext context) async {
     _context = context;
 
@@ -55,18 +116,28 @@ class ScreenshotPlugin implements IPlugin {
       _screenshotService = ScreenshotService();
       _fileManager = FileManagerService();
       _clipboard = ClipboardService();
+      _hotkeyService = HotkeyService();
+
+      // 初始化热键服务
+      await _hotkeyService.initialize();
 
       // 加载保存的状态
       await _loadSavedState();
 
       // 检查平台支持
-      if (!_screenshotService.isAvailable) {
-        debugPrint('$name: Screenshot not fully supported on this platform');
+      if (!isCurrentPlatformSupported) {
+        debugPrint('$name: ${currentCapability.description}');
+        if (!isCurrentPlatformFullySupported) {
+          debugPrint('$name: 限制 - ${currentCapability.limitations ?? "无"}');
+        }
         // 不抛出异常，允许插件以降级模式运行
       }
 
       // 更新文件管理器的设置
       _fileManager.updateSettings(_settings);
+
+      // 注册快捷键
+      await _registerHotkeys();
 
       _isInitialized = true;
 
@@ -80,6 +151,9 @@ class ScreenshotPlugin implements IPlugin {
   @override
   Future<void> dispose() async {
     try {
+      // 释放热键服务
+      await _hotkeyService.dispose();
+
       // 保存当前状态
       await _saveCurrentState();
 
@@ -131,7 +205,7 @@ class ScreenshotPlugin implements IPlugin {
   bool get isAvailable => _screenshotService.isAvailable;
 
   /// 获取当前设置
-  ScreenshotSettings get settings => _settings;
+  ss.ScreenshotSettings get settings => _settings;
 
   /// 获取截图历史记录
   List<ScreenshotRecord> get screenshots => List.unmodifiable(_screenshots);
@@ -198,7 +272,7 @@ class ScreenshotPlugin implements IPlugin {
   }
 
   /// 更新设置
-  Future<void> updateSettings(ScreenshotSettings newSettings) async {
+  Future<void> updateSettings(ss.ScreenshotSettings newSettings) async {
     _settings = newSettings;
     _fileManager.updateSettings(newSettings);
     await _saveCurrentState();
@@ -273,14 +347,85 @@ class ScreenshotPlugin implements IPlugin {
     return _settings.filenameFormat;
   }
 
+  /// 将 ScreenshotConfig 转换为 ss.ScreenshotSettings
+  ss.ScreenshotSettings _configToSettings(ScreenshotConfig config) {
+    return ss.ScreenshotSettings(
+      savePath: config.savePath,
+      filenameFormat: config.filenameFormat,
+      imageFormat: _parseImageFormat(config.imageFormat),
+      imageQuality: config.imageQuality,
+      autoCopyToClipboard: config.autoCopyToClipboard,
+      showPreview: config.showPreview,
+      saveHistory: config.saveHistory,
+      maxHistoryCount: config.maxHistoryCount,
+      historyRetentionPeriod: Duration(days: config.historyRetentionDays),
+      shortcuts: config.shortcuts,
+      pinSettings: _configPinToSettingsPin(config.pinSettings),
+    );
+  }
+
+  /// 将 ss.ScreenshotSettings 转换为 ScreenshotConfig
+  ScreenshotConfig _settingsToConfig(ss.ScreenshotSettings settings) {
+    return ScreenshotConfig(
+      savePath: settings.savePath,
+      filenameFormat: settings.filenameFormat,
+      imageFormat: settings.imageFormat.name,
+      imageQuality: settings.imageQuality,
+      autoCopyToClipboard: settings.autoCopyToClipboard,
+      showPreview: settings.showPreview,
+      saveHistory: settings.saveHistory,
+      maxHistoryCount: settings.maxHistoryCount,
+      historyRetentionDays: settings.historyRetentionPeriod.inDays,
+      shortcuts: settings.shortcuts,
+      pinSettings: _settingsPinToConfigPin(settings.pinSettings),
+    );
+  }
+
+  /// 解析图片格式字符串
+  ss.ImageFormat _parseImageFormat(String format) {
+    switch (format.toLowerCase()) {
+      case 'png':
+        return ss.ImageFormat.png;
+      case 'jpeg':
+      case 'jpg':
+        return ss.ImageFormat.jpeg;
+      case 'webp':
+        return ss.ImageFormat.webp;
+      default:
+        return ss.ImageFormat.png;
+    }
+  }
+
+  /// 将 PinScreenshotConfig 转换为 ss.PinSettings
+  ss.PinSettings _configPinToSettingsPin(PinScreenshotConfig configPin) {
+    return ss.PinSettings(
+      alwaysOnTop: configPin.alwaysOnTop,
+      defaultOpacity: configPin.defaultOpacity,
+      enableDrag: configPin.enableDrag,
+      enableResize: configPin.enableResize,
+      showCloseButton: configPin.showCloseButton,
+    );
+  }
+
+  /// 将 ss.PinSettings 转换为 PinScreenshotConfig
+  PinScreenshotConfig _settingsPinToConfigPin(ss.PinSettings settingsPin) {
+    return PinScreenshotConfig(
+      alwaysOnTop: settingsPin.alwaysOnTop,
+      defaultOpacity: settingsPin.defaultOpacity,
+      enableDrag: settingsPin.enableDrag,
+      enableResize: settingsPin.enableResize,
+      showCloseButton: settingsPin.showCloseButton,
+    );
+  }
+
   /// 加载保存的状态
   Future<void> _loadSavedState() async {
     try {
-      // 加载设置
-      final settingsData =
-          await _context.dataStorage.retrieve<Map<String, dynamic>>('screenshotSettings');
-      if (settingsData != null) {
-        _settings = ScreenshotSettings.fromJson(settingsData);
+      // 从 ConfigManager 加载设置
+      final configData = await ConfigManager.instance.loadPluginConfig(id);
+      if (configData.isNotEmpty) {
+        final config = ScreenshotConfig.fromJson(configData);
+        _settings = _configToSettings(config);
       }
 
       // 加载截图历史记录（仅加载元数据，不加载实际文件）
@@ -302,12 +447,11 @@ class ScreenshotPlugin implements IPlugin {
   /// 保存当前状态
   Future<void> _saveCurrentState() async {
     try {
-      await _context.dataStorage.store(
-        'screenshotSettings',
-        _settings.toJson(),
-      );
+      // 保存设置到 ConfigManager
+      final config = _settingsToConfig(_settings);
+      await ConfigManager.instance.savePluginConfig(id, config.toJson());
 
-      // 只保存最近 100 条记录的元数据
+      // 只保存最近 100 条记录的元数据到 dataStorage
       final screenshotsToSave = _screenshots.take(100).map((s) => s.toJson()).toList();
       await _context.dataStorage.store(
         'screenshots',
@@ -316,6 +460,53 @@ class ScreenshotPlugin implements IPlugin {
     } catch (e) {
       debugPrint('Failed to save state: $e');
     }
+  }
+
+  /// 注册快捷键
+  Future<void> _registerHotkeys() async {
+    final shortcuts = _settings.shortcuts;
+
+    // 注册区域截图快捷键
+    if (shortcuts.containsKey('regionCapture')) {
+      await _hotkeyService.registerHotkey(
+        'regionCapture',
+        shortcuts['regionCapture']!,
+        () async {
+          debugPrint('Hotkey: Region capture triggered');
+          // 触发区域截图
+          final success = await showNativeRegionCapture();
+          if (!success) {
+            debugPrint('Failed to show native region capture window');
+          }
+        },
+      );
+    }
+
+    // 注册全屏截图快捷键
+    if (shortcuts.containsKey('fullScreenCapture')) {
+      await _hotkeyService.registerHotkey(
+        'fullScreenCapture',
+        shortcuts['fullScreenCapture']!,
+        () async {
+          debugPrint('Hotkey: Full screen capture triggered');
+          await captureFullScreen();
+        },
+      );
+    }
+
+    // 注册窗口截图快捷键
+    if (shortcuts.containsKey('windowCapture')) {
+      await _hotkeyService.registerHotkey(
+        'windowCapture',
+        shortcuts['windowCapture']!,
+        () async {
+          debugPrint('Hotkey: Window capture triggered');
+          // TODO: 实现窗口截图功能
+        },
+      );
+    }
+
+    debugPrint('Hotkeys registered: ${shortcuts.keys.join(", ")}');
   }
 }
 

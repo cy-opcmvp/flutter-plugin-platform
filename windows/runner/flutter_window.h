@@ -11,6 +11,7 @@
 #include <memory>
 
 #include "win32_window.h"
+#include "hotkey_manager.h"
 
 // A window that does nothing but host a Flutter view.
 class FlutterWindow : public Win32Window {
@@ -36,13 +37,30 @@ class FlutterWindow : public Win32Window {
   // Screenshot event sink for communicating region selection back to Flutter
   std::unique_ptr<flutter::EventSink<flutter::EncodableValue>> screenshot_event_sink_;
 
+  // Hotkey event sink for communicating hotkey events back to Flutter
+  std::unique_ptr<flutter::EventSink<flutter::EncodableValue>> hotkey_event_sink_;
+
+  // Hotkey manager instance
+  std::unique_ptr<HotkeyManager> hotkey_manager_;
+
   // Handle screenshot method calls from Flutter
   void HandleScreenshotMethodCall(
       const flutter::MethodCall<flutter::EncodableValue>& call,
       std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
 
+  // Handle hotkey method calls from Flutter
+  void HandleHotkeyMethodCall(
+      const flutter::MethodCall<flutter::EncodableValue>& call,
+      std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+
   // Handle screenshot event channel registration
   void RegisterScreenshotEventChannel();
+
+  // Handle hotkey event channel registration
+  void RegisterHotkeyEventChannel();
+
+  // Hotkey callback function
+  void OnHotkeyPressed(const std::string& actionId);
 };
 
 #endif  // RUNNER_FLUTTER_WINDOW_H_

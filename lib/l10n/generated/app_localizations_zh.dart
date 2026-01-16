@@ -526,6 +526,96 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get settings_global => '全局配置';
+
+  @override
+  String get settings_app => '应用设置';
+
+  @override
+  String get settings_features => '功能设置';
+
+  @override
+  String get settings_services => '服务设置';
+
+  @override
+  String get settings_advanced => '高级设置';
+
+  @override
+  String get settings_plugins => '插件配置';
+
+  @override
+  String get settings_appName => '应用名称';
+
+  @override
+  String get settings_appVersion => '应用版本';
+
+  @override
+  String get settings_autoStart => '开机自启';
+
+  @override
+  String get settings_minimizeToTray => '最小化到托盘';
+
+  @override
+  String get settings_showDesktopPet => '显示桌面宠物';
+
+  @override
+  String get settings_enableNotifications => '启用通知';
+
+  @override
+  String get settings_debugMode => '调试模式';
+
+  @override
+  String get settings_logLevel => '日志级别';
+
+  @override
+  String get settings_savePath => '保存路径';
+
+  @override
+  String get settings_filenameFormat => '文件名格式';
+
+  @override
+  String get settings_imageFormat => '图片格式';
+
+  @override
+  String get settings_imageQuality => '图片质量';
+
+  @override
+  String get settings_autoCopyToClipboard => '自动复制到剪贴板';
+
+  @override
+  String get settings_showPreview => '显示预览窗口';
+
+  @override
+  String get settings_saveHistory => '保存历史记录';
+
+  @override
+  String get settings_maxHistoryCount => '最大历史记录数';
+
+  @override
+  String get settings_shortcuts => '快捷键设置';
+
+  @override
+  String get settings_regionCapture => '区域截图';
+
+  @override
+  String get settings_fullScreenCapture => '全屏截图';
+
+  @override
+  String get settings_windowCapture => '窗口截图';
+
+  @override
+  String get settings_configSaved => '配置已保存';
+
+  @override
+  String get settings_configSaveFailed => '配置保存失败';
+
+  @override
+  String get settings_resetToDefaults => '恢复默认设置';
+
+  @override
+  String get settings_resetConfirm => '确定要恢复默认设置吗？此操作不可撤销。';
+
+  @override
   String get plugin_detailsTitle => '插件详情';
 
   @override
@@ -1432,5 +1522,82 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String screenshot_daysAgo(int days) {
     return '$days 天前';
+  }
+
+  @override
+  String get settings_general => '常规设置';
+
+  @override
+  String get settings_behavior => '行为';
+
+  @override
+  String get screenshot_config_title => '截图插件配置';
+
+  @override
+  String get plugin_version => '版本';
+
+  @override
+  String get plugin_type_label => '类型';
+
+  @override
+  String get plugin_id_label => 'ID';
+
+  @override
+  String get plugin_background_plugins => '后台插件';
+
+  @override
+  String plugin_pauseFailed(String message) {
+    return '暂停插件失败: $message';
+  }
+
+  @override
+  String get plugin_update_label => '更新';
+
+  @override
+  String get plugin_rollback_label => '回滚';
+
+  @override
+  String get plugin_remove_label => '移除';
+
+  @override
+  String get screenshot_select_window => '选择窗口';
+
+  @override
+  String get screenshot_close_preview => '关闭预览';
+
+  @override
+  String get screenshot_share_not_implemented => '分享功能待实现';
+
+  @override
+  String get screenshot_saved_to_temp => '已保存到临时文件';
+
+  @override
+  String get screenshot_copy_failed => '复制到剪贴板失败';
+
+  @override
+  String get screenshot_image_load_failed => '图片加载失败';
+
+  @override
+  String get screenshot_file_not_exists => '文件不存在';
+
+  @override
+  String get screenshot_window_not_available => '窗口选择不可用';
+
+  @override
+  String screenshot_region_failed(String error) {
+    return '区域截图失败: $error';
+  }
+
+  @override
+  String screenshot_fullscreen_failed(String error) {
+    return '全屏截图失败: $error';
+  }
+
+  @override
+  String get screenshot_native_window_failed => '无法打开原生截图窗口';
+
+  @override
+  String screenshot_window_failed(String error) {
+    return '窗口截图失败: $error';
   }
 }

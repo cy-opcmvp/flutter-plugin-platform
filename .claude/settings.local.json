@@ -33,7 +33,10 @@
       "Bash(buildwindowsx64runnerDebugflutter_app.exe)",
       "Bash(printf '\\\\xEF\\\\xBB\\\\xBF')",
       "Bash(Select-Object:*)",
-      "Bash(exit:*)"
+      "Bash(exit:*)",
+      "Bash(git checkout:*)",
+      "Bash(grep:*)",
+      "Bash(dart run:*)"
     ]
   }
 }

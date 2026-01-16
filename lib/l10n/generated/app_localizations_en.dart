@@ -537,6 +537,97 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get settings_global => 'Global Config';
+
+  @override
+  String get settings_app => 'App Settings';
+
+  @override
+  String get settings_features => 'Features';
+
+  @override
+  String get settings_services => 'Services';
+
+  @override
+  String get settings_advanced => 'Advanced';
+
+  @override
+  String get settings_plugins => 'Plugin Config';
+
+  @override
+  String get settings_appName => 'App Name';
+
+  @override
+  String get settings_appVersion => 'App Version';
+
+  @override
+  String get settings_autoStart => 'Auto Start';
+
+  @override
+  String get settings_minimizeToTray => 'Minimize to Tray';
+
+  @override
+  String get settings_showDesktopPet => 'Show Desktop Pet';
+
+  @override
+  String get settings_enableNotifications => 'Enable Notifications';
+
+  @override
+  String get settings_debugMode => 'Debug Mode';
+
+  @override
+  String get settings_logLevel => 'Log Level';
+
+  @override
+  String get settings_savePath => 'Save Path';
+
+  @override
+  String get settings_filenameFormat => 'Filename Format';
+
+  @override
+  String get settings_imageFormat => 'Image Format';
+
+  @override
+  String get settings_imageQuality => 'Image Quality';
+
+  @override
+  String get settings_autoCopyToClipboard => 'Auto Copy to Clipboard';
+
+  @override
+  String get settings_showPreview => 'Show Preview';
+
+  @override
+  String get settings_saveHistory => 'Save History';
+
+  @override
+  String get settings_maxHistoryCount => 'Max History Count';
+
+  @override
+  String get settings_shortcuts => 'Shortcuts';
+
+  @override
+  String get settings_regionCapture => 'Region Capture';
+
+  @override
+  String get settings_fullScreenCapture => 'Full Screen Capture';
+
+  @override
+  String get settings_windowCapture => 'Window Capture';
+
+  @override
+  String get settings_configSaved => 'Configuration saved';
+
+  @override
+  String get settings_configSaveFailed => 'Failed to save configuration';
+
+  @override
+  String get settings_resetToDefaults => 'Reset to Defaults';
+
+  @override
+  String get settings_resetConfirm =>
+      'Are you sure you want to reset to defaults? This cannot be undone.';
+
+  @override
   String get plugin_detailsTitle => 'Plugin Details';
 
   @override
@@ -1481,5 +1572,85 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String screenshot_daysAgo(int days) {
     return '$days days ago';
+  }
+
+  @override
+  String get settings_general => 'General Settings';
+
+  @override
+  String get settings_behavior => 'Behavior';
+
+  @override
+  String get screenshot_config_title => 'Screenshot Plugin Config';
+
+  @override
+  String get plugin_version => 'Version';
+
+  @override
+  String get plugin_type_label => 'Type';
+
+  @override
+  String get plugin_id_label => 'ID';
+
+  @override
+  String get plugin_background_plugins => 'Background Plugins';
+
+  @override
+  String plugin_pauseFailed(String message) {
+    return 'Failed to pause plugin: $message';
+  }
+
+  @override
+  String get plugin_update_label => 'Update';
+
+  @override
+  String get plugin_rollback_label => 'Rollback';
+
+  @override
+  String get plugin_remove_label => 'Remove';
+
+  @override
+  String get screenshot_select_window => 'Select Window';
+
+  @override
+  String get screenshot_close_preview => 'Close Preview';
+
+  @override
+  String get screenshot_share_not_implemented =>
+      'Share feature not implemented';
+
+  @override
+  String get screenshot_saved_to_temp => 'Saved to temporary file';
+
+  @override
+  String get screenshot_copy_failed => 'Failed to copy to clipboard';
+
+  @override
+  String get screenshot_image_load_failed => 'Failed to load image';
+
+  @override
+  String get screenshot_file_not_exists => 'File does not exist';
+
+  @override
+  String get screenshot_window_not_available =>
+      'Window selection not available';
+
+  @override
+  String screenshot_region_failed(String error) {
+    return 'Region capture failed: $error';
+  }
+
+  @override
+  String screenshot_fullscreen_failed(String error) {
+    return 'Full screen capture failed: $error';
+  }
+
+  @override
+  String get screenshot_native_window_failed =>
+      'Failed to open native capture window';
+
+  @override
+  String screenshot_window_failed(String error) {
+    return 'Window capture failed: $error';
   }
 }

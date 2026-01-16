@@ -3,6 +3,7 @@ library;
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 import '../screenshot_plugin.dart';
 import '../models/screenshot_models.dart';
 import 'screenshot_overlay.dart';
@@ -24,6 +25,7 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
@@ -348,10 +350,11 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
       if (!success) {
         debugPrint('无法打开原生截图窗口');
         if (mounted) {
+          final l10n = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('无法打开原生截图窗口'),
-              duration: Duration(seconds: 2),
+            SnackBar(
+              content: Text(l10n.screenshot_native_window_failed),
+              duration: const Duration(seconds: 2),
             ),
           );
         }
@@ -364,9 +367,10 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
     } catch (e) {
       debugPrint('区域截图异常: $e');
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('区域截图失败: $e'),
+            content: Text(l10n.screenshot_region_failed(e.toString())),
             duration: const Duration(seconds: 2),
           ),
         );
@@ -418,9 +422,10 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
       await widget.plugin.captureFullScreen();
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('全屏截图失败: $e'),
+            content: Text(l10n.screenshot_fullscreen_failed(e.toString())),
             duration: const Duration(seconds: 2),
           ),
         );
@@ -435,10 +440,11 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
       if (!mounted) return;
 
       if (windows.isEmpty) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('未检测到可用窗口'),
-            duration: Duration(seconds: 2),
+          SnackBar(
+            content: Text(l10n.screenshot_window_not_available),
+            duration: const Duration(seconds: 2),
           ),
         );
         return;
@@ -455,9 +461,10 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('窗口截图失败: $e'),
+            content: Text(l10n.screenshot_window_failed(e.toString())),
             duration: const Duration(seconds: 2),
           ),
         );
@@ -484,15 +491,16 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
 
   /// 删除截图
   void _deleteScreenshot(String screenshotId) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('确认删除'),
-        content: const Text('确定要删除这张截图吗？'),
+        title: Text(l10n.screenshot_confirmDelete),
+        content: Text(l10n.screenshot_confirmDeleteMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('取消'),
+            child: Text(l10n.common_cancel),
           ),
           FilledButton(
             onPressed: () async {
@@ -501,7 +509,7 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
                 Navigator.of(context).pop();
               }
             },
-            child: const Text('删除'),
+            child: Text(l10n.common_delete),
           ),
         ],
       ),
@@ -712,8 +720,9 @@ class _WindowListDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('选择窗口'),
+      title: Text(l10n.screenshot_select_window),
       content: SizedBox(
         width: double.maxFinite,
         child: ListView.builder(
@@ -733,7 +742,7 @@ class _WindowListDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: Text(l10n.common_cancel),
         ),
       ],
     );
@@ -782,8 +791,9 @@ class _ScreenshotPreviewScreenState extends State<_ScreenshotPreviewScreen> {
           });
         }
         if (mounted) {
+          final l10n = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('截图文件不存在')),
+            SnackBar(content: Text(l10n.screenshot_file_not_exists)),
           );
         }
       }
@@ -794,8 +804,9 @@ class _ScreenshotPreviewScreenState extends State<_ScreenshotPreviewScreen> {
         });
       }
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('加载图片失败: $e')),
+          SnackBar(content: Text('${l10n.screenshot_image_load_failed}: $e')),
         );
       }
     }
@@ -803,6 +814,7 @@ class _ScreenshotPreviewScreenState extends State<_ScreenshotPreviewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -812,7 +824,7 @@ class _ScreenshotPreviewScreenState extends State<_ScreenshotPreviewScreen> {
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(),
-          tooltip: '关闭',
+          tooltip: l10n.common_close,
         ),
         actions: [
           if (_imageBytes != null)
@@ -830,7 +842,7 @@ class _ScreenshotPreviewScreenState extends State<_ScreenshotPreviewScreen> {
           IconButton(
             icon: const Icon(Icons.delete),
             onPressed: _confirmDelete,
-            tooltip: '删除',
+            tooltip: l10n.common_delete,
           ),
         ],
       ),
@@ -848,7 +860,7 @@ class _ScreenshotPreviewScreenState extends State<_ScreenshotPreviewScreen> {
               child: ElevatedButton.icon(
                 onPressed: () => Navigator.of(context).pop(),
                 icon: const Icon(Icons.close),
-                label: const Text('关闭预览'),
+                label: Text(l10n.screenshot_close_preview),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
                   foregroundColor: Colors.black,
@@ -934,17 +946,19 @@ class _ScreenshotPreviewScreenState extends State<_ScreenshotPreviewScreen> {
       await tempFile.writeAsBytes(_imageBytes!);
 
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('图片已保存到临时文件夹'),
-            duration: Duration(seconds: 2),
+          SnackBar(
+            content: Text(l10n.screenshot_saved_to_temp),
+            duration: const Duration(seconds: 2),
           ),
         );
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('复制失败: $e')),
+          SnackBar(content: Text('${l10n.screenshot_copy_failed}: $e')),
         );
       }
     }
@@ -955,25 +969,27 @@ class _ScreenshotPreviewScreenState extends State<_ScreenshotPreviewScreen> {
 
     // TODO: 实现分享功能
     if (mounted) {
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('分享功能待实现'),
-          duration: Duration(seconds: 2),
+        SnackBar(
+          content: Text(l10n.screenshot_share_not_implemented),
+          duration: const Duration(seconds: 2),
         ),
       );
     }
   }
 
   void _confirmDelete() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('确认删除'),
-        content: const Text('确定要删除这张截图吗？'),
+        title: Text(l10n.screenshot_confirmDelete),
+        content: Text(l10n.screenshot_confirmDeleteMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('取消'),
+            child: Text(l10n.common_cancel),
           ),
           FilledButton(
             onPressed: () async {
@@ -983,7 +999,7 @@ class _ScreenshotPreviewScreenState extends State<_ScreenshotPreviewScreen> {
                 Navigator.of(context).pop(); // 关闭预览界面
               }
             },
-            child: const Text('删除'),
+            child: Text(l10n.common_delete),
           ),
         ],
       ),

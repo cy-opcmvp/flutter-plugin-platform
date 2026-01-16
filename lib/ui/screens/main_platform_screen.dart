@@ -1057,7 +1057,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
         ),
         subtitle: Row(
           children: [
-            Text('v${plugin.version} • '),
+            Text('${context.l10n.plugin_version} ${plugin.version} • '),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
@@ -1552,7 +1552,9 @@ class _PluginViewScreenState extends State<_PluginViewScreen> {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Failed to switch plugin: $e'),
+                        content: Text(context.l10n.plugin_switchFailed(
+                          message: e.toString(),
+                        )),
                         backgroundColor: Colors.red,
                       ),
                     );
@@ -1567,7 +1569,7 @@ class _PluginViewScreenState extends State<_PluginViewScreen> {
                     child: ListTile(
                       leading: Icon(_getPluginTypeIcon(plugin.type)),
                       title: Text(_getLocalizedPluginName(plugin.id)),
-                      subtitle: Text('v${plugin.version}'),
+                      subtitle: Text('${context.l10n.plugin_version} ${plugin.version}'),
                       dense: true,
                     ),
                   );
@@ -1584,7 +1586,9 @@ class _PluginViewScreenState extends State<_PluginViewScreen> {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Failed to pause plugin: $e'),
+                      content: Text(context.l10n.plugin_pauseFailed(
+                        message: e.toString(),
+                      )),
                       backgroundColor: Colors.red,
                     ),
                   );
@@ -1605,11 +1609,11 @@ class _PluginViewScreenState extends State<_PluginViewScreen> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Version: ${_currentPlugin.version}'),
-                      Text('Type: ${_currentPlugin.type.name.toUpperCase()}'),
-                      Text('ID: ${_currentPlugin.id}'),
+                      Text('${context.l10n.plugin_version}: ${_currentPlugin.version}'),
+                      Text('${context.l10n.plugin_type_label}: ${_currentPlugin.type.name.toUpperCase()}'),
+                      Text('${context.l10n.plugin_id_label}: ${_currentPlugin.id}'),
                       const SizedBox(height: 8),
-                      Text('Background Plugins: ${backgroundPlugins.length}'),
+                      Text('${context.l10n.plugin_background_plugins}: ${backgroundPlugins.length}'),
                     ],
                   ),
                   actions: [

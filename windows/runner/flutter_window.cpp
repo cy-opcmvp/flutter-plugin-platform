@@ -77,6 +77,9 @@ bool FlutterWindow::OnCreate() {
   // Register screenshot event channel for region selection feedback
   RegisterScreenshotEventChannel();
 
+  // Register hotkey event channel
+  RegisterHotkeyEventChannel();
+
   // Register screenshot method channel
   auto screenshot_channel =
       std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
@@ -87,6 +90,23 @@ bool FlutterWindow::OnCreate() {
       [this](const auto& call, auto result) {
         HandleScreenshotMethodCall(call, std::move(result));
       });
+
+  // Register hotkey method channel
+  auto hotkey_channel =
+      std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
+          flutter_controller_->engine()->messenger(), "com.example.screenshot/hotkey",
+          &flutter::StandardMethodCodec::GetInstance());
+
+  hotkey_channel->SetMethodCallHandler(
+      [this](const auto& call, auto result) {
+        HandleHotkeyMethodCall(call, std::move(result));
+      });
+
+  // Initialize hotkey manager
+  hotkey_manager_ = std::make_unique<HotkeyManager>();
+  hotkey_manager_->SetCallback([this](const std::string& actionId) {
+    OnHotkeyPressed(actionId);
+  });
 
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
@@ -131,6 +151,11 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
     case WM_FONTCHANGE:
       flutter_controller_->engine()->ReloadSystemFonts();
       break;
+    case WM_HOTKEY:
+      if (hotkey_manager_) {
+        hotkey_manager_->HandleHotkeyMessage(wparam, lparam);
+      }
+      return 0;
   }
 
   return Win32Window::MessageHandler(hwnd, message, wparam, lparam);
@@ -311,5 +336,122 @@ void FlutterWindow::HandleScreenshotMethodCall(
     }
   } else {
     result->NotImplemented();
+  }
+}
+
+void FlutterWindow::RegisterHotkeyEventChannel() {
+  // 暂时禁用 EventChannel 实现由于 API 不匹配
+  // TODO: 找到正确的 Flutter Windows EventChannel API 并实现
+  // 使用全局变量或通过 MethodChannel 反向调用
+  LOG_FLUTTER("Hotkey event channel registered (placeholder)");
+}
+
+void FlutterWindow::HandleHotkeyMethodCall(
+    const flutter::MethodCall<flutter::EncodableValue>& call,
+    std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+  LOG_FLUTTER_FMT("Hotkey method called: %s", call.method_name().c_str());
+
+  const auto* arguments = std::get_if<flutter::EncodableMap>(call.arguments());
+
+  if (call.method_name() == "registerHotkey") {
+    if (!arguments) {
+      result->Error("INVALID_ARGUMENTS", "No arguments provided");
+      return;
+    }
+
+    auto actionIdIt = arguments->find(flutter::EncodableValue("actionId"));
+    auto shortcutIt = arguments->find(flutter::EncodableValue("shortcut"));
+
+    if (actionIdIt == arguments->end() || shortcutIt == arguments->end()) {
+      result->Error("INVALID_ARGUMENTS", "Missing actionId or shortcut");
+      return;
+    }
+
+    const auto* actionIdStr = std::get_if<std::string>(&actionIdIt->second);
+    const auto* shortcutStr = std::get_if<std::string>(&shortcutIt->second);
+
+    if (!actionIdStr || !shortcutStr) {
+      result->Error("INVALID_ARGUMENTS", "Invalid actionId or shortcut type");
+      return;
+    }
+
+    LOG_FLUTTER_FMT("Registering hotkey: %s -> %s", actionIdStr->c_str(), shortcutStr->c_str());
+
+    bool success = hotkey_manager_->RegisterHotkey(*actionIdStr, *shortcutStr);
+    result->Success(flutter::EncodableValue(success));
+
+  } else if (call.method_name() == "unregisterHotkey") {
+    if (!arguments) {
+      result->Error("INVALID_ARGUMENTS", "No arguments provided");
+      return;
+    }
+
+    auto actionIdIt = arguments->find(flutter::EncodableValue("actionId"));
+    if (actionIdIt == arguments->end()) {
+      result->Error("INVALID_ARGUMENTS", "Missing actionId");
+      return;
+    }
+
+    const auto* actionIdStr = std::get_if<std::string>(&actionIdIt->second);
+    if (!actionIdStr) {
+      result->Error("INVALID_ARGUMENTS", "Invalid actionId type");
+      return;
+    }
+
+    LOG_FLUTTER_FMT("Unregistering hotkey: %s", actionIdStr->c_str());
+
+    bool success = hotkey_manager_->UnregisterHotkey(*actionIdStr);
+    result->Success(flutter::EncodableValue(success));
+
+  } else {
+    result->NotImplemented();
+  }
+}
+
+void FlutterWindow::OnHotkeyPressed(const std::string& actionId) {
+  LOG_FLUTTER_FMT("Hotkey pressed: %s", actionId.c_str());
+
+  // 直接在原生端处理热键事件，不通过 EventChannel
+  if (actionId == "regionCapture") {
+    // 触发区域截图
+    std::thread([this]() {
+      LOG_FLUTTER("Triggering region capture from hotkey");
+
+      NativeScreenshotWindow window;
+      bool success = window.Show(
+          [](int x, int y, int width, int height) {
+            LOG_FLUTTER_FMT("Region selected from hotkey: (%d,%d) %dx%d", x, y, width, height);
+            // 保存选择结果
+            g_regionSelectionResult.completed = true;
+            g_regionSelectionResult.cancelled = false;
+            g_regionSelectionResult.x = x;
+            g_regionSelectionResult.y = y;
+            g_regionSelectionResult.width = width;
+            g_regionSelectionResult.height = height;
+          },
+          []() {
+            LOG_FLUTTER("Region capture cancelled from hotkey");
+            g_regionSelectionResult.completed = true;
+            g_regionSelectionResult.cancelled = true;
+          }
+      );
+
+      if (!success) {
+        LOG_FLUTTER("Failed to show native region capture window from hotkey");
+      }
+    }).detach();
+
+  } else if (actionId == "fullScreenCapture") {
+    // 触发全屏截图
+    LOG_FLUTTER("Triggering full screen capture from hotkey");
+    // TODO: 实现全屏截图功能
+
+  } else if (actionId == "windowCapture") {
+    // 触发窗口截图
+    LOG_FLUTTER("Triggering window capture from hotkey");
+    // TODO: 实现窗口截图功能
+
+  } else {
+    LOG_FLUTTER_FMT("Unknown hotkey action: %s", actionId.c_str());
   }
 }

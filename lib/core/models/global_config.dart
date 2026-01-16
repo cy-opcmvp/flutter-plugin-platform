@@ -1,0 +1,320 @@
+library;
+
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
+
+/// 全局应用配置
+///
+/// 包含应用的所有全局设置，从配置文件读取
+class GlobalConfig {
+  /// 应用配置
+  final AppConfig app;
+
+  /// 功能配置
+  final FeatureConfig features;
+
+  /// 服务配置
+  final ServiceConfig services;
+
+  /// 高级配置
+  final AdvancedConfig advanced;
+
+  const GlobalConfig({
+    required this.app,
+    required this.features,
+    required this.services,
+    required this.advanced,
+  });
+
+  /// 从 JSON 创建实例
+  factory GlobalConfig.fromJson(Map<String, dynamic> json) {
+    return GlobalConfig(
+      app: AppConfig.fromJson(
+        json['app'] as Map<String, dynamic>? ?? {},
+      ),
+      features: FeatureConfig.fromJson(
+        json['features'] as Map<String, dynamic>? ?? {},
+      ),
+      services: ServiceConfig.fromJson(
+        json['services'] as Map<String, dynamic>? ?? {},
+      ),
+      advanced: AdvancedConfig.fromJson(
+        json['advanced'] as Map<String, dynamic>? ?? {},
+      ),
+    );
+  }
+
+  /// 转换为 JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'app': app.toJson(),
+      'features': features.toJson(),
+      'services': services.toJson(),
+      'advanced': advanced.toJson(),
+    };
+  }
+
+  /// 获取默认配置
+  static GlobalConfig get defaultConfig => GlobalConfig(
+    app: AppConfig.defaultConfig,
+    features: FeatureConfig.defaultConfig,
+    services: ServiceConfig.defaultConfig,
+    advanced: AdvancedConfig.defaultConfig,
+  );
+
+  /// 复制并修改部分配置
+  GlobalConfig copyWith({
+    AppConfig? app,
+    FeatureConfig? features,
+    ServiceConfig? services,
+    AdvancedConfig? advanced,
+  }) {
+    return GlobalConfig(
+      app: app ?? this.app,
+      features: features ?? this.features,
+      services: services ?? this.services,
+      advanced: advanced ?? this.advanced,
+    );
+  }
+}
+
+/// 应用配置
+class AppConfig {
+  final String name;
+  final String version;
+  final String language;
+  final String theme;
+
+  const AppConfig({
+    required this.name,
+    required this.version,
+    required this.language,
+    required this.theme,
+  });
+
+  factory AppConfig.fromJson(Map<String, dynamic> json) {
+    return AppConfig(
+      name: json['name'] as String? ?? 'Flutter Plugin Platform',
+      version: json['version'] as String? ?? '0.0.0',
+      language: json['language'] as String? ?? 'zh_CN',
+      theme: json['theme'] as String? ?? 'system',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'version': version,
+      'language': language,
+      'theme': theme,
+    };
+  }
+
+  static const defaultConfig = AppConfig(
+    name: 'Flutter Plugin Platform',
+    version: '0.3.4',
+    language: 'zh_CN',
+    theme: 'system',
+  );
+}
+
+/// 功能配置
+class FeatureConfig {
+  final bool autoStart;
+  final bool minimizeToTray;
+  final bool showDesktopPet;
+  final bool enableNotifications;
+
+  const FeatureConfig({
+    required this.autoStart,
+    required this.minimizeToTray,
+    required this.showDesktopPet,
+    required this.enableNotifications,
+  });
+
+  factory FeatureConfig.fromJson(Map<String, dynamic> json) {
+    return FeatureConfig(
+      autoStart: json['autoStart'] as bool? ?? false,
+      minimizeToTray: json['minimizeToTray'] as bool? ?? true,
+      showDesktopPet: json['showDesktopPet'] as bool? ?? true,
+      enableNotifications: json['enableNotifications'] as bool? ?? true,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'autoStart': autoStart,
+      'minimizeToTray': minimizeToTray,
+      'showDesktopPet': showDesktopPet,
+      'enableNotifications': enableNotifications,
+    };
+  }
+
+  /// 复制并修改部分配置
+  FeatureConfig copyWith({
+    bool? autoStart,
+    bool? minimizeToTray,
+    bool? showDesktopPet,
+    bool? enableNotifications,
+  }) {
+    return FeatureConfig(
+      autoStart: autoStart ?? this.autoStart,
+      minimizeToTray: minimizeToTray ?? this.minimizeToTray,
+      showDesktopPet: showDesktopPet ?? this.showDesktopPet,
+      enableNotifications: enableNotifications ?? this.enableNotifications,
+    );
+  }
+
+  static const defaultConfig = FeatureConfig(
+    autoStart: false,
+    minimizeToTray: true,
+    showDesktopPet: true,
+    enableNotifications: true,
+  );
+}
+
+/// 服务配置
+class ServiceConfig {
+  final AudioServiceConfig audio;
+  final NotificationServiceConfig notification;
+  final TaskSchedulerServiceConfig taskScheduler;
+
+  const ServiceConfig({
+    required this.audio,
+    required this.notification,
+    required this.taskScheduler,
+  });
+
+  factory ServiceConfig.fromJson(Map<String, dynamic> json) {
+    return ServiceConfig(
+      audio: AudioServiceConfig.fromJson(
+        json['audio'] as Map<String, dynamic>? ?? {},
+      ),
+      notification: NotificationServiceConfig.fromJson(
+        json['notification'] as Map<String, dynamic>? ?? {},
+      ),
+      taskScheduler: TaskSchedulerServiceConfig.fromJson(
+        json['taskScheduler'] as Map<String, dynamic>? ?? {},
+      ),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'audio': audio.toJson(),
+      'notification': notification.toJson(),
+      'taskScheduler': taskScheduler.toJson(),
+    };
+  }
+
+  static const defaultConfig = ServiceConfig(
+    audio: AudioServiceConfig.defaultConfig,
+    notification: NotificationServiceConfig.defaultConfig,
+    taskScheduler: TaskSchedulerServiceConfig.defaultConfig,
+  );
+}
+
+/// 音频服务配置
+class AudioServiceConfig {
+  final bool enabled;
+
+  const AudioServiceConfig({required this.enabled});
+
+  factory AudioServiceConfig.fromJson(Map<String, dynamic> json) {
+    return AudioServiceConfig(
+      enabled: json['enabled'] as bool? ?? true,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'enabled': enabled};
+  }
+
+  static const defaultConfig = AudioServiceConfig(enabled: true);
+}
+
+/// 通知服务配置
+class NotificationServiceConfig {
+  final bool enabled;
+
+  const NotificationServiceConfig({required this.enabled});
+
+  factory NotificationServiceConfig.fromJson(Map<String, dynamic> json) {
+    return NotificationServiceConfig(
+      enabled: json['enabled'] as bool? ?? true,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'enabled': enabled};
+  }
+
+  static const defaultConfig = NotificationServiceConfig(enabled: true);
+}
+
+/// 任务调度服务配置
+class TaskSchedulerServiceConfig {
+  final bool enabled;
+
+  const TaskSchedulerServiceConfig({required this.enabled});
+
+  factory TaskSchedulerServiceConfig.fromJson(Map<String, dynamic> json) {
+    return TaskSchedulerServiceConfig(
+      enabled: json['enabled'] as bool? ?? true,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'enabled': enabled};
+  }
+
+  static const defaultConfig = TaskSchedulerServiceConfig(enabled: true);
+}
+
+/// 高级配置
+class AdvancedConfig {
+  final bool debugMode;
+  final String logLevel;
+  final int maxLogFileSize;
+
+  const AdvancedConfig({
+    required this.debugMode,
+    required this.logLevel,
+    required this.maxLogFileSize,
+  });
+
+  factory AdvancedConfig.fromJson(Map<String, dynamic> json) {
+    return AdvancedConfig(
+      debugMode: json['debugMode'] as bool? ?? false,
+      logLevel: json['logLevel'] as String? ?? 'info',
+      maxLogFileSize: json['maxLogFileSize'] as int? ?? 10,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'debugMode': debugMode,
+      'logLevel': logLevel,
+      'maxLogFileSize': maxLogFileSize,
+    };
+  }
+
+  /// 复制并修改部分配置
+  AdvancedConfig copyWith({
+    bool? debugMode,
+    String? logLevel,
+    int? maxLogFileSize,
+  }) {
+    return AdvancedConfig(
+      debugMode: debugMode ?? this.debugMode,
+      logLevel: logLevel ?? this.logLevel,
+      maxLogFileSize: maxLogFileSize ?? this.maxLogFileSize,
+    );
+  }
+
+  static const defaultConfig = AdvancedConfig(
+    debugMode: false,
+    logLevel: 'info',
+    maxLogFileSize: 10,
+  );
+}

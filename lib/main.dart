@@ -5,6 +5,7 @@ import 'package:window_manager/window_manager.dart';
 import './l10n/generated/app_localizations.dart';
 import './core/services/locale_provider.dart';
 import './core/services/platform_service_manager.dart';
+import './core/services/config_manager.dart';
 import './ui/screens/main_platform_screen.dart';
 import './ui/screens/service_test_screen.dart' show ServiceTestScreen;
 
@@ -27,6 +28,12 @@ void main() async {
       await windowManager.show();
       await windowManager.focus();
     });
+  }
+
+  // 初始化配置管理器
+  await ConfigManager.instance.initialize();
+  if (kDebugMode) {
+    print('Config manager initialized');
   }
 
   // 初始化平台服务

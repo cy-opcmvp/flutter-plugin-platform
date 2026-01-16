@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 import '../models/world_clock_models.dart';
 
 /// 世界时钟显示组件
@@ -284,15 +285,18 @@ class _WorldClockWidgetState extends State<WorldClockWidget> {
   }
 
   void _showDeleteConfirmation(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('确认删除'),
-        content: Text('确定要删除 ${widget.worldClock.cityName} 的时钟吗？'),
+        title: Text(l10n.worldClock_confirmDelete),
+        content: Text(l10n.worldClock_confirmDeleteClock(
+          widget.worldClock.cityName,
+        )),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('取消'),
+            child: Text(l10n.common_cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -303,7 +307,7 @@ class _WorldClockWidgetState extends State<WorldClockWidget> {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            child: const Text('删除'),
+            child: Text(l10n.common_delete),
           ),
         ],
       ),
