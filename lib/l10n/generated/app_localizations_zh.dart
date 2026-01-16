@@ -1600,4 +1600,168 @@ class AppLocalizationsZh extends AppLocalizations {
   String screenshot_window_failed(String error) {
     return '窗口截图失败: $error';
   }
+
+  @override
+  String get worldClock_section_clocks => '世界时钟';
+
+  @override
+  String get worldClock_section_countdown => '倒计时提醒';
+
+  @override
+  String get worldClock_empty_clocks => '暂无时钟';
+
+  @override
+  String get worldClock_empty_clocks_hint => '点击右上角 + 添加时钟';
+
+  @override
+  String get worldClock_empty_countdown => '暂无倒计时';
+
+  @override
+  String get worldClock_empty_countdown_hint => '点击右上角闹钟图标添加倒计时';
+
+  @override
+  String get worldClock_tooltip_addCountdown => '添加倒计时';
+
+  @override
+  String get worldClock_tooltip_addClock => '添加时钟';
+
+  @override
+  String get worldClock_tooltip_settings => '设置';
+
+  @override
+  String get worldClock_setTime => '设置时间';
+
+  @override
+  String get worldClock_display_options => '显示选项';
+
+  @override
+  String get worldClock_24hour_format => '24小时制';
+
+  @override
+  String get worldClock_24hour_format_desc => '使用24小时时间格式';
+
+  @override
+  String get worldClock_show_seconds => '显示秒数';
+
+  @override
+  String get worldClock_show_seconds_desc => '在时钟中显示秒数';
+
+  @override
+  String get worldClock_feature_options => '功能选项';
+
+  @override
+  String get worldClock_enable_notifications => '启用通知';
+
+  @override
+  String get worldClock_enable_notifications_desc => '倒计时完成时显示通知';
+
+  @override
+  String get worldClock_enable_animations => '启用动画';
+
+  @override
+  String get worldClock_enable_animations_desc => '显示动画效果';
+
+  @override
+  String get screenshot_settings_title => '截图设置';
+
+  @override
+  String get screenshot_settings_save => '保存设置';
+
+  @override
+  String get screenshot_settings_section_save => '保存设置';
+
+  @override
+  String get screenshot_settings_section_function => '功能设置';
+
+  @override
+  String get screenshot_settings_section_shortcuts => '快捷键';
+
+  @override
+  String get screenshot_settings_section_pin => '钉图设置';
+
+  @override
+  String get screenshot_settings_auto_copy_desc => '截图后自动复制到剪贴板';
+
+  @override
+  String get screenshot_settings_show_preview_desc => '截图后显示预览和编辑窗口';
+
+  @override
+  String get screenshot_settings_save_history_desc => '保存截图历史以供查看';
+
+  @override
+  String get screenshot_settings_always_on_top_desc => '钉图窗口始终在最前面';
+
+  @override
+  String get screenshot_settings_saved => '设置已保存';
+
+  @override
+  String get screenshot_settings_save_path_title => '设置保存路径';
+
+  @override
+  String get screenshot_settings_save_path_hint => '[documents]/Screenshots';
+
+  @override
+  String get screenshot_settings_save_path_helper =>
+      '可用占位符: [documents], [home], [temp]';
+
+  @override
+  String get screenshot_settings_filename_title => '设置文件名格式';
+
+  @override
+  String get screenshot_settings_filename_helper =>
+      '可用占位符: [timestamp], [date], [time], [datetime], [index]';
+
+  @override
+  String get screenshot_settings_format_title => '选择图片格式';
+
+  @override
+  String get screenshot_settings_quality_title => '设置图片质量';
+
+  @override
+  String get screenshot_settings_history_title => '设置最大历史记录数';
+
+  @override
+  String get screenshot_settings_opacity_title => '设置默认透明度';
+
+  @override
+  String get screenshot_settings_items => '条';
+
+  @override
+  String get screenshot_shortcut_region => '区域截图';
+
+  @override
+  String get screenshot_shortcut_fullscreen => '全屏截图';
+
+  @override
+  String get screenshot_shortcut_window => '窗口截图';
+
+  @override
+  String get screenshot_shortcut_history => '显示历史';
+
+  @override
+  String get screenshot_shortcut_settings => '打开设置';
+
+  @override
+  String get screenshot_tooltip_history => '历史记录';
+
+  @override
+  String get screenshot_tooltip_settings => '设置';
+
+  @override
+  String get screenshot_tooltip_cancel => '取消';
+
+  @override
+  String get screenshot_tooltip_confirm => '确认';
+
+  @override
+  String get screenshot_confirm_capture => '确认截图';
+
+  @override
+  String get ui_retry => '重试';
+
+  @override
+  String get ui_close => '关闭';
+
+  @override
+  String get ui_follow_system => '跟随系统';
 }

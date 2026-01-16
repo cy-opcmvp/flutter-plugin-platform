@@ -1653,4 +1653,175 @@ class AppLocalizationsEn extends AppLocalizations {
   String screenshot_window_failed(String error) {
     return 'Window capture failed: $error';
   }
+
+  @override
+  String get worldClock_section_clocks => 'World Clocks';
+
+  @override
+  String get worldClock_section_countdown => 'Countdown Reminders';
+
+  @override
+  String get worldClock_empty_clocks => 'No clocks';
+
+  @override
+  String get worldClock_empty_clocks_hint =>
+      'Click + in the top right to add a clock';
+
+  @override
+  String get worldClock_empty_countdown => 'No countdowns';
+
+  @override
+  String get worldClock_empty_countdown_hint =>
+      'Click the alarm icon to add a countdown';
+
+  @override
+  String get worldClock_tooltip_addCountdown => 'Add Countdown';
+
+  @override
+  String get worldClock_tooltip_addClock => 'Add Clock';
+
+  @override
+  String get worldClock_tooltip_settings => 'Settings';
+
+  @override
+  String get worldClock_setTime => 'Set Time';
+
+  @override
+  String get worldClock_display_options => 'Display Options';
+
+  @override
+  String get worldClock_24hour_format => '24-Hour Format';
+
+  @override
+  String get worldClock_24hour_format_desc => 'Use 24-hour time format';
+
+  @override
+  String get worldClock_show_seconds => 'Show Seconds';
+
+  @override
+  String get worldClock_show_seconds_desc => 'Display seconds in clocks';
+
+  @override
+  String get worldClock_feature_options => 'Feature Options';
+
+  @override
+  String get worldClock_enable_notifications => 'Enable Notifications';
+
+  @override
+  String get worldClock_enable_notifications_desc =>
+      'Show notification when countdown completes';
+
+  @override
+  String get worldClock_enable_animations => 'Enable Animations';
+
+  @override
+  String get worldClock_enable_animations_desc => 'Show animation effects';
+
+  @override
+  String get screenshot_settings_title => 'Screenshot Settings';
+
+  @override
+  String get screenshot_settings_save => 'Save Settings';
+
+  @override
+  String get screenshot_settings_section_save => 'Save Settings';
+
+  @override
+  String get screenshot_settings_section_function => 'Function Settings';
+
+  @override
+  String get screenshot_settings_section_shortcuts => 'Shortcuts';
+
+  @override
+  String get screenshot_settings_section_pin => 'Pin Settings';
+
+  @override
+  String get screenshot_settings_auto_copy_desc =>
+      'Auto copy to clipboard after capture';
+
+  @override
+  String get screenshot_settings_show_preview_desc =>
+      'Show preview and edit window after capture';
+
+  @override
+  String get screenshot_settings_save_history_desc =>
+      'Save screenshot history for viewing';
+
+  @override
+  String get screenshot_settings_always_on_top_desc =>
+      'Pin window always stays on top';
+
+  @override
+  String get screenshot_settings_saved => 'Settings saved';
+
+  @override
+  String get screenshot_settings_save_path_title => 'Set Save Path';
+
+  @override
+  String get screenshot_settings_save_path_hint => '[documents]/Screenshots';
+
+  @override
+  String get screenshot_settings_save_path_helper =>
+      'Available placeholders: [documents], [home], [temp]';
+
+  @override
+  String get screenshot_settings_filename_title => 'Set Filename Format';
+
+  @override
+  String get screenshot_settings_filename_helper =>
+      'Available placeholders: [timestamp], [date], [time], [datetime], [index]';
+
+  @override
+  String get screenshot_settings_format_title => 'Select Image Format';
+
+  @override
+  String get screenshot_settings_quality_title => 'Set Image Quality';
+
+  @override
+  String get screenshot_settings_history_title => 'Set Max History Count';
+
+  @override
+  String get screenshot_settings_opacity_title => 'Set Default Opacity';
+
+  @override
+  String get screenshot_settings_items => 'items';
+
+  @override
+  String get screenshot_shortcut_region => 'Region Capture';
+
+  @override
+  String get screenshot_shortcut_fullscreen => 'Full Screen Capture';
+
+  @override
+  String get screenshot_shortcut_window => 'Window Capture';
+
+  @override
+  String get screenshot_shortcut_history => 'Show History';
+
+  @override
+  String get screenshot_shortcut_settings => 'Open Settings';
+
+  @override
+  String get screenshot_tooltip_history => 'History';
+
+  @override
+  String get screenshot_tooltip_settings => 'Settings';
+
+  @override
+  String get screenshot_tooltip_cancel => 'Cancel';
+
+  @override
+  String get screenshot_tooltip_confirm => 'Confirm';
+
+  @override
+  String get screenshot_confirm_capture => 'Confirm Capture';
+
+  @override
+  String get ui_retry => 'Retry';
+
+  @override
+  String get ui_close => 'Close';
+
+  @override
+  String get ui_follow_system => 'Follow System';
 }

@@ -170,8 +170,9 @@ class PluginPlatformCapabilities {
     if (Platform.isLinux) return TargetPlatform.linux;
     if (Platform.isAndroid) return TargetPlatform.android;
     if (Platform.isIOS) return TargetPlatform.ios;
-    if (Platform.isWeb) return TargetPlatform.web;
-    throw UnsupportedError('Unknown platform');
+    // Web platform detection - dart:io doesn't have Platform.isWeb
+    // On web, dart:io is not available, so this code won't run
+    return TargetPlatform.web;
   }
 
   /// 获取所有支持的平台列表
@@ -229,17 +230,27 @@ class PluginPlatformCapabilities {
   }
 }
 
-/// 平台插件接口 - 扩展 IPlugin，添加平台能力支持
-abstract class IPlatformPlugin extends IPlugin {
-  /// 获取平台能力配置
+/// 平台插件接口 - 定义平台能力支持的契约
+abstract class IPlatformPlugin implements IPlugin {
+  /// 获取平台能力配置（必须实现）
+  PluginPlatformCapabilities get platformCapabilities;
+}
+
+/// 平台插件基类 - 提供默认实现
+abstract class PlatformPluginBase implements IPlatformPlugin {
+  /// 获取平台能力配置（子类必须实现）
+  @override
   PluginPlatformCapabilities get platformCapabilities;
 
   /// 检查当前平台是否支持
-  bool get isCurrentPlatformSupported => platformCapabilities.isCurrentPlatformSupported;
+  bool get isCurrentPlatformSupported {
+    return platformCapabilities.isCurrentPlatformSupported;
+  }
 
   /// 检查当前平台是否完全支持
-  bool get isCurrentPlatformFullySupported =>
-      platformCapabilities.isCurrentPlatformFullySupported;
+  bool get isCurrentPlatformFullySupported {
+    return platformCapabilities.isCurrentPlatformFullySupported;
+  }
 
   /// 是否应该在应用中显示此插件
   bool get shouldBeVisible {
@@ -250,9 +261,11 @@ abstract class IPlatformPlugin extends IPlugin {
   }
 
   /// 获取当前平台的能力描述
-  PlatformCapability get currentCapability => platformCapabilities.currentPlatformCapability;
+  PlatformCapability get currentCapability {
+    return platformCapabilities.currentPlatformCapability;
+  }
 
-  /// 构建不支持的平台 UI（可选）
+  /// 构建不支持的平台 UI（可重写）
   Widget buildUnsupportedPlatformUI(BuildContext context) {
     final capability = currentCapability;
     return Scaffold(

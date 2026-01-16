@@ -2,6 +2,7 @@ library;
 
 import 'dart:io';
 import 'package:flutter/material.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 import '../models/screenshot_settings.dart';
 import '../screenshot_plugin.dart';
 
@@ -40,9 +41,10 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('截图设置'),
+        title: Text(l10n.screenshot_settings_title),
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
         elevation: 0,
@@ -51,41 +53,41 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
         padding: const EdgeInsets.all(16.0),
         children: [
           // 保存设置
-          _buildSectionHeader('保存设置'),
+          _buildSectionHeader(l10n.screenshot_settings_section_save),
           const SizedBox(height: 8),
-          _buildSavePathTile(),
-          _buildFilenameFormatTile(),
-          _buildImageFormatTile(),
-          _buildImageQualityTile(),
+          _buildSavePathTile(l10n),
+          _buildFilenameFormatTile(l10n),
+          _buildImageFormatTile(l10n),
+          _buildImageQualityTile(l10n),
 
           const SizedBox(height: 24),
 
           // 功能设置
-          _buildSectionHeader('功能设置'),
+          _buildSectionHeader(l10n.screenshot_settings_section_function),
           const SizedBox(height: 8),
-          _buildAutoCopyTile(),
-          _buildShowPreviewTile(),
-          _buildSaveHistoryTile(),
-          _buildMaxHistoryCountTile(),
+          _buildAutoCopyTile(l10n),
+          _buildShowPreviewTile(l10n),
+          _buildSaveHistoryTile(l10n),
+          _buildMaxHistoryCountTile(l10n),
 
           const SizedBox(height: 24),
 
           // 快捷键设置
-          _buildSectionHeader('快捷键'),
+          _buildSectionHeader(l10n.screenshot_settings_section_shortcuts),
           const SizedBox(height: 8),
-          _buildShortcutTiles(),
+          _buildShortcutTiles(l10n),
 
           const SizedBox(height: 24),
 
           // 钉图设置
-          _buildSectionHeader('钉图设置'),
+          _buildSectionHeader(l10n.screenshot_settings_section_pin),
           const SizedBox(height: 8),
-          _buildPinSettingsTiles(),
+          _buildPinSettingsTiles(l10n),
 
           const SizedBox(height: 32),
 
           // 保存按钮
-          _buildSaveButton(),
+          _buildSaveButton(l10n),
         ],
       ),
     );
@@ -106,10 +108,10 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
   }
 
   /// 构建保存路径设置
-  Widget _buildSavePathTile() {
+  Widget _buildSavePathTile(AppLocalizations l10n) {
     return ListTile(
       leading: const Icon(Icons.folder),
-      title: const Text('保存路径'),
+      title: Text(l10n.screenshot_savePath),
       subtitle: Text(_settings.savePath),
       trailing: const Icon(Icons.chevron_right),
       onTap: _selectSavePath,
@@ -117,10 +119,10 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
   }
 
   /// 构建文件名格式设置
-  Widget _buildFilenameFormatTile() {
+  Widget _buildFilenameFormatTile(AppLocalizations l10n) {
     return ListTile(
       leading: const Icon(Icons.text_fields),
-      title: const Text('文件名格式'),
+      title: Text(l10n.screenshot_filenameFormat),
       subtitle: Text(_settings.filenameFormat),
       trailing: const Icon(Icons.chevron_right),
       onTap: _editFilenameFormat,
@@ -128,10 +130,10 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
   }
 
   /// 构建图片格式设置
-  Widget _buildImageFormatTile() {
+  Widget _buildImageFormatTile(AppLocalizations l10n) {
     return ListTile(
       leading: const Icon(Icons.image),
-      title: const Text('图片格式'),
+      title: Text(l10n.screenshot_imageFormat),
       subtitle: Text(_formatImageFormatName(_settings.imageFormat)),
       trailing: const Icon(Icons.chevron_right),
       onTap: _selectImageFormat,
@@ -139,10 +141,10 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
   }
 
   /// 构建图片质量设置
-  Widget _buildImageQualityTile() {
+  Widget _buildImageQualityTile(AppLocalizations l10n) {
     return ListTile(
       leading: const Icon(Icons.high_quality),
-      title: const Text('图片质量'),
+      title: Text(l10n.screenshot_imageQuality),
       subtitle: Text('${_settings.imageQuality}%'),
       trailing: const Icon(Icons.chevron_right),
       onTap: _adjustImageQuality,
@@ -150,11 +152,11 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
   }
 
   /// 构建自动复制设置
-  Widget _buildAutoCopyTile() {
+  Widget _buildAutoCopyTile(AppLocalizations l10n) {
     return SwitchListTile(
       secondary: const Icon(Icons.content_copy),
-      title: const Text('自动复制到剪贴板'),
-      subtitle: const Text('截图后自动复制到剪贴板'),
+      title: Text(l10n.screenshot_autoCopy),
+      subtitle: Text(l10n.screenshot_settings_auto_copy_desc),
       value: _settings.autoCopyToClipboard,
       onChanged: (value) {
         setState(() {
@@ -165,11 +167,11 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
   }
 
   /// 构建显示预览设置
-  Widget _buildShowPreviewTile() {
+  Widget _buildShowPreviewTile(AppLocalizations l10n) {
     return SwitchListTile(
       secondary: const Icon(Icons.preview),
-      title: const Text('显示预览窗口'),
-      subtitle: const Text('截图后显示预览和编辑窗口'),
+      title: Text(l10n.screenshot_showPreview),
+      subtitle: Text(l10n.screenshot_settings_show_preview_desc),
       value: _settings.showPreview,
       onChanged: (value) {
         setState(() {
@@ -180,11 +182,11 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
   }
 
   /// 构建保存历史设置
-  Widget _buildSaveHistoryTile() {
+  Widget _buildSaveHistoryTile(AppLocalizations l10n) {
     return SwitchListTile(
       secondary: const Icon(Icons.history),
-      title: const Text('保存历史记录'),
-      subtitle: const Text('保存截图历史以供查看'),
+      title: Text(l10n.screenshot_saveHistory),
+      subtitle: Text(l10n.screenshot_settings_save_history_desc),
       value: _settings.saveHistory,
       onChanged: (value) {
         setState(() {
@@ -195,23 +197,23 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
   }
 
   /// 构建最大历史记录数设置
-  Widget _buildMaxHistoryCountTile() {
+  Widget _buildMaxHistoryCountTile(AppLocalizations l10n) {
     return ListTile(
       leading: const Icon(Icons.format_list_numbered),
-      title: const Text('最大历史记录数'),
-      subtitle: Text('${_settings.maxHistoryCount} 条'),
+      title: Text(l10n.screenshot_maxHistoryCount),
+      subtitle: Text('${_settings.maxHistoryCount} ${l10n.screenshot_settings_items}'),
       trailing: const Icon(Icons.chevron_right),
       onTap: _adjustMaxHistoryCount,
     );
   }
 
   /// 构建快捷键设置
-  Widget _buildShortcutTiles() {
+  Widget _buildShortcutTiles(AppLocalizations l10n) {
     return Column(
       children: _settings.shortcuts.entries.map((entry) {
         return ListTile(
           leading: const Icon(Icons.keyboard),
-          title: Text(_getShortcutDisplayName(entry.key)),
+          title: Text(_getShortcutDisplayName(entry.key, l10n)),
           subtitle: Text(entry.value),
           trailing: const Icon(Icons.chevron_right),
           onTap: () => _editShortcut(entry.key, entry.value),
@@ -221,13 +223,13 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
   }
 
   /// 构建钉图设置
-  Widget _buildPinSettingsTiles() {
+  Widget _buildPinSettingsTiles(AppLocalizations l10n) {
     return Column(
       children: [
         SwitchListTile(
           secondary: const Icon(Icons.vertical_align_top),
-          title: const Text('始终置顶'),
-          subtitle: const Text('钉图窗口始终在最前面'),
+          title: Text(l10n.screenshot_alwaysOnTop),
+          subtitle: Text(l10n.screenshot_settings_always_on_top_desc),
           value: _settings.pinSettings.alwaysOnTop,
           onChanged: (value) {
             setState(() {
@@ -239,7 +241,7 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
         ),
         ListTile(
           leading: const Icon(Icons.opacity),
-          title: const Text('默认透明度'),
+          title: Text(l10n.screenshot_defaultOpacity),
           subtitle: Text('${(_settings.pinSettings.defaultOpacity * 100).toInt()}%'),
           trailing: const Icon(Icons.chevron_right),
           onTap: _adjustOpacity,
@@ -249,13 +251,13 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
   }
 
   /// 构建保存按钮
-  Widget _buildSaveButton() {
+  Widget _buildSaveButton(AppLocalizations l10n) {
     return FilledButton(
       onPressed: _saveSettings,
       style: FilledButton.styleFrom(
         minimumSize: const Size(double.infinity, 48),
       ),
-      child: const Text('保存设置'),
+      child: Text(l10n.screenshot_settings_save),
     );
   }
 
@@ -362,10 +364,11 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
   void _saveSettings() async {
     await widget.plugin.updateSettings(_settings);
     if (mounted) {
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('设置已保存'),
-          duration: Duration(seconds: 2),
+        SnackBar(
+          content: Text(l10n.screenshot_settings_saved),
+          duration: const Duration(seconds: 2),
         ),
       );
       Navigator.of(context).pop();
@@ -376,27 +379,27 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
   String _formatImageFormatName(ImageFormat format) {
     switch (format) {
       case ImageFormat.png:
-        return 'PNG (无损)';
+        return 'PNG';
       case ImageFormat.jpeg:
-        return 'JPEG (较小文件)';
+        return 'JPEG';
       case ImageFormat.webp:
-        return 'WebP (现代格式)';
+        return 'WebP';
     }
   }
 
   /// 获取快捷键显示名称
-  String _getShortcutDisplayName(String action) {
+  String _getShortcutDisplayName(String action, AppLocalizations l10n) {
     switch (action) {
       case 'regionCapture':
-        return '区域截图';
+        return l10n.screenshot_shortcut_region;
       case 'fullScreenCapture':
-        return '全屏截图';
+        return l10n.screenshot_shortcut_fullscreen;
       case 'windowCapture':
-        return '窗口截图';
+        return l10n.screenshot_shortcut_window;
       case 'showHistory':
-        return '显示历史';
+        return l10n.screenshot_shortcut_history;
       case 'showSettings':
-        return '打开设置';
+        return l10n.screenshot_shortcut_settings;
       default:
         return action;
     }
@@ -434,17 +437,18 @@ class _SavePathDialogState extends State<_SavePathDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('设置保存路径'),
+      title: Text(l10n.screenshot_settings_save_path_title),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
             controller: _controller,
-            decoration: const InputDecoration(
-              labelText: '保存路径',
-              hintText: '{documents}/Screenshots',
-              helperText: '可用占位符: {documents}, {home}, {temp}',
+            decoration: InputDecoration(
+              labelText: l10n.screenshot_savePath,
+              hintText: l10n.screenshot_settings_save_path_hint,
+              helperText: l10n.screenshot_settings_save_path_helper,
             ),
           ),
         ],
@@ -452,14 +456,14 @@ class _SavePathDialogState extends State<_SavePathDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: Text(l10n.common_cancel),
         ),
         FilledButton(
           onPressed: () {
             widget.onSave(_controller.text);
             Navigator.of(context).pop();
           },
-          child: const Text('保存'),
+          child: Text(l10n.common_save),
         ),
       ],
     );
@@ -497,21 +501,20 @@ class _FilenameFormatDialogState extends State<_FilenameFormatDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('设置文件名格式'),
+      title: Text(l10n.screenshot_settings_filename_title),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
             controller: _controller,
-            decoration: const InputDecoration(
-              labelText: '文件名格式',
-              helperText: '可用占位符: {timestamp}, {date}, {time}, {datetime}, {index}',
+            decoration: InputDecoration(
+              labelText: l10n.screenshot_filenameFormat,
+              helperText: l10n.screenshot_settings_filename_helper,
             ),
           ),
           const SizedBox(height: 16),
-          const Text('示例格式：', style: TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
           _buildExampleItem('screenshot_{datetime}', 'screenshot_2026-01-15_19-30-45'),
           _buildExampleItem('Screenshot_{date}_{index}', 'Screenshot_2026-01-15_1'),
           _buildExampleItem('{timestamp}', '1736952645000'),
@@ -520,14 +523,14 @@ class _FilenameFormatDialogState extends State<_FilenameFormatDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: Text(l10n.common_cancel),
         ),
         FilledButton(
           onPressed: () {
             widget.onSave(_controller.text);
             Navigator.of(context).pop();
           },
-          child: const Text('保存'),
+          child: Text(l10n.common_save),
         ),
       ],
     );
@@ -565,14 +568,15 @@ class _ImageFormatDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('选择图片格式'),
+      title: Text(l10n.screenshot_settings_format_title),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: ImageFormat.values.map((format) {
           return RadioListTile<ImageFormat>(
             title: Text(_formatName(format)),
-            subtitle: Text(_formatDescription(format)),
+            subtitle: Text(_formatDescription(format, l10n)),
             value: format,
             groupValue: currentFormat,
             onChanged: (value) {
@@ -598,14 +602,14 @@ class _ImageFormatDialog extends StatelessWidget {
     }
   }
 
-  String _formatDescription(ImageFormat format) {
+  String _formatDescription(ImageFormat format, AppLocalizations l10n) {
     switch (format) {
       case ImageFormat.png:
-        return '无损压缩，文件较大';
+        return 'Lossless';
       case ImageFormat.jpeg:
-        return '有损压缩，文件较小';
+        return 'Lossy, smaller';
       case ImageFormat.webp:
-        return '现代格式，压缩率高';
+        return 'Modern format';
     }
   }
 }
@@ -631,8 +635,9 @@ class _ImageQualityDialogState extends State<_ImageQualityDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('设置图片质量'),
+      title: Text(l10n.screenshot_settings_quality_title),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -659,11 +664,11 @@ class _ImageQualityDialogState extends State<_ImageQualityDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: Text(l10n.common_cancel),
         ),
         FilledButton(
           onPressed: () => Navigator.of(context).pop(_quality),
-          child: const Text('确定'),
+          child: Text(l10n.common_ok),
         ),
       ],
     );
@@ -691,8 +696,9 @@ class _MaxHistoryCountDialogState extends State<_MaxHistoryCountDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('设置最大历史记录数'),
+      title: Text(l10n.screenshot_settings_history_title),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -701,7 +707,7 @@ class _MaxHistoryCountDialogState extends State<_MaxHistoryCountDialog> {
             min: 10,
             max: 500,
             divisions: 49,
-            label: '$_count 条',
+            label: '$_count ${l10n.screenshot_settings_items}',
             onChanged: (value) {
               setState(() {
                 _count = value.toInt();
@@ -710,7 +716,7 @@ class _MaxHistoryCountDialogState extends State<_MaxHistoryCountDialog> {
           ),
           Center(
             child: Text(
-              '$_count 条',
+              '$_count ${l10n.screenshot_settings_items}',
               style: Theme.of(context).textTheme.headlineSmall,
             ),
           ),
@@ -719,11 +725,11 @@ class _MaxHistoryCountDialogState extends State<_MaxHistoryCountDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: Text(l10n.common_cancel),
         ),
         FilledButton(
           onPressed: () => Navigator.of(context).pop(_count),
-          child: const Text('确定'),
+          child: Text(l10n.common_ok),
         ),
       ],
     );
@@ -751,8 +757,9 @@ class _OpacityDialogState extends State<_OpacityDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('设置默认透明度'),
+      title: Text(l10n.screenshot_settings_opacity_title),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -779,11 +786,11 @@ class _OpacityDialogState extends State<_OpacityDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: Text(l10n.common_cancel),
         ),
         FilledButton(
           onPressed: () => Navigator.of(context).pop(_opacity),
-          child: const Text('确定'),
+          child: Text(l10n.common_ok),
         ),
       ],
     );

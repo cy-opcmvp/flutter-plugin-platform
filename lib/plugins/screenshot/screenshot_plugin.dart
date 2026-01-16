@@ -30,7 +30,7 @@ import 'widgets/screenshot_main_widget.dart';
 /// - macOS: 待实现（需要 Quartz API 支持）
 /// - Android/iOS: 部分支持（只能实现应用内截图）
 /// - Web: 不支持（浏览器安全限制）
-class ScreenshotPlugin implements IPlatformPlugin {
+class ScreenshotPlugin extends PlatformPluginBase {
   late PluginContext _context;
 
   // 插件状态变量
@@ -67,7 +67,7 @@ class ScreenshotPlugin implements IPlatformPlugin {
 
   /// 创建平台能力配置
   PluginPlatformCapabilities _createPlatformCapabilities() {
-    return PluginPlatformCapabilities.custom(
+    return PlatformCapabilityHelper.custom(
       pluginId: id,
       capabilities: {
         // Windows - 完整支持

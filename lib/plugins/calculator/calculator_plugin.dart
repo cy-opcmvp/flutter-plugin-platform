@@ -9,7 +9,7 @@ import '../../../l10n/generated/app_localizations.dart';
 ///
 /// 平台支持：
 /// - 所有平台: 完整支持（纯 Dart 实现）
-class CalculatorPlugin implements IPlatformPlugin {
+class CalculatorPlugin extends PlatformPluginBase {
   late PluginContext _context;
 
   // Calculator state - shared with the widget

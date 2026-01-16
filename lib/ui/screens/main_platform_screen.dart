@@ -1552,9 +1552,7 @@ class _PluginViewScreenState extends State<_PluginViewScreen> {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text(context.l10n.plugin_switchFailed(
-                          message: e.toString(),
-                        )),
+                        content: Text(context.l10n.plugin_switchFailed(e.toString())),
                         backgroundColor: Colors.red,
                       ),
                     );
@@ -1586,9 +1584,7 @@ class _PluginViewScreenState extends State<_PluginViewScreen> {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(context.l10n.plugin_pauseFailed(
-                        message: e.toString(),
-                      )),
+                      content: Text(context.l10n.plugin_pauseFailed(e.toString())),
                       backgroundColor: Colors.red,
                     ),
                   );

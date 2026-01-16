@@ -214,7 +214,10 @@ class PlatformCapabilityHelper {
 
   /// 检查是否是 Web 平台
   static bool isWebPlatform() {
-    return Platform.isWeb;
+    // dart:io doesn't have Platform.isWeb
+    // On web, dart:io is not available, so this will return false
+    // For web detection, use kIsWeb from 'package:flutter/foundation.dart'
+    return false;
   }
 
   /// 获取平台类型名称

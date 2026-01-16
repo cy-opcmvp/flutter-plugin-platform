@@ -3049,6 +3049,330 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'窗口截图失败: {error}'**
   String screenshot_window_failed(String error);
+
+  /// No description provided for @worldClock_section_clocks.
+  ///
+  /// In zh, this message translates to:
+  /// **'世界时钟'**
+  String get worldClock_section_clocks;
+
+  /// No description provided for @worldClock_section_countdown.
+  ///
+  /// In zh, this message translates to:
+  /// **'倒计时提醒'**
+  String get worldClock_section_countdown;
+
+  /// No description provided for @worldClock_empty_clocks.
+  ///
+  /// In zh, this message translates to:
+  /// **'暂无时钟'**
+  String get worldClock_empty_clocks;
+
+  /// No description provided for @worldClock_empty_clocks_hint.
+  ///
+  /// In zh, this message translates to:
+  /// **'点击右上角 + 添加时钟'**
+  String get worldClock_empty_clocks_hint;
+
+  /// No description provided for @worldClock_empty_countdown.
+  ///
+  /// In zh, this message translates to:
+  /// **'暂无倒计时'**
+  String get worldClock_empty_countdown;
+
+  /// No description provided for @worldClock_empty_countdown_hint.
+  ///
+  /// In zh, this message translates to:
+  /// **'点击右上角闹钟图标添加倒计时'**
+  String get worldClock_empty_countdown_hint;
+
+  /// No description provided for @worldClock_tooltip_addCountdown.
+  ///
+  /// In zh, this message translates to:
+  /// **'添加倒计时'**
+  String get worldClock_tooltip_addCountdown;
+
+  /// No description provided for @worldClock_tooltip_addClock.
+  ///
+  /// In zh, this message translates to:
+  /// **'添加时钟'**
+  String get worldClock_tooltip_addClock;
+
+  /// No description provided for @worldClock_tooltip_settings.
+  ///
+  /// In zh, this message translates to:
+  /// **'设置'**
+  String get worldClock_tooltip_settings;
+
+  /// No description provided for @worldClock_setTime.
+  ///
+  /// In zh, this message translates to:
+  /// **'设置时间'**
+  String get worldClock_setTime;
+
+  /// No description provided for @worldClock_display_options.
+  ///
+  /// In zh, this message translates to:
+  /// **'显示选项'**
+  String get worldClock_display_options;
+
+  /// No description provided for @worldClock_24hour_format.
+  ///
+  /// In zh, this message translates to:
+  /// **'24小时制'**
+  String get worldClock_24hour_format;
+
+  /// No description provided for @worldClock_24hour_format_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'使用24小时时间格式'**
+  String get worldClock_24hour_format_desc;
+
+  /// No description provided for @worldClock_show_seconds.
+  ///
+  /// In zh, this message translates to:
+  /// **'显示秒数'**
+  String get worldClock_show_seconds;
+
+  /// No description provided for @worldClock_show_seconds_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'在时钟中显示秒数'**
+  String get worldClock_show_seconds_desc;
+
+  /// No description provided for @worldClock_feature_options.
+  ///
+  /// In zh, this message translates to:
+  /// **'功能选项'**
+  String get worldClock_feature_options;
+
+  /// No description provided for @worldClock_enable_notifications.
+  ///
+  /// In zh, this message translates to:
+  /// **'启用通知'**
+  String get worldClock_enable_notifications;
+
+  /// No description provided for @worldClock_enable_notifications_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'倒计时完成时显示通知'**
+  String get worldClock_enable_notifications_desc;
+
+  /// No description provided for @worldClock_enable_animations.
+  ///
+  /// In zh, this message translates to:
+  /// **'启用动画'**
+  String get worldClock_enable_animations;
+
+  /// No description provided for @worldClock_enable_animations_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'显示动画效果'**
+  String get worldClock_enable_animations_desc;
+
+  /// No description provided for @screenshot_settings_title.
+  ///
+  /// In zh, this message translates to:
+  /// **'截图设置'**
+  String get screenshot_settings_title;
+
+  /// No description provided for @screenshot_settings_save.
+  ///
+  /// In zh, this message translates to:
+  /// **'保存设置'**
+  String get screenshot_settings_save;
+
+  /// No description provided for @screenshot_settings_section_save.
+  ///
+  /// In zh, this message translates to:
+  /// **'保存设置'**
+  String get screenshot_settings_section_save;
+
+  /// No description provided for @screenshot_settings_section_function.
+  ///
+  /// In zh, this message translates to:
+  /// **'功能设置'**
+  String get screenshot_settings_section_function;
+
+  /// No description provided for @screenshot_settings_section_shortcuts.
+  ///
+  /// In zh, this message translates to:
+  /// **'快捷键'**
+  String get screenshot_settings_section_shortcuts;
+
+  /// No description provided for @screenshot_settings_section_pin.
+  ///
+  /// In zh, this message translates to:
+  /// **'钉图设置'**
+  String get screenshot_settings_section_pin;
+
+  /// No description provided for @screenshot_settings_auto_copy_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'截图后自动复制到剪贴板'**
+  String get screenshot_settings_auto_copy_desc;
+
+  /// No description provided for @screenshot_settings_show_preview_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'截图后显示预览和编辑窗口'**
+  String get screenshot_settings_show_preview_desc;
+
+  /// No description provided for @screenshot_settings_save_history_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'保存截图历史以供查看'**
+  String get screenshot_settings_save_history_desc;
+
+  /// No description provided for @screenshot_settings_always_on_top_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'钉图窗口始终在最前面'**
+  String get screenshot_settings_always_on_top_desc;
+
+  /// No description provided for @screenshot_settings_saved.
+  ///
+  /// In zh, this message translates to:
+  /// **'设置已保存'**
+  String get screenshot_settings_saved;
+
+  /// No description provided for @screenshot_settings_save_path_title.
+  ///
+  /// In zh, this message translates to:
+  /// **'设置保存路径'**
+  String get screenshot_settings_save_path_title;
+
+  /// No description provided for @screenshot_settings_save_path_hint.
+  ///
+  /// In zh, this message translates to:
+  /// **'[documents]/Screenshots'**
+  String get screenshot_settings_save_path_hint;
+
+  /// No description provided for @screenshot_settings_save_path_helper.
+  ///
+  /// In zh, this message translates to:
+  /// **'可用占位符: [documents], [home], [temp]'**
+  String get screenshot_settings_save_path_helper;
+
+  /// No description provided for @screenshot_settings_filename_title.
+  ///
+  /// In zh, this message translates to:
+  /// **'设置文件名格式'**
+  String get screenshot_settings_filename_title;
+
+  /// No description provided for @screenshot_settings_filename_helper.
+  ///
+  /// In zh, this message translates to:
+  /// **'可用占位符: [timestamp], [date], [time], [datetime], [index]'**
+  String get screenshot_settings_filename_helper;
+
+  /// No description provided for @screenshot_settings_format_title.
+  ///
+  /// In zh, this message translates to:
+  /// **'选择图片格式'**
+  String get screenshot_settings_format_title;
+
+  /// No description provided for @screenshot_settings_quality_title.
+  ///
+  /// In zh, this message translates to:
+  /// **'设置图片质量'**
+  String get screenshot_settings_quality_title;
+
+  /// No description provided for @screenshot_settings_history_title.
+  ///
+  /// In zh, this message translates to:
+  /// **'设置最大历史记录数'**
+  String get screenshot_settings_history_title;
+
+  /// No description provided for @screenshot_settings_opacity_title.
+  ///
+  /// In zh, this message translates to:
+  /// **'设置默认透明度'**
+  String get screenshot_settings_opacity_title;
+
+  /// No description provided for @screenshot_settings_items.
+  ///
+  /// In zh, this message translates to:
+  /// **'条'**
+  String get screenshot_settings_items;
+
+  /// No description provided for @screenshot_shortcut_region.
+  ///
+  /// In zh, this message translates to:
+  /// **'区域截图'**
+  String get screenshot_shortcut_region;
+
+  /// No description provided for @screenshot_shortcut_fullscreen.
+  ///
+  /// In zh, this message translates to:
+  /// **'全屏截图'**
+  String get screenshot_shortcut_fullscreen;
+
+  /// No description provided for @screenshot_shortcut_window.
+  ///
+  /// In zh, this message translates to:
+  /// **'窗口截图'**
+  String get screenshot_shortcut_window;
+
+  /// No description provided for @screenshot_shortcut_history.
+  ///
+  /// In zh, this message translates to:
+  /// **'显示历史'**
+  String get screenshot_shortcut_history;
+
+  /// No description provided for @screenshot_shortcut_settings.
+  ///
+  /// In zh, this message translates to:
+  /// **'打开设置'**
+  String get screenshot_shortcut_settings;
+
+  /// No description provided for @screenshot_tooltip_history.
+  ///
+  /// In zh, this message translates to:
+  /// **'历史记录'**
+  String get screenshot_tooltip_history;
+
+  /// No description provided for @screenshot_tooltip_settings.
+  ///
+  /// In zh, this message translates to:
+  /// **'设置'**
+  String get screenshot_tooltip_settings;
+
+  /// No description provided for @screenshot_tooltip_cancel.
+  ///
+  /// In zh, this message translates to:
+  /// **'取消'**
+  String get screenshot_tooltip_cancel;
+
+  /// No description provided for @screenshot_tooltip_confirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'确认'**
+  String get screenshot_tooltip_confirm;
+
+  /// No description provided for @screenshot_confirm_capture.
+  ///
+  /// In zh, this message translates to:
+  /// **'确认截图'**
+  String get screenshot_confirm_capture;
+
+  /// No description provided for @ui_retry.
+  ///
+  /// In zh, this message translates to:
+  /// **'重试'**
+  String get ui_retry;
+
+  /// No description provided for @ui_close.
+  ///
+  /// In zh, this message translates to:
+  /// **'关闭'**
+  String get ui_close;
+
+  /// No description provided for @ui_follow_system.
+  ///
+  /// In zh, this message translates to:
+  /// **'跟随系统'**
+  String get ui_follow_system;
 }
 
 class _AppLocalizationsDelegate

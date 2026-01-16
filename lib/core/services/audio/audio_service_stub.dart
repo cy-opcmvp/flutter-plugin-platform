@@ -74,6 +74,20 @@ class AudioServiceImpl extends IAudioService implements Disposable {
   }
 
   @override
+  Future<void> pauseMusic(String playerId) async {
+    if (kDebugMode) {
+      print('AudioService: pauseMusic($playerId) - stub mode');
+    }
+  }
+
+  @override
+  Future<void> resumeMusic(String playerId) async {
+    if (kDebugMode) {
+      print('AudioService: resumeMusic($playerId) - stub mode');
+    }
+  }
+
+  @override
   Future<void> setGlobalVolume(double volume) async {
     _globalVolume = volume.clamp(0.0, 1.0);
     if (kDebugMode) {

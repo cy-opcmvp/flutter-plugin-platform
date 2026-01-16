@@ -12,7 +12,7 @@ import 'widgets/countdown_timer_widget.dart';
 ///
 /// 平台支持：
 /// - 所有平台: 完整支持（纯 Dart 实现）
-class WorldClockPlugin implements IPlatformPlugin {
+class WorldClockPlugin extends PlatformPluginBase {
   late PluginContext _context;
   
   // 插件状态变量

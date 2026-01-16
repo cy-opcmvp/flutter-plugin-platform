@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:plugin_platform/l10n/generated/app_localizations.dart';
 import '../../core/services/external_plugin_manager.dart';
 import '../../core/models/plugin_models.dart';
 import '../../core/extensions/context_extensions.dart';
@@ -1185,6 +1186,7 @@ class _ExternalPluginDetailsDialog extends StatelessWidget {
     final descriptor = runtimeInfo.descriptor;
     final state = runtimeInfo.stateManager.currentState;
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return AlertDialog(
       title: Text(descriptor.name),

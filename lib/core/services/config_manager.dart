@@ -19,7 +19,7 @@ class ConfigManager {
 
   ConfigManager._internal();
 
-  late final ConfigService _service;
+  final ConfigService _service = ConfigService.instance;
   GlobalConfig? _globalConfig;
   final Map<String, Map<String, dynamic>> _pluginConfigs = {};
 
