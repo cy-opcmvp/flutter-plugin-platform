@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.4] - 2026-01-16
+
+### Added - 桌面级区域截图
+- 🖼️ **真正的桌面级区域选择** - 可跨应用选择任何屏幕区域
+  - 实现原生 Windows 全屏选择窗口
+  - 支持在整个桌面范围内拖拽选择区域
+  - 不受 Flutter 应用窗口限制
+- 🎨 **专业的视觉效果**
+  - 半透明黑色遮罩（63% 不透明度）突出显示选中区域
+  - 明显的红色边框（4px）和控制点（8px）
+  - 实时显示选区尺寸信息
+  - 双缓冲绘制技术，消除拖拽时的闪烁
+- ⌨️ **交互优化**
+  - 支持 ESC 键取消选择
+  - 完整的 Windows 消息循环处理
+  - 窗口置顶和焦点管理优化
+
+### Technical Details
+- 📁 新增文件：
+  - `windows/runner/native_screenshot_window.h` - 原生窗口头文件
+  - `windows/runner/native_screenshot_window.cpp` - 原生窗口实现（400+ 行）
+  - `lib/plugins/screenshot/widgets/screenshot_window.dart` - 截图窗口组件
+- 📝 修改文件：
+  - `windows/runner/flutter_window.cpp` - 添加 MethodChannel 处理
+  - `windows/runner/CMakeLists.txt` - 添加 msimg32.lib 依赖
+  - `lib/plugins/screenshot/platform/screenshot_platform_interface.dart` - 改用轮询机制
+- 🔧 核心技术：
+  - 桌面背景捕获（BitBlt）
+  - 双缓冲绘制（CreateCompatibleDC）
+  - 分段遮罩算法（上、下、左、右独立绘制）
+  - AlphaBlend 半透明混合
+
 ## [0.3.2] - 2026-01-15
 
 ### Added - 配置页面与国际化
