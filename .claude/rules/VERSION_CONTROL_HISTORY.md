@@ -4,9 +4,100 @@
 
 ## 版本索引
 
+- [v0.3.4](#v034-2026-01-16) - 2026-01-16
 - [v0.3.2](#v032-2026-01-15) - 2026-01-15
 - [v0.3.1](#v031-2025-01-14) - 2025-01-14
 - [v0.3.0](#v030-2025-01-14) - 2025-01-14
+
+---
+
+## v0.3.4 (2026-01-16)
+
+### Tag 信息
+- **版本号**: v0.3.4
+- **提交**: a6ca5f9
+- **创建时间**: 2026-01-16
+- **创建者**: cyamz
+- **类型**: Minor 版本（新功能）
+
+### 变更内容
+- **桌面级区域截图功能** - 实现真正的桌面级区域选择
+  - 原生 Windows 全屏选择窗口，可跨应用选择任何屏幕区域
+  - 半透明黑色遮罩效果，清晰显示选中区域
+  - 红色边框和控制点，拖动选择时实时显示尺寸
+  - 双缓冲绘制技术，消除拖拽时的闪烁
+  - 支持 ESC 键取消选择
+
+### 技术实现
+- **新增文件**:
+  - `windows/runner/native_screenshot_window.h` - 原生窗口头文件
+  - `windows/runner/native_screenshot_window.cpp` - 原生窗口实现（400+ 行）
+  - `lib/plugins/screenshot/widgets/screenshot_window.dart` - 截图窗口组件
+- **修改文件**:
+  - `windows/runner/flutter_window.cpp` - 添加 MethodChannel 处理
+  - `windows/runner/CMakeLists.txt` - 添加 msimg32.lib 依赖
+  - `lib/plugins/screenshot/platform/screenshot_platform_interface.dart` - 改用轮询机制
+  - `lib/plugins/screenshot/widgets/screenshot_main_widget.dart` - 添加轮询逻辑
+
+### 核心技术
+- **桌面背景捕获**: 使用 BitBlt 捕获整个屏幕
+- **双缓冲绘制**: 在内存 DC 完成所有绘制，避免闪烁
+- **分段遮罩算法**: 分别绘制上、下、左、右四个区域的半透明遮罩
+- **AlphaBlend 半透明混合**: 实现 63% 不透明度的遮罩效果
+- **Windows 消息循环**: 完整的消息处理和窗口管理
+
+### 对话记录
+- **对话时间**: 2026-01-16
+- **对话主题**: 实现桌面级区域截图功能
+- **操作内容**:
+  - 移除 WS_EX_LAYERED 窗口样式，使用普通窗口
+  - 实现桌面背景捕获和显示
+  - 实现分段遮罩绘制算法
+  - 使用双缓冲技术消除闪烁
+  - 添加 MethodChannel 轮询机制
+  - 完整的日志输出用于调试
+
+### Git 提交
+```
+a6ca5f9 docs: 更新 CHANGELOG.md，记录 v0.3.4 版本变更
+d35b1bb feat: 实现桌面级区域截图功能
+cac2d3a temp
+3de9f65 docs: 更新 v0.3.2 版本记录，补充完整功能说明
+```
+
+### Tag 注释
+```
+Release v0.3.4
+
+## ✨ 新增功能
+### 桌面级区域截图
+- 实现真正的桌面级区域选择，可跨应用选择任何屏幕区域
+- 原生 Windows 截图选择窗口，支持全屏操作
+- 半透明黑色遮罩效果，清晰显示选中区域
+- 红色边框和控制点，拖动选择时实时显示尺寸
+- 双缓冲绘制技术，消除拖拽时的闪烁
+
+### 技术改进
+- 新增 native_screenshot_window.h/cpp 实现原生窗口
+- 桌面背景捕获和显示
+- 双缓冲绘制技术，消除闪烁
+- 分段遮罩算法，精确绘制非选中区域
+- MethodChannel 轮询机制替代 EventChannel
+
+## 🔧 改进
+- 完整的日志输出，便于调试
+- 窗口置顶和焦点管理优化
+- 支持 ESC 键取消选择
+
+## 📝 完整提交历史
+- a6ca5f9 docs: 更新 CHANGELOG.md，记录 v0.3.4 版本变更
+- d35b1bb feat: 实现桌面级区域截图功能
+- cac2d3a temp
+- 3de9f65 docs: 更新 v0.3.2 版本记录，补充完整功能说明
+```
+
+### 发布文档
+- `docs/releases/RELEASE_NOTES_v0.3.4.md`（待创建）
 
 ---
 
