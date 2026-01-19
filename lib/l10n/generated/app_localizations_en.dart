@@ -9,7 +9,125 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'Plugin Platform';
+  String get appTitle => 'Multi-Function Plugin Platform';
+
+  @override
+  String get appName => 'Multi-Function Plugin Platform';
+
+  @override
+  String get autoStart => 'Auto-start';
+
+  @override
+  String get autoStartPlugin => 'Plugin Auto-start';
+
+  @override
+  String get autoStartDescription => 'Auto-start on boot';
+
+  @override
+  String autoStartedPlugins(Object count) {
+    return 'Auto-started $count plugins';
+  }
+
+  @override
+  String get autoStartAdded => 'Added to auto-start list';
+
+  @override
+  String get autoStartRemoved => 'Removed from auto-start list';
+
+  @override
+  String get autoStartPlugins_empty => 'No auto-start plugins';
+
+  @override
+  String get tag_title => 'Tags';
+
+  @override
+  String get tag_add => 'Add Tag';
+
+  @override
+  String get tag_edit => 'Edit Tag';
+
+  @override
+  String get tag_delete => 'Delete Tag';
+
+  @override
+  String get tag_name => 'Tag Name';
+
+  @override
+  String get tag_description => 'Tag Description';
+
+  @override
+  String get tag_color => 'Tag Color';
+
+  @override
+  String get tag_icon => 'Tag Icon';
+
+  @override
+  String get tag_create_success => 'Tag created successfully';
+
+  @override
+  String get tag_update_success => 'Tag updated successfully';
+
+  @override
+  String get tag_delete_success => 'Tag deleted successfully';
+
+  @override
+  String tag_delete_confirm(Object name) {
+    return 'Are you sure you want to delete tag \"$name\"?';
+  }
+
+  @override
+  String get tag_in_use => 'This tag is in use and cannot be deleted';
+
+  @override
+  String get tag_system_protected =>
+      'System tags cannot be deleted or modified';
+
+  @override
+  String get tag_assign_success => 'Tag assigned successfully';
+
+  @override
+  String get tag_assign_removed => 'Tag removed';
+
+  @override
+  String get tag_filter_all => 'All';
+
+  @override
+  String tag_filter_active(Object count) {
+    return '$count tags selected';
+  }
+
+  @override
+  String get tag_no_tags => 'No tags yet';
+
+  @override
+  String get tag_create_hint => 'Create custom tag';
+
+  @override
+  String get tag_select_hint => 'Select tags to filter';
+
+  @override
+  String get tag_empty => 'No tags';
+
+  @override
+  String get tag_popular => 'Popular Tags';
+
+  @override
+  String get tag_productivity => 'Productivity';
+
+  @override
+  String get tag_system => 'System';
+
+  @override
+  String get tag_entertainment => 'Entertainment';
+
+  @override
+  String get tag_game => 'Game';
+
+  @override
+  String get tag_development => 'Development';
+
+  @override
+  String get tag_favorite => 'Favorite';
 
   @override
   String get common_confirm => 'Confirm';
@@ -111,6 +229,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get button_launch => 'Launch';
 
   @override
+  String get button_open => 'Open';
+
+  @override
   String get button_install => 'Install';
 
   @override
@@ -151,6 +272,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get button_exitPetMode => 'Exit Pet Mode';
+
+  @override
+  String get autoStartEnabled => 'Auto-start: Enabled';
+
+  @override
+  String get autoStartDisabled => 'Auto-start: Disabled';
+
+  @override
+  String get plugin_enabled => 'Enabled';
+
+  @override
+  String get plugin_disabled => 'Disabled';
 
   @override
   String get dialog_confirmTitle => 'Confirm Action';
@@ -547,6 +680,82 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_services => 'Services';
+
+  @override
+  String get tray_title => 'System Tray';
+
+  @override
+  String get tray_enabled => 'Enable System Tray';
+
+  @override
+  String get tray_enabled_desc => 'Show application icon in system tray';
+
+  @override
+  String get tray_tooltip => 'Tray Tooltip';
+
+  @override
+  String get tray_menu => 'Tray Menu';
+
+  @override
+  String get tray_menu_edit => 'Edit Menu';
+
+  @override
+  String get tray_menu_add => 'Add Menu Item';
+
+  @override
+  String get tray_menu_item_type => 'Menu Item Type';
+
+  @override
+  String get tray_menu_item_text => 'Menu Item Text';
+
+  @override
+  String get tray_menu_item_action => 'Action Type';
+
+  @override
+  String get tray_menu_item_enabled => 'Enabled';
+
+  @override
+  String get tray_menu_item_visible => 'Visible';
+
+  @override
+  String get tray_menu_item_checked => 'Checked';
+
+  @override
+  String get tray_menu_separator => 'Separator';
+
+  @override
+  String get tray_menu_normal => 'Normal Item';
+
+  @override
+  String get tray_menu_submenu => 'Submenu';
+
+  @override
+  String get tray_menu_action_show_hide => 'Show/Hide';
+
+  @override
+  String get tray_menu_action_quit => 'Quit';
+
+  @override
+  String get tray_menu_action_settings => 'Settings';
+
+  @override
+  String get tray_menu_action_custom => 'Custom';
+
+  @override
+  String get tray_minimize_to_tray => 'Minimize to Tray';
+
+  @override
+  String get tray_minimize_to_tray_desc =>
+      'Hide to tray when closing window instead of quitting';
+
+  @override
+  String get tray_start_minimized => 'Start Minimized to Tray';
+
+  @override
+  String get tray_menu_saved => 'Menu saved';
+
+  @override
+  String get tray_menu_reset_confirm => 'Reset menu to default?';
 
   @override
   String get settings_advanced => 'Advanced';
@@ -1740,6 +1949,41 @@ class AppLocalizationsEn extends AppLocalizations {
       'Auto copy to clipboard after capture';
 
   @override
+  String get screenshot_clipboard_content_type => 'Clipboard Content Type';
+
+  @override
+  String get screenshot_clipboard_type_image => 'Image';
+
+  @override
+  String get screenshot_clipboard_type_filename => 'Filename';
+
+  @override
+  String get screenshot_clipboard_type_full_path => 'Full Path';
+
+  @override
+  String get screenshot_clipboard_type_directory_path => 'Directory Path';
+
+  @override
+  String get screenshot_clipboard_type_image_desc =>
+      'Copy the image itself to clipboard';
+
+  @override
+  String get screenshot_clipboard_type_filename_desc =>
+      'Copy filename only (without path)';
+
+  @override
+  String get screenshot_clipboard_type_full_path_desc =>
+      'Copy the full file path';
+
+  @override
+  String get screenshot_clipboard_type_directory_path_desc =>
+      'Copy the directory path containing the file';
+
+  @override
+  String get screenshot_settings_clipboard_type_title =>
+      'Select Clipboard Content Type';
+
+  @override
   String get screenshot_settings_show_preview_desc =>
       'Show preview and edit window after capture';
 
@@ -1802,6 +2046,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screenshot_shortcut_settings => 'Open Settings';
 
   @override
+  String get screenshot_settings_json_editor => 'JSON Configuration Editor';
+
+  @override
+  String get screenshot_settings_json_editor_desc =>
+      'Edit JSON configuration file directly for advanced customization';
+
+  @override
+  String get screenshot_settings_config_name => 'Screenshot Configuration';
+
+  @override
+  String get screenshot_settings_config_description =>
+      'Configure all screenshot plugin options';
+
+  @override
+  String get screenshot_settings_json_saved => 'Configuration saved';
+
+  @override
   String get screenshot_tooltip_history => 'History';
 
   @override
@@ -1824,4 +2085,129 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ui_follow_system => 'Follow System';
+
+  @override
+  String json_editor_title(String configName) {
+    return 'Edit $configName';
+  }
+
+  @override
+  String get json_editor_format => 'Format';
+
+  @override
+  String get json_editor_minify => 'Minify';
+
+  @override
+  String get json_editor_reset => 'Reset';
+
+  @override
+  String get json_editor_example => 'Example';
+
+  @override
+  String get json_editor_validate => 'Validate';
+
+  @override
+  String get json_editor_unsaved_changes => 'Unsaved changes';
+
+  @override
+  String get json_editor_save_failed => 'Save failed';
+
+  @override
+  String get json_editor_reset_confirm_title => 'Reset to Default';
+
+  @override
+  String get json_editor_reset_confirm_message =>
+      'Are you sure you want to reset to default configuration? All current changes will be lost.';
+
+  @override
+  String get json_editor_reset_confirm => 'Reset';
+
+  @override
+  String get json_editor_example_title => 'Load Example Configuration';
+
+  @override
+  String get json_editor_example_message =>
+      'Loading example will replace current content. The example contains detailed configuration explanations.';
+
+  @override
+  String get json_editor_example_warning =>
+      'Warning: Current content will be overwritten';
+
+  @override
+  String get json_editor_example_load => 'Load';
+
+  @override
+  String get json_editor_discard_title => 'Discard Changes';
+
+  @override
+  String get json_editor_discard_message =>
+      'You have unsaved changes. Are you sure you want to discard them?';
+
+  @override
+  String get json_editor_discard_confirm => 'Discard';
+
+  @override
+  String get json_editor_edit_json => 'Edit JSON Configuration';
+
+  @override
+  String get json_editor_reset_to_default => 'Reset to Default';
+
+  @override
+  String get json_editor_view_example => 'View Configuration Example';
+
+  @override
+  String get close_dialog_title => 'Close Confirmation';
+
+  @override
+  String get close_dialog_message => 'What would you like to do?';
+
+  @override
+  String get close_dialog_directly => 'Close Directly';
+
+  @override
+  String get close_dialog_minimize_to_tray => 'Minimize to Tray';
+
+  @override
+  String get close_dialog_cancel => 'Cancel';
+
+  @override
+  String get close_dialog_remember => 'Remember my choice, don\'t ask again';
+
+  @override
+  String get close_behavior_ask => 'Ask Every Time';
+
+  @override
+  String get close_behavior_close => 'Close Directly';
+
+  @override
+  String get close_behavior_minimize_to_tray => 'Minimize to Tray';
+
+  @override
+  String get settings_close_behavior => 'Close Behavior';
+
+  @override
+  String get settings_close_behavior_desc =>
+      'Default behavior when closing the window';
+
+  @override
+  String get settings_remember_close_choice => 'Remember Close Choice';
+
+  @override
+  String get settings_remember_close_choice_desc =>
+      'Remember the user\'s choice for closing';
+
+  @override
+  String get plugin_view_mode => 'View Mode';
+
+  @override
+  String get plugin_view_large_icon => 'Large Icons';
+
+  @override
+  String get plugin_view_medium_icon => 'Medium Icons';
+
+  @override
+  String get plugin_view_small_icon => 'Small Icons';
+
+  @override
+  String get plugin_view_list => 'List';
 }

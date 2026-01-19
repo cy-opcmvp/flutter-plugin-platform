@@ -25,6 +25,54 @@ class ConfigManager {
 
   bool _isInitialized = false;
 
+  /// 获取全局配置
+  GlobalConfig get globalConfig {
+    if (_globalConfig == null) {
+      throw StateError('Global config not loaded');
+    }
+    return _globalConfig!;
+  }
+
+  /// 获取自启动插件列表
+  List<String> get autoStartPlugins => globalConfig.app.autoStartPlugins;
+
+  /// 添加插件到自启动列表
+  Future<void> addAutoStartPlugin(String pluginId) async {
+    final currentList = globalConfig.app.autoStartPlugins;
+    if (currentList.contains(pluginId)) {
+      debugPrint('Plugin $pluginId is already in auto-start list');
+      return;
+    }
+
+    final newList = [...currentList, pluginId];
+    final newAppConfig = globalConfig.app.copyWith(autoStartPlugins: newList);
+    final newGlobalConfig = globalConfig.copyWith(app: newAppConfig);
+
+    await updateGlobalConfig(newGlobalConfig);
+    debugPrint('Added plugin $pluginId to auto-start list');
+  }
+
+  /// 从自启动列表中移除插件
+  Future<void> removeAutoStartPlugin(String pluginId) async {
+    final currentList = globalConfig.app.autoStartPlugins;
+    if (!currentList.contains(pluginId)) {
+      debugPrint('Plugin $pluginId is not in auto-start list');
+      return;
+    }
+
+    final newList = currentList.where((id) => id != pluginId).toList();
+    final newAppConfig = globalConfig.app.copyWith(autoStartPlugins: newList);
+    final newGlobalConfig = globalConfig.copyWith(app: newAppConfig);
+
+    await updateGlobalConfig(newGlobalConfig);
+    debugPrint('Removed plugin $pluginId from auto-start list');
+  }
+
+  /// 检查插件是否在自启动列表中
+  bool isAutoStartPlugin(String pluginId) {
+    return globalConfig.app.autoStartPlugins.contains(pluginId);
+  }
+
   /// 初始化配置管理器
   Future<void> initialize() async {
     if (_isInitialized) return;
@@ -96,14 +144,6 @@ class ConfigManager {
     _pluginConfigs.remove(pluginId);
     await _service.deletePluginConfig(pluginId);
     debugPrint('Plugin config deleted for $pluginId');
-  }
-
-  /// 获取全局配置
-  GlobalConfig get globalConfig {
-    if (_globalConfig == null) {
-      throw StateError('Global config not loaded. Call initialize() first.');
-    }
-    return _globalConfig!;
   }
 
   /// 导出所有配置到字符串

@@ -4,11 +4,51 @@ import 'dart:typed_data';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:path/path.dart' as path;
+import '../models/screenshot_settings.dart';
 
 /// 剪贴板服务
 ///
 /// 提供跨平台的剪贴板操作功能
 class ClipboardService {
+  /// 复制内容到剪贴板
+  ///
+  /// [filePath] 文件完整路径
+  /// [contentType] 要复制的内容类型
+  /// 返回是否成功复制
+  Future<bool> copyContent(
+    String filePath, {
+    required ClipboardContentType contentType,
+    Uint8List? imageBytes,
+  }) async {
+    try {
+      switch (contentType) {
+        case ClipboardContentType.image:
+          if (imageBytes != null) {
+            return await copyImage(imageBytes);
+          }
+          return false;
+
+        case ClipboardContentType.filename:
+          final filename = path.basename(filePath);
+          await Clipboard.setData(ClipboardData(text: filename));
+          return true;
+
+        case ClipboardContentType.fullPath:
+          await Clipboard.setData(ClipboardData(text: filePath));
+          return true;
+
+        case ClipboardContentType.directoryPath:
+          final directory = path.dirname(filePath);
+          await Clipboard.setData(ClipboardData(text: directory));
+          return true;
+      }
+    } catch (e) {
+      debugPrint('Failed to copy content to clipboard: $e');
+      return false;
+    }
+  }
+
   /// 复制图片到剪贴板
   ///
   /// [imageBytes] 图片数据的字节数组

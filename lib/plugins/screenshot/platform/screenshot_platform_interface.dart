@@ -159,10 +159,20 @@ class WindowsScreenshotService implements ScreenshotPlatformInterface {
       final List<WindowInfo> windows = [];
       for (var windowMap in windowList) {
         final Map<dynamic, dynamic> map = Map<dynamic, dynamic>.from(windowMap);
+
+        // Parse icon data if present
+        Uint8List? iconBytes;
+        if (map['icon'] != null) {
+          final List<int> iconData = List<int>.from(map['icon']);
+          iconBytes = Uint8List.fromList(iconData);
+        }
+
         windows.add(WindowInfo(
           id: map['id'] as String,
           title: map['title'] as String,
           bounds: Rect.fromLTWH(0, 0, 0, 0), // Bounds not provided by Windows API
+          appName: map['appName'] as String?,
+          icon: iconBytes,
         ));
       }
       return windows;

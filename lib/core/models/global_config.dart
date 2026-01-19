@@ -84,20 +84,36 @@ class AppConfig {
   final String version;
   final String language;
   final String theme;
+  final PluginViewMode pluginViewMode;
+  final List<String> autoStartPlugins; // 自启动插件ID列表
 
   const AppConfig({
     required this.name,
     required this.version,
     required this.language,
     required this.theme,
+    this.pluginViewMode = PluginViewMode.mediumIcon,
+    this.autoStartPlugins = const [],
   });
 
   factory AppConfig.fromJson(Map<String, dynamic> json) {
+    // 安全地转换 autoStartPlugins
+    List<String> parseAutoStartPlugins(dynamic value) {
+      if (value == null) return [];
+      if (value is List<String>) return value;
+      if (value is List) {
+        return value.map((e) => e.toString()).toList();
+      }
+      return [];
+    }
+
     return AppConfig(
       name: json['name'] as String? ?? 'Flutter Plugin Platform',
       version: json['version'] as String? ?? '0.0.0',
       language: json['language'] as String? ?? 'zh_CN',
       theme: json['theme'] as String? ?? 'system',
+      pluginViewMode: _parsePluginViewMode(json['pluginViewMode'] as String?),
+      autoStartPlugins: parseAutoStartPlugins(json['autoStartPlugins']),
     );
   }
 
@@ -107,7 +123,28 @@ class AppConfig {
       'version': version,
       'language': language,
       'theme': theme,
+      'pluginViewMode': pluginViewMode.name,
+      'autoStartPlugins': autoStartPlugins,
     };
+  }
+
+  /// 复制并修改部分配置
+  AppConfig copyWith({
+    String? name,
+    String? version,
+    String? language,
+    String? theme,
+    PluginViewMode? pluginViewMode,
+    List<String>? autoStartPlugins,
+  }) {
+    return AppConfig(
+      name: name ?? this.name,
+      version: version ?? this.version,
+      language: language ?? this.language,
+      theme: theme ?? this.theme,
+      pluginViewMode: pluginViewMode ?? this.pluginViewMode,
+      autoStartPlugins: autoStartPlugins ?? this.autoStartPlugins,
+    );
   }
 
   static const defaultConfig = AppConfig(
@@ -115,7 +152,18 @@ class AppConfig {
     version: '0.3.4',
     language: 'zh_CN',
     theme: 'system',
+    pluginViewMode: PluginViewMode.mediumIcon,
+    autoStartPlugins: [],
   );
+
+  /// 解析插件视图模式
+  static PluginViewMode _parsePluginViewMode(String? value) {
+    if (value == null) return PluginViewMode.mediumIcon;
+    return PluginViewMode.values.firstWhere(
+      (e) => e.name == value,
+      orElse: () => PluginViewMode.mediumIcon,
+    );
+  }
 }
 
 /// 功能配置
@@ -269,6 +317,14 @@ class TaskSchedulerServiceConfig {
   }
 
   static const defaultConfig = TaskSchedulerServiceConfig(enabled: true);
+}
+
+/// 插件视图模式枚举
+enum PluginViewMode {
+  largeIcon,     // 大图标
+  mediumIcon,    // 中图标（默认）
+  smallIcon,     // 小图标
+  list;          // 列表
 }
 
 /// 高级配置

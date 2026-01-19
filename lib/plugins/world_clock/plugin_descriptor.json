@@ -1,0 +1,18 @@
+{
+  "id": "com.example.worldclock",
+  "name": "World Clock",
+  "version": "1.0.0",
+  "type": "tool",
+  "requiredPermissions": ["notifications", "platformServices"],
+  "metadata": {
+    "description": "Display times from multiple time zones with countdown timer support, showing Beijing time by default",
+    "author": "Example Developer",
+    "category": "Productivity",
+    "tags": ["time", "clock", "timezone", "countdown", "productivity"],
+    "icon": "schedule",
+    "minPlatformVersion": "1.0.0",
+    "supportedPlatforms": ["mobile", "desktop", "web", "steam"]
+  },
+  "entryPoint": "lib/plugins/world_clock/world_clock_plugin.dart",
+  "tags": ["tag_productivity", "tag_favorite"]
+}

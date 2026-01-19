@@ -50,7 +50,7 @@ dependencies:
   
   # Platform-specific dependencies
   desktop_window: ^0.4.0
-  window_manager: ^0.3.7
+  window_manager: ^0.5.1
   
   # Web view for external plugin UI
   webview_flutter: ^4.4.2

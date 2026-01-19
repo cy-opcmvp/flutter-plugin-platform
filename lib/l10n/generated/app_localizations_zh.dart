@@ -9,7 +9,124 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
-  String get appTitle => '插件平台';
+  String get appTitle => '多功能插件平台';
+
+  @override
+  String get appName => '多功能插件平台';
+
+  @override
+  String get autoStart => '开机自启动';
+
+  @override
+  String get autoStartPlugin => '插件自启动';
+
+  @override
+  String get autoStartDescription => '开机自启动';
+
+  @override
+  String autoStartedPlugins(Object count) {
+    return '已自动启动 $count 个插件';
+  }
+
+  @override
+  String get autoStartAdded => '已添加到自启动列表';
+
+  @override
+  String get autoStartRemoved => '已从自启动列表移除';
+
+  @override
+  String get autoStartPlugins_empty => '暂无自启动插件';
+
+  @override
+  String get tag_title => '标签';
+
+  @override
+  String get tag_add => '添加标签';
+
+  @override
+  String get tag_edit => '编辑标签';
+
+  @override
+  String get tag_delete => '删除标签';
+
+  @override
+  String get tag_name => '标签名称';
+
+  @override
+  String get tag_description => '标签描述';
+
+  @override
+  String get tag_color => '标签颜色';
+
+  @override
+  String get tag_icon => '标签图标';
+
+  @override
+  String get tag_create_success => '标签创建成功';
+
+  @override
+  String get tag_update_success => '标签更新成功';
+
+  @override
+  String get tag_delete_success => '标签删除成功';
+
+  @override
+  String tag_delete_confirm(Object name) {
+    return '确定要删除标签 \"$name\" 吗？';
+  }
+
+  @override
+  String get tag_in_use => '该标签正在被使用中，无法删除';
+
+  @override
+  String get tag_system_protected => '系统标签无法删除或修改';
+
+  @override
+  String get tag_assign_success => '标签分配成功';
+
+  @override
+  String get tag_assign_removed => '标签已移除';
+
+  @override
+  String get tag_filter_all => '全部';
+
+  @override
+  String tag_filter_active(Object count) {
+    return '已选择 $count 个标签';
+  }
+
+  @override
+  String get tag_no_tags => '暂无标签';
+
+  @override
+  String get tag_create_hint => '创建自定义标签';
+
+  @override
+  String get tag_select_hint => '选择标签进行筛选';
+
+  @override
+  String get tag_empty => '没有标签';
+
+  @override
+  String get tag_popular => '热门标签';
+
+  @override
+  String get tag_productivity => '生产力工具';
+
+  @override
+  String get tag_system => '系统工具';
+
+  @override
+  String get tag_entertainment => '娱乐休闲';
+
+  @override
+  String get tag_game => '游戏';
+
+  @override
+  String get tag_development => '开发工具';
+
+  @override
+  String get tag_favorite => '常用';
 
   @override
   String get common_confirm => '确认';
@@ -110,6 +227,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get button_launch => '启动';
 
   @override
+  String get button_open => '打开';
+
+  @override
   String get button_install => '安装';
 
   @override
@@ -150,6 +270,18 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get button_exitPetMode => '退出宠物模式';
+
+  @override
+  String get autoStartEnabled => '开机自启：已开启';
+
+  @override
+  String get autoStartDisabled => '开机自启：已关闭';
+
+  @override
+  String get plugin_enabled => '已启用';
+
+  @override
+  String get plugin_disabled => '已禁用';
 
   @override
   String get dialog_confirmTitle => '确认操作';
@@ -536,6 +668,81 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_services => '服务设置';
+
+  @override
+  String get tray_title => '系统托盘';
+
+  @override
+  String get tray_enabled => '启用系统托盘';
+
+  @override
+  String get tray_enabled_desc => '在系统托盘显示应用图标';
+
+  @override
+  String get tray_tooltip => '托盘提示';
+
+  @override
+  String get tray_menu => '托盘菜单';
+
+  @override
+  String get tray_menu_edit => '编辑菜单';
+
+  @override
+  String get tray_menu_add => '添加菜单项';
+
+  @override
+  String get tray_menu_item_type => '菜单项类型';
+
+  @override
+  String get tray_menu_item_text => '菜单项文本';
+
+  @override
+  String get tray_menu_item_action => '动作类型';
+
+  @override
+  String get tray_menu_item_enabled => '启用';
+
+  @override
+  String get tray_menu_item_visible => '可见';
+
+  @override
+  String get tray_menu_item_checked => '已勾选';
+
+  @override
+  String get tray_menu_separator => '分隔符';
+
+  @override
+  String get tray_menu_normal => '普通菜单项';
+
+  @override
+  String get tray_menu_submenu => '子菜单';
+
+  @override
+  String get tray_menu_action_show_hide => '显示/隐藏';
+
+  @override
+  String get tray_menu_action_quit => '退出';
+
+  @override
+  String get tray_menu_action_settings => '设置';
+
+  @override
+  String get tray_menu_action_custom => '自定义';
+
+  @override
+  String get tray_minimize_to_tray => '最小化到托盘';
+
+  @override
+  String get tray_minimize_to_tray_desc => '关闭窗口时隐藏到托盘而非退出';
+
+  @override
+  String get tray_start_minimized => '启动时最小化到托盘';
+
+  @override
+  String get tray_menu_saved => '菜单已保存';
+
+  @override
+  String get tray_menu_reset_confirm => '确定要重置为默认菜单吗？';
 
   @override
   String get settings_advanced => '高级设置';
@@ -1683,6 +1890,36 @@ class AppLocalizationsZh extends AppLocalizations {
   String get screenshot_settings_auto_copy_desc => '截图后自动复制到剪贴板';
 
   @override
+  String get screenshot_clipboard_content_type => '剪贴板内容类型';
+
+  @override
+  String get screenshot_clipboard_type_image => '图片本身';
+
+  @override
+  String get screenshot_clipboard_type_filename => '文件名';
+
+  @override
+  String get screenshot_clipboard_type_full_path => '完整路径';
+
+  @override
+  String get screenshot_clipboard_type_directory_path => '目录路径';
+
+  @override
+  String get screenshot_clipboard_type_image_desc => '复制图片本身到剪贴板';
+
+  @override
+  String get screenshot_clipboard_type_filename_desc => '仅复制文件名（不含路径）';
+
+  @override
+  String get screenshot_clipboard_type_full_path_desc => '复制文件的完整路径';
+
+  @override
+  String get screenshot_clipboard_type_directory_path_desc => '复制文件所在的目录路径';
+
+  @override
+  String get screenshot_settings_clipboard_type_title => '选择剪贴板内容类型';
+
+  @override
   String get screenshot_settings_show_preview_desc => '截图后显示预览和编辑窗口';
 
   @override
@@ -1742,6 +1979,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get screenshot_shortcut_settings => '打开设置';
 
   @override
+  String get screenshot_settings_json_editor => 'JSON 配置编辑器';
+
+  @override
+  String get screenshot_settings_json_editor_desc => '直接编辑 JSON 配置文件，支持高级自定义';
+
+  @override
+  String get screenshot_settings_config_name => '截图配置';
+
+  @override
+  String get screenshot_settings_config_description => '配置截图插件的所有选项';
+
+  @override
+  String get screenshot_settings_json_saved => '配置已保存';
+
+  @override
   String get screenshot_tooltip_history => '历史记录';
 
   @override
@@ -1764,4 +2016,123 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ui_follow_system => '跟随系统';
+
+  @override
+  String json_editor_title(String configName) {
+    return '编辑 $configName';
+  }
+
+  @override
+  String get json_editor_format => '格式化';
+
+  @override
+  String get json_editor_minify => '压缩';
+
+  @override
+  String get json_editor_reset => '重置';
+
+  @override
+  String get json_editor_example => '示例';
+
+  @override
+  String get json_editor_validate => '验证';
+
+  @override
+  String get json_editor_unsaved_changes => '有未保存的更改';
+
+  @override
+  String get json_editor_save_failed => '保存失败';
+
+  @override
+  String get json_editor_reset_confirm_title => '重置为默认值';
+
+  @override
+  String get json_editor_reset_confirm_message => '确定要重置为默认配置吗？当前所有更改将丢失。';
+
+  @override
+  String get json_editor_reset_confirm => '重置';
+
+  @override
+  String get json_editor_example_title => '加载示例配置';
+
+  @override
+  String get json_editor_example_message => '加载示例将替换当前内容，示例包含详细的配置说明。';
+
+  @override
+  String get json_editor_example_warning => '警告：当前内容将被覆盖';
+
+  @override
+  String get json_editor_example_load => '加载';
+
+  @override
+  String get json_editor_discard_title => '放弃更改';
+
+  @override
+  String get json_editor_discard_message => '您有未保存的更改，确定要放弃吗？';
+
+  @override
+  String get json_editor_discard_confirm => '放弃';
+
+  @override
+  String get json_editor_edit_json => '编辑 JSON 配置';
+
+  @override
+  String get json_editor_reset_to_default => '恢复默认配置';
+
+  @override
+  String get json_editor_view_example => '查看配置示例';
+
+  @override
+  String get close_dialog_title => '关闭确认';
+
+  @override
+  String get close_dialog_message => '您希望如何操作？';
+
+  @override
+  String get close_dialog_directly => '直接关闭';
+
+  @override
+  String get close_dialog_minimize_to_tray => '最小化到托盘';
+
+  @override
+  String get close_dialog_cancel => '取消';
+
+  @override
+  String get close_dialog_remember => '记住选择，不再询问';
+
+  @override
+  String get close_behavior_ask => '每次询问';
+
+  @override
+  String get close_behavior_close => '直接关闭';
+
+  @override
+  String get close_behavior_minimize_to_tray => '最小化到托盘';
+
+  @override
+  String get settings_close_behavior => '关闭行为';
+
+  @override
+  String get settings_close_behavior_desc => '关闭窗口时的默认行为';
+
+  @override
+  String get settings_remember_close_choice => '记住关闭选择';
+
+  @override
+  String get settings_remember_close_choice_desc => '记住用户选择的关闭方式';
+
+  @override
+  String get plugin_view_mode => '视图模式';
+
+  @override
+  String get plugin_view_large_icon => '大图标';
+
+  @override
+  String get plugin_view_medium_icon => '中图标';
+
+  @override
+  String get plugin_view_small_icon => '小图标';
+
+  @override
+  String get plugin_view_list => '列表';
 }

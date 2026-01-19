@@ -36,7 +36,8 @@
       "Bash(exit:*)",
       "Bash(git checkout:*)",
       "Bash(grep:*)",
-      "Bash(dart run:*)"
+      "Bash(dart run:*)",
+      "Bash(flutter attach:*)"
     ]
   }
 }

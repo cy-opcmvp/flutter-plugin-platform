@@ -103,7 +103,10 @@ class ConfigService {
   }
 
   /// 保存插件配置文件
-  Future<void> savePluginConfig(String pluginId, Map<String, dynamic> config) async {
+  Future<void> savePluginConfig(
+    String pluginId,
+    Map<String, dynamic> config,
+  ) async {
     final file = File('${_configDir.path}/plugin_$pluginId.json');
 
     try {
@@ -123,9 +126,13 @@ class ConfigService {
     try {
       final entities = await _configDir.list().toList();
       for (final entity in entities) {
-        if (entity is File && entity.path.contains('plugin_') && entity.path.endsWith('.json')) {
+        if (entity is File &&
+            entity.path.contains('plugin_') &&
+            entity.path.endsWith('.json')) {
           final fileName = entity.path.split(Platform.pathSeparator).last;
-          final pluginId = fileName.replaceAll('plugin_', '').replaceAll('.json', '');
+          final pluginId = fileName
+              .replaceAll('plugin_', '')
+              .replaceAll('.json', '');
 
           final config = await loadPluginConfig(pluginId);
           result[pluginId] = config;
@@ -218,6 +225,51 @@ class ConfigService {
         'maxLogFileSize': 10, // MB
       },
     };
+  }
+
+  /// 读取自定义配置文件
+  Future<Map<String, dynamic>?> loadCustomConfig(String configName) async {
+    final file = File('${_configDir.path}/${configName}_config.json');
+
+    if (!await file.exists()) {
+      return null;
+    }
+
+    try {
+      final jsonString = await file.readAsString();
+      final json = jsonDecode(jsonString) as Map<String, dynamic>;
+      return json;
+    } catch (e) {
+      debugPrint('Failed to load custom config $configName: $e');
+      return null;
+    }
+  }
+
+  /// 保存自定义配置文件
+  Future<void> saveCustomConfig(
+    String configName,
+    Map<String, dynamic> config,
+  ) async {
+    final file = File('${_configDir.path}/${configName}_config.json');
+
+    try {
+      final jsonString = JsonEncoder.withIndent('  ').convert(config);
+      await file.writeAsString(jsonString);
+      debugPrint('Custom config saved: $configName');
+    } catch (e) {
+      debugPrint('Failed to save custom config $configName: $e');
+      rethrow;
+    }
+  }
+
+  /// 删除自定义配置文件
+  Future<void> deleteCustomConfig(String configName) async {
+    final file = File('${_configDir.path}/${configName}_config.json');
+
+    if (await file.exists()) {
+      await file.delete();
+      debugPrint('Custom config deleted: $configName');
+    }
   }
 
   /// 检查服务是否已初始化

@@ -1,0 +1,18 @@
+{
+  "id": "com.example.screenshot",
+  "name": "Smart Screenshot",
+  "version": "1.0.0",
+  "type": "tool",
+  "requiredPermissions": ["fileSystemRead", "fileSystemWrite", "systemClipboard", "platformServices"],
+  "metadata": {
+    "description": "Professional screenshot tool like Snipaste, supporting region, fullscreen, window capture and image annotation",
+    "author": "Example Developer",
+    "category": "System",
+    "tags": ["screenshot", "capture", "image", "annotation", "system"],
+    "icon": "screenshot",
+    "minPlatformVersion": "1.0.0",
+    "supportedPlatforms": ["desktop"]
+  },
+  "entryPoint": "lib/plugins/screenshot/screenshot_plugin.dart",
+  "tags": ["tag_productivity", "tag_system", "tag_favorite"]
+}

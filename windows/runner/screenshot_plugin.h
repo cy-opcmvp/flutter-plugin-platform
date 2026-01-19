@@ -7,6 +7,14 @@
 #include <tuple>
 #include <gdiplus.h>
 
+// Structure to hold window information with icon
+struct WindowInfo {
+    std::string title;
+    std::string id;
+    std::string appName;
+    std::vector<uint8_t> icon;
+};
+
 // Initialize GDI+ (call once at startup)
 void InitializeGDIPlus();
 
@@ -29,8 +37,8 @@ std::vector<uint8_t> CaptureWindow(HWND hwnd);
 std::vector<uint8_t> CaptureRegion(int x, int y, int width, int height);
 
 // Enumerate all visible windows
-// Returns vector of tuples (title, windowId)
-std::vector<std::tuple<std::string, std::string>> EnumerateWindows();
+// Returns vector of WindowInfo structures
+std::vector<WindowInfo> EnumerateWindows();
 
 // Convert HWND from string representation
 HWND HwndFromString(const std::string& str);

@@ -1,8 +1,12 @@
 library;
 
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../../../l10n/generated/app_localizations.dart';
+import '../../../../ui/widgets/json_editor_screen.dart';
+import '../../../../core/services/json_validator.dart';
+import '../config/screenshot_config_defaults.dart';
 import '../models/screenshot_settings.dart';
 import '../screenshot_plugin.dart';
 
@@ -49,47 +53,82 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
         foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
         elevation: 0,
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16.0),
-        children: [
-          // 保存设置
-          _buildSectionHeader(l10n.screenshot_settings_section_save),
-          const SizedBox(height: 8),
-          _buildSavePathTile(l10n),
-          _buildFilenameFormatTile(l10n),
-          _buildImageFormatTile(l10n),
-          _buildImageQualityTile(l10n),
-
-          const SizedBox(height: 24),
-
-          // 功能设置
-          _buildSectionHeader(l10n.screenshot_settings_section_function),
-          const SizedBox(height: 8),
-          _buildAutoCopyTile(l10n),
-          _buildShowPreviewTile(l10n),
-          _buildSaveHistoryTile(l10n),
-          _buildMaxHistoryCountTile(l10n),
-
-          const SizedBox(height: 24),
-
-          // 快捷键设置
-          _buildSectionHeader(l10n.screenshot_settings_section_shortcuts),
-          const SizedBox(height: 8),
-          _buildShortcutTiles(l10n),
-
-          const SizedBox(height: 24),
-
-          // 钉图设置
-          _buildSectionHeader(l10n.screenshot_settings_section_pin),
-          const SizedBox(height: 8),
-          _buildPinSettingsTiles(l10n),
-
-          const SizedBox(height: 32),
-
-          // 保存按钮
-          _buildSaveButton(l10n),
-        ],
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // 如果高度太小，使用 SingleChildScrollView
+          if (constraints.maxHeight < 600) {
+            return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: _buildContent(context, l10n),
+              ),
+            );
+          }
+          // 否则使用 ListView
+          return Padding(
+            padding: EdgeInsets.only(
+              left: 16.0,
+              right: 16.0,
+              top: 16.0,
+              bottom: MediaQuery.of(context).padding.bottom + 16.0,
+            ),
+            child: _buildContent(context, l10n),
+          );
+        },
       ),
+    );
+  }
+
+  /// 构建内容
+  Widget _buildContent(BuildContext context, AppLocalizations l10n) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 保存设置
+        _buildSectionHeader(l10n.screenshot_settings_section_save),
+        const SizedBox(height: 8),
+        _buildSavePathTile(l10n),
+        _buildFilenameFormatTile(l10n),
+        _buildImageFormatTile(l10n),
+        _buildImageQualityTile(l10n),
+
+        const SizedBox(height: 24),
+
+        // 功能设置
+        _buildSectionHeader(l10n.screenshot_settings_section_function),
+        const SizedBox(height: 8),
+        _buildAutoCopyTile(l10n),
+        _buildClipboardContentTypeTile(l10n),
+        _buildShowPreviewTile(l10n),
+        _buildSaveHistoryTile(l10n),
+        _buildMaxHistoryCountTile(l10n),
+
+        const SizedBox(height: 24),
+
+        // 快捷键设置
+        _buildSectionHeader(l10n.screenshot_settings_section_shortcuts),
+        const SizedBox(height: 8),
+        _buildShortcutTiles(l10n),
+
+        const SizedBox(height: 24),
+
+        // 钉图设置
+        _buildSectionHeader(l10n.screenshot_settings_section_pin),
+        const SizedBox(height: 8),
+        _buildPinSettingsTiles(l10n),
+
+        const SizedBox(height: 32),
+
+        // 保存按钮
+        _buildSaveButton(l10n),
+
+        const SizedBox(height: 24),
+
+        // JSON 编辑器入口
+        _buildJsonEditorSection(context, l10n),
+      ],
     );
   }
 
@@ -111,10 +150,18 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
   Widget _buildSavePathTile(AppLocalizations l10n) {
     return ListTile(
       leading: const Icon(Icons.folder),
-      title: Text(l10n.screenshot_savePath),
-      subtitle: Text(_settings.savePath),
+      title: Text(
+        l10n.screenshot_savePath,
+        overflow: TextOverflow.ellipsis,
+      ),
+      subtitle: Text(
+        _settings.savePath,
+        overflow: TextOverflow.ellipsis,
+        maxLines: 2,
+      ),
       trailing: const Icon(Icons.chevron_right),
       onTap: _selectSavePath,
+      contentPadding: EdgeInsets.zero,
     );
   }
 
@@ -122,10 +169,18 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
   Widget _buildFilenameFormatTile(AppLocalizations l10n) {
     return ListTile(
       leading: const Icon(Icons.text_fields),
-      title: Text(l10n.screenshot_filenameFormat),
-      subtitle: Text(_settings.filenameFormat),
+      title: Text(
+        l10n.screenshot_filenameFormat,
+        overflow: TextOverflow.ellipsis,
+      ),
+      subtitle: Text(
+        _settings.filenameFormat,
+        overflow: TextOverflow.ellipsis,
+        maxLines: 2,
+      ),
       trailing: const Icon(Icons.chevron_right),
       onTap: _editFilenameFormat,
+      contentPadding: EdgeInsets.zero,
     );
   }
 
@@ -133,10 +188,17 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
   Widget _buildImageFormatTile(AppLocalizations l10n) {
     return ListTile(
       leading: const Icon(Icons.image),
-      title: Text(l10n.screenshot_imageFormat),
-      subtitle: Text(_formatImageFormatName(_settings.imageFormat)),
+      title: Text(
+        l10n.screenshot_imageFormat,
+        overflow: TextOverflow.ellipsis,
+      ),
+      subtitle: Text(
+        _formatImageFormatName(_settings.imageFormat),
+        overflow: TextOverflow.ellipsis,
+      ),
       trailing: const Icon(Icons.chevron_right),
       onTap: _selectImageFormat,
+      contentPadding: EdgeInsets.zero,
     );
   }
 
@@ -144,10 +206,17 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
   Widget _buildImageQualityTile(AppLocalizations l10n) {
     return ListTile(
       leading: const Icon(Icons.high_quality),
-      title: Text(l10n.screenshot_imageQuality),
-      subtitle: Text('${_settings.imageQuality}%'),
+      title: Text(
+        l10n.screenshot_imageQuality,
+        overflow: TextOverflow.ellipsis,
+      ),
+      subtitle: Text(
+        '${_settings.imageQuality}%',
+        overflow: TextOverflow.ellipsis,
+      ),
       trailing: const Icon(Icons.chevron_right),
       onTap: _adjustImageQuality,
+      contentPadding: EdgeInsets.zero,
     );
   }
 
@@ -155,29 +224,78 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
   Widget _buildAutoCopyTile(AppLocalizations l10n) {
     return SwitchListTile(
       secondary: const Icon(Icons.content_copy),
-      title: Text(l10n.screenshot_autoCopy),
-      subtitle: Text(l10n.screenshot_settings_auto_copy_desc),
+      title: Text(
+        l10n.screenshot_autoCopy,
+        overflow: TextOverflow.ellipsis,
+      ),
+      subtitle: Text(
+        l10n.screenshot_settings_auto_copy_desc,
+        overflow: TextOverflow.ellipsis,
+        maxLines: 2,
+      ),
       value: _settings.autoCopyToClipboard,
       onChanged: (value) {
         setState(() {
           _settings = _settings.copyWith(autoCopyToClipboard: value);
         });
       },
+      contentPadding: EdgeInsets.zero,
     );
+  }
+
+  /// 构建剪贴板内容类型设置
+  Widget _buildClipboardContentTypeTile(AppLocalizations l10n) {
+    return ListTile(
+      leading: const Icon(Icons.paste),
+      title: Text(
+        l10n.screenshot_clipboard_content_type,
+        overflow: TextOverflow.ellipsis,
+      ),
+      subtitle: Text(
+        _getClipboardContentTypeDisplayName(l10n),
+        overflow: TextOverflow.ellipsis,
+      ),
+      trailing: const Icon(Icons.chevron_right),
+      enabled: _settings.autoCopyToClipboard,
+      onTap: _selectClipboardContentType,
+      contentPadding: EdgeInsets.zero,
+    );
+  }
+
+  /// 获取剪贴板内容类型显示名称
+  String _getClipboardContentTypeDisplayName(AppLocalizations l10n) {
+    switch (_settings.clipboardContentType) {
+      case ClipboardContentType.image:
+        return l10n.screenshot_clipboard_type_image;
+      case ClipboardContentType.filename:
+        return l10n.screenshot_clipboard_type_filename;
+      case ClipboardContentType.fullPath:
+        return l10n.screenshot_clipboard_type_full_path;
+      case ClipboardContentType.directoryPath:
+        return l10n.screenshot_clipboard_type_directory_path;
+    }
   }
 
   /// 构建显示预览设置
   Widget _buildShowPreviewTile(AppLocalizations l10n) {
     return SwitchListTile(
       secondary: const Icon(Icons.preview),
-      title: Text(l10n.screenshot_showPreview),
-      subtitle: Text(l10n.screenshot_settings_show_preview_desc),
+      title: Text(
+        l10n.screenshot_showPreview,
+        overflow: TextOverflow.ellipsis,
+      ),
+      subtitle: Text(
+        l10n.screenshot_settings_show_preview_desc,
+        overflow: TextOverflow.ellipsis,
+        maxLines: 2,
+      ),
       value: _settings.showPreview,
       onChanged: (value) {
         setState(() {
           _settings = _settings.copyWith(showPreview: value);
         });
       },
+      contentPadding: EdgeInsets.zero,
     );
   }
 
@@ -185,14 +303,22 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
   Widget _buildSaveHistoryTile(AppLocalizations l10n) {
     return SwitchListTile(
       secondary: const Icon(Icons.history),
-      title: Text(l10n.screenshot_saveHistory),
-      subtitle: Text(l10n.screenshot_settings_save_history_desc),
+      title: Text(
+        l10n.screenshot_saveHistory,
+        overflow: TextOverflow.ellipsis,
+      ),
+      subtitle: Text(
+        l10n.screenshot_settings_save_history_desc,
+        overflow: TextOverflow.ellipsis,
+        maxLines: 2,
+      ),
       value: _settings.saveHistory,
       onChanged: (value) {
         setState(() {
           _settings = _settings.copyWith(saveHistory: value);
         });
       },
+      contentPadding: EdgeInsets.zero,
     );
   }
 
@@ -200,10 +326,17 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
   Widget _buildMaxHistoryCountTile(AppLocalizations l10n) {
     return ListTile(
       leading: const Icon(Icons.format_list_numbered),
-      title: Text(l10n.screenshot_maxHistoryCount),
-      subtitle: Text('${_settings.maxHistoryCount} ${l10n.screenshot_settings_items}'),
+      title: Text(
+        l10n.screenshot_maxHistoryCount,
+        overflow: TextOverflow.ellipsis,
+      ),
+      subtitle: Text(
+        '${_settings.maxHistoryCount} ${l10n.screenshot_settings_items}',
+        overflow: TextOverflow.ellipsis,
+      ),
       trailing: const Icon(Icons.chevron_right),
       onTap: _adjustMaxHistoryCount,
+      contentPadding: EdgeInsets.zero,
     );
   }
 
@@ -213,10 +346,17 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
       children: _settings.shortcuts.entries.map((entry) {
         return ListTile(
           leading: const Icon(Icons.keyboard),
-          title: Text(_getShortcutDisplayName(entry.key, l10n)),
-          subtitle: Text(entry.value),
+          title: Text(
+            _getShortcutDisplayName(entry.key, l10n),
+            overflow: TextOverflow.ellipsis,
+          ),
+          subtitle: Text(
+            entry.value,
+            overflow: TextOverflow.ellipsis,
+          ),
           trailing: const Icon(Icons.chevron_right),
           onTap: () => _editShortcut(entry.key, entry.value),
+          contentPadding: EdgeInsets.zero,
         );
       }).toList(),
     );
@@ -228,8 +368,15 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
       children: [
         SwitchListTile(
           secondary: const Icon(Icons.vertical_align_top),
-          title: Text(l10n.screenshot_alwaysOnTop),
-          subtitle: Text(l10n.screenshot_settings_always_on_top_desc),
+          title: Text(
+            l10n.screenshot_alwaysOnTop,
+            overflow: TextOverflow.ellipsis,
+          ),
+          subtitle: Text(
+            l10n.screenshot_settings_always_on_top_desc,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 2,
+          ),
           value: _settings.pinSettings.alwaysOnTop,
           onChanged: (value) {
             setState(() {
@@ -238,13 +385,21 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
               );
             });
           },
+          contentPadding: EdgeInsets.zero,
         ),
         ListTile(
           leading: const Icon(Icons.opacity),
-          title: Text(l10n.screenshot_defaultOpacity),
-          subtitle: Text('${(_settings.pinSettings.defaultOpacity * 100).toInt()}%'),
+          title: Text(
+            l10n.screenshot_defaultOpacity,
+            overflow: TextOverflow.ellipsis,
+          ),
+          subtitle: Text(
+            '${(_settings.pinSettings.defaultOpacity * 100).toInt()}%',
+            overflow: TextOverflow.ellipsis,
+          ),
           trailing: const Icon(Icons.chevron_right),
           onTap: _adjustOpacity,
+          contentPadding: EdgeInsets.zero,
         ),
       ],
     );
@@ -252,12 +407,15 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
 
   /// 构建保存按钮
   Widget _buildSaveButton(AppLocalizations l10n) {
-    return FilledButton(
-      onPressed: _saveSettings,
-      style: FilledButton.styleFrom(
-        minimumSize: const Size(double.infinity, 48),
+    return SizedBox(
+      width: double.infinity,
+      child: FilledButton(
+        onPressed: _saveSettings,
+        style: FilledButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        ),
+        child: Text(l10n.screenshot_settings_save),
       ),
-      child: Text(l10n.screenshot_settings_save),
     );
   }
 
@@ -300,6 +458,21 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
         onSave: (format) {
           setState(() {
             _settings = _settings.copyWith(imageFormat: format);
+          });
+        },
+      ),
+    );
+  }
+
+  /// 选择剪贴板内容类型
+  void _selectClipboardContentType() {
+    showDialog(
+      context: context,
+      builder: (context) => _ClipboardContentTypeDialog(
+        currentType: _settings.clipboardContentType,
+        onSave: (type) {
+          setState(() {
+            _settings = _settings.copyWith(clipboardContentType: type);
           });
         },
       ),
@@ -402,6 +575,139 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
         return l10n.screenshot_shortcut_settings;
       default:
         return action;
+    }
+  }
+
+  /// 构建 JSON 编辑器部分
+  Widget _buildJsonEditorSection(BuildContext context, AppLocalizations l10n) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.code,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  l10n.screenshot_settings_json_editor,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              l10n.screenshot_settings_json_editor_desc,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+            const SizedBox(height: 16),
+            // 使用 Wrap 在小屏幕时自动换行
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              alignment: WrapAlignment.start,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: () => _openJsonEditor(context, false),
+                  icon: const Icon(Icons.edit, size: 18),
+                  label: Text(l10n.json_editor_edit_json),
+                ),
+                OutlinedButton.icon(
+                  onPressed: () => _openJsonEditor(context, true),
+                  icon: const Icon(Icons.restore, size: 18),
+                  label: Text(l10n.json_editor_reset_to_default),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 打开 JSON 编辑器
+  Future<void> _openJsonEditor(BuildContext context, bool resetToDefault) async {
+    final l10n = AppLocalizations.of(context)!;
+
+    // 获取当前配置
+    final currentJson = const JsonEncoder.withIndent('  ').convert(_settings.toJson());
+
+    // 如果要重置，使用默认配置
+    final initialJson = resetToDefault ? ScreenshotConfigDefaults.defaultConfig : currentJson;
+
+    // 解析 Schema
+    final schema = JsonSchema.fromJson(
+      jsonDecode(ScreenshotConfigDefaults.schemaJson) as Map<String, dynamic>,
+    );
+
+    final result = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (context) => JsonEditorScreen(
+          configName: l10n.screenshot_settings_config_name,
+          configDescription: l10n.screenshot_settings_config_description,
+          currentJson: initialJson,
+          schema: schema,
+          defaultJson: ScreenshotConfigDefaults.defaultConfig,
+          exampleJson: ScreenshotConfigDefaults.cleanExample,
+          onSave: _saveJsonConfig,
+        ),
+      ),
+    );
+
+    if (result == true && mounted) {
+      // 配置已保存，刷新界面
+      setState(() {
+        _settings = widget.plugin.settings;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.screenshot_settings_json_saved),
+          backgroundColor: Theme.of(context).colorScheme.primary,
+        ),
+      );
+    }
+  }
+
+  /// 保存 JSON 配置
+  Future<bool> _saveJsonConfig(String jsonString) async {
+    try {
+      // 1. 校验 JSON
+      final validationResult = JsonValidator.validateJsonString(jsonString);
+      if (!validationResult.isValid) {
+        throw Exception(validationResult.errorMessage);
+      }
+
+      // 2. 解析 JSON
+      final data = jsonDecode(jsonString) as Map<String, dynamic>;
+
+      // 3. 创建配置对象
+      final settings = ScreenshotSettings.fromJson(data);
+
+      // 4. 验证配置
+      if (!settings.isValid()) {
+        throw Exception('配置验证失败：请检查所有配置项是否符合要求');
+      }
+
+      // 5. 保存配置
+      await widget.plugin.updateSettings(settings);
+
+      return true;
+    } catch (e) {
+      debugPrint('保存配置失败: $e');
+      return false;
     }
   }
 }
@@ -794,5 +1100,67 @@ class _OpacityDialogState extends State<_OpacityDialog> {
         ),
       ],
     );
+  }
+}
+
+/// 剪贴板内容类型对话框
+class _ClipboardContentTypeDialog extends StatelessWidget {
+  final ClipboardContentType currentType;
+  final Function(ClipboardContentType) onSave;
+
+  const _ClipboardContentTypeDialog({
+    required this.currentType,
+    required this.onSave,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return AlertDialog(
+      title: Text(l10n.screenshot_settings_clipboard_type_title),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: ClipboardContentType.values.map((type) {
+          return RadioListTile<ClipboardContentType>(
+            title: Text(_getTypeDisplayName(type, l10n)),
+            subtitle: Text(_getTypeDescription(type, l10n)),
+            value: type,
+            groupValue: currentType,
+            onChanged: (value) {
+              if (value != null) {
+                onSave(value);
+                Navigator.of(context).pop();
+              }
+            },
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  String _getTypeDisplayName(ClipboardContentType type, AppLocalizations l10n) {
+    switch (type) {
+      case ClipboardContentType.image:
+        return l10n.screenshot_clipboard_type_image;
+      case ClipboardContentType.filename:
+        return l10n.screenshot_clipboard_type_filename;
+      case ClipboardContentType.fullPath:
+        return l10n.screenshot_clipboard_type_full_path;
+      case ClipboardContentType.directoryPath:
+        return l10n.screenshot_clipboard_type_directory_path;
+    }
+  }
+
+  String _getTypeDescription(ClipboardContentType type, AppLocalizations l10n) {
+    switch (type) {
+      case ClipboardContentType.image:
+        return l10n.screenshot_clipboard_type_image_desc;
+      case ClipboardContentType.filename:
+        return l10n.screenshot_clipboard_type_filename_desc;
+      case ClipboardContentType.fullPath:
+        return l10n.screenshot_clipboard_type_full_path_desc;
+      case ClipboardContentType.directoryPath:
+        return l10n.screenshot_clipboard_type_directory_path_desc;
+    }
   }
 }

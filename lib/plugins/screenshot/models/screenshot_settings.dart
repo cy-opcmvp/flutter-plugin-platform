@@ -1,5 +1,37 @@
 library;
 
+/// 剪贴板内容类型
+enum ClipboardContentType {
+  /// 复制图片本身
+  image,
+
+  /// 复制文件名（不含路径）
+  filename,
+
+  /// 复制完整路径
+  fullPath,
+
+  /// 复制目录路径（不含文件名）
+  directoryPath,
+}
+
+/// 剪贴板内容类型扩展
+extension ClipboardContentTypeExtension on ClipboardContentType {
+  /// 获取显示名称
+  String get displayName {
+    switch (this) {
+      case ClipboardContentType.image:
+        return 'Image';
+      case ClipboardContentType.filename:
+        return 'Filename';
+      case ClipboardContentType.fullPath:
+        return 'Full Path';
+      case ClipboardContentType.directoryPath:
+        return 'Directory Path';
+    }
+  }
+}
+
 /// 截图插件设置模型
 class ScreenshotSettings {
   /// 保存路径
@@ -16,6 +48,9 @@ class ScreenshotSettings {
 
   /// 是否自动复制到剪贴板
   final bool autoCopyToClipboard;
+
+  /// 剪贴板内容类型
+  final ClipboardContentType clipboardContentType;
 
   /// 是否显示预览窗口
   final bool showPreview;
@@ -41,6 +76,7 @@ class ScreenshotSettings {
     this.imageFormat = ImageFormat.png,
     this.imageQuality = 95,
     this.autoCopyToClipboard = true,
+    this.clipboardContentType = ClipboardContentType.image,
     this.showPreview = true,
     this.saveHistory = true,
     this.maxHistoryCount = 100,
@@ -53,6 +89,7 @@ class ScreenshotSettings {
   factory ScreenshotSettings.defaultSettings() {
     return ScreenshotSettings(
       savePath: '{documents}/Screenshots',
+      clipboardContentType: ClipboardContentType.image,
       shortcuts: {
         'regionCapture': 'Ctrl+Shift+A',
         'fullScreenCapture': 'Ctrl+Shift+F',
@@ -75,6 +112,12 @@ class ScreenshotSettings {
       ),
       imageQuality: json['imageQuality'] as int? ?? 95,
       autoCopyToClipboard: json['autoCopyToClipboard'] as bool? ?? true,
+      clipboardContentType: json['clipboardContentType'] != null
+          ? ClipboardContentType.values.firstWhere(
+              (e) => e.name == json['clipboardContentType'] as String?,
+              orElse: () => ClipboardContentType.image,
+            )
+          : ClipboardContentType.image,
       showPreview: json['showPreview'] as bool? ?? true,
       saveHistory: json['saveHistory'] as bool? ?? true,
       maxHistoryCount: json['maxHistoryCount'] as int? ?? 100,
@@ -96,6 +139,7 @@ class ScreenshotSettings {
       'imageFormat': imageFormat.name,
       'imageQuality': imageQuality,
       'autoCopyToClipboard': autoCopyToClipboard,
+      'clipboardContentType': clipboardContentType.name,
       'showPreview': showPreview,
       'saveHistory': saveHistory,
       'maxHistoryCount': maxHistoryCount,
@@ -112,6 +156,7 @@ class ScreenshotSettings {
     ImageFormat? imageFormat,
     int? imageQuality,
     bool? autoCopyToClipboard,
+    ClipboardContentType? clipboardContentType,
     bool? showPreview,
     bool? saveHistory,
     int? maxHistoryCount,
@@ -125,6 +170,7 @@ class ScreenshotSettings {
       imageFormat: imageFormat ?? this.imageFormat,
       imageQuality: imageQuality ?? this.imageQuality,
       autoCopyToClipboard: autoCopyToClipboard ?? this.autoCopyToClipboard,
+      clipboardContentType: clipboardContentType ?? this.clipboardContentType,
       showPreview: showPreview ?? this.showPreview,
       saveHistory: saveHistory ?? this.saveHistory,
       maxHistoryCount: maxHistoryCount ?? this.maxHistoryCount,

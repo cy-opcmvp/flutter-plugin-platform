@@ -3,18 +3,24 @@ import 'dart:async';
 import '../../core/models/platform_models.dart';
 import '../../core/models/plugin_models.dart';
 import '../../core/models/feature_metadata.dart';
+import '../../core/models/global_config.dart';
+import '../../core/models/tag_model.dart';
 import '../../core/services/platform_core.dart';
 import '../../core/services/plugin_launcher.dart';
 import '../../core/services/desktop_pet_manager.dart';
 import '../../core/services/feature_manager.dart';
+import '../../core/services/config_manager.dart';
+import '../../core/services/tag_manager.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../plugins/plugin_registry.dart';
+import '../widgets/tag_filter_bar.dart';
 
 import '../../core/interfaces/i_plugin.dart';
 import '../../core/interfaces/i_platform_services.dart';
 import 'desktop_pet_screen.dart';
 import 'service_test_screen.dart';
 import 'settings_screen.dart';
+import 'tag_management_screen.dart';
 
 /// Main platform interface that displays plugins and manages navigation
 /// Implements requirements 1.1, 1.2, 1.5, 7.5
@@ -25,24 +31,33 @@ class MainPlatformScreen extends StatefulWidget {
   State<MainPlatformScreen> createState() => _MainPlatformScreenState();
 }
 
-class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProviderStateMixin {
+class _MainPlatformScreenState extends State<MainPlatformScreen>
+    with TickerProviderStateMixin {
   late final PlatformCore _platformCore;
   PluginLauncher? _pluginLauncher;
   late final TabController _tabController;
   late final DesktopPetManager _desktopPetManager;
-  
+  late final TagManager _tagManager;
+
   OperationMode _currentMode = OperationMode.local;
   List<PluginDescriptor> _availablePlugins = [];
+  List<PluginDescriptor> _filteredPlugins = [];
   List<IPlugin> _activePlugins = [];
   Set<String> _availableFeatures = {};
   PlatformInfo? _platformInfo;
   bool _isLoading = true;
   String? _error;
-  
+  PluginViewMode _viewMode = PluginViewMode.mediumIcon;
+
+  // 标签筛选相关
+  List<Tag> _tags = [];
+  Set<String> _selectedTagIds = {};
+  TagFilter _tagFilter = const TagFilter();
+
   // Plugin launching state
   IPlugin? _currentPlugin;
   Map<String, IPlugin> _backgroundPlugins = {};
-  
+
   StreamSubscription<PlatformEvent>? _platformEventSubscription;
   StreamSubscription<PluginEvent>? _pluginEventSubscription;
   StreamSubscription<PluginLaunchEvent>? _pluginLaunchSubscription;
@@ -53,6 +68,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
     _tabController = TabController(length: 3, vsync: this);
     _platformCore = PlatformCore();
     _desktopPetManager = DesktopPetManager();
+    _tagManager = TagManager.instance;
     _initializePlatform();
   }
 
@@ -67,10 +83,13 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
 
       // Initialize platform core
       await _platformCore.initialize();
-      
+
       // Initialize desktop pet manager
       await _desktopPetManager.initialize();
-      
+
+      // Initialize tag manager
+      await _tagManager.initialize();
+
       // Initialize plugin launcher
       _pluginLauncher = PluginLauncher(_platformCore.pluginManager);
 
@@ -80,18 +99,32 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
       _availableFeatures = _platformCore.getAvailableFeatures();
 
       // Filter to only show implemented features
-      _availableFeatures = FeatureManager.instance.getFeaturesForMode(_availableFeatures)
+      _availableFeatures = FeatureManager.instance
+          .getFeaturesForMode(_availableFeatures)
           .map((f) => f.id)
           .toSet();
 
-      // Load available plugins
+      // Load available plugins and tags
       await _loadPlugins();
-      
+      await _loadTags();
+
+      // Auto-start configured plugins
+      await _autoStartPlugins();
+
+      // Load view mode from config
+      _viewMode = ConfigManager.instance.globalConfig.app.pluginViewMode;
+
       // Subscribe to platform events
-      _platformEventSubscription = _platformCore.eventStream.listen(_handlePlatformEvent);
-      _pluginEventSubscription = _platformCore.pluginManager.eventStream.listen(_handlePluginEvent);
-      _pluginLaunchSubscription = _pluginLauncher?.eventStream.listen(_handlePluginLaunchEvent);
-      
+      _platformEventSubscription = _platformCore.eventStream.listen(
+        _handlePlatformEvent,
+      );
+      _pluginEventSubscription = _platformCore.pluginManager.eventStream.listen(
+        _handlePluginEvent,
+      );
+      _pluginLaunchSubscription = _pluginLauncher?.eventStream.listen(
+        _handlePluginLaunchEvent,
+      );
+
       setState(() {
         _isLoading = false;
       });
@@ -106,17 +139,101 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
   /// Load available and active plugins from the plugin manager
   Future<void> _loadPlugins() async {
     try {
-      final availablePlugins = await _platformCore.pluginManager.getAvailablePlugins();
+      final availablePlugins = await _platformCore.pluginManager
+          .getAvailablePlugins();
       final activePlugins = _pluginLauncher?.getAllLoadedPlugins() ?? [];
-      
+
       setState(() {
         _availablePlugins = availablePlugins;
         _activePlugins = activePlugins;
         _currentPlugin = _pluginLauncher?.currentPlugin;
         _backgroundPlugins = _pluginLauncher?.backgroundPlugins ?? {};
+
+        // 应用标签筛选
+        _applyTagFilter();
       });
     } catch (e) {
       // Handle error silently for now - plugins may not be available yet
+    }
+  }
+
+  /// Load tags from tag manager
+  Future<void> _loadTags() async {
+    try {
+      _tags = _tagManager.getAllTags();
+      setState(() {});
+    } catch (e) {
+      debugPrint('Failed to load tags: $e');
+    }
+  }
+
+  /// Apply tag filter to plugins
+  void _applyTagFilter() {
+    if (_selectedTagIds.isEmpty) {
+      _filteredPlugins = _availablePlugins;
+    } else {
+      _filteredPlugins = _availablePlugins.where((plugin) {
+        final pluginTags = _tagManager.getPluginTags(plugin.id);
+        return pluginTags.any(_selectedTagIds.contains);
+      }).toList();
+    }
+  }
+
+  /// Handle tag selection change
+  void _onTagSelectionChanged(Set<String> selectedTagIds) {
+    setState(() {
+      _selectedTagIds = selectedTagIds;
+      _tagFilter = TagFilter(selectedTagIds: selectedTagIds);
+      _applyTagFilter();
+    });
+  }
+
+  /// Auto-start configured plugins
+  Future<void> _autoStartPlugins() async {
+    try {
+      final autoStartPluginIds = ConfigManager.instance.autoStartPlugins;
+      if (autoStartPluginIds.isEmpty) {
+        debugPrint('No auto-start plugins configured');
+        return;
+      }
+
+      debugPrint(
+        'Auto-starting ${autoStartPluginIds.length} plugins: $autoStartPluginIds',
+      );
+
+      for (final pluginId in autoStartPluginIds) {
+        try {
+          // Find the plugin descriptor
+          final plugin = _availablePlugins.firstWhere(
+            (p) => p.id == pluginId,
+            orElse: () => throw StateError('Plugin $pluginId not found'),
+          );
+
+          // Launch the plugin in background (without showing UI)
+          await _pluginLauncher?.launchPlugin(plugin);
+
+          debugPrint('Auto-started plugin: $pluginId');
+        } catch (e) {
+          debugPrint('Failed to auto-start plugin $pluginId: $e');
+          // Continue with other plugins even if one fails
+        }
+      }
+
+      // Reload plugins list to update UI
+      await _loadPlugins();
+
+      if (mounted) {
+        final l10n = context.l10n;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.autoStartedPlugins(autoStartPluginIds.length)),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error during plugin auto-start: $e');
     }
   }
 
@@ -129,7 +246,8 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
         _availableFeatures = _platformCore.getAvailableFeatures();
 
         // Filter to only show implemented features
-        _availableFeatures = FeatureManager.instance.getFeaturesForMode(_availableFeatures)
+        _availableFeatures = FeatureManager.instance
+            .getFeaturesForMode(_availableFeatures)
             .map((f) => f.id)
             .toSet();
       });
@@ -143,7 +261,9 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.mode_switchSuccess(modeName)),
-            backgroundColor: event.newMode == OperationMode.online ? Colors.green : Colors.blue,
+            backgroundColor: event.newMode == OperationMode.online
+                ? Colors.green
+                : Colors.blue,
             duration: const Duration(seconds: 2),
           ),
         );
@@ -164,7 +284,12 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(context.l10n.plugin_errorDetails(event.data?['error']?.toString() ?? context.l10n.error_unknown)),
+              content: Text(
+                context.l10n.plugin_errorDetails(
+                  event.data?['error']?.toString() ??
+                      context.l10n.error_unknown,
+                ),
+              ),
               backgroundColor: Colors.red,
               duration: const Duration(seconds: 3),
             ),
@@ -233,7 +358,9 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
       case PluginLaunchEventType.pauseFailed:
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.plugin_operationFailed(event.error ?? l10n.error_unknown)),
+            content: Text(
+              l10n.plugin_operationFailed(event.error ?? l10n.error_unknown),
+            ),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),
@@ -246,7 +373,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
   /// Requirement 7.5: Mode switching functionality
   Future<void> _switchMode(OperationMode newMode) async {
     if (_currentMode == newMode) return;
-    
+
     try {
       await _platformCore.switchMode(newMode);
       // Mode change will be handled by the platform event listener
@@ -297,24 +424,23 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
         final shouldEnable = await _showDesktopPetDialog();
         if (shouldEnable == true) {
           await _desktopPetManager.transitionToDesktopPet();
-          
+
           // 导航到Desktop Pet屏幕 - Requirements 7.3: Handle navigation gracefully on unsupported platforms
           if (mounted && DesktopPetManager.isSupported()) {
             try {
               await Navigator.of(context).push(
                 PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) => DesktopPetScreen(
-                    petManager: _desktopPetManager,
-                    platformCore: _platformCore,
-                    onLaunchPlugin: _launchPlugin, // 传入插件启动回调
-                  ),
-                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                    // 淡入淡出动画
-                    return FadeTransition(
-                      opacity: animation,
-                      child: child,
-                    );
-                  },
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      DesktopPetScreen(
+                        petManager: _desktopPetManager,
+                        platformCore: _platformCore,
+                        onLaunchPlugin: _launchPlugin, // 传入插件启动回调
+                      ),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                        // 淡入淡出动画
+                        return FadeTransition(opacity: animation, child: child);
+                      },
                   transitionDuration: const Duration(milliseconds: 500),
                   reverseTransitionDuration: const Duration(milliseconds: 300),
                   opaque: true, // 完全覆盖背景
@@ -326,14 +452,16 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(context.l10n.pet_navFailed(navigationError.toString())),
+                    content: Text(
+                      context.l10n.pet_navFailed(navigationError.toString()),
+                    ),
                     backgroundColor: Colors.orange,
                     duration: const Duration(seconds: 3),
                   ),
                 );
               }
             }
-            
+
             // 当从Desktop Pet屏幕返回时，更新状态
             if (mounted) {
               setState(() {});
@@ -341,7 +469,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
           }
         }
       }
-      
+
       // 更新UI
       if (mounted) {
         setState(() {});
@@ -419,7 +547,10 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
           children: [
             Text(l10n.pet_modeDesc),
             const SizedBox(height: 16),
-            Text(l10n.pet_features, style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              l10n.pet_features,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 8),
             Text(l10n.pet_featureAlwaysOnTop),
             Text(l10n.pet_featureAnimations),
@@ -466,11 +597,32 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
   /// Requirement 1.2: Launch plugins within application context
   Future<void> _launchPlugin(PluginDescriptor plugin) async {
     if (_pluginLauncher == null) return;
-    
+
     try {
+      // Check if the plugin is already the current active plugin
+      final currentPlugin = _pluginLauncher!.currentPlugin;
+      if (currentPlugin != null && currentPlugin.id == plugin.id) {
+        // Plugin is already active, navigate to it directly
+        debugPrint('Plugin ${plugin.id} is already active, navigating to view');
+        if (mounted) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => _PluginViewScreen(
+                plugin: currentPlugin,
+                pluginLauncher: _pluginLauncher!,
+                onBack: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ),
+          );
+        }
+        return;
+      }
+
       // Use plugin launcher for sophisticated launching
       final loadedPlugin = await _pluginLauncher!.launchPlugin(plugin);
-      
+
       // Navigate to plugin view
       if (mounted) {
         Navigator.of(context).push(
@@ -502,10 +654,10 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
   /// Requirement 1.4: Plugin switching with state preservation
   Future<void> _switchToPlugin(String pluginId) async {
     if (_pluginLauncher == null) return;
-    
+
     try {
       final plugin = await _pluginLauncher!.switchToPlugin(pluginId);
-      
+
       // Navigate to plugin view
       if (mounted) {
         Navigator.of(context).push(
@@ -548,7 +700,41 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
           SnackBar(
             content: Text(l10n.plugin_operationFailed(e.toString())),
             backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  /// Toggle plugin auto-start
+  Future<void> _toggleAutoStart(String pluginId, bool enabled) async {
+    try {
+      if (enabled) {
+        await ConfigManager.instance.addAutoStartPlugin(pluginId);
+      } else {
+        await ConfigManager.instance.removeAutoStartPlugin(pluginId);
+      }
+
+      if (mounted) {
+        final l10n = context.l10n;
+        setState(() {}); // Rebuild to update switch state
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              enabled ? l10n.autoStartAdded : l10n.autoStartRemoved,
+            ),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        final l10n = context.l10n;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.plugin_operationFailed(e.toString())),
+            backgroundColor: Colors.red,
           ),
         );
       }
@@ -623,6 +809,21 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
       appBar: AppBar(
         title: Text(l10n.appTitle),
         actions: [
+          // View mode selector
+          _buildViewModeSelector(),
+          // Tag management button
+          IconButton(
+            icon: const Icon(Icons.label),
+            tooltip: l10n.tag_title,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const TagManagementScreen(),
+                ),
+              );
+            },
+          ),
           // Settings button
           IconButton(
             icon: const Icon(Icons.settings),
@@ -630,9 +831,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const SettingsScreen(),
-                ),
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
               );
             },
           ),
@@ -653,8 +852,14 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
           // Requirements 7.1: Hide desktop pet UI controls on web platform
           if (DesktopPetManager.isSupported())
             IconButton(
-              icon: Icon(_desktopPetManager.isDesktopPetMode ? Icons.fullscreen_exit : Icons.pets),
-              tooltip: _desktopPetManager.isDesktopPetMode ? l10n.button_exitPetMode : l10n.button_enablePetMode,
+              icon: Icon(
+                _desktopPetManager.isDesktopPetMode
+                    ? Icons.fullscreen_exit
+                    : Icons.pets,
+              ),
+              tooltip: _desktopPetManager.isDesktopPetMode
+                  ? l10n.button_exitPetMode
+                  : l10n.button_enablePetMode,
               onPressed: _toggleDesktopPetMode,
             ),
           _buildModeIndicator(),
@@ -687,16 +892,15 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
     final l10n = context.l10n;
     final isOnline = _currentMode == OperationMode.online;
     final modeName = isOnline ? l10n.mode_online : l10n.mode_local;
-    
+
     return Container(
       margin: const EdgeInsets.only(right: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: isOnline ? Colors.green.withValues(alpha: 0.1) : Colors.blue.withValues(alpha: 0.1),
+        color: (isOnline ? Colors.green : Colors.blue).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isOnline ? Colors.green : Colors.blue,
-          width: 1,
+          color: (isOnline ? Colors.green : Colors.blue).withValues(alpha: 0.3),
         ),
       ),
       child: Row(
@@ -720,17 +924,108 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
     );
   }
 
+  /// Build view mode selector for plugins display
+  Widget _buildViewModeSelector() {
+    final l10n = context.l10n;
+
+    return PopupMenuButton<PluginViewMode>(
+      icon: const Icon(Icons.view_module),
+      tooltip: l10n.plugin_view_mode,
+      onSelected: _changeViewMode,
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: PluginViewMode.largeIcon,
+          child: Row(
+            children: [
+              const Icon(Icons.apps, size: 20),
+              const SizedBox(width: 12),
+              Text(l10n.plugin_view_large_icon),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: PluginViewMode.mediumIcon,
+          child: Row(
+            children: [
+              const Icon(Icons.grid_view, size: 20),
+              const SizedBox(width: 12),
+              Text(l10n.plugin_view_medium_icon),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: PluginViewMode.smallIcon,
+          child: Row(
+            children: [
+              const Icon(Icons.view_comfortable, size: 20),
+              const SizedBox(width: 12),
+              Text(l10n.plugin_view_small_icon),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: PluginViewMode.list,
+          child: Row(
+            children: [
+              const Icon(Icons.view_list, size: 20),
+              const SizedBox(width: 12),
+              Text(l10n.plugin_view_list),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Change plugin view mode and save to config
+  void _changeViewMode(PluginViewMode mode) async {
+    setState(() {
+      _viewMode = mode;
+    });
+
+    // Save to config
+    final currentConfig = ConfigManager.instance.globalConfig;
+    final newConfig = currentConfig.copyWith(
+      app: currentConfig.app.copyWith(pluginViewMode: mode),
+    );
+    await ConfigManager.instance.updateGlobalConfig(newConfig);
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_getViewModeName(mode)),
+          duration: const Duration(seconds: 1),
+        ),
+      );
+    }
+  }
+
+  /// Get view mode display name
+  String _getViewModeName(PluginViewMode mode) {
+    final l10n = context.l10n;
+    switch (mode) {
+      case PluginViewMode.largeIcon:
+        return l10n.plugin_view_large_icon;
+      case PluginViewMode.mediumIcon:
+        return l10n.plugin_view_medium_icon;
+      case PluginViewMode.smallIcon:
+        return l10n.plugin_view_small_icon;
+      case PluginViewMode.list:
+        return l10n.plugin_view_list;
+    }
+  }
+
   /// Build feature availability bar showing available features
   /// Requirement 7.5: Display available features to users
   Widget _buildFeatureAvailabilityBar() {
     final theme = Theme.of(context);
     final l10n = context.l10n;
     final features = _availableFeatures.toList()..sort();
-    
+
     if (features.isEmpty) {
       return const SizedBox.shrink();
     }
-    
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -756,7 +1051,9 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
           Wrap(
             spacing: 8,
             runSpacing: 4,
-            children: features.map((feature) => _buildFeatureChip(feature)).toList(),
+            children: features
+                .map((feature) => _buildFeatureChip(feature))
+                .toList(),
           ),
         ],
       ),
@@ -832,141 +1129,405 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
   /// Requirement 1.1: Display available plugins
   Widget _buildPluginGrid() {
     final l10n = context.l10n;
-    if (_availablePlugins.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.extension_off,
-              size: 64,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              l10n.platform_noPluginsAvailable,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              l10n.platform_installFromManagement,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
 
-    return RefreshIndicator(
-      onRefresh: _loadPlugins,
-      child: GridView.builder(
-        padding: const EdgeInsets.all(16),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: _platformInfo?.type == PlatformType.mobile ? 2 : 3,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          childAspectRatio: 0.8,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // 标签筛选器
+        if (_tags.isNotEmpty)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: TagFilterBar(
+              tags: _tags,
+              selectedTagIds: _selectedTagIds,
+              onTagSelectionChanged: _onTagSelectionChanged,
+              showSearch: false,
+              showTitle: false,
+              displayMode: TagDisplayMode.chip,
+            ),
+          ),
+
+        // 插件列表
+        Expanded(
+          child: _filteredPlugins.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        _selectedTagIds.isEmpty
+                            ? Icons.extension_off
+                            : Icons.filter_list_off,
+                        size: 64,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.3),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        _selectedTagIds.isEmpty
+                            ? l10n.platform_noPluginsAvailable
+                            : l10n.plugin_noMatch,
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.7),
+                            ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        _selectedTagIds.isEmpty
+                            ? l10n.platform_installFromManagement
+                            : l10n.hint_tryAdjustSearch,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.5),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : RefreshIndicator(
+                  onRefresh: _loadPlugins,
+                  child: _buildPluginsByViewMode(),
+                ),
         ),
-        itemCount: _availablePlugins.length,
-        itemBuilder: (context, index) {
-          final plugin = _availablePlugins[index];
-          return _buildPluginTile(plugin);
-        },
+      ],
+    );
+  }
+
+  Widget _buildPluginsByViewMode() {
+    switch (_viewMode) {
+      case PluginViewMode.largeIcon:
+        return _buildLargeIconView();
+      case PluginViewMode.mediumIcon:
+        return _buildMediumIconView();
+      case PluginViewMode.smallIcon:
+        return _buildSmallIconView();
+      case PluginViewMode.list:
+        return _buildListView();
+    }
+  }
+
+  /// 大图标视图 (3列)
+  Widget _buildLargeIconView() {
+    return GridView.builder(
+      padding: const EdgeInsets.all(16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+        childAspectRatio: 1.0,
       ),
+      itemCount: _filteredPlugins.length,
+      itemBuilder: (context, index) {
+        final plugin = _filteredPlugins[index];
+        return _buildPluginTile(plugin, isLarge: true);
+      },
+    );
+  }
+
+  /// 中图标视图 (4列，默认)
+  Widget _buildMediumIconView() {
+    return GridView.builder(
+      padding: const EdgeInsets.all(16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 1.6,
+      ),
+      itemCount: _filteredPlugins.length,
+      itemBuilder: (context, index) {
+        final plugin = _filteredPlugins[index];
+        return _buildPluginTile(plugin, isMedium: true);
+      },
+    );
+  }
+
+  /// 小图标视图 (6列)
+  Widget _buildSmallIconView() {
+    return GridView.builder(
+      padding: const EdgeInsets.all(16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 6,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+        childAspectRatio: 1.8,
+      ),
+      itemCount: _filteredPlugins.length,
+      itemBuilder: (context, index) {
+        final plugin = _filteredPlugins[index];
+        return _buildPluginTile(plugin, isSmall: true);
+      },
+    );
+  }
+
+  /// 列表视图
+  Widget _buildListView() {
+    return ListView.separated(
+      padding: const EdgeInsets.all(16),
+      itemCount: _filteredPlugins.length,
+      separatorBuilder: (context, index) => const Divider(),
+      itemBuilder: (context, index) {
+        final plugin = _filteredPlugins[index];
+        return _buildPluginListTile(plugin);
+      },
     );
   }
 
   /// Build individual plugin tile with selection capability
   /// Requirement 1.2: Plugin selection functionality
-  Widget _buildPluginTile(PluginDescriptor plugin) {
+  Widget _buildPluginTile(
+    PluginDescriptor plugin, {
+    bool isLarge = false,
+    bool isMedium = false,
+    bool isSmall = false,
+  }) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
     final isEnabled = _platformCore.pluginManager.isPluginEnabled(plugin.id);
-    final pluginTypeName = plugin.type == PluginType.tool ? l10n.plugin_typeTool : l10n.plugin_typeGame;
-    
+    final isAutoStart = ConfigManager.instance.isAutoStartPlugin(plugin.id);
+    final pluginTypeName = plugin.type == PluginType.tool
+        ? l10n.plugin_typeTool
+        : l10n.plugin_typeGame;
+
+    // 根据视图大小调整参数
+    double iconSize = isSmall ? 32 : (isMedium ? 32 : 40);
+    double iconContainerSize = isSmall ? 48 : (isMedium ? 36 : 40);
+    double padding = isSmall ? 6 : (isMedium ? 10 : 12);
+    double fontSize = isSmall ? 11 : (isMedium ? 11 : 12);
+    int maxLines = isSmall ? 2 : 2;
+    bool showButton = !isSmall;
+    bool showDescription = !isSmall && !isMedium;
+
     return Card(
-      elevation: 2,
+      elevation: isSmall ? 1 : 2,
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: isEnabled ? () => _launchPlugin(plugin) : null,
-        borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: EdgeInsets.all(padding),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // Plugin icon and enable/disable toggle
+              // 顶部：插件图标、名称和操作按钮
               Row(
                 children: [
+                  // 插件类型图标
                   Container(
-                    width: 40,
-                    height: 40,
+                    width: iconContainerSize,
+                    height: iconContainerSize,
                     decoration: BoxDecoration(
-                      color: _getPluginTypeColor(plugin.type).withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
+                      color: _getPluginTypeColor(
+                        plugin.type,
+                      ).withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(isSmall ? 8 : 8),
                     ),
                     child: Icon(
                       _getPluginTypeIcon(plugin.type),
                       color: _getPluginTypeColor(plugin.type),
-                      size: 20,
+                      size: isSmall ? iconSize * 0.6 : iconSize * 0.5,
                     ),
                   ),
-                  const Spacer(),
-                  Switch(
-                    value: isEnabled,
-                    onChanged: (value) => _togglePlugin(plugin.id, value),
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  SizedBox(width: isMedium ? 8 : 12),
+                  // 插件名称和版本
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          _getLocalizedPluginName(plugin.id),
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            fontSize: isSmall ? 12 : null,
+                          ),
+                          maxLines: maxLines,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (!isSmall)
+                          Text(
+                            'v${plugin.version} • $pluginTypeName',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                              fontSize: fontSize,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                      ],
+                    ),
                   ),
+                  // 操作按钮组
+                  if (!isSmall) ...[
+                    // 开机自启动按钮
+                    IconButton(
+                      icon: Icon(
+                        isAutoStart ? Icons.star : Icons.star_border,
+                        color: isAutoStart
+                            ? Colors.amber
+                            : theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                      ),
+                      tooltip: isAutoStart
+                          ? l10n.autoStartEnabled
+                          : l10n.autoStartDisabled,
+                      onPressed: isEnabled
+                          ? () => _toggleAutoStart(plugin.id, !isAutoStart)
+                          : null,
+                      constraints: const BoxConstraints(
+                        minWidth: 32,
+                        minHeight: 32,
+                      ),
+                      padding: EdgeInsets.zero,
+                    ),
+                    // 启用/禁用按钮
+                    IconButton(
+                      icon: Icon(
+                        isEnabled ? Icons.check_circle : Icons.cancel,
+                        color: isEnabled
+                            ? Colors.green
+                            : theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                      ),
+                      tooltip: isEnabled ? l10n.plugin_enabled : l10n.plugin_disabled,
+                      onPressed: () => _togglePlugin(plugin.id, !isEnabled),
+                      constraints: const BoxConstraints(
+                        minWidth: 32,
+                        minHeight: 32,
+                      ),
+                      padding: EdgeInsets.zero,
+                    ),
+                  ],
                 ],
               ),
-              const SizedBox(height: 8),
-              // Plugin name
-              Text(
-                _getLocalizedPluginName(plugin.id),
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 4),
-              // Plugin version and type
-              Text(
-                'v${plugin.version} • $pluginTypeName',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                ),
-              ),
-              const Spacer(),
+              if (!isSmall) SizedBox(height: isMedium ? 6 : 8),
               // Plugin description
-              Text(
-                _getLocalizedPluginDescription(plugin.id),
-                style: theme.textTheme.bodySmall,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 8),
-              // Launch button
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: isEnabled ? () => _launchPlugin(plugin) : null,
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
+              if (showDescription)
+                Text(
+                  _getLocalizedPluginDescription(plugin.id),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontSize: fontSize,
                   ),
-                  child: Text(
-                    isEnabled ? l10n.button_launch : l10n.plugin_statusDisabled,
-                    style: const TextStyle(fontSize: 12),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              // 将按钮推到底部
+              if (showDescription || showButton)
+                const Spacer(),
+              // Launch button
+              if (showButton)
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: isEnabled ? () => _launchPlugin(plugin) : null,
+                    icon: const Icon(Icons.play_arrow, size: 18),
+                    label: Text(
+                      isEnabled
+                          ? l10n.button_open
+                          : l10n.button_enable,
+                      style: TextStyle(fontSize: fontSize),
+                    ),
+                    style: FilledButton.styleFrom(
+                      padding: EdgeInsets.symmetric(
+                        vertical: isMedium ? 8 : 12,
+                        horizontal: 16,
+                      ),
+                      backgroundColor: isEnabled
+                          ? null
+                          : theme.colorScheme.surfaceContainerHighest,
+                      foregroundColor: isEnabled
+                          ? null
+                          : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  /// Build list view tile for plugins
+  Widget _buildPluginListTile(PluginDescriptor plugin) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final isEnabled = _platformCore.pluginManager.isPluginEnabled(plugin.id);
+    final isAutoStart = ConfigManager.instance.isAutoStartPlugin(plugin.id);
+    final pluginTypeName = plugin.type == PluginType.tool
+        ? l10n.plugin_typeTool
+        : l10n.plugin_typeGame;
+
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      leading: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: _getPluginTypeColor(plugin.type).withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          _getPluginTypeIcon(plugin.type),
+          color: _getPluginTypeColor(plugin.type),
+          size: 24,
+        ),
+      ),
+      title: Text(
+        _getLocalizedPluginName(plugin.id),
+        style: theme.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _getLocalizedPluginDescription(plugin.id),
+            style: theme.textTheme.bodySmall,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'v${plugin.version} • $pluginTypeName',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
+          ),
+        ],
+      ),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Auto-start switch
+          Tooltip(
+            message: l10n.autoStartDescription,
+            child: Switch(
+              value: isAutoStart,
+              onChanged: isEnabled
+                  ? (value) => _toggleAutoStart(plugin.id, value)
+                  : null,
+            ),
+          ),
+          const SizedBox(width: 8),
+          // Enable/disable switch
+          Switch(
+            value: isEnabled,
+            onChanged: (value) => _togglePlugin(plugin.id, value),
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            icon: const Icon(Icons.launch),
+            onPressed: isEnabled ? () => _launchPlugin(plugin) : null,
+            tooltip: l10n.button_launch,
+          ),
+        ],
+      ),
+      onTap: isEnabled ? () => _launchPlugin(plugin) : null,
     );
   }
 
@@ -981,20 +1542,26 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
             Icon(
               Icons.play_circle_outline,
               size: 64,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.3),
             ),
             const SizedBox(height: 16),
             Text(
               l10n.platform_activePlugins,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
             const SizedBox(height: 8),
             Text(
               l10n.plugin_installFirst,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.5),
               ),
             ),
           ],
@@ -1019,7 +1586,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
     final l10n = context.l10n;
     final isCurrentPlugin = _currentPlugin?.id == plugin.id;
     final isBackgroundPlugin = _backgroundPlugins.containsKey(plugin.id);
-    
+
     String status;
     Color statusColor;
     if (isCurrentPlugin) {
@@ -1032,7 +1599,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
       status = l10n.plugin_statusActive;
       statusColor = Colors.blue;
     }
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
@@ -1108,7 +1675,23 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
           ],
         ),
         onTap: () {
-          if (!isCurrentPlugin) {
+          if (isCurrentPlugin) {
+            // Current plugin is already active, navigate to its view
+            if (_pluginLauncher != null &&
+                _pluginLauncher!.currentPlugin != null) {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => _PluginViewScreen(
+                    plugin: _pluginLauncher!.currentPlugin!,
+                    pluginLauncher: _pluginLauncher!,
+                    onBack: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ),
+              );
+            }
+          } else {
             _switchToPlugin(plugin.id);
           }
         },
@@ -1120,7 +1703,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
   Widget _buildPlatformInfoView() {
     final theme = Theme.of(context);
     final l10n = context.l10n;
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -1140,8 +1723,14 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
                     ),
                   ),
                   const SizedBox(height: 16),
-                  _buildInfoRow(context.l10n.info_platformType, _getLocalizedPlatformType()),
-                  _buildInfoRow(context.l10n.info_version, _platformInfo?.version ?? context.l10n.info_unknown),
+                  _buildInfoRow(
+                    context.l10n.info_platformType,
+                    _getLocalizedPlatformType(),
+                  ),
+                  _buildInfoRow(
+                    context.l10n.info_version,
+                    _platformInfo?.version ?? context.l10n.info_unknown,
+                  ),
                   _buildModeInfoRow(),
                   const SizedBox(height: 16),
                   Text(
@@ -1156,9 +1745,18 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
                       (entry) => _buildCapabilityRow(entry.key, entry.value),
                     ),
                   // 添加Desktop Pet支持信息 - Requirements 7.1: Display platform capabilities
-                  _buildCapabilityRow(context.l10n.capability_desktopPetSupport, DesktopPetManager.isSupported()),
-                  _buildCapabilityRow(context.l10n.capability_alwaysOnTop, DesktopPetManager.isSupported()),
-                  _buildCapabilityRow(context.l10n.capability_systemTray, DesktopPetManager.isSupported()),
+                  _buildCapabilityRow(
+                    context.l10n.capability_desktopPetSupport,
+                    DesktopPetManager.isSupported(),
+                  ),
+                  _buildCapabilityRow(
+                    context.l10n.capability_alwaysOnTop,
+                    DesktopPetManager.isSupported(),
+                  ),
+                  _buildCapabilityRow(
+                    context.l10n.capability_systemTray,
+                    DesktopPetManager.isSupported(),
+                  ),
                 ],
               ),
             ),
@@ -1178,9 +1776,18 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
                     ),
                   ),
                   const SizedBox(height: 16),
-                  _buildInfoRow(context.l10n.info_availablePlugins, '${_availablePlugins.length}'),
-                  _buildInfoRow(context.l10n.info_activePlugins, '${_activePlugins.length}'),
-                  _buildInfoRow(context.l10n.info_availableFeatures, '${_availableFeatures.length}'),
+                  _buildInfoRow(
+                    context.l10n.info_availablePlugins,
+                    '${_availablePlugins.length}',
+                  ),
+                  _buildInfoRow(
+                    context.l10n.info_activePlugins,
+                    '${_activePlugins.length}',
+                  ),
+                  _buildInfoRow(
+                    context.l10n.info_availableFeatures,
+                    '${_availableFeatures.length}',
+                  ),
                 ],
               ),
             ),
@@ -1193,7 +1800,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
   /// Build information row for platform details
   Widget _buildInfoRow(String label, String value) {
     final theme = Theme.of(context);
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -1288,11 +1895,10 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
     final l10n = context.l10n;
     final isOnline = _currentMode == OperationMode.online;
     final targetMode = isOnline ? l10n.mode_local : l10n.mode_online;
-    
+
     return FloatingActionButton.extended(
-      onPressed: () => _switchMode(
-        isOnline ? OperationMode.local : OperationMode.online,
-      ),
+      onPressed: () =>
+          _switchMode(isOnline ? OperationMode.local : OperationMode.online),
       icon: Icon(isOnline ? Icons.offline_bolt : Icons.cloud),
       label: Text(l10n.mode_switchSuccess(targetMode)),
       backgroundColor: isOnline ? Colors.blue : Colors.green,
@@ -1321,13 +1927,19 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
 
   /// Get localized plugin name from plugin registry
   String _getLocalizedPluginName(String pluginId) {
-    final descriptor = ExamplePluginRegistry.getDescriptor(pluginId, context: context);
+    final descriptor = ExamplePluginRegistry.getDescriptor(
+      pluginId,
+      context: context,
+    );
     return descriptor?.name ?? pluginId;
   }
 
   /// Get localized plugin description from plugin registry
   String _getLocalizedPluginDescription(String pluginId) {
-    final descriptor = ExamplePluginRegistry.getDescriptor(pluginId, context: context);
+    final descriptor = ExamplePluginRegistry.getDescriptor(
+      pluginId,
+      context: context,
+    );
     return descriptor?.metadata['description'] as String? ?? '';
   }
 
@@ -1437,9 +2049,11 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
     }
 
     // Fallback to formatted key
-    return key.replaceAll('_', ' ').split(' ').map((word) =>
-      word[0].toUpperCase() + word.substring(1)
-    ).join(' ');
+    return key
+        .replaceAll('_', ' ')
+        .split(' ')
+        .map((word) => word[0].toUpperCase() + word.substring(1))
+        .join(' ');
   }
 
   /// Get localized capability description
@@ -1448,7 +2062,8 @@ class _MainPlatformScreenState extends State<MainPlatformScreen> with TickerProv
 
     // Map capability keys to localization description keys
     final capabilityMap = {
-      'supportsEnvironmentVariables': 'capability_supportsEnvironmentVariables_desc',
+      'supportsEnvironmentVariables':
+          'capability_supportsEnvironmentVariables_desc',
       'supportsFileSystem': 'capability_supportsFileSystem_desc',
       'touchInput': 'capability_touchInput_desc',
       'desktopPetSupport': 'capability_desktopPetSupport_desc',
@@ -1508,9 +2123,11 @@ class _PluginViewScreenState extends State<_PluginViewScreen> {
   void initState() {
     super.initState();
     _currentPlugin = widget.plugin;
-    
+
     // Listen for plugin switching events
-    _launchEventSubscription = widget.pluginLauncher.eventStream.listen((event) {
+    _launchEventSubscription = widget.pluginLauncher.eventStream.listen((
+      event,
+    ) {
       if (event.type == PluginLaunchEventType.switched && mounted) {
         final newPlugin = widget.pluginLauncher.currentPlugin;
         if (newPlugin != null && newPlugin.id != _currentPlugin.id) {
@@ -1531,7 +2148,7 @@ class _PluginViewScreenState extends State<_PluginViewScreen> {
   @override
   Widget build(BuildContext context) {
     final backgroundPlugins = widget.pluginLauncher.backgroundPlugins;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: Text(_currentPlugin.name),
@@ -1552,7 +2169,9 @@ class _PluginViewScreenState extends State<_PluginViewScreen> {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text(context.l10n.plugin_switchFailed(e.toString())),
+                        content: Text(
+                          context.l10n.plugin_switchFailed(e.toString()),
+                        ),
                         backgroundColor: Colors.red,
                       ),
                     );
@@ -1567,7 +2186,9 @@ class _PluginViewScreenState extends State<_PluginViewScreen> {
                     child: ListTile(
                       leading: Icon(_getPluginTypeIcon(plugin.type)),
                       title: Text(_getLocalizedPluginName(plugin.id)),
-                      subtitle: Text('${context.l10n.plugin_version} ${plugin.version}'),
+                      subtitle: Text(
+                        '${context.l10n.plugin_version} ${plugin.version}',
+                      ),
                       dense: true,
                     ),
                   );
@@ -1584,7 +2205,9 @@ class _PluginViewScreenState extends State<_PluginViewScreen> {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(context.l10n.plugin_pauseFailed(e.toString())),
+                      content: Text(
+                        context.l10n.plugin_pauseFailed(e.toString()),
+                      ),
                       backgroundColor: Colors.red,
                     ),
                   );
@@ -1605,11 +2228,19 @@ class _PluginViewScreenState extends State<_PluginViewScreen> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('${context.l10n.plugin_version}: ${_currentPlugin.version}'),
-                      Text('${context.l10n.plugin_type_label}: ${_currentPlugin.type.name.toUpperCase()}'),
-                      Text('${context.l10n.plugin_id_label}: ${_currentPlugin.id}'),
+                      Text(
+                        '${context.l10n.plugin_version}: ${_currentPlugin.version}',
+                      ),
+                      Text(
+                        '${context.l10n.plugin_type_label}: ${_currentPlugin.type.name.toUpperCase()}',
+                      ),
+                      Text(
+                        '${context.l10n.plugin_id_label}: ${_currentPlugin.id}',
+                      ),
                       const SizedBox(height: 8),
-                      Text('${context.l10n.plugin_background_plugins}: ${backgroundPlugins.length}'),
+                      Text(
+                        '${context.l10n.plugin_background_plugins}: ${backgroundPlugins.length}',
+                      ),
                     ],
                   ),
                   actions: [
@@ -1641,7 +2272,10 @@ class _PluginViewScreenState extends State<_PluginViewScreen> {
 
   /// Get localized plugin name from plugin registry
   String _getLocalizedPluginName(String pluginId) {
-    final descriptor = ExamplePluginRegistry.getDescriptor(pluginId, context: context);
+    final descriptor = ExamplePluginRegistry.getDescriptor(
+      pluginId,
+      context: context,
+    );
     return descriptor?.name ?? pluginId;
   }
 }

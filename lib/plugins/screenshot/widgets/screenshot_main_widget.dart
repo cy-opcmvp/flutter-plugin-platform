@@ -731,9 +731,9 @@ class _WindowListDialog extends StatelessWidget {
           itemBuilder: (context, index) {
             final window = windows[index];
             return ListTile(
-              leading: const Icon(Icons.window),
+              leading: _buildWindowIcon(window),
               title: Text(window.title),
-              subtitle: Text(window.id),
+              subtitle: window.appName != null ? Text(window.appName!) : null,
               onTap: () => Navigator.of(context).pop(window.id),
             );
           },
@@ -746,6 +746,25 @@ class _WindowListDialog extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  /// 构建窗口图标
+  Widget _buildWindowIcon(WindowInfo window) {
+    if (window.icon != null && window.icon!.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(4),
+        child: Image.memory(
+          window.icon!,
+          width: 32,
+          height: 32,
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) {
+            return const Icon(Icons.window, size: 32);
+          },
+        ),
+      );
+    }
+    return const Icon(Icons.window, size: 32);
   }
 }
 

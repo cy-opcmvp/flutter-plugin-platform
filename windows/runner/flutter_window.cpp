@@ -10,6 +10,7 @@
 #include "flutter/generated_plugin_registrant.h"
 #include "screenshot_plugin.h"
 #include "native_screenshot_window.h"
+#include "hotkey_manager.h"
 
 // 用于同步存储原生窗口选择结果
 static struct {
@@ -137,12 +138,63 @@ LRESULT
 FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
                               WPARAM const wparam,
                               LPARAM const lparam) noexcept {
+  // 在进入/退出调整大小模式时，不让 Flutter 处理这些消息
+  // 这可以防止 Flutter 的内部状态导致鼠标卡住
+  if (message == WM_ENTERSIZEMOVE || message == WM_EXITSIZEMOVE) {
+    if (message == WM_EXITSIZEMOVE) {
+      LOG_FLUTTER("WM_EXITSIZEMOVE - Forcing mouse state reset");
+      // 强制释放鼠标捕获（无论是否被我们持有）
+      ReleaseCapture();
+      // 发送鼠标移动消息来刷新鼠标状态
+      POINT pt;
+      GetCursorPos(&pt);
+      PostMessage(hwnd, WM_MOUSEMOVE, 0, MAKELPARAM(pt.x, pt.y));
+    }
+    // 直接传递给默认处理，不让 Flutter 处理
+    return Win32Window::MessageHandler(hwnd, message, wparam, lparam);
+  }
+
+  // Log mouse-related events for debugging
+  switch (message) {
+    case WM_LBUTTONDOWN:
+      LOG_FLUTTER("WM_LBUTTONDOWN - Left mouse button DOWN");
+      break;
+    case WM_LBUTTONUP:
+      LOG_FLUTTER("WM_LBUTTONUP - Left mouse button UP");
+      break;
+    case WM_RBUTTONDOWN:
+      LOG_FLUTTER("WM_RBUTTONDOWN - Right mouse button DOWN");
+      break;
+    case WM_RBUTTONUP:
+      LOG_FLUTTER("WM_RBUTTONUP - Right mouse button UP");
+      break;
+    case WM_NCLBUTTONDOWN:
+      LOG_FLUTTER("WM_NCLBUTTONDOWN - Non-client area left button DOWN");
+      break;
+    case WM_NCLBUTTONUP:
+      LOG_FLUTTER("WM_NCLBUTTONUP - Non-client area left button UP");
+      break;
+    case WM_MOUSEMOVE:
+      // Don't log every mouse move to avoid spam
+      break;
+    case WM_CAPTURECHANGED:
+      LOG_FLUTTER("WM_CAPTURECHANGED - Mouse capture changed");
+      break;
+    case WM_ENTERSIZEMOVE:
+      LOG_FLUTTER("WM_ENTERSIZEMOVE - Entering size move");
+      break;
+    case WM_EXITSIZEMOVE:
+      LOG_FLUTTER("WM_EXITSIZEMOVE - Exiting size move");
+      break;
+  }
+
   // Give Flutter, including plugins, an opportunity to handle window messages.
   if (flutter_controller_) {
     std::optional<LRESULT> result =
         flutter_controller_->HandleTopLevelWindowProc(hwnd, message, wparam,
                                                       lparam);
     if (result) {
+      LOG_FLUTTER_FMT("Flutter handled message: %u, result: %lld", message, (long long)*result);
       return *result;
     }
   }
@@ -239,13 +291,25 @@ void FlutterWindow::HandleScreenshotMethodCall(
     }
   } else if (method == "getAvailableWindows") {
     try {
-      std::vector<std::tuple<std::string, std::string>> windows = EnumerateWindows();
+      std::vector<WindowInfo> windows = EnumerateWindows();
 
       flutter::EncodableList windowList;
       for (const auto& window : windows) {
         flutter::EncodableMap windowMap;
-        windowMap[flutter::EncodableValue("title")] = flutter::EncodableValue(std::get<0>(window));
-        windowMap[flutter::EncodableValue("id")] = flutter::EncodableValue(std::get<1>(window));
+        windowMap[flutter::EncodableValue("title")] = flutter::EncodableValue(window.title);
+        windowMap[flutter::EncodableValue("id")] = flutter::EncodableValue(window.id);
+
+        // Add app name if available
+        if (!window.appName.empty()) {
+          windowMap[flutter::EncodableValue("appName")] = flutter::EncodableValue(window.appName);
+        }
+
+        // Add icon if available
+        if (!window.icon.empty()) {
+          flutter::EncodableList iconData(window.icon.begin(), window.icon.end());
+          windowMap[flutter::EncodableValue("icon")] = flutter::EncodableValue(iconData);
+        }
+
         windowList.push_back(flutter::EncodableValue(windowMap));
       }
 

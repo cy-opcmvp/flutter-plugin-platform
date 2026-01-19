@@ -297,14 +297,8 @@ class ScreenshotPlugin extends PlatformPluginBase {
     ScreenshotType type,
   ) async {
     try {
-      // 生成文件名
-      final filename = _generateFilename();
-
-      // 保存到文件
-      final filePath = await _fileManager.saveScreenshot(
-        bytes,
-        filename: filename,
-      );
+      // 保存到文件（不传入 filename，让 FileManagerService 自动生成唯一的文件名）
+      final filePath = await _fileManager.saveScreenshot(bytes);
 
       // 创建记录
       final record = ScreenshotRecord(
@@ -325,7 +319,11 @@ class ScreenshotPlugin extends PlatformPluginBase {
 
       // 复制到剪贴板
       if (_settings.autoCopyToClipboard) {
-        await _clipboard.copyImage(bytes);
+        await _clipboard.copyContent(
+          filePath,
+          contentType: _settings.clipboardContentType,
+          imageBytes: bytes,
+        );
       }
 
       // 保存状态
@@ -340,11 +338,6 @@ class ScreenshotPlugin extends PlatformPluginBase {
       debugPrint('Failed to process screenshot: $e');
       await _context.platformServices.showNotification('截图处理失败: $e');
     }
-  }
-
-  /// 生成文件名
-  String _generateFilename() {
-    return _settings.filenameFormat;
   }
 
   /// 将 ScreenshotConfig 转换为 ss.ScreenshotSettings

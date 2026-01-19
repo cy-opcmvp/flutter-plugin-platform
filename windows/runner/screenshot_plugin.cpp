@@ -35,7 +35,17 @@ void ShutdownGDIPlus() {
 
 // Callback function for enumerating windows
 BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam) {
-    auto* windows = reinterpret_cast<std::vector<std::tuple<std::string, std::string>>*>(lParam);
+    auto* windows = reinterpret_cast<std::vector<WindowInfo>*>(lParam);
+
+    // Skip invisible windows
+    if (!IsWindowVisible(hwnd)) {
+        return TRUE;
+    }
+
+    // Skip minimized windows
+    if (IsIconic(hwnd)) {
+        return TRUE;
+    }
 
     // Get window title
     WCHAR title[256];
@@ -46,15 +56,30 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam) {
         return TRUE;
     }
 
-    // Skip invisible windows
-    if (!IsWindowVisible(hwnd)) {
+    // Skip special window classes (like tooltips, menus, etc.)
+    WCHAR className[256];
+    GetClassNameW(hwnd, className, 256);
+
+    // Filter out system windows
+    if (wcscmp(className, L"Shell_TrayWnd") == 0 ||  // Taskbar
+        wcscmp(className, L"Progman") == 0 ||        // Desktop
+        wcscmp(className, L"WorkerW") == 0 ||         // Desktop background
+        wcscmp(className, L"DV2ControlHost") == 0 ||  // Some overlay windows
+        wcscmp(className, L"MsgrSinkWindowClass") == 0) {  // Messenger windows
+        return TRUE;
+    }
+
+    // Check if window has a reasonable size (too small windows are usually UI elements)
+    RECT rect;
+    GetWindowRect(hwnd, &rect);
+    int width = rect.right - rect.left;
+    int height = rect.bottom - rect.top;
+
+    if (width < 100 || height < 50) {
         return TRUE;
     }
 
     // Get window ID as string
-    WCHAR className[256];
-    GetClassNameW(hwnd, className, 256);
-
     char windowId[64];
     sprintf_s(windowId, "%p", hwnd);
 
@@ -63,8 +88,98 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam) {
     std::string titleUtf8(titleLen, 0);
     WideCharToMultiByte(CP_UTF8, 0, title, -1, &titleUtf8[0], titleLen, NULL, NULL);
 
+    // Get application name from class name or process
+    std::string appName;
+    DWORD processId = 0;
+    GetWindowThreadProcessId(hwnd, &processId);
+    if (processId != 0) {
+        HANDLE hProcess = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, processId);
+        if (hProcess != NULL) {
+            WCHAR processName[MAX_PATH];
+            DWORD size = MAX_PATH;
+            if (QueryFullProcessImageNameW(hProcess, 0, processName, &size)) {
+                // Extract just the filename without extension
+                std::wstring processPath = processName;
+                size_t lastSlash = processPath.find_last_of(L"\\/");
+                if (lastSlash != std::wstring::npos) {
+                    std::wstring fileName = processPath.substr(lastSlash + 1);
+                    size_t dotPos = fileName.find_last_of(L'.');
+                    if (dotPos != std::wstring::npos) {
+                        fileName = fileName.substr(0, dotPos);
+                    }
+                    // Convert to UTF-8
+                    int nameLen = WideCharToMultiByte(CP_UTF8, 0, fileName.c_str(), -1, NULL, 0, NULL, NULL);
+                    appName.resize(nameLen, 0);
+                    WideCharToMultiByte(CP_UTF8, 0, fileName.c_str(), -1, &appName[0], nameLen, NULL, NULL);
+                }
+            }
+            CloseHandle(hProcess);
+        }
+    }
+
+    // Get window icon
+    std::vector<uint8_t> iconData;
+    HICON hIcon = (HICON)SendMessage(hwnd, WM_GETICON, ICON_SMALL, 0);
+    if (hIcon == NULL) {
+        hIcon = (HICON)GetClassLongPtr(hwnd, GCLP_HICONSM);
+    }
+    if (hIcon == NULL) {
+        hIcon = (HICON)SendMessage(hwnd, WM_GETICON, ICON_BIG, 0);
+    }
+    if (hIcon == NULL) {
+        hIcon = (HICON)GetClassLongPtr(hwnd, GCLP_HICON);
+    }
+
+    if (hIcon != NULL) {
+        // Extract icon to PNG
+        ICONINFO iconInfo;
+        if (GetIconInfo(hIcon, &iconInfo)) {
+            BITMAP bm;
+            GetObject(iconInfo.hbmColor, sizeof(BITMAP), &bm);
+
+            // Create GDI+ bitmap from icon
+            Bitmap* gdiBitmap = Bitmap::FromHICON(hIcon);
+            if (gdiBitmap != nullptr) {
+                // Create IStream
+                IStream* stream = NULL;
+                CreateStreamOnHGlobal(NULL, TRUE, &stream);
+
+                // Save to PNG format
+                CLSID pngClsid;
+                if (GetEncoderClsid(L"image/png", &pngClsid) >= 0) {
+                    Gdiplus::Status status = gdiBitmap->Save(stream, &pngClsid);
+                    if (status == Gdiplus::Ok) {
+                        // Get stream size
+                        STATSTG statstg;
+                        stream->Stat(&statstg, STATFLAG_NONAME);
+
+                        // Read stream data
+                        LARGE_INTEGER pos;
+                        pos.QuadPart = 0;
+                        stream->Seek(pos, STREAM_SEEK_SET, NULL);
+
+                        iconData.resize(statstg.cbSize.LowPart);
+                        ULONG bytesRead;
+                        stream->Read(iconData.data(), statstg.cbSize.LowPart, &bytesRead);
+                    }
+                }
+
+                stream->Release();
+                delete gdiBitmap;
+            }
+
+            if (iconInfo.hbmColor != NULL) DeleteObject(iconInfo.hbmColor);
+            if (iconInfo.hbmMask != NULL) DeleteObject(iconInfo.hbmMask);
+        }
+    }
+
     // Store window info
-    windows->push_back(std::make_tuple(titleUtf8, std::string(windowId)));
+    WindowInfo info;
+    info.title = titleUtf8;
+    info.id = std::string(windowId);
+    info.appName = appName;
+    info.icon = iconData;
+    windows->push_back(info);
 
     return TRUE;
 }
@@ -190,23 +305,99 @@ int GetEncoderClsid(const WCHAR* format, CLSID* pClsid) {
 
 // Capture specific window
 std::vector<uint8_t> CaptureWindow(HWND hwnd) {
+    // Check if window is valid
+    if (!IsWindow(hwnd)) {
+        return std::vector<uint8_t>();
+    }
+
     // Get window dimensions
     RECT rect;
     GetWindowRect(hwnd, &rect);
     int width = rect.right - rect.left;
     int height = rect.bottom - rect.top;
 
-    // Create device context
+    // Validate dimensions
+    if (width <= 0 || height <= 0) {
+        return std::vector<uint8_t>();
+    }
+
+    // Create device contexts
     HDC hdcScreen = GetDC(NULL);
     HDC hdcMem = CreateCompatibleDC(hdcScreen);
-    HDC hdcWindow = GetWindowDC(hwnd);
 
     // Create bitmap
     HBITMAP hBitmap = CreateCompatibleBitmap(hdcScreen, width, height);
     HBITMAP hOldBitmap = (HBITMAP)SelectObject(hdcMem, hBitmap);
 
-    // Copy window to bitmap
-    BitBlt(hdcMem, 0, 0, width, height, hdcWindow, 0, 0, SRCCOPY);
+    // Fill background with white (not black)
+    RECT bgRect = {0, 0, width, height};
+    FillRect(hdcMem, &bgRect, (HBRUSH)GetStockObject(WHITE_BRUSH));
+
+    // Method 1: Try PrintWindow with different flags
+    BOOL success = FALSE;
+
+    // Try PW_RENDERFULLCONTENT (for Windows 8.1+, captures hardware-accelerated content)
+    #ifdef PW_RENDERFULLCONTENT
+    success = PrintWindow(hwnd, hdcMem, PW_RENDERFULLCONTENT);
+    #endif
+
+    // Try standard PrintWindow if PW_RENDERFULLCONTENT failed or not available
+    if (!success) {
+        success = PrintWindow(hwnd, hdcMem, 0);
+    }
+
+    // Method 2: If PrintWindow failed, use window DC
+    if (!success) {
+        HDC hdcWindow = GetWindowDC(hwnd);
+        if (hdcWindow != NULL) {
+            // Get client area dimensions
+            RECT clientRect;
+            GetClientRect(hwnd, &clientRect);
+
+            // Center the client area in the bitmap
+            int clientWidth = clientRect.right - clientRect.left;
+            int clientHeight = clientRect.bottom - clientRect.top;
+            int offsetX = (width - clientWidth) / 2;
+            int offsetY = (height - clientHeight) / 2;
+
+            // Clear the bitmap area first
+            RECT clearRect = {0, 0, width, height};
+            FillRect(hdcMem, &clearRect, (HBRUSH)GetStockObject(WHITE_BRUSH));
+
+            // Copy from window DC (client area only)
+            BitBlt(hdcMem, offsetX, offsetY, clientWidth, clientHeight,
+                   hdcWindow, 0, 0, SRCCOPY);
+
+            ReleaseDC(hwnd, hdcWindow);
+            success = TRUE;
+        }
+    }
+
+    // Method 3: Last resort - capture from screen DC (desktop)
+    if (!success) {
+        // Ensure window is visible and not minimized
+        if (IsIconic(hwnd)) {
+            ShowWindow(hwnd, SW_RESTORE);
+        }
+
+        // Bring window to top without stealing focus
+        SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0,
+                     SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+
+        // Update window
+        UpdateWindow(hwnd);
+
+        // Small delay to let window paint
+        Sleep(100);
+
+        // Clear bitmap first
+        RECT clearRect = {0, 0, width, height};
+        FillRect(hdcMem, &clearRect, (HBRUSH)GetStockObject(WHITE_BRUSH));
+
+        // Capture from screen (desktop)
+        BitBlt(hdcMem, 0, 0, width, height, hdcScreen, rect.left, rect.top, SRCCOPY);
+        success = TRUE;
+    }
 
     // Select old bitmap back
     SelectObject(hdcMem, hOldBitmap);
@@ -268,7 +459,6 @@ std::vector<uint8_t> CaptureWindow(HWND hwnd) {
     delete gdiBitmap;
     DeleteObject(hBitmap);
     DeleteDC(hdcMem);
-    ReleaseDC(hwnd, hdcWindow);
     ReleaseDC(NULL, hdcScreen);
 
     return result;
@@ -353,8 +543,8 @@ std::vector<uint8_t> CaptureRegion(int x, int y, int width, int height) {
 }
 
 // Enumerate all windows
-std::vector<std::tuple<std::string, std::string>> EnumerateWindows() {
-    std::vector<std::tuple<std::string, std::string>> windows;
+std::vector<WindowInfo> EnumerateWindows() {
+    std::vector<WindowInfo> windows;
     EnumWindows(EnumWindowsProc, reinterpret_cast<LPARAM>(&windows));
     return windows;
 }

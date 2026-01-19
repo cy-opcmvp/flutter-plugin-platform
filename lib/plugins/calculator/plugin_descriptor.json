@@ -13,5 +13,6 @@
     "minPlatformVersion": "1.0.0",
     "supportedPlatforms": ["mobile", "desktop", "steam"]
   },
-  "entryPoint": "lib/plugins/calculator/calculator_plugin.dart"
+  "entryPoint": "lib/plugins/calculator/calculator_plugin.dart",
+  "tags": ["tag_productivity"]
 }

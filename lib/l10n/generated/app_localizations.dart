@@ -101,8 +101,230 @@ abstract class AppLocalizations {
   /// 应用标题
   ///
   /// In zh, this message translates to:
-  /// **'插件平台'**
+  /// **'多功能插件平台'**
   String get appTitle;
+
+  /// 应用名称
+  ///
+  /// In zh, this message translates to:
+  /// **'多功能插件平台'**
+  String get appName;
+
+  /// No description provided for @autoStart.
+  ///
+  /// In zh, this message translates to:
+  /// **'开机自启动'**
+  String get autoStart;
+
+  /// No description provided for @autoStartPlugin.
+  ///
+  /// In zh, this message translates to:
+  /// **'插件自启动'**
+  String get autoStartPlugin;
+
+  /// No description provided for @autoStartDescription.
+  ///
+  /// In zh, this message translates to:
+  /// **'开机自启动'**
+  String get autoStartDescription;
+
+  /// No description provided for @autoStartedPlugins.
+  ///
+  /// In zh, this message translates to:
+  /// **'已自动启动 {count} 个插件'**
+  String autoStartedPlugins(Object count);
+
+  /// No description provided for @autoStartAdded.
+  ///
+  /// In zh, this message translates to:
+  /// **'已添加到自启动列表'**
+  String get autoStartAdded;
+
+  /// No description provided for @autoStartRemoved.
+  ///
+  /// In zh, this message translates to:
+  /// **'已从自启动列表移除'**
+  String get autoStartRemoved;
+
+  /// No description provided for @autoStartPlugins_empty.
+  ///
+  /// In zh, this message translates to:
+  /// **'暂无自启动插件'**
+  String get autoStartPlugins_empty;
+
+  /// No description provided for @tag_title.
+  ///
+  /// In zh, this message translates to:
+  /// **'标签'**
+  String get tag_title;
+
+  /// No description provided for @tag_add.
+  ///
+  /// In zh, this message translates to:
+  /// **'添加标签'**
+  String get tag_add;
+
+  /// No description provided for @tag_edit.
+  ///
+  /// In zh, this message translates to:
+  /// **'编辑标签'**
+  String get tag_edit;
+
+  /// No description provided for @tag_delete.
+  ///
+  /// In zh, this message translates to:
+  /// **'删除标签'**
+  String get tag_delete;
+
+  /// No description provided for @tag_name.
+  ///
+  /// In zh, this message translates to:
+  /// **'标签名称'**
+  String get tag_name;
+
+  /// No description provided for @tag_description.
+  ///
+  /// In zh, this message translates to:
+  /// **'标签描述'**
+  String get tag_description;
+
+  /// No description provided for @tag_color.
+  ///
+  /// In zh, this message translates to:
+  /// **'标签颜色'**
+  String get tag_color;
+
+  /// No description provided for @tag_icon.
+  ///
+  /// In zh, this message translates to:
+  /// **'标签图标'**
+  String get tag_icon;
+
+  /// No description provided for @tag_create_success.
+  ///
+  /// In zh, this message translates to:
+  /// **'标签创建成功'**
+  String get tag_create_success;
+
+  /// No description provided for @tag_update_success.
+  ///
+  /// In zh, this message translates to:
+  /// **'标签更新成功'**
+  String get tag_update_success;
+
+  /// No description provided for @tag_delete_success.
+  ///
+  /// In zh, this message translates to:
+  /// **'标签删除成功'**
+  String get tag_delete_success;
+
+  /// No description provided for @tag_delete_confirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'确定要删除标签 \"{name}\" 吗？'**
+  String tag_delete_confirm(Object name);
+
+  /// No description provided for @tag_in_use.
+  ///
+  /// In zh, this message translates to:
+  /// **'该标签正在被使用中，无法删除'**
+  String get tag_in_use;
+
+  /// No description provided for @tag_system_protected.
+  ///
+  /// In zh, this message translates to:
+  /// **'系统标签无法删除或修改'**
+  String get tag_system_protected;
+
+  /// No description provided for @tag_assign_success.
+  ///
+  /// In zh, this message translates to:
+  /// **'标签分配成功'**
+  String get tag_assign_success;
+
+  /// No description provided for @tag_assign_removed.
+  ///
+  /// In zh, this message translates to:
+  /// **'标签已移除'**
+  String get tag_assign_removed;
+
+  /// No description provided for @tag_filter_all.
+  ///
+  /// In zh, this message translates to:
+  /// **'全部'**
+  String get tag_filter_all;
+
+  /// No description provided for @tag_filter_active.
+  ///
+  /// In zh, this message translates to:
+  /// **'已选择 {count} 个标签'**
+  String tag_filter_active(Object count);
+
+  /// No description provided for @tag_no_tags.
+  ///
+  /// In zh, this message translates to:
+  /// **'暂无标签'**
+  String get tag_no_tags;
+
+  /// No description provided for @tag_create_hint.
+  ///
+  /// In zh, this message translates to:
+  /// **'创建自定义标签'**
+  String get tag_create_hint;
+
+  /// No description provided for @tag_select_hint.
+  ///
+  /// In zh, this message translates to:
+  /// **'选择标签进行筛选'**
+  String get tag_select_hint;
+
+  /// No description provided for @tag_empty.
+  ///
+  /// In zh, this message translates to:
+  /// **'没有标签'**
+  String get tag_empty;
+
+  /// No description provided for @tag_popular.
+  ///
+  /// In zh, this message translates to:
+  /// **'热门标签'**
+  String get tag_popular;
+
+  /// No description provided for @tag_productivity.
+  ///
+  /// In zh, this message translates to:
+  /// **'生产力工具'**
+  String get tag_productivity;
+
+  /// No description provided for @tag_system.
+  ///
+  /// In zh, this message translates to:
+  /// **'系统工具'**
+  String get tag_system;
+
+  /// No description provided for @tag_entertainment.
+  ///
+  /// In zh, this message translates to:
+  /// **'娱乐休闲'**
+  String get tag_entertainment;
+
+  /// No description provided for @tag_game.
+  ///
+  /// In zh, this message translates to:
+  /// **'游戏'**
+  String get tag_game;
+
+  /// No description provided for @tag_development.
+  ///
+  /// In zh, this message translates to:
+  /// **'开发工具'**
+  String get tag_development;
+
+  /// No description provided for @tag_favorite.
+  ///
+  /// In zh, this message translates to:
+  /// **'常用'**
+  String get tag_favorite;
 
   /// No description provided for @common_confirm.
   ///
@@ -284,6 +506,12 @@ abstract class AppLocalizations {
   /// **'启动'**
   String get button_launch;
 
+  /// No description provided for @button_open.
+  ///
+  /// In zh, this message translates to:
+  /// **'打开'**
+  String get button_open;
+
   /// No description provided for @button_install.
   ///
   /// In zh, this message translates to:
@@ -367,6 +595,30 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'退出宠物模式'**
   String get button_exitPetMode;
+
+  /// No description provided for @autoStartEnabled.
+  ///
+  /// In zh, this message translates to:
+  /// **'开机自启：已开启'**
+  String get autoStartEnabled;
+
+  /// No description provided for @autoStartDisabled.
+  ///
+  /// In zh, this message translates to:
+  /// **'开机自启：已关闭'**
+  String get autoStartDisabled;
+
+  /// No description provided for @plugin_enabled.
+  ///
+  /// In zh, this message translates to:
+  /// **'已启用'**
+  String get plugin_enabled;
+
+  /// No description provided for @plugin_disabled.
+  ///
+  /// In zh, this message translates to:
+  /// **'已禁用'**
+  String get plugin_disabled;
 
   /// No description provided for @dialog_confirmTitle.
   ///
@@ -1027,6 +1279,156 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'服务设置'**
   String get settings_services;
+
+  /// No description provided for @tray_title.
+  ///
+  /// In zh, this message translates to:
+  /// **'系统托盘'**
+  String get tray_title;
+
+  /// No description provided for @tray_enabled.
+  ///
+  /// In zh, this message translates to:
+  /// **'启用系统托盘'**
+  String get tray_enabled;
+
+  /// No description provided for @tray_enabled_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'在系统托盘显示应用图标'**
+  String get tray_enabled_desc;
+
+  /// No description provided for @tray_tooltip.
+  ///
+  /// In zh, this message translates to:
+  /// **'托盘提示'**
+  String get tray_tooltip;
+
+  /// No description provided for @tray_menu.
+  ///
+  /// In zh, this message translates to:
+  /// **'托盘菜单'**
+  String get tray_menu;
+
+  /// No description provided for @tray_menu_edit.
+  ///
+  /// In zh, this message translates to:
+  /// **'编辑菜单'**
+  String get tray_menu_edit;
+
+  /// No description provided for @tray_menu_add.
+  ///
+  /// In zh, this message translates to:
+  /// **'添加菜单项'**
+  String get tray_menu_add;
+
+  /// No description provided for @tray_menu_item_type.
+  ///
+  /// In zh, this message translates to:
+  /// **'菜单项类型'**
+  String get tray_menu_item_type;
+
+  /// No description provided for @tray_menu_item_text.
+  ///
+  /// In zh, this message translates to:
+  /// **'菜单项文本'**
+  String get tray_menu_item_text;
+
+  /// No description provided for @tray_menu_item_action.
+  ///
+  /// In zh, this message translates to:
+  /// **'动作类型'**
+  String get tray_menu_item_action;
+
+  /// No description provided for @tray_menu_item_enabled.
+  ///
+  /// In zh, this message translates to:
+  /// **'启用'**
+  String get tray_menu_item_enabled;
+
+  /// No description provided for @tray_menu_item_visible.
+  ///
+  /// In zh, this message translates to:
+  /// **'可见'**
+  String get tray_menu_item_visible;
+
+  /// No description provided for @tray_menu_item_checked.
+  ///
+  /// In zh, this message translates to:
+  /// **'已勾选'**
+  String get tray_menu_item_checked;
+
+  /// No description provided for @tray_menu_separator.
+  ///
+  /// In zh, this message translates to:
+  /// **'分隔符'**
+  String get tray_menu_separator;
+
+  /// No description provided for @tray_menu_normal.
+  ///
+  /// In zh, this message translates to:
+  /// **'普通菜单项'**
+  String get tray_menu_normal;
+
+  /// No description provided for @tray_menu_submenu.
+  ///
+  /// In zh, this message translates to:
+  /// **'子菜单'**
+  String get tray_menu_submenu;
+
+  /// No description provided for @tray_menu_action_show_hide.
+  ///
+  /// In zh, this message translates to:
+  /// **'显示/隐藏'**
+  String get tray_menu_action_show_hide;
+
+  /// No description provided for @tray_menu_action_quit.
+  ///
+  /// In zh, this message translates to:
+  /// **'退出'**
+  String get tray_menu_action_quit;
+
+  /// No description provided for @tray_menu_action_settings.
+  ///
+  /// In zh, this message translates to:
+  /// **'设置'**
+  String get tray_menu_action_settings;
+
+  /// No description provided for @tray_menu_action_custom.
+  ///
+  /// In zh, this message translates to:
+  /// **'自定义'**
+  String get tray_menu_action_custom;
+
+  /// No description provided for @tray_minimize_to_tray.
+  ///
+  /// In zh, this message translates to:
+  /// **'最小化到托盘'**
+  String get tray_minimize_to_tray;
+
+  /// No description provided for @tray_minimize_to_tray_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'关闭窗口时隐藏到托盘而非退出'**
+  String get tray_minimize_to_tray_desc;
+
+  /// No description provided for @tray_start_minimized.
+  ///
+  /// In zh, this message translates to:
+  /// **'启动时最小化到托盘'**
+  String get tray_start_minimized;
+
+  /// No description provided for @tray_menu_saved.
+  ///
+  /// In zh, this message translates to:
+  /// **'菜单已保存'**
+  String get tray_menu_saved;
+
+  /// No description provided for @tray_menu_reset_confirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'确定要重置为默认菜单吗？'**
+  String get tray_menu_reset_confirm;
 
   /// No description provided for @settings_advanced.
   ///
@@ -3212,6 +3614,66 @@ abstract class AppLocalizations {
   /// **'截图后自动复制到剪贴板'**
   String get screenshot_settings_auto_copy_desc;
 
+  /// No description provided for @screenshot_clipboard_content_type.
+  ///
+  /// In zh, this message translates to:
+  /// **'剪贴板内容类型'**
+  String get screenshot_clipboard_content_type;
+
+  /// No description provided for @screenshot_clipboard_type_image.
+  ///
+  /// In zh, this message translates to:
+  /// **'图片本身'**
+  String get screenshot_clipboard_type_image;
+
+  /// No description provided for @screenshot_clipboard_type_filename.
+  ///
+  /// In zh, this message translates to:
+  /// **'文件名'**
+  String get screenshot_clipboard_type_filename;
+
+  /// No description provided for @screenshot_clipboard_type_full_path.
+  ///
+  /// In zh, this message translates to:
+  /// **'完整路径'**
+  String get screenshot_clipboard_type_full_path;
+
+  /// No description provided for @screenshot_clipboard_type_directory_path.
+  ///
+  /// In zh, this message translates to:
+  /// **'目录路径'**
+  String get screenshot_clipboard_type_directory_path;
+
+  /// No description provided for @screenshot_clipboard_type_image_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'复制图片本身到剪贴板'**
+  String get screenshot_clipboard_type_image_desc;
+
+  /// No description provided for @screenshot_clipboard_type_filename_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'仅复制文件名（不含路径）'**
+  String get screenshot_clipboard_type_filename_desc;
+
+  /// No description provided for @screenshot_clipboard_type_full_path_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'复制文件的完整路径'**
+  String get screenshot_clipboard_type_full_path_desc;
+
+  /// No description provided for @screenshot_clipboard_type_directory_path_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'复制文件所在的目录路径'**
+  String get screenshot_clipboard_type_directory_path_desc;
+
+  /// No description provided for @screenshot_settings_clipboard_type_title.
+  ///
+  /// In zh, this message translates to:
+  /// **'选择剪贴板内容类型'**
+  String get screenshot_settings_clipboard_type_title;
+
   /// No description provided for @screenshot_settings_show_preview_desc.
   ///
   /// In zh, this message translates to:
@@ -3326,6 +3788,36 @@ abstract class AppLocalizations {
   /// **'打开设置'**
   String get screenshot_shortcut_settings;
 
+  /// No description provided for @screenshot_settings_json_editor.
+  ///
+  /// In zh, this message translates to:
+  /// **'JSON 配置编辑器'**
+  String get screenshot_settings_json_editor;
+
+  /// No description provided for @screenshot_settings_json_editor_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'直接编辑 JSON 配置文件，支持高级自定义'**
+  String get screenshot_settings_json_editor_desc;
+
+  /// No description provided for @screenshot_settings_config_name.
+  ///
+  /// In zh, this message translates to:
+  /// **'截图配置'**
+  String get screenshot_settings_config_name;
+
+  /// No description provided for @screenshot_settings_config_description.
+  ///
+  /// In zh, this message translates to:
+  /// **'配置截图插件的所有选项'**
+  String get screenshot_settings_config_description;
+
+  /// No description provided for @screenshot_settings_json_saved.
+  ///
+  /// In zh, this message translates to:
+  /// **'配置已保存'**
+  String get screenshot_settings_json_saved;
+
   /// No description provided for @screenshot_tooltip_history.
   ///
   /// In zh, this message translates to:
@@ -3373,6 +3865,240 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'跟随系统'**
   String get ui_follow_system;
+
+  /// No description provided for @json_editor_title.
+  ///
+  /// In zh, this message translates to:
+  /// **'编辑 {configName}'**
+  String json_editor_title(String configName);
+
+  /// No description provided for @json_editor_format.
+  ///
+  /// In zh, this message translates to:
+  /// **'格式化'**
+  String get json_editor_format;
+
+  /// No description provided for @json_editor_minify.
+  ///
+  /// In zh, this message translates to:
+  /// **'压缩'**
+  String get json_editor_minify;
+
+  /// No description provided for @json_editor_reset.
+  ///
+  /// In zh, this message translates to:
+  /// **'重置'**
+  String get json_editor_reset;
+
+  /// No description provided for @json_editor_example.
+  ///
+  /// In zh, this message translates to:
+  /// **'示例'**
+  String get json_editor_example;
+
+  /// No description provided for @json_editor_validate.
+  ///
+  /// In zh, this message translates to:
+  /// **'验证'**
+  String get json_editor_validate;
+
+  /// No description provided for @json_editor_unsaved_changes.
+  ///
+  /// In zh, this message translates to:
+  /// **'有未保存的更改'**
+  String get json_editor_unsaved_changes;
+
+  /// No description provided for @json_editor_save_failed.
+  ///
+  /// In zh, this message translates to:
+  /// **'保存失败'**
+  String get json_editor_save_failed;
+
+  /// No description provided for @json_editor_reset_confirm_title.
+  ///
+  /// In zh, this message translates to:
+  /// **'重置为默认值'**
+  String get json_editor_reset_confirm_title;
+
+  /// No description provided for @json_editor_reset_confirm_message.
+  ///
+  /// In zh, this message translates to:
+  /// **'确定要重置为默认配置吗？当前所有更改将丢失。'**
+  String get json_editor_reset_confirm_message;
+
+  /// No description provided for @json_editor_reset_confirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'重置'**
+  String get json_editor_reset_confirm;
+
+  /// No description provided for @json_editor_example_title.
+  ///
+  /// In zh, this message translates to:
+  /// **'加载示例配置'**
+  String get json_editor_example_title;
+
+  /// No description provided for @json_editor_example_message.
+  ///
+  /// In zh, this message translates to:
+  /// **'加载示例将替换当前内容，示例包含详细的配置说明。'**
+  String get json_editor_example_message;
+
+  /// No description provided for @json_editor_example_warning.
+  ///
+  /// In zh, this message translates to:
+  /// **'警告：当前内容将被覆盖'**
+  String get json_editor_example_warning;
+
+  /// No description provided for @json_editor_example_load.
+  ///
+  /// In zh, this message translates to:
+  /// **'加载'**
+  String get json_editor_example_load;
+
+  /// No description provided for @json_editor_discard_title.
+  ///
+  /// In zh, this message translates to:
+  /// **'放弃更改'**
+  String get json_editor_discard_title;
+
+  /// No description provided for @json_editor_discard_message.
+  ///
+  /// In zh, this message translates to:
+  /// **'您有未保存的更改，确定要放弃吗？'**
+  String get json_editor_discard_message;
+
+  /// No description provided for @json_editor_discard_confirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'放弃'**
+  String get json_editor_discard_confirm;
+
+  /// No description provided for @json_editor_edit_json.
+  ///
+  /// In zh, this message translates to:
+  /// **'编辑 JSON 配置'**
+  String get json_editor_edit_json;
+
+  /// No description provided for @json_editor_reset_to_default.
+  ///
+  /// In zh, this message translates to:
+  /// **'恢复默认配置'**
+  String get json_editor_reset_to_default;
+
+  /// No description provided for @json_editor_view_example.
+  ///
+  /// In zh, this message translates to:
+  /// **'查看配置示例'**
+  String get json_editor_view_example;
+
+  /// No description provided for @close_dialog_title.
+  ///
+  /// In zh, this message translates to:
+  /// **'关闭确认'**
+  String get close_dialog_title;
+
+  /// No description provided for @close_dialog_message.
+  ///
+  /// In zh, this message translates to:
+  /// **'您希望如何操作？'**
+  String get close_dialog_message;
+
+  /// No description provided for @close_dialog_directly.
+  ///
+  /// In zh, this message translates to:
+  /// **'直接关闭'**
+  String get close_dialog_directly;
+
+  /// No description provided for @close_dialog_minimize_to_tray.
+  ///
+  /// In zh, this message translates to:
+  /// **'最小化到托盘'**
+  String get close_dialog_minimize_to_tray;
+
+  /// No description provided for @close_dialog_cancel.
+  ///
+  /// In zh, this message translates to:
+  /// **'取消'**
+  String get close_dialog_cancel;
+
+  /// No description provided for @close_dialog_remember.
+  ///
+  /// In zh, this message translates to:
+  /// **'记住选择，不再询问'**
+  String get close_dialog_remember;
+
+  /// No description provided for @close_behavior_ask.
+  ///
+  /// In zh, this message translates to:
+  /// **'每次询问'**
+  String get close_behavior_ask;
+
+  /// No description provided for @close_behavior_close.
+  ///
+  /// In zh, this message translates to:
+  /// **'直接关闭'**
+  String get close_behavior_close;
+
+  /// No description provided for @close_behavior_minimize_to_tray.
+  ///
+  /// In zh, this message translates to:
+  /// **'最小化到托盘'**
+  String get close_behavior_minimize_to_tray;
+
+  /// No description provided for @settings_close_behavior.
+  ///
+  /// In zh, this message translates to:
+  /// **'关闭行为'**
+  String get settings_close_behavior;
+
+  /// No description provided for @settings_close_behavior_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'关闭窗口时的默认行为'**
+  String get settings_close_behavior_desc;
+
+  /// No description provided for @settings_remember_close_choice.
+  ///
+  /// In zh, this message translates to:
+  /// **'记住关闭选择'**
+  String get settings_remember_close_choice;
+
+  /// No description provided for @settings_remember_close_choice_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'记住用户选择的关闭方式'**
+  String get settings_remember_close_choice_desc;
+
+  /// No description provided for @plugin_view_mode.
+  ///
+  /// In zh, this message translates to:
+  /// **'视图模式'**
+  String get plugin_view_mode;
+
+  /// No description provided for @plugin_view_large_icon.
+  ///
+  /// In zh, this message translates to:
+  /// **'大图标'**
+  String get plugin_view_large_icon;
+
+  /// No description provided for @plugin_view_medium_icon.
+  ///
+  /// In zh, this message translates to:
+  /// **'中图标'**
+  String get plugin_view_medium_icon;
+
+  /// No description provided for @plugin_view_small_icon.
+  ///
+  /// In zh, this message translates to:
+  /// **'小图标'**
+  String get plugin_view_small_icon;
+
+  /// No description provided for @plugin_view_list.
+  ///
+  /// In zh, this message translates to:
+  /// **'列表'**
+  String get plugin_view_list;
 }
 
 class _AppLocalizationsDelegate

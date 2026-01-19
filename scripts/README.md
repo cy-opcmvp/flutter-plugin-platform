@@ -6,12 +6,56 @@ This directory contains various scripts for development, building, and troublesh
 
 ```
 scripts/
-├── README.md              # This file
-├── fix-nuget.ps1         # NuGet package installation fix
-└── install-cppwinrt.ps1  # Windows CppWinRT package installation
+├── README.md                  # This file
+├── generate_app_icon.py       # App icon generation script
+├── generate_icon.bat          # Windows icon generation batch script
+├── fix-nuget.ps1              # NuGet package installation fix
+└── install-cppwinrt.ps1       # Windows CppWinRT package installation
 ```
 
 ## 🔧 Available Scripts
+
+### Icon Generation Scripts
+
+#### `generate_app_icon.py`
+**Purpose**: Generate application icons with a blue rectangular frame and white "P" letter.
+
+**Design**:
+- 3:4 aspect ratio blue rectangle
+- White uppercase letter "P" in center
+- Supports multiple sizes (16x16 to 1024x1024)
+- Generates Windows ICO, macOS PNG, and general icons
+
+**Usage**:
+```bash
+# Windows
+python generate_app_icon.py
+
+# macOS/Linux
+python3 generate_app_icon.py
+```
+
+**Requirements**:
+- Python 3.6+
+- Pillow library: `pip install Pillow`
+
+**When to use**:
+- When updating app icon design
+- When first setting up the project
+- When adding new icon sizes
+
+#### `generate_icon.bat`
+**Purpose**: Windows batch script for quick icon generation.
+
+**Usage**:
+```bash
+# Double-click or run in command prompt
+generate_icon.bat
+```
+
+**When to use**:
+- Quick icon generation on Windows
+- Automatically installs dependencies if needed
 
 ### Windows Build Scripts
 
@@ -67,6 +111,8 @@ flutter run -d windows
 
 ## 📚 Related Documentation
 
+- [Icon Generation Guide](../docs/guides/ICON_GENERATION_GUIDE.md) - Detailed icon generation guide
+- [Icon Update Guide](../ICON_UPDATE_GUIDE.md) - Quick icon update instructions
 - [Windows Build Fix Guide](../docs/troubleshooting/WINDOWS_BUILD_FIX.md)
 - [Windows Distribution Guide](../docs/WINDOWS_DISTRIBUTION_GUIDE.md)
 - [Platform Services User Guide](../docs/guides/PLATFORM_SERVICES_USER_GUIDE.md)
@@ -109,5 +155,5 @@ See [WINDOWS_BUILD_FIX.md](../docs/troubleshooting/WINDOWS_BUILD_FIX.md) for det
 
 ---
 
-**Last Updated**: 2026-01-15
+**Last Updated**: 2026-01-19
 **Maintained By**: Flutter Plugin Platform Team

@@ -7,6 +7,7 @@ class PluginDescriptor {
   final List<Permission> requiredPermissions;
   final Map<String, dynamic> metadata;
   final String entryPoint;
+  final Set<String> tags; // 插件标签ID集合
 
   const PluginDescriptor({
     required this.id,
@@ -16,6 +17,7 @@ class PluginDescriptor {
     required this.requiredPermissions,
     required this.metadata,
     required this.entryPoint,
+    this.tags = const {},
   });
 
   /// Validates the plugin descriptor for data integrity
@@ -54,12 +56,15 @@ class PluginDescriptor {
           .toList(),
       metadata: json['metadata'] as Map<String, dynamic>,
       entryPoint: json['entryPoint'] as String,
+      tags: json['tags'] != null
+          ? (json['tags'] as List).cast<String>().toSet()
+          : const {},
     );
-    
+
     if (!descriptor.isValid()) {
       throw ArgumentError('Invalid plugin descriptor data');
     }
-    
+
     return descriptor;
   }
 
@@ -72,6 +77,7 @@ class PluginDescriptor {
       'requiredPermissions': requiredPermissions.map((e) => e.name).toList(),
       'metadata': metadata,
       'entryPoint': entryPoint,
+      'tags': tags.toList(),
     };
   }
 }

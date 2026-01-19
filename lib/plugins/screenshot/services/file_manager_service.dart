@@ -15,9 +15,6 @@ class FileManagerService {
   /// 当前设置
   ScreenshotSettings _settings = ScreenshotSettings.defaultSettings();
 
-  /// 历史记录索引（用于文件名计数）
-  int _historyIndex = 0;
-
   /// 获取当前设置
   ScreenshotSettings get settings => _settings;
 
@@ -73,16 +70,35 @@ class FileManagerService {
   }
 
   /// 生成文件名
-  String _generateFilename({String? customFormat}) {
+  Future<String> _generateFilename({String? customFormat}) async {
     final format = customFormat ?? _settings.filenameFormat;
     final now = DateTime.now();
 
+    // 生成唯一的文件名
     String filename = format
         .replaceAll('{timestamp}', now.millisecondsSinceEpoch.toString())
         .replaceAll('{date}', DateFormat('yyyy-MM-dd').format(now))
         .replaceAll('{time}', DateFormat('HH-mm-ss').format(now))
-        .replaceAll('{datetime}', DateFormat('yyyy-MM-dd_HH-mm-ss').format(now))
-        .replaceAll('{index}', (++_historyIndex).toString());
+        .replaceAll('{datetime}', DateFormat('yyyy-MM-dd_HH-mm-ss').format(now));
+
+    // 处理 {index} 占位符 - 基于现有文件数量
+    if (filename.contains('{index}')) {
+      final savePath = await _resolveSavePath();
+      final dir = Directory(savePath);
+      int currentIndex = 1;
+
+      if (await dir.exists()) {
+        // 统计今天已有的截图数量
+        final today = DateFormat('yyyy-MM-dd').format(now);
+        await for (final entity in dir.list()) {
+          if (entity is File && entity.path.contains(today)) {
+            currentIndex++;
+          }
+        }
+      }
+
+      filename = filename.replaceAll('{index}', currentIndex.toString());
+    }
 
     // 添加扩展名
     final extension = _settings.imageFormat.extension;
@@ -90,7 +106,19 @@ class FileManagerService {
       filename = '$filename.$extension';
     }
 
-    return filename;
+    // 如果文件已存在，添加序号确保唯一性
+    final savePath = await _resolveSavePath();
+    String finalPath = path.join(savePath, filename);
+    int counter = 1;
+
+    while (await File(finalPath).exists()) {
+      final nameWithoutExt = path.basenameWithoutExtension(filename);
+      final ext = path.extension(filename);
+      finalPath = path.join(savePath, '${nameWithoutExt}_$counter$ext');
+      counter++;
+    }
+
+    return path.basename(finalPath);
   }
 
   /// 保存截图到文件
@@ -117,7 +145,7 @@ class FileManagerService {
       await _ensureDirectoryExists(savePath);
 
       // 生成文件名
-      final finalFilename = filename ?? _generateFilename();
+      final finalFilename = filename ?? await _generateFilename();
       final filePath = path.join(savePath, finalFilename);
 
       // 写入文件

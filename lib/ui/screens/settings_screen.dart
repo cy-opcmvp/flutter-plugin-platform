@@ -10,6 +10,7 @@ import 'package:plugin_platform/main.dart' show PluginPlatformApp;
 import 'package:plugin_platform/core/services/locale_provider.dart';
 import 'package:plugin_platform/core/services/config_manager.dart';
 import 'package:plugin_platform/core/models/global_config.dart';
+import 'tag_management_screen.dart';
 
 /// Settings Screen
 ///
@@ -147,7 +148,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   secondary: const Icon(Icons.notifications),
                   title: Text(l10n.settings_enableNotifications),
                   value: _globalConfig!.features.enableNotifications,
-                  onChanged: (value) => _updateFeature('enableNotifications', value),
+                  onChanged: (value) =>
+                      _updateFeature('enableNotifications', value),
                 ),
               ],
             ),
@@ -179,6 +181,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
             context,
             title: l10n.settings_plugins,
             children: [
+              ListTile(
+                leading: const Icon(Icons.label),
+                title: Text(l10n.tag_title),
+                subtitle: Text('管理插件标签和分类'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const TagManagementScreen(),
+                    ),
+                  );
+                },
+              ),
               ListTile(
                 leading: const Icon(Icons.screenshot),
                 title: Text(l10n.plugin_screenshot_name),
@@ -266,7 +282,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             return ListTile(
               title: Text(level.toUpperCase()),
               trailing: isSelected
-                  ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
+                  ? Icon(
+                      Icons.check,
+                      color: Theme.of(context).colorScheme.primary,
+                    )
                   : null,
               onTap: () async {
                 Navigator.of(context).pop();
@@ -396,9 +415,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Text(
             title,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
         Card(
@@ -410,7 +429,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   /// Show language selection dialog
-  void _showLanguageDialog(BuildContext context, LocaleProvider localeProvider) {
+  void _showLanguageDialog(
+    BuildContext context,
+    LocaleProvider localeProvider,
+  ) {
     final l10n = AppLocalizations.of(context)!;
 
     showDialog(
@@ -504,19 +526,26 @@ class _ScreenshotConfigScreenState extends State<ScreenshotConfigScreen> {
   @override
   void initState() {
     super.initState();
-    _savePathController = TextEditingController(text: widget.config['savePath'] ?? '{documents}/Screenshots');
-    _filenameFormatController = TextEditingController(text: widget.config['filenameFormat'] ?? 'screenshot_{timestamp}');
+    _savePathController = TextEditingController(
+      text: widget.config['savePath'] ?? '{documents}/Screenshots',
+    );
+    _filenameFormatController = TextEditingController(
+      text: widget.config['filenameFormat'] ?? 'screenshot_{timestamp}',
+    );
     _imageFormat = widget.config['imageFormat'] ?? 'png';
     _imageQuality = widget.config['imageQuality'] ?? 95;
     _autoCopyToClipboard = widget.config['autoCopyToClipboard'] ?? true;
     _showPreview = widget.config['showPreview'] ?? true;
     _saveHistory = widget.config['saveHistory'] ?? true;
     _maxHistoryCount = widget.config['maxHistoryCount'] ?? 100;
-    _shortcuts = Map<String, String>.from(widget.config['shortcuts'] ?? {
-      'regionCapture': 'Ctrl+Shift+A',
-      'fullScreenCapture': 'Ctrl+Shift+F',
-      'windowCapture': 'Ctrl+Shift+W',
-    });
+    _shortcuts = Map<String, String>.from(
+      widget.config['shortcuts'] ??
+          {
+            'regionCapture': 'Ctrl+Shift+A',
+            'fullScreenCapture': 'Ctrl+Shift+F',
+            'windowCapture': 'Ctrl+Shift+W',
+          },
+    );
   }
 
   @override
@@ -585,7 +614,8 @@ class _ScreenshotConfigScreenState extends State<ScreenshotConfigScreen> {
                 secondary: const Icon(Icons.content_copy),
                 title: Text(l10n.settings_autoCopyToClipboard),
                 value: _autoCopyToClipboard,
-                onChanged: (value) => setState(() => _autoCopyToClipboard = value),
+                onChanged: (value) =>
+                    setState(() => _autoCopyToClipboard = value),
               ),
               SwitchListTile(
                 secondary: const Icon(Icons.preview),
@@ -674,7 +704,9 @@ class _ScreenshotConfigScreenState extends State<ScreenshotConfigScreen> {
 
   Future<void> _editFilenameFormat(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
-    final controller = TextEditingController(text: _filenameFormatController.text);
+    final controller = TextEditingController(
+      text: _filenameFormatController.text,
+    );
 
     final result = await showDialog<String>(
       context: context,
@@ -682,9 +714,7 @@ class _ScreenshotConfigScreenState extends State<ScreenshotConfigScreen> {
         title: Text(l10n.settings_filenameFormat),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(
-            hintText: 'screenshot_{timestamp}',
-          ),
+          decoration: const InputDecoration(hintText: 'screenshot_{timestamp}'),
         ),
         actions: [
           TextButton(
@@ -718,7 +748,10 @@ class _ScreenshotConfigScreenState extends State<ScreenshotConfigScreen> {
             return ListTile(
               title: Text(format.toUpperCase()),
               trailing: isSelected
-                  ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
+                  ? Icon(
+                      Icons.check,
+                      color: Theme.of(context).colorScheme.primary,
+                    )
                   : null,
               onTap: () {
                 setState(() => _imageFormat = format);
@@ -749,7 +782,8 @@ class _ScreenshotConfigScreenState extends State<ScreenshotConfigScreen> {
                   max: 100,
                   divisions: 99,
                   label: '$_imageQuality%',
-                  onChanged: (value) => setDialogState(() => _imageQuality = value.toInt()),
+                  onChanged: (value) =>
+                      setDialogState(() => _imageQuality = value.toInt()),
                 ),
                 Text('$_imageQuality%'),
               ],
@@ -777,9 +811,7 @@ class _ScreenshotConfigScreenState extends State<ScreenshotConfigScreen> {
         content: TextField(
           controller: controller,
           keyboardType: TextInputType.number,
-          decoration: const InputDecoration(
-            hintText: '100',
-          ),
+          decoration: const InputDecoration(hintText: '100'),
         ),
         actions: [
           TextButton(
@@ -806,11 +838,13 @@ class _ScreenshotConfigScreenState extends State<ScreenshotConfigScreen> {
 
   Future<void> _editShortcut(BuildContext context, String actionId) async {
     final l10n = AppLocalizations.of(context)!;
-    final actionName = {
-      'regionCapture': l10n.settings_regionCapture,
-      'fullScreenCapture': l10n.settings_fullScreenCapture,
-      'windowCapture': l10n.settings_windowCapture,
-    }[actionId] ?? actionId;
+    final actionName =
+        {
+          'regionCapture': l10n.settings_regionCapture,
+          'fullScreenCapture': l10n.settings_fullScreenCapture,
+          'windowCapture': l10n.settings_windowCapture,
+        }[actionId] ??
+        actionId;
 
     final controller = TextEditingController(text: _shortcuts[actionId] ?? '');
 
@@ -820,9 +854,7 @@ class _ScreenshotConfigScreenState extends State<ScreenshotConfigScreen> {
         title: Text(actionName),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(
-            hintText: 'Ctrl+Shift+A',
-          ),
+          decoration: const InputDecoration(hintText: 'Ctrl+Shift+A'),
           inputFormatters: [
             TextInputFormatter.withFunction((oldValue, newValue) {
               // Allow only shortcut keys
@@ -892,9 +924,9 @@ class _ScreenshotConfigScreenState extends State<ScreenshotConfigScreen> {
           child: Text(
             title,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
         Card(
