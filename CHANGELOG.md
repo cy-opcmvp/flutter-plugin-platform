@@ -5,6 +5,81 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-01-19
+
+### Added - 配置管理系统与界面优化
+- 🔧 **JSON 配置管理系统** - 完整的配置文件管理解决方案
+  - 新增 JSON 配置文件管理规范 (JSON_CONFIG_RULES.md)
+  - 新增 JsonValidator 服务，提供 JSON 语法校验和 Schema 验证
+  - 新增通用 JSON 编辑器界面 (JsonEditorScreen)
+  - 支持格式化、压缩、重置、查看示例
+  - 实时错误提示和行号定位
+- 🏷️ **标签管理系统** - 插件分类和组织功能
+  - 新增 TagModel 标签数据模型
+  - 新增 TagManager 标签管理服务
+  - 新增标签管理界面 (TagManagementScreen)
+  - 新增标签过滤栏组件 (TagFilterBar)
+  - 支持标签的创建、编辑、删除
+  - 支持按标签过滤插件
+- 📋 **插件描述符系统** - 统一的插件元数据管理
+  - 新增截图插件描述符 (plugin_descriptor.json)
+  - 新增计算器插件描述符 (plugin_descriptor.json)
+  - 新增世界时钟插件描述符 (plugin_descriptor.json)
+  - 规范插件 ID、版本、作者等信息
+- 🎨 **截图插件配置完善** - 可视化 + JSON 双模式编辑
+  - 新增截图插件配置文件系统
+    - screenshot_config_defaults.dart - 默认配置和示例
+    - screenshot_config_schema.dart - JSON Schema 定义
+  - 在设置页面集成 JSON 编辑器
+  - 支持可视化界面和 JSON 两种编辑方式
+  - 完整的配置校验和错误提示
+
+### Changed
+- 🎨 **界面优化**
+  - 优化截图设置页面布局和响应式设计
+  - 改进小屏幕下的显示效果
+  - 统一使用国际化文本
+- 🌍 **国际化完善**
+  - 新增配置管理相关翻译 50+ 条
+  - 新增标签管理相关翻译 20+ 条
+  - 完善截图插件设置翻译
+  - 所有新功能完整支持中英文
+
+### Fixed
+- 🐛 **编译错误修复**
+  - 修复截图设置页面编译错误 (Widget.children 访问问题)
+  - 修复布局适配问题
+
+### Technical Details
+- 📁 新增文件：
+  - `.claude/rules/JSON_CONFIG_RULES.md` - JSON 配置管理规范
+  - `lib/core/services/json_validator.dart` - JSON 校验服务
+  - `lib/core/models/tag_model.dart` - 标签数据模型
+  - `lib/core/services/tag_manager.dart` - 标签管理服务
+  - `lib/ui/screens/tag_management_screen.dart` - 标签管理界面
+  - `lib/ui/widgets/json_editor_screen.dart` - JSON 编辑器组件
+  - `lib/ui/widgets/tag_filter_bar.dart` - 标签过滤栏
+  - `lib/plugins/screenshot/config/screenshot_config_defaults.dart` - 截图配置默认值
+  - 多个 plugin_descriptor.json 文件
+- 📝 修改文件：
+  - `lib/plugins/screenshot/widgets/settings_screen.dart` - 集成 JSON 编辑器
+  - `lib/l10n/app_zh.arb` - 中文翻译新增 70+ 条
+  - `lib/l10n/app_en.arb` - 英文翻译新增 70+ 条
+  - 规则文档索引更新
+
+### Developer Experience
+- ✨ **配置管理规范**
+  - 建立 JSON 配置文件管理标准
+  - 提供配置校验和 Schema 定义
+  - 支持默认值、示例、说明文档
+  - 强制保存前校验，防止配置错误
+- 📖 **文档完善**
+  - 新增图标生成指南
+  - 更新规则文档索引
+  - 更新版本控制历史
+
+---
+
 ## [0.3.4] - 2026-01-16
 
 ### Added - 桌面级区域截图
