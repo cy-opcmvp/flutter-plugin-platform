@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.2] - 2026-01-21
+
+### Fixed - Windows 编译问题
+- 🔧 **GDI+ 编译错误修复** - 解决 Windows 平台 GDI+ min/max 宏冲突问题
+  * 在 `screenshot_plugin.h` 中正确包含 `<algorithm>` 头文件
+  * 在包含 `gdiplus.h` 之前使用 `using std::min/max` 声明
+  * 在 `CMakeLists.txt` 中禁用 C4458 警告（GDI+ 头文件遮蔽成员变量）
+  * Release 和 Debug 模式均可成功编译
+  * 修复了从 v0.3.4 开始就存在的长期编译问题
+
+### Technical Details
+- **根本原因**: Windows SDK 的 `<windows.h>` 定义了 min/max 宏，而 GDI+ 头文件内部使用 min/max 时期望 std::min/std::max
+- **解决方案**: 定义 NOMINMAX 禁用 Windows 宏，同时在包含 GDI+ 前提供 std::min/max
+- **验证**: Release (189KB) 和 Debug 模式均编译通过
+
 ## [0.4.1] - 2026-01-20
 
 ### Added - 开发规范体系完善
