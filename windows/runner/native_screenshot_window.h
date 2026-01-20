@@ -1,6 +1,11 @@
 ﻿#ifndef RUNNER_NATIVE_SCREENSHOT_WINDOW_H_
 #define RUNNER_NATIVE_SCREENSHOT_WINDOW_H_
 
+// 定义 NOMINMAX 以避免 Windows 宏与 std::min/max 冲突
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
 #include <windows.h>
 
 class NativeScreenshotWindow {

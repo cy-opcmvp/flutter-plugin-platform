@@ -1,6 +1,11 @@
 #ifndef RUNNER_SCREENSHOT_PLUGIN_H_
 #define RUNNER_SCREENSHOT_PLUGIN_H_
 
+// 定义 NOMINMAX 以避免 Windows 宏与 std::min/max 冲突
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
 #include <windows.h>
 #include <vector>
 #include <string>
