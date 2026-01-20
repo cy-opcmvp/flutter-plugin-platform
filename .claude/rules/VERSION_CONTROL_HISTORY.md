@@ -4,11 +4,132 @@
 
 ## 版本索引
 
+- [v0.4.1](#v041-2026-01-20) - 2026-01-20
 - [v0.4.0](#v040-2026-01-19) - 2026-01-19
 - [v0.3.4](#v034-2026-01-16) - 2026-01-16
 - [v0.3.2](#v032-2026-01-15) - 2026-01-15
 - [v0.3.1](#v031-2025-01-14) - 2025-01-14
 - [v0.3.0](#v030-2025-01-14) - 2025-01-14
+
+---
+
+## v0.4.1 (2026-01-20)
+
+### Push 信息
+- **提交**: a1869ef, e34e5d1
+- **推送时间**: 2026-01-20
+- **推送者**: Claude Code
+- **类型**: Patch 版本（文档和规范更新）
+
+### 变更内容
+- **开发规范体系完善** - 建立完整的编码规范体系
+  - 新增 CODE_STYLE_RULES.md（代码风格规范）
+    * 基于 Effective Dart 官方指南
+    * 命名、格式化、注释、代码组织规范
+    * UI 代码规范和最佳实践
+  - 新增 TESTING_RULES.md（测试规范）
+    * 测试文件组织和命名规范
+    * AAA 测试模式（Arrange-Act-Assert）
+    * Widget 测试和 Mock 使用规范
+    * 测试覆盖率 ≥80% 要求
+  - 新增 GIT_COMMIT_RULES.md（Git 提交规范）
+    * 约定式提交格式
+    * 10 种提交类型和范围定义
+    * 分支策略和 PR 规范
+  - 新增 ERROR_HANDLING_RULES.md（错误处理规范）
+    * 异常类型使用和自定义异常
+    * 输入验证和异步错误处理
+    * 用户错误提示和日志规范
+  - 新增 DOCUMENTATION_NAMING_RULES.md（文档命名规范）
+    * 定义三级命名标准（kebab-case、UPPERCASE_CASE、snake_case）
+  - 新增 PLUGIN_CONFIG_SPEC.md（插件配置规范）
+    * 强制的配置文件结构
+    * 配置功能检查清单
+  - 新增 PLUGIN_SETTINGS_SCREEN_RULES.md（插件配置页面开发规范）
+    * 统一的架构模式
+    * 实时保存原则和 UI 组件规范
+
+- **文档整理优化**
+  - 删除 5 个过时文档
+  - 归档 9 个历史文档到 docs/archive/
+  - 重命名 9 个文档遵循 kebab-case 规范
+  - 创建文档审计报告
+  - 更新 MASTER_INDEX.md 索引
+
+- **配置功能增强**
+  - 添加插件配置基类 BasePluginSettings
+  - 实现计算器插件配置系统
+  - 实现世界时钟插件配置系统
+  - 完善截图插件配置文档
+  - 优化插件管理器，支持配置持久化
+  - 新增配置功能审计报告
+
+- **国际化完善**
+  - 新增配置相关翻译 100+ 条
+  - 完善配置界面翻译
+
+### 技术实现
+- **新增文件**:
+  - `.claude/rules/CODE_STYLE_RULES.md` - 代码风格规范
+  - `.claude/rules/TESTING_RULES.md` - 测试规范
+  - `.claude/rules/GIT_COMMIT_RULES.md` - Git 提交规范
+  - `.claude/rules/ERROR_HANDLING_RULES.md` - 错误处理规范
+  - `.claude/rules/DOCUMENTATION_NAMING_RULES.md` - 文档命名规范
+  - `.claude/rules/PLUGIN_CONFIG_SPEC.md` - 插件配置规范
+  - `.claude/rules/PLUGIN_SETTINGS_SCREEN_RULES.md` - 插件配置页面开发规范
+  - `.claude/rules/RULES_AUDIT_REPORT.md` - 规范审计报告
+  - `lib/core/models/base_plugin_settings.dart` - 配置基类
+  - `lib/plugins/calculator/config/` - 计算器配置文件
+  - `lib/plugins/world_clock/config/` - 世界时钟配置文件
+  - `docs/reports/CONFIG_FEATURE_AUDIT.md` - 配置功能审计
+  - `docs/reports/CONFIG_IMPLEMENTATION_PROGRESS.md` - 配置实施进度
+  - `docs/archive/` - 归档文档目录
+
+- **修改文件**:
+  - `.claude/rules/README.md` - 规范索引更新（修复格式错误）
+  - `lib/core/interfaces/i_plugin_manager.dart` - 支持配置持久化
+  - `lib/core/services/plugin_manager.dart` - 配置管理优化
+  - 各插件配置系统实现
+  - 国际化文件更新
+
+- **删除文件**:
+  - `CHANGELOG_NOTIFICATION_FIX.md`
+  - `ICON_UPDATE_GUIDE.md`
+  - `NOTIFICATION_FIX_SUMMARY.md`
+  - `WINDOWS_PLATFORM_FIXES_REPORT.md`
+  - `docs/index.md`
+  - `scripts/verify-audio-fix.md`
+  - `scripts/verify-notification-fix.md`
+
+### 对话记录
+- **对话时间**: 2026-01-20
+- **对话主题**: 审计和清理开发规范，完善配置功能
+- **操作内容**:
+  - 外部插件文档评价分析（70% 准确）
+  - 全面文档审计（110+ 文档）
+  - 删除 5 个过时文档，归档 9 个历史文档
+  - 重命名 9 个文档遵循统一命名规范
+  - 创建 DOCUMENTATION_NAMING_RULES.md
+  - 开发规范系统审计（8 个文档，3,632 行）
+  - 创建 4 个缺失的关键规范文档
+  - 更新规范索引，修复格式错误
+  - 推送代码到远程仓库
+
+### Git 提交
+```
+a1869ef docs: 调整配置相关代码，初步梳理开发规范和文档
+e34e5d1 docs: 更新 CHANGELOG.md，记录 v0.4.1 版本变更
+```
+
+### 发布文档
+- `docs/releases/RELEASE_NOTES_v0.4.1.md`（待创建）
+
+### 统计信息
+- **规范文档**: 从 8 个扩展到 11 个（+3 个关键规范）
+- **规范总行数**: 约 5,500+ 行
+- **文档数量**: 从 110+ 优化到 95+
+- **文件变更**: 76 个文件（新增、修改、删除、重命名）
+- **代码行数**: +11,843 / -3,574
 
 ---
 
