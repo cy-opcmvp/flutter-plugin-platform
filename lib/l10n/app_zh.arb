@@ -191,6 +191,20 @@
       "name": {"type": "String"}
     }
   },
+  "plugin_disableSuccess": "插件 {name} 已禁用",
+  "@plugin_disableSuccess": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "plugin_enableSuccess": "插件 {name} 已启用",
+  "@plugin_enableSuccess": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "button_disable": "禁用",
+  "button_enable": "启用",
   "plugin_installSuccess": "示例插件安装成功",
   "plugin_uninstallSuccess": "插件卸载成功",
   "plugin_updateSuccess": "插件更新成功，可回滚",
@@ -994,6 +1008,8 @@
   "json_editor_edit_json": "编辑 JSON 配置",
   "json_editor_reset_to_default": "恢复默认配置",
   "json_editor_view_example": "查看配置示例",
+  "json_editor_config_description": "配置文件说明",
+  "settings_config_saved": "设置已保存",
 
   "close_dialog_title": "关闭确认",
   "close_dialog_message": "您希望如何操作？",

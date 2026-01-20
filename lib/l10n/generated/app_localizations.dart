@@ -776,6 +776,30 @@ abstract class AppLocalizations {
   /// **'插件 {name} 已移至后台'**
   String plugin_pauseSuccess(String name);
 
+  /// No description provided for @plugin_disableSuccess.
+  ///
+  /// In zh, this message translates to:
+  /// **'插件 {name} 已禁用'**
+  String plugin_disableSuccess(String name);
+
+  /// No description provided for @plugin_enableSuccess.
+  ///
+  /// In zh, this message translates to:
+  /// **'插件 {name} 已启用'**
+  String plugin_enableSuccess(String name);
+
+  /// No description provided for @button_disable.
+  ///
+  /// In zh, this message translates to:
+  /// **'禁用'**
+  String get button_disable;
+
+  /// No description provided for @button_enable.
+  ///
+  /// In zh, this message translates to:
+  /// **'启用'**
+  String get button_enable;
+
   /// No description provided for @plugin_installSuccess.
   ///
   /// In zh, this message translates to:
@@ -3937,6 +3961,18 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'查看配置示例'**
   String get json_editor_view_example;
+
+  /// No description provided for @json_editor_config_description.
+  ///
+  /// In zh, this message translates to:
+  /// **'配置文件说明'**
+  String get json_editor_config_description;
+
+  /// No description provided for @settings_config_saved.
+  ///
+  /// In zh, this message translates to:
+  /// **'设置已保存'**
+  String get settings_config_saved;
 
   /// No description provided for @close_dialog_title.
   ///

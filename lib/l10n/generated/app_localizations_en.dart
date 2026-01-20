@@ -385,6 +385,22 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String plugin_disableSuccess(String name) {
+    return 'Plugin $name disabled';
+  }
+
+  @override
+  String plugin_enableSuccess(String name) {
+    return 'Plugin $name enabled';
+  }
+
+  @override
+  String get button_disable => 'Disable';
+
+  @override
+  String get button_enable => 'Enable';
+
+  @override
   String get plugin_installSuccess => 'Sample plugin installed successfully';
 
   @override
@@ -2127,6 +2143,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get json_editor_view_example => 'View Configuration Example';
+
+  @override
+  String get json_editor_config_description => 'Configuration File Description';
+
+  @override
+  String get settings_config_saved => 'Settings saved';
 
   @override
   String get close_dialog_title => 'Close Confirmation';

@@ -36,7 +36,8 @@
       "Bash(exit:*)",
       "Bash(git checkout:*)",
       "Bash(git stash:*)",
-      "Bash(flutter doctor:*)"
+      "Bash(flutter doctor:*)",
+      "Bash(dart analyze:*)"
     ]
   }
 }

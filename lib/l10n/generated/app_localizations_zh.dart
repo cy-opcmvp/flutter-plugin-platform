@@ -378,6 +378,22 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String plugin_disableSuccess(String name) {
+    return '插件 $name 已禁用';
+  }
+
+  @override
+  String plugin_enableSuccess(String name) {
+    return '插件 $name 已启用';
+  }
+
+  @override
+  String get button_disable => '禁用';
+
+  @override
+  String get button_enable => '启用';
+
+  @override
   String get plugin_installSuccess => '示例插件安装成功';
 
   @override
@@ -2054,6 +2070,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get json_editor_view_example => '查看配置示例';
+
+  @override
+  String get json_editor_config_description => '配置文件说明';
+
+  @override
+  String get settings_config_saved => '设置已保存';
 
   @override
   String get close_dialog_title => '关闭确认';

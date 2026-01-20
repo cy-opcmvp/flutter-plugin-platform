@@ -1,5 +1,7 @@
 library;
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../ui/widgets/json_editor_screen.dart';
@@ -32,6 +34,11 @@ abstract class PluginSettingsScreen<T extends Object, S extends Object>
   /// 插件实例
   final T plugin;
 
+  const PluginSettingsScreen({
+    super.key,
+    required this.plugin,
+  });
+
   /// 配置对象 getter
   S get settings;
 
@@ -46,16 +53,6 @@ abstract class PluginSettingsScreen<T extends Object, S extends Object>
 
   /// JSON Schema（可选，用于校验）
   String? get schemaJson => null;
-
-  const PluginSettingsScreen({
-    super.key,
-    required this.plugin,
-    required this.settings,
-    required this.updateSettings,
-    required this.defaultConfig,
-    required this.cleanExample,
-    this.schemaJson,
-  });
 
   @override
   State<PluginSettingsScreen<T, S>> createState() =>
@@ -118,10 +115,14 @@ class _PluginSettingsScreenState<T extends Object, S extends Object>
   }
 
   /// 构建配置内容（子类实现）
-  Widget buildConfigContent(BuildContext context, AppLocalizations l10n);
+  Widget buildConfigContent(BuildContext context, AppLocalizations l10n) {
+    throw UnimplementedError('Subclasses must implement buildConfigContent');
+  }
 
   /// 获取页面标题
-  String getTitle(AppLocalizations l10n);
+  String getTitle(AppLocalizations l10n) {
+    throw UnimplementedError('Subclasses must implement getTitle');
+  }
 
   /// 构建章节标题
   Widget buildSectionHeader(String title) {
@@ -146,7 +147,7 @@ class _PluginSettingsScreenState<T extends Object, S extends Object>
     IconData? secondary,
   }) {
     return SwitchListTile(
-      secondary: secondary,
+      secondary: secondary != null ? Icon(secondary) : null,
       title: Text(title, overflow: TextOverflow.ellipsis),
       subtitle: subtitle != null
           ? Text(subtitle, overflow: TextOverflow.ellipsis, maxLines: 2)
@@ -241,7 +242,7 @@ class _PluginSettingsScreenState<T extends Object, S extends Object>
                     max: max.toDouble(),
                     divisions: divisions,
                     label: labelFormatter != null
-                        ? labelFormatter(value)
+                        ? (labelFormatter(value) ?? '$value')
                         : '$value ${unit ?? ''}',
                     onChanged: (newValue) async {
                       final newSettings = _onSliderChanged(newValue.toInt());
@@ -254,7 +255,7 @@ class _PluginSettingsScreenState<T extends Object, S extends Object>
                 const SizedBox(width: 16),
                 Text(
                   labelFormatter != null
-                      ? labelFormatter(value)
+                      ? (labelFormatter(value) ?? '$value')
                       : '$value ${unit ?? ''}',
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
@@ -340,7 +341,10 @@ class _PluginSettingsScreenState<T extends Object, S extends Object>
   }
 
   /// 子类实现 JSON 保存逻辑
-  Future<bool> saveJsonConfigImpl(String jsonString);
+  Future<bool> saveJsonConfigImpl(String jsonString) async {
+    // 默认实现：子类应该重写此方法
+    throw UnimplementedError('Subclasses must implement saveJsonConfigImpl');
+  }
 
   /// 获取配置描述（用于 JSON 编辑器）
   String getConfigDescription(AppLocalizations l10n) {

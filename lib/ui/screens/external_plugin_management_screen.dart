@@ -241,10 +241,15 @@ class _ExternalPluginManagementScreenState
       await _pluginManager.pauseExternalPlugin(pluginId);
       await _loadPlugins();
 
+      final pluginName = _pluginRuntimeInfos
+          .firstWhere((p) => p.descriptor.id == pluginId)
+          .descriptor
+          .name;
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(context.l10n.plugin_disableSuccess),
+            content: Text(context.l10n.plugin_disableSuccess(pluginName)),
             backgroundColor: Colors.orange,
           ),
         );
@@ -272,10 +277,15 @@ class _ExternalPluginManagementScreenState
       await _pluginManager.resumeExternalPlugin(pluginId);
       await _loadPlugins();
 
+      final pluginName = _pluginRuntimeInfos
+          .firstWhere((p) => p.descriptor.id == pluginId)
+          .descriptor
+          .name;
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(context.l10n.plugin_enableSuccess),
+            content: Text(context.l10n.plugin_enableSuccess(pluginName)),
             backgroundColor: Colors.green,
           ),
         );

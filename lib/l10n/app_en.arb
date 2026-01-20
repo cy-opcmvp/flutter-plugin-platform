@@ -128,6 +128,20 @@
   "plugin_switchFailed": "Failed to switch plugin: {message}",
   "plugin_closeSuccess": "Plugin {name} closed",
   "plugin_pauseSuccess": "Plugin {name} moved to background",
+  "plugin_disableSuccess": "Plugin {name} disabled",
+  "@plugin_disableSuccess": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "plugin_enableSuccess": "Plugin {name} enabled",
+  "@plugin_enableSuccess": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "button_disable": "Disable",
+  "button_enable": "Enable",
   "plugin_installSuccess": "Sample plugin installed successfully",
   "plugin_uninstallSuccess": "Plugin uninstalled successfully",
   "plugin_updateSuccess": "Plugin updated successfully. Rollback available if needed.",
@@ -764,6 +778,8 @@
   "json_editor_edit_json": "Edit JSON Configuration",
   "json_editor_reset_to_default": "Reset to Default",
   "json_editor_view_example": "View Configuration Example",
+  "json_editor_config_description": "Configuration File Description",
+  "settings_config_saved": "Settings saved",
 
   "close_dialog_title": "Close Confirmation",
   "close_dialog_message": "What would you like to do?",
