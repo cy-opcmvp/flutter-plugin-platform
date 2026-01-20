@@ -1,11 +1,10 @@
-#include "screenshot_plugin.h"
-
 // This namespace is required for Windows GDI+ and screen capture
+// NOMINMAX must be defined before any Windows headers
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
-#include <windows.h>
-#include <gdiplus.h>
+
+#include "screenshot_plugin.h"
 #include <shellapi.h>
 #include <comdef.h>
 #include <algorithm>
