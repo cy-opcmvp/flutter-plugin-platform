@@ -2284,6 +2284,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enable Countdown Notifications';
 
   @override
+  String get world_clock_enable_notifications_desc =>
+      'Show notification when countdown completes';
+
+  @override
   String get world_clock_setting_updateInterval => 'Update Interval';
 
   @override
@@ -2342,6 +2346,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get world_clock_countdown_almost_complete => 'Almost complete!';
+
+  @override
+  String world_clock_countdown_complete(Object title) {
+    return 'Countdown \"$title\" completed!';
+  }
 
   @override
   String world_clock_remaining_minutes(Object minutes) {

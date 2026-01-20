@@ -512,7 +512,7 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          l10n.screenshot_shortcut_edit_pending.replaceAll('{action}', action),
+          l10n.screenshot_shortcut_edit_pending(action),
         ),
         duration: const Duration(seconds: 2),
       ),

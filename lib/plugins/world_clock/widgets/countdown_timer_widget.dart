@@ -515,8 +515,7 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
       builder: (context) => AlertDialog(
         title: Text(l10n.world_clock_confirm_delete),
         content: Text(
-          l10n.world_clock_confirm_delete_countdown_message.replaceAll(
-            '{title}',
+          l10n.world_clock_confirm_delete_countdown_message(
             widget.countdownTimer.title,
           ),
         ),

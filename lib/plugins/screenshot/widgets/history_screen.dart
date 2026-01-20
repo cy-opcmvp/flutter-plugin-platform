@@ -245,7 +245,7 @@ class _ScreenshotThumbnail extends StatelessWidget {
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
-                  _formatDate(record.createdAt),
+                  _formatDate(context, record.createdAt),
                   style: const TextStyle(color: Colors.white, fontSize: 12),
                 ),
               ),
@@ -272,7 +272,7 @@ class _ScreenshotThumbnail extends StatelessWidget {
     }
   }
 
-  String _formatDate(DateTime date) {
+  String _formatDate(BuildContext context, DateTime date) {
     final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final diff = now.difference(date);
@@ -280,18 +280,13 @@ class _ScreenshotThumbnail extends StatelessWidget {
     if (diff.inMinutes < 1) {
       return l10n.screenshot_recent;
     } else if (diff.inHours < 1) {
-      return l10n.screenshot_minutes_ago.replaceAll(
-        '{minutes}',
-        '${diff.inMinutes}',
-      );
+      return l10n.screenshot_minutes_ago(diff.inMinutes);
     } else if (diff.inDays < 1) {
-      return l10n.screenshot_hours_ago.replaceAll('{hours}', '${diff.inHours}');
+      return l10n.screenshot_hours_ago(diff.inHours);
     } else if (diff.inDays < 7) {
-      return l10n.screenshot_days_ago.replaceAll('{days}', '${diff.inDays}');
+      return l10n.screenshot_days_ago(diff.inDays);
     } else {
-      return l10n.screenshot_date_format
-          .replaceAll('{month}', '${date.month}')
-          .replaceAll('{day}', '${date.day}');
+      return l10n.screenshot_date_format(date.month, date.day);
     }
   }
 }

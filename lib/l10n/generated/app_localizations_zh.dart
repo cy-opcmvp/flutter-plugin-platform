@@ -2206,6 +2206,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get world_clock_setting_enableNotifications => '启用倒计时通知';
 
   @override
+  String get world_clock_enable_notifications_desc => '倒计时完成时显示通知';
+
+  @override
   String get world_clock_setting_updateInterval => '更新间隔';
 
   @override
@@ -2263,6 +2266,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get world_clock_countdown_almost_complete => '即将完成！';
+
+  @override
+  String world_clock_countdown_complete(Object title) {
+    return '倒计时 \"$title\" 已完成！';
+  }
 
   @override
   String world_clock_remaining_minutes(Object minutes) {

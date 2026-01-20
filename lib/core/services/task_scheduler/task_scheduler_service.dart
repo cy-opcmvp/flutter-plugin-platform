@@ -305,7 +305,7 @@ class TaskSchedulerServiceImpl extends ITaskSchedulerService
     } catch (e, stackTrace) {
       if (kDebugMode) {
         debugPrint('TaskSchedulerService: Error executing task ${task.id}: $e');
-        debugPrint(stackTrace);
+        debugPrint('$stackTrace');
       }
 
       // Emit failure event

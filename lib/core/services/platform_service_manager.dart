@@ -40,7 +40,7 @@ class PlatformServiceManager {
     } catch (e, stackTrace) {
       if (kDebugMode) {
         debugPrint('$_tag: Initialization failed: $e');
-        debugPrint(stackTrace);
+        debugPrint('$stackTrace');
       }
       return false;
     }

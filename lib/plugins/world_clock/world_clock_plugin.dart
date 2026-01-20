@@ -98,14 +98,12 @@ class WorldClockPlugin extends PlatformPluginBase {
 
       final l10n = AppLocalizations.of(_context as BuildContext)!;
       await _context.platformServices.showNotification(
-        l10n.world_clock_plugin_initialized.replaceAll('{name}', name),
+        l10n.world_clock_plugin_initialized(name),
       );
     } catch (e) {
       final l10n = AppLocalizations.of(_context as BuildContext)!;
       await _context.platformServices.showNotification(
-        l10n.world_clock_plugin_init_failed
-            .replaceAll('{name}', name)
-            .replaceAll('{error}', e.toString()),
+        l10n.world_clock_plugin_init_failed(name, e.toString()),
       );
       rethrow;
     }
@@ -295,7 +293,7 @@ class WorldClockPlugin extends PlatformPluginBase {
     if (_settings.enableNotifications) {
       final l10n = AppLocalizations.of(_context as BuildContext)!;
       await _context.platformServices.showNotification(
-        l10n.world_clock_countdown_complete.replaceAll('{title}', timer.title),
+        l10n.world_clock_countdown_complete(timer.title),
       );
     }
   }

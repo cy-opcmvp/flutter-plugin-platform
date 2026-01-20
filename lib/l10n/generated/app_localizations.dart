@@ -4232,6 +4232,12 @@ abstract class AppLocalizations {
   /// **'启用倒计时通知'**
   String get world_clock_setting_enableNotifications;
 
+  /// No description provided for @world_clock_enable_notifications_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'倒计时完成时显示通知'**
+  String get world_clock_enable_notifications_desc;
+
   /// No description provided for @world_clock_setting_updateInterval.
   ///
   /// In zh, this message translates to:
@@ -4345,6 +4351,12 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'即将完成！'**
   String get world_clock_countdown_almost_complete;
+
+  /// No description provided for @world_clock_countdown_complete.
+  ///
+  /// In zh, this message translates to:
+  /// **'倒计时 \"{title}\" 已完成！'**
+  String world_clock_countdown_complete(Object title);
 
   /// No description provided for @world_clock_remaining_minutes.
   ///
