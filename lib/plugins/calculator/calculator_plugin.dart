@@ -4,6 +4,8 @@ import '../../core/interfaces/i_platform_plugin.dart';
 import '../../core/models/plugin_models.dart';
 import '../../core/utils/platform_capability_helper.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import 'models/calculator_settings.dart';
+import 'widgets/settings_screen.dart';
 
 /// A simple calculator plugin that demonstrates tool plugin implementation
 ///
@@ -14,6 +16,9 @@ class CalculatorPlugin extends PlatformPluginBase {
 
   // Calculator state - shared with the widget
   final CalculatorState calculatorState = CalculatorState();
+
+  // Calculator settings
+  CalculatorSettings _settings = CalculatorSettings.defaultSettings();
 
   @override
   String get id => 'com.example.calculator';
@@ -46,6 +51,12 @@ class CalculatorPlugin extends PlatformPluginBase {
   Future<void> initialize(PluginContext context) async {
     _context = context;
 
+    // Load saved settings if available
+    final savedSettings = await _context.dataStorage.retrieve<Map<String, dynamic>>('calculator_settings');
+    if (savedSettings != null) {
+      _settings = CalculatorSettings.fromJson(savedSettings);
+    }
+
     // Load saved state if available
     final savedState = await _context.dataStorage.retrieve<Map<String, dynamic>>('calculator_state');
     if (savedState != null) {
@@ -59,18 +70,35 @@ class CalculatorPlugin extends PlatformPluginBase {
     // In production, you might want to implement a different notification system
   }
 
+  /// 获取当前设置
+  CalculatorSettings get settings => _settings;
+
+  /// 更新设置
+  void updateSettings(CalculatorSettings settings) {
+    _settings = settings;
+    _saveSettings();
+  }
+
   @override
   Future<void> dispose() async {
     await _saveState();
+    await _saveSettings();
     // Note: Notifications skipped as we need BuildContext for localization
   }
 
   @override
   Widget buildUI(BuildContext context) {
     return CalculatorWidget(
+      plugin: this,
       state: calculatorState,
+      settings: _settings,
       onStateChanged: _saveState,
     );
+  }
+
+  /// 构建设置界面
+  Widget buildSettingsScreen() {
+    return CalculatorSettingsScreen(plugin: this);
   }
 
   Future<void> _saveState() async {
@@ -81,6 +109,10 @@ class CalculatorPlugin extends PlatformPluginBase {
       'waitingForOperand': calculatorState.waitingForOperand,
     };
     await _context.dataStorage.store('calculator_state', state);
+  }
+
+  Future<void> _saveSettings() async {
+    await _context.dataStorage.store('calculator_settings', _settings.toJson());
   }
 
   @override
@@ -128,12 +160,16 @@ class CalculatorState {
 
 /// StatefulWidget for calculator UI
 class CalculatorWidget extends StatefulWidget {
+  final CalculatorPlugin plugin;
   final CalculatorState state;
+  final CalculatorSettings settings;
   final VoidCallback onStateChanged;
 
   const CalculatorWidget({
     super.key,
+    required this.plugin,
     required this.state,
+    required this.settings,
     required this.onStateChanged,
   });
 
@@ -152,6 +188,19 @@ class _CalculatorWidgetState extends State<CalculatorWidget> {
       appBar: AppBar(
         title: Text(l10n.plugin_calculator_name),
         backgroundColor: Colors.blue,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => widget.plugin.buildSettingsScreen(),
+                ),
+              );
+            },
+            tooltip: l10n.calculator_settings_title,
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -169,7 +218,7 @@ class _CalculatorWidgetState extends State<CalculatorWidget> {
                   // Show operation indicator
                   if (_state.previousValue.isNotEmpty)
                     Text(
-                      '${_state.previousValue} ${_state.operation}',
+                      _formatNumber(_state.previousValue) + ' ${_state.operation}',
                       style: TextStyle(
                         color: Colors.grey[400],
                         fontSize: 20,
@@ -177,7 +226,7 @@ class _CalculatorWidgetState extends State<CalculatorWidget> {
                     ),
                   const SizedBox(height: 8),
                   Text(
-                    _state.display,
+                    _formatNumber(_state.display),
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 48,
@@ -365,19 +414,67 @@ class _CalculatorWidgetState extends State<CalculatorWidget> {
   String _formatResult(double result) {
     // Handle very large or very small numbers
     if (result.abs() > 1e12 || (result != 0 && result.abs() < 1e-10)) {
-      return result.toStringAsExponential(6);
+      return result.toStringAsExponential(widget.settings.precision);
     }
-    
+
     if (result == result.toInt()) {
-      return result.toInt().toString();
+      // 整数：应用千分位分隔符
+      return _formatNumber(result.toInt());
     } else {
-      // Limit decimal places to avoid floating point display issues
-      String str = result.toStringAsFixed(10);
-      // Remove trailing zeros
+      // 小数：使用配置的精度
+      final precision = widget.settings.precision;
+      String str = result.toStringAsFixed(precision);
+      // 移除末尾的0
       str = str.replaceAll(RegExp(r'0+$'), '');
       str = str.replaceAll(RegExp(r'\.$'), '');
+
+      // 应用千分位分隔符
+      return _formatNumber(str);
+    }
+  }
+
+  /// 格式化数字字符串，添加千分位分隔符
+  String _formatNumber(dynamic number) {
+    final String str = number.toString();
+
+    // 分离整数和小数部分
+    final parts = str.split('.');
+    final integerPart = parts[0];
+    final decimalPart = parts.length > 1 ? '.${parts[1]}' : '';
+
+    if (!widget.settings.showGroupingSeparator) {
       return str;
     }
+
+    // 处理负号
+    String sign = '';
+    String absInteger = integerPart;
+    if (integerPart.startsWith('-')) {
+      sign = '-';
+      absInteger = integerPart.substring(1);
+    }
+
+    // 添加千分位分隔符
+    final formatted = _addGroupingSeparators(absInteger);
+
+    return '$sign$formatted$decimalPart';
+  }
+
+  /// 为整数部分添加千分位分隔符
+  String _addGroupingSeparators(String integer) {
+    final buffer = StringBuffer();
+    int count = 0;
+
+    for (int i = integer.length - 1; i >= 0; i--) {
+      buffer.write(integer[i]);
+      count++;
+      if (count == 3 && i != 0) {
+        buffer.write(',');
+        count = 0;
+      }
+    }
+
+    return buffer.toString().split('').reversed.join('');
   }
 
   void _addDigit(String digit) {

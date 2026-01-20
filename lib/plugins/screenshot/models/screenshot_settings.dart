@@ -1,5 +1,7 @@
 library;
 
+import '../../../core/models/base_plugin_settings.dart';
+
 /// 剪贴板内容类型
 enum ClipboardContentType {
   /// 复制图片本身
@@ -33,7 +35,11 @@ extension ClipboardContentTypeExtension on ClipboardContentType {
 }
 
 /// 截图插件设置模型
-class ScreenshotSettings {
+class ScreenshotSettings extends BasePluginSettings {
+  /// 配置版本
+  @override
+  final String version;
+
   /// 保存路径
   final String savePath;
 
@@ -70,7 +76,8 @@ class ScreenshotSettings {
   /// 钉图设置
   final PinSettings pinSettings;
 
-  const ScreenshotSettings({
+  ScreenshotSettings({
+    this.version = '1.0.0',
     required this.savePath,
     this.filenameFormat = 'screenshot_{timestamp}',
     this.imageFormat = ImageFormat.png,
@@ -88,6 +95,7 @@ class ScreenshotSettings {
   /// 默认设置
   factory ScreenshotSettings.defaultSettings() {
     return ScreenshotSettings(
+      version: '1.0.0',
       savePath: '{documents}/Screenshots',
       clipboardContentType: ClipboardContentType.image,
       shortcuts: {
@@ -104,6 +112,7 @@ class ScreenshotSettings {
   /// 从 JSON 创建实例
   factory ScreenshotSettings.fromJson(Map<String, dynamic> json) {
     return ScreenshotSettings(
+      version: json['version'] as String? ?? '1.0.0',
       savePath: json['savePath'] as String? ?? '{documents}/Screenshots',
       filenameFormat: json['filenameFormat'] as String? ?? 'screenshot_{timestamp}',
       imageFormat: ImageFormat.values.firstWhere(
@@ -132,8 +141,10 @@ class ScreenshotSettings {
   }
 
   /// 转换为 JSON
+  @override
   Map<String, dynamic> toJson() {
     return {
+      'version': version,
       'savePath': savePath,
       'filenameFormat': filenameFormat,
       'imageFormat': imageFormat.name,
@@ -150,7 +161,9 @@ class ScreenshotSettings {
   }
 
   /// 复制并修改部分设置
+  @override
   ScreenshotSettings copyWith({
+    String? version,
     String? savePath,
     String? filenameFormat,
     ImageFormat? imageFormat,
@@ -165,6 +178,7 @@ class ScreenshotSettings {
     PinSettings? pinSettings,
   }) {
     return ScreenshotSettings(
+      version: version ?? this.version,
       savePath: savePath ?? this.savePath,
       filenameFormat: filenameFormat ?? this.filenameFormat,
       imageFormat: imageFormat ?? this.imageFormat,
@@ -181,6 +195,7 @@ class ScreenshotSettings {
   }
 
   /// 验证设置是否有效
+  @override
   bool isValid() {
     return savePath.isNotEmpty &&
         imageQuality >= 1 &&

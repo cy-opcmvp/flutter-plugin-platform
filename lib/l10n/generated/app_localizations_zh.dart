@@ -236,12 +236,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get button_uninstall => '卸载';
 
   @override
-  String get button_enable => '启用';
-
-  @override
-  String get button_disable => '禁用';
-
-  @override
   String get button_update => '更新';
 
   @override
@@ -278,12 +272,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get autoStartDisabled => '开机自启：已关闭';
 
   @override
-  String get plugin_enabled => '已启用';
-
-  @override
-  String get plugin_disabled => '已禁用';
-
-  @override
   String get dialog_confirmTitle => '确认操作';
 
   @override
@@ -313,12 +301,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get plugin_externalTitle => '外部插件';
-
-  @override
-  String get plugin_statusEnabled => '已启用';
-
-  @override
-  String get plugin_statusDisabled => '已禁用';
 
   @override
   String get plugin_statusActive => '运行中';
@@ -394,12 +376,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String plugin_pauseSuccess(String name) {
     return '插件 $name 已移至后台';
   }
-
-  @override
-  String get plugin_enableSuccess => '插件已启用';
-
-  @override
-  String get plugin_disableSuccess => '插件已禁用';
 
   @override
   String get plugin_installSuccess => '示例插件安装成功';
@@ -830,9 +806,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get plugin_detailsState => '状态';
-
-  @override
-  String get plugin_detailsEnabled => '已启用';
 
   @override
   String get plugin_detailsType => '类型';
@@ -2135,4 +2108,117 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get plugin_view_list => '列表';
+
+  @override
+  String get calculator_settings_title => '计算器设置';
+
+  @override
+  String get calculator_settings_basic => '基础设置';
+
+  @override
+  String get calculator_settings_display => '显示设置';
+
+  @override
+  String get calculator_settings_interaction => '交互设置';
+
+  @override
+  String get calculator_setting_precision => '计算精度';
+
+  @override
+  String get calculator_decimal_places => '位小数';
+
+  @override
+  String get calculator_setting_angleMode => '角度模式';
+
+  @override
+  String get calculator_angle_mode_degrees => '角度制';
+
+  @override
+  String get calculator_angle_mode_radians => '弧度制';
+
+  @override
+  String get calculator_angle_mode_degrees_short => '角度';
+
+  @override
+  String get calculator_angle_mode_radians_short => '弧度';
+
+  @override
+  String get calculator_setting_historySize => '历史记录大小';
+
+  @override
+  String calculator_history_size_description(Object count) {
+    return '保存最近 $count 条计算记录';
+  }
+
+  @override
+  String get calculator_setting_showGroupingSeparator => '显示千分位分隔符';
+
+  @override
+  String get calculator_grouping_separator_description =>
+      '在大数字中显示逗号分隔，如 1,234.56';
+
+  @override
+  String get calculator_setting_enableVibration => '启用振动反馈';
+
+  @override
+  String get calculator_vibration_description => '按键时触觉反馈';
+
+  @override
+  String get calculator_setting_buttonSoundVolume => '按键音效音量';
+
+  @override
+  String get calculator_config_name => '计算器配置';
+
+  @override
+  String get calculator_config_description => '自定义计算器的计算精度、角度模式和历史记录';
+
+  @override
+  String get calculator_settings_saved => '配置已保存';
+
+  @override
+  String get world_clock_settings_title => '世界时钟设置';
+
+  @override
+  String get world_clock_settings_basic => '基础设置';
+
+  @override
+  String get world_clock_settings_display => '显示设置';
+
+  @override
+  String get world_clock_settings_notification => '通知设置';
+
+  @override
+  String get world_clock_setting_defaultTimeZone => '默认时区';
+
+  @override
+  String get world_clock_setting_timeFormat => '时间格式';
+
+  @override
+  String get world_clock_time_format_12h => '12小时制';
+
+  @override
+  String get world_clock_time_format_24h => '24小时制';
+
+  @override
+  String get world_clock_setting_showSeconds => '显示秒数';
+
+  @override
+  String get world_clock_setting_enableNotifications => '启用倒计时通知';
+
+  @override
+  String get world_clock_setting_updateInterval => '更新间隔';
+
+  @override
+  String world_clock_update_interval_description(Object ms) {
+    return '每 $ms 毫秒更新一次';
+  }
+
+  @override
+  String get world_clock_config_name => '世界时钟配置';
+
+  @override
+  String get world_clock_config_description => '自定义世界时钟的时区、显示格式和通知';
+
+  @override
+  String get world_clock_settings_saved => '配置已保存';
 }

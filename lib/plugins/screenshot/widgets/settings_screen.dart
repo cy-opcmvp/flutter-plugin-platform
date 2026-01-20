@@ -53,29 +53,14 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
         foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
         elevation: 0,
       ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          // 如果高度太小，使用 SingleChildScrollView
-          if (constraints.maxHeight < 600) {
-            return SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                child: _buildContent(context, l10n),
-              ),
-            );
-          }
-          // 否则使用 ListView
-          return Padding(
-            padding: EdgeInsets.only(
-              left: 16.0,
-              right: 16.0,
-              top: 16.0,
-              bottom: MediaQuery.of(context).padding.bottom + 16.0,
-            ),
-            child: _buildContent(context, l10n),
-          );
-        },
+      body: SingleChildScrollView(
+        padding: EdgeInsets.only(
+          left: 16.0,
+          right: 16.0,
+          top: 16.0,
+          bottom: MediaQuery.of(context).padding.bottom + 16.0,
+        ),
+        child: _buildContent(context, l10n),
       ),
     );
   }
@@ -120,11 +105,6 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
         _buildPinSettingsTiles(l10n),
 
         const SizedBox(height: 32),
-
-        // 保存按钮
-        _buildSaveButton(l10n),
-
-        const SizedBox(height: 24),
 
         // JSON 编辑器入口
         _buildJsonEditorSection(context, l10n),
@@ -234,10 +214,15 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
         maxLines: 2,
       ),
       value: _settings.autoCopyToClipboard,
-      onChanged: (value) {
-        setState(() {
-          _settings = _settings.copyWith(autoCopyToClipboard: value);
-        });
+      onChanged: (value) async {
+        final newSettings = _settings.copyWith(autoCopyToClipboard: value);
+        await widget.plugin.updateSettings(newSettings);
+        if (mounted) {
+          setState(() {
+            _settings = newSettings;
+          });
+          _showSuccessMessage();
+        }
       },
       contentPadding: EdgeInsets.zero,
     );
@@ -290,10 +275,15 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
         maxLines: 2,
       ),
       value: _settings.showPreview,
-      onChanged: (value) {
-        setState(() {
-          _settings = _settings.copyWith(showPreview: value);
-        });
+      onChanged: (value) async {
+        final newSettings = _settings.copyWith(showPreview: value);
+        await widget.plugin.updateSettings(newSettings);
+        if (mounted) {
+          setState(() {
+            _settings = newSettings;
+          });
+          _showSuccessMessage();
+        }
       },
       contentPadding: EdgeInsets.zero,
     );
@@ -313,10 +303,15 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
         maxLines: 2,
       ),
       value: _settings.saveHistory,
-      onChanged: (value) {
-        setState(() {
-          _settings = _settings.copyWith(saveHistory: value);
-        });
+      onChanged: (value) async {
+        final newSettings = _settings.copyWith(saveHistory: value);
+        await widget.plugin.updateSettings(newSettings);
+        if (mounted) {
+          setState(() {
+            _settings = newSettings;
+          });
+          _showSuccessMessage();
+        }
       },
       contentPadding: EdgeInsets.zero,
     );
@@ -378,12 +373,17 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
             maxLines: 2,
           ),
           value: _settings.pinSettings.alwaysOnTop,
-          onChanged: (value) {
-            setState(() {
-              _settings = _settings.copyWith(
-                pinSettings: _settings.pinSettings.copyWith(alwaysOnTop: value),
-              );
-            });
+          onChanged: (value) async {
+            final newSettings = _settings.copyWith(
+              pinSettings: _settings.pinSettings.copyWith(alwaysOnTop: value),
+            );
+            await widget.plugin.updateSettings(newSettings);
+            if (mounted) {
+              setState(() {
+                _settings = newSettings;
+              });
+              _showSuccessMessage();
+            }
           },
           contentPadding: EdgeInsets.zero,
         ),
@@ -405,30 +405,21 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
     );
   }
 
-  /// 构建保存按钮
-  Widget _buildSaveButton(AppLocalizations l10n) {
-    return SizedBox(
-      width: double.infinity,
-      child: FilledButton(
-        onPressed: _saveSettings,
-        style: FilledButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        ),
-        child: Text(l10n.screenshot_settings_save),
-      ),
-    );
-  }
-
   /// 选择保存路径
   void _selectSavePath() {
     showDialog(
       context: context,
       builder: (context) => _SavePathDialog(
         currentPath: _settings.savePath,
-        onSave: (path) {
-          setState(() {
-            _settings = _settings.copyWith(savePath: path);
-          });
+        onSave: (path) async {
+          final newSettings = _settings.copyWith(savePath: path);
+          await widget.plugin.updateSettings(newSettings);
+          if (mounted) {
+            setState(() {
+              _settings = newSettings;
+            });
+            _showSuccessMessage();
+          }
         },
       ),
     );
@@ -440,10 +431,15 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
       context: context,
       builder: (context) => _FilenameFormatDialog(
         currentFormat: _settings.filenameFormat,
-        onSave: (format) {
-          setState(() {
-            _settings = _settings.copyWith(filenameFormat: format);
-          });
+        onSave: (format) async {
+          final newSettings = _settings.copyWith(filenameFormat: format);
+          await widget.plugin.updateSettings(newSettings);
+          if (mounted) {
+            setState(() {
+              _settings = newSettings;
+            });
+            _showSuccessMessage();
+          }
         },
       ),
     );
@@ -455,10 +451,15 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
       context: context,
       builder: (context) => _ImageFormatDialog(
         currentFormat: _settings.imageFormat,
-        onSave: (format) {
-          setState(() {
-            _settings = _settings.copyWith(imageFormat: format);
-          });
+        onSave: (format) async {
+          final newSettings = _settings.copyWith(imageFormat: format);
+          await widget.plugin.updateSettings(newSettings);
+          if (mounted) {
+            setState(() {
+              _settings = newSettings;
+            });
+            _showSuccessMessage();
+          }
         },
       ),
     );
@@ -470,10 +471,15 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
       context: context,
       builder: (context) => _ClipboardContentTypeDialog(
         currentType: _settings.clipboardContentType,
-        onSave: (type) {
-          setState(() {
-            _settings = _settings.copyWith(clipboardContentType: type);
-          });
+        onSave: (type) async {
+          final newSettings = _settings.copyWith(clipboardContentType: type);
+          await widget.plugin.updateSettings(newSettings);
+          if (mounted) {
+            setState(() {
+              _settings = newSettings;
+            });
+            _showSuccessMessage();
+          }
         },
       ),
     );
@@ -487,9 +493,14 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
     );
 
     if (quality != null) {
-      setState(() {
-        _settings = _settings.copyWith(imageQuality: quality);
-      });
+      final newSettings = _settings.copyWith(imageQuality: quality);
+      await widget.plugin.updateSettings(newSettings);
+      if (mounted) {
+        setState(() {
+          _settings = newSettings;
+        });
+        _showSuccessMessage();
+      }
     }
   }
 
@@ -501,9 +512,14 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
     );
 
     if (count != null) {
-      setState(() {
-        _settings = _settings.copyWith(maxHistoryCount: count);
-      });
+      final newSettings = _settings.copyWith(maxHistoryCount: count);
+      await widget.plugin.updateSettings(newSettings);
+      if (mounted) {
+        setState(() {
+          _settings = newSettings;
+        });
+        _showSuccessMessage();
+      }
     }
   }
 
@@ -525,27 +541,28 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
     );
 
     if (opacity != null) {
-      setState(() {
-        _settings = _settings.copyWith(
-          pinSettings: _settings.pinSettings.copyWith(defaultOpacity: opacity),
-        );
-      });
+      final newSettings = _settings.copyWith(
+        pinSettings: _settings.pinSettings.copyWith(defaultOpacity: opacity),
+      );
+      await widget.plugin.updateSettings(newSettings);
+      if (mounted) {
+        setState(() {
+          _settings = newSettings;
+        });
+        _showSuccessMessage();
+      }
     }
   }
 
-  /// 保存设置
-  void _saveSettings() async {
-    await widget.plugin.updateSettings(_settings);
-    if (mounted) {
-      final l10n = AppLocalizations.of(context)!;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.screenshot_settings_saved),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-      Navigator.of(context).pop();
-    }
+  /// 显示成功消息
+  void _showSuccessMessage() {
+    final l10n = AppLocalizations.of(context)!;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(l10n.screenshot_settings_saved),
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   /// 格式化图片格式名称
@@ -616,19 +633,33 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
             const SizedBox(height: 16),
             // 使用 Wrap 在小屏幕时自动换行
             Wrap(
-              spacing: 12,
-              runSpacing: 12,
+              spacing: 8,
+              runSpacing: 8,
               alignment: WrapAlignment.start,
               children: [
                 OutlinedButton.icon(
                   onPressed: () => _openJsonEditor(context, false),
-                  icon: const Icon(Icons.edit, size: 18),
-                  label: Text(l10n.json_editor_edit_json),
+                  icon: const Icon(Icons.edit, size: 16),
+                  label: Text(
+                    l10n.json_editor_edit_json,
+                    style: TextStyle(fontSize: 13),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  ),
                 ),
                 OutlinedButton.icon(
                   onPressed: () => _openJsonEditor(context, true),
-                  icon: const Icon(Icons.restore, size: 18),
-                  label: Text(l10n.json_editor_reset_to_default),
+                  icon: const Icon(Icons.restore, size: 16),
+                  label: Text(
+                    l10n.json_editor_reset_to_default,
+                    style: TextStyle(fontSize: 13),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  ),
                 ),
               ],
             ),

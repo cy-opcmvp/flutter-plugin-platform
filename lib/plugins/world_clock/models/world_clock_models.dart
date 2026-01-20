@@ -17,18 +17,46 @@ class WorldClockItem {
     // 注意：这是一个简化的实现
     // 在实际应用中，应该使用更精确的时区处理库，如 timezone 包
     final now = DateTime.now().toUtc();
-    
+
     // 简单的时区偏移映射
     final offsetHours = _getTimeZoneOffset(timeZone);
     return now.add(Duration(hours: offsetHours));
   }
 
   /// 获取格式化的时间字符串
-  String get formattedTime {
+  /// timeFormat: '12h' 或 '24h'
+  String getFormattedTime(String timeFormat, {bool showSeconds = true}) {
     final time = currentTime;
-    return '${time.hour.toString().padLeft(2, '0')}:'
-           '${time.minute.toString().padLeft(2, '0')}:'
-           '${time.second.toString().padLeft(2, '0')}';
+    final hour = time.hour;
+    final minute = time.minute;
+    final second = time.second;
+
+    String timeStr;
+    if (timeFormat == '12h') {
+      // 12小时制
+      final period = hour >= 12 ? 'PM' : 'AM';
+      final displayHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+      timeStr = '${displayHour.toString().padLeft(2, '0')}:'
+                '${minute.toString().padLeft(2, '0')}';
+      if (showSeconds) {
+        timeStr += ':${second.toString().padLeft(2, '0')}';
+      }
+      timeStr += ' $period';
+    } else {
+      // 24小时制
+      timeStr = '${hour.toString().padLeft(2, '0')}:'
+               '${minute.toString().padLeft(2, '0')}';
+      if (showSeconds) {
+        timeStr += ':${second.toString().padLeft(2, '0')}';
+      }
+    }
+    return timeStr;
+  }
+
+  /// 获取格式化的时间字符串（24小时制，兼容旧代码）
+  @deprecated
+  String get formattedTime {
+    return getFormattedTime('24h', showSeconds: true);
   }
 
   /// 获取格式化的日期字符串

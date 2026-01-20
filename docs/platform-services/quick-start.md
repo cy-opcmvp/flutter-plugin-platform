@@ -11,7 +11,7 @@ flutter run
 启动后点击主界面右上角的 🔬 图标进入服务测试界面。
 
 ### 快速文档
-- **[快速开始指南](docs/platform-services/PLATFORM_SERVICES_README.md)** - 5分钟上手
+- **[快速开始指南](docs/platform-services/quick-start.md)** - 5分钟上手
 - **[完整文档中心](docs/platform-services/)** - 所有文档索引
 
 ## 🎯 核心功能
@@ -62,7 +62,7 @@ await PlatformServiceManager.taskScheduler.scheduleOneShotTask(
 
 ### 用户文档
 - [快速开始指南](docs/platform-services/PLATFORM_SERVICES_README.md)
-- [用户使用指南](docs/guides/PLATFORM_SERVICES_USER_GUIDE.md)
+- [用户使用指南](docs/guides/platform-services-user-guide.md)
 
 ### 技术文档
 - [服务架构设计](docs/.kiro/specs/platform-services/design.md)
@@ -132,7 +132,7 @@ flutter test test/core/interfaces/service_locator_test.dart
 ## 📞 获取帮助
 
 1. 查看 [快速开始指南](docs/platform-services/PLATFORM_SERVICES_README.md)
-2. 阅读 [用户使用指南](docs/guides/PLATFORM_SERVICES_USER_GUIDE.md)
+2. 阅读 [用户使用指南](docs/guides/platform-services-user-guide.md)
 3. 查看 [完整文档中心](docs/platform-services/)
 
 ---

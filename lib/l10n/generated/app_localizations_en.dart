@@ -238,12 +238,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get button_uninstall => 'Uninstall';
 
   @override
-  String get button_enable => 'Enable';
-
-  @override
-  String get button_disable => 'Disable';
-
-  @override
   String get button_update => 'Update';
 
   @override
@@ -280,12 +274,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get autoStartDisabled => 'Auto-start: Disabled';
 
   @override
-  String get plugin_enabled => 'Enabled';
-
-  @override
-  String get plugin_disabled => 'Disabled';
-
-  @override
   String get dialog_confirmTitle => 'Confirm Action';
 
   @override
@@ -319,12 +307,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get plugin_externalTitle => 'External Plugins';
-
-  @override
-  String get plugin_statusEnabled => 'Enabled';
-
-  @override
-  String get plugin_statusDisabled => 'Disabled';
 
   @override
   String get plugin_statusActive => 'Active';
@@ -401,12 +383,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String plugin_pauseSuccess(String name) {
     return 'Plugin $name moved to background';
   }
-
-  @override
-  String get plugin_enableSuccess => 'Plugin enabled';
-
-  @override
-  String get plugin_disableSuccess => 'Plugin disabled';
 
   @override
   String get plugin_installSuccess => 'Sample plugin installed successfully';
@@ -844,9 +820,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get plugin_detailsState => 'State';
-
-  @override
-  String get plugin_detailsEnabled => 'Enabled';
 
   @override
   String get plugin_detailsType => 'Type';
@@ -2210,4 +2183,121 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get plugin_view_list => 'List';
+
+  @override
+  String get calculator_settings_title => 'Calculator Settings';
+
+  @override
+  String get calculator_settings_basic => 'Basic Settings';
+
+  @override
+  String get calculator_settings_display => 'Display Settings';
+
+  @override
+  String get calculator_settings_interaction => 'Interaction Settings';
+
+  @override
+  String get calculator_setting_precision => 'Precision';
+
+  @override
+  String get calculator_decimal_places => 'decimal places';
+
+  @override
+  String get calculator_setting_angleMode => 'Angle Mode';
+
+  @override
+  String get calculator_angle_mode_degrees => 'Degrees';
+
+  @override
+  String get calculator_angle_mode_radians => 'Radians';
+
+  @override
+  String get calculator_angle_mode_degrees_short => 'Deg';
+
+  @override
+  String get calculator_angle_mode_radians_short => 'Rad';
+
+  @override
+  String get calculator_setting_historySize => 'History Size';
+
+  @override
+  String calculator_history_size_description(Object count) {
+    return 'Save last $count calculations';
+  }
+
+  @override
+  String get calculator_setting_showGroupingSeparator =>
+      'Show Grouping Separator';
+
+  @override
+  String get calculator_grouping_separator_description =>
+      'Show commas in large numbers, like 1,234.56';
+
+  @override
+  String get calculator_setting_enableVibration => 'Enable Vibration';
+
+  @override
+  String get calculator_vibration_description => 'Haptic feedback on key press';
+
+  @override
+  String get calculator_setting_buttonSoundVolume => 'Button Sound Volume';
+
+  @override
+  String get calculator_config_name => 'Calculator Configuration';
+
+  @override
+  String get calculator_config_description =>
+      'Customize calculator precision, angle mode, and history';
+
+  @override
+  String get calculator_settings_saved => 'Settings saved';
+
+  @override
+  String get world_clock_settings_title => 'World Clock Settings';
+
+  @override
+  String get world_clock_settings_basic => 'Basic Settings';
+
+  @override
+  String get world_clock_settings_display => 'Display Settings';
+
+  @override
+  String get world_clock_settings_notification => 'Notification Settings';
+
+  @override
+  String get world_clock_setting_defaultTimeZone => 'Default Time Zone';
+
+  @override
+  String get world_clock_setting_timeFormat => 'Time Format';
+
+  @override
+  String get world_clock_time_format_12h => '12-hour';
+
+  @override
+  String get world_clock_time_format_24h => '24-hour';
+
+  @override
+  String get world_clock_setting_showSeconds => 'Show Seconds';
+
+  @override
+  String get world_clock_setting_enableNotifications =>
+      'Enable Countdown Notifications';
+
+  @override
+  String get world_clock_setting_updateInterval => 'Update Interval';
+
+  @override
+  String world_clock_update_interval_description(Object ms) {
+    return 'Update every $ms milliseconds';
+  }
+
+  @override
+  String get world_clock_config_name => 'World Clock Configuration';
+
+  @override
+  String get world_clock_config_description =>
+      'Customize world clock time zone, display format, and notifications';
+
+  @override
+  String get world_clock_settings_saved => 'Settings saved';
 }

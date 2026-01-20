@@ -89,36 +89,6 @@ class _PluginManagementScreenState extends State<PluginManagementScreen> {
     return filtered;
   }
 
-  Future<void> _togglePluginEnabled(String pluginId, bool enabled) async {
-    try {
-      if (enabled) {
-        await _pluginManager.enablePlugin(pluginId);
-      } else {
-        await _pluginManager.disablePlugin(pluginId);
-      }
-      await _loadPlugins();
-      
-      if (mounted) {
-        final l10n = context.l10n;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(enabled ? l10n.plugin_enableSuccess : l10n.plugin_disableSuccess),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.l10n.plugin_operationFailed(e.toString())),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
   Future<void> _uninstallPlugin(String pluginId) async {
     final l10n = context.l10n;
     final confirmed = await showDialog<bool>(
@@ -171,7 +141,6 @@ class _PluginManagementScreenState extends State<PluginManagementScreen> {
       context: context,
       builder: (context) => PluginDetailsDialog(
         pluginInfo: pluginInfo,
-        onToggleEnabled: (enabled) => _togglePluginEnabled(pluginInfo.descriptor.id, enabled),
         onUninstall: () => _uninstallPlugin(pluginInfo.descriptor.id),
       ),
     );
@@ -381,7 +350,6 @@ class _PluginManagementScreenState extends State<PluginManagementScreen> {
         return PluginCard(
           pluginInfo: pluginInfo,
           onTap: () => _showPluginDetails(pluginInfo),
-          onToggleEnabled: (enabled) => _togglePluginEnabled(pluginInfo.descriptor.id, enabled),
           onUninstall: () => _uninstallPlugin(pluginInfo.descriptor.id),
         );
       },

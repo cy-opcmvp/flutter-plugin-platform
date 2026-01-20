@@ -49,14 +49,12 @@ enum SecurityLevel {
 /// Plugin registry entry
 class PluginRegistryEntry {
   final PluginDescriptor descriptor;
-  final bool isEnabled;
   final DateTime installedAt;
   final DateTime? lastUsed;
   final SecurityLevel securityLevel;
 
   const PluginRegistryEntry({
     required this.descriptor,
-    required this.isEnabled,
     required this.installedAt,
     this.lastUsed,
     required this.securityLevel,
@@ -65,7 +63,6 @@ class PluginRegistryEntry {
   Map<String, dynamic> toJson() {
     return {
       'descriptor': descriptor.toJson(),
-      'isEnabled': isEnabled,
       'installedAt': installedAt.toIso8601String(),
       'lastUsed': lastUsed?.toIso8601String(),
       'securityLevel': securityLevel.name,
@@ -75,7 +72,6 @@ class PluginRegistryEntry {
   factory PluginRegistryEntry.fromJson(Map<String, dynamic> json) {
     return PluginRegistryEntry(
       descriptor: PluginDescriptor.fromJson(json['descriptor']),
-      isEnabled: json['isEnabled'] as bool,
       installedAt: DateTime.parse(json['installedAt']),
       lastUsed: json['lastUsed'] != null ? DateTime.parse(json['lastUsed']) : null,
       securityLevel: SecurityLevel.values.firstWhere((e) => e.name == json['securityLevel']),
@@ -147,14 +143,10 @@ class PluginManager implements IPluginManager {
       throw PluginException('Invalid plugin descriptor', pluginId: descriptor.id);
     }
 
-    // Check if plugin is registered and enabled
+    // Check if plugin is registered
     final registryEntry = _pluginRegistry[descriptor.id];
     if (registryEntry == null) {
       throw PluginException('Plugin ${descriptor.id} is not registered');
-    }
-    
-    if (!registryEntry.isEnabled) {
-      throw PluginException('Plugin ${descriptor.id} is disabled');
     }
 
     try {
@@ -357,7 +349,6 @@ class PluginManager implements IPluginManager {
 
     final entry = PluginRegistryEntry(
       descriptor: descriptor,
-      isEnabled: true,
       installedAt: DateTime.now(),
       securityLevel: SecurityLevel.medium, // Default security level
     );
@@ -425,79 +416,6 @@ class PluginManager implements IPluginManager {
   }
 
   @override
-  Future<void> enablePlugin(String pluginId) async {
-    _ensureInitialized();
-    
-    final entry = _pluginRegistry[pluginId];
-    if (entry == null) {
-      throw PluginException('Plugin $pluginId is not registered');
-    }
-
-    if (entry.isEnabled) {
-      return; // Already enabled
-    }
-
-    final updatedEntry = PluginRegistryEntry(
-      descriptor: entry.descriptor,
-      isEnabled: true,
-      installedAt: entry.installedAt,
-      lastUsed: entry.lastUsed,
-      securityLevel: entry.securityLevel,
-    );
-
-    _pluginRegistry[pluginId] = updatedEntry;
-    await _savePluginRegistry();
-
-    _eventController.add(PluginEvent(
-      type: PluginEventType.enabled,
-      pluginId: pluginId,
-      timestamp: DateTime.now(),
-    ));
-  }
-
-  @override
-  Future<void> disablePlugin(String pluginId) async {
-    _ensureInitialized();
-    
-    final entry = _pluginRegistry[pluginId];
-    if (entry == null) {
-      throw PluginException('Plugin $pluginId is not registered');
-    }
-
-    // Unload plugin if it's currently loaded
-    if (_activePlugins.containsKey(pluginId)) {
-      await unloadPlugin(pluginId);
-    }
-
-    if (!entry.isEnabled) {
-      return; // Already disabled
-    }
-
-    final updatedEntry = PluginRegistryEntry(
-      descriptor: entry.descriptor,
-      isEnabled: false,
-      installedAt: entry.installedAt,
-      lastUsed: entry.lastUsed,
-      securityLevel: entry.securityLevel,
-    );
-
-    _pluginRegistry[pluginId] = updatedEntry;
-    await _savePluginRegistry();
-
-    _eventController.add(PluginEvent(
-      type: PluginEventType.disabled,
-      pluginId: pluginId,
-      timestamp: DateTime.now(),
-    ));
-  }
-
-  @override
-  bool isPluginEnabled(String pluginId) {
-    _ensureInitialized();
-    return _pluginRegistry[pluginId]?.isEnabled ?? false;
-  }
-
-  @override
   Future<PluginInfo?> getPluginInfo(String pluginId) async {
     _ensureInitialized();
     
@@ -510,7 +428,6 @@ class PluginManager implements IPluginManager {
     return PluginInfo(
       descriptor: entry.descriptor,
       state: state,
-      isEnabled: entry.isEnabled,
       installedAt: entry.installedAt,
       lastUsed: entry.lastUsed,
     );
@@ -647,7 +564,6 @@ class PluginManager implements IPluginManager {
     for (final descriptor in exampleDescriptors) {
       final entry = PluginRegistryEntry(
         descriptor: descriptor,
-        isEnabled: true,
         installedAt: DateTime.now(),
         securityLevel: SecurityLevel.low,
       );
@@ -685,7 +601,6 @@ class PluginManager implements IPluginManager {
     if (entry != null) {
       final updatedEntry = PluginRegistryEntry(
         descriptor: entry.descriptor,
-        isEnabled: entry.isEnabled,
         installedAt: entry.installedAt,
         lastUsed: DateTime.now(),
         securityLevel: entry.securityLevel,

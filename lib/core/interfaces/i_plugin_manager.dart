@@ -39,16 +39,7 @@ abstract class IPluginManager {
   
   /// Uninstall a plugin completely
   Future<void> uninstallPlugin(String pluginId);
-  
-  /// Enable a plugin
-  Future<void> enablePlugin(String pluginId);
-  
-  /// Disable a plugin
-  Future<void> disablePlugin(String pluginId);
-  
-  /// Check if a plugin is enabled
-  bool isPluginEnabled(String pluginId);
-  
+
   /// Get plugin information
   Future<PluginInfo?> getPluginInfo(String pluginId);
   
@@ -79,14 +70,12 @@ class PluginPackage {
 class PluginInfo {
   final PluginDescriptor descriptor;
   final PluginState state;
-  final bool isEnabled;
   final DateTime installedAt;
   final DateTime? lastUsed;
 
   const PluginInfo({
     required this.descriptor,
     required this.state,
-    required this.isEnabled,
     required this.installedAt,
     this.lastUsed,
   });

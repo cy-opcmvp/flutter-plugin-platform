@@ -33,7 +33,7 @@ flutter-plugin-platform/
 │   │   └── STRUCTURE.md            #   文档结构说明
 │   │
 │   ├── guides/                      📖 使用指南
-│   │   └── PLATFORM_SERVICES_USER_GUIDE.md  #   完整指南
+│   │   └── platform-services-user-guide.md  #   完整指南
 │   │
 │   └── reports/                     📊 实施报告
 │       ├── PLATFORM_SERVICES_PHASE0_COMPLETE.md
@@ -56,7 +56,7 @@ flutter-plugin-platform/
 👉 **步骤3**: 启动应用，使用测试界面体验功能
 
 ### 场景2: 我想在插件中使用服务
-👉 **步骤1**: 阅读 [用户使用指南 - 开发者部分](docs/guides/PLATFORM_SERVICES_USER_GUIDE.md#🧑-💻-开发者使用)  
+👉 **步骤1**: 阅读 [用户使用指南 - 开发者部分](docs/guides/platform-services-user-guide.md#🧑-💻-开发者使用)  
 👉 **步骤2**: 查看代码示例  
 👉 **步骤3**: 参考 API 文档
 
@@ -71,7 +71,7 @@ flutter-plugin-platform/
 👉 **步骤3**: 了解测试结果
 
 ### 场景5: 我遇到了问题
-👉 **步骤1**: 查看 [用户指南 - 故障排除](docs/guides/PLATFORM_SERVICES_USER_GUIDE.md#🐛-故障排除)  
+👉 **步骤1**: 查看 [用户指南 - 故障排除](docs/guides/platform-services-user-guide.md#🐛-故障排除)  
 👉 **步骤2**: 检查活动日志  
 👉 **步骤3**: 查看技术文档
 

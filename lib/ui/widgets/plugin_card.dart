@@ -7,14 +7,12 @@ import '../../core/extensions/context_extensions.dart';
 class PluginCard extends StatelessWidget {
   final PluginInfo pluginInfo;
   final VoidCallback? onTap;
-  final ValueChanged<bool>? onToggleEnabled;
   final VoidCallback? onUninstall;
 
   const PluginCard({
     super.key,
     required this.pluginInfo,
     this.onTap,
-    this.onToggleEnabled,
     this.onUninstall,
   });
 
@@ -94,35 +92,20 @@ class PluginCard extends StatelessWidget {
               // Plugin actions
               Row(
                 children: [
-                  // Enable/Disable toggle
-                  Switch(
-                    value: pluginInfo.isEnabled,
-                    onChanged: onToggleEnabled,
+                  // Action buttons
+                  IconButton(
+                    onPressed: onTap,
+                    icon: const Icon(Icons.info_outline),
+                    tooltip: context.l10n.plugin_detailsTitle,
+                    iconSize: 20,
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    pluginInfo.isEnabled ? context.l10n.plugin_statusEnabled : context.l10n.plugin_statusDisabled,
-                    style: theme.textTheme.bodySmall,
-                  ),
-                  const Spacer(),
-                  // Action buttons
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        onPressed: onTap,
-                        icon: const Icon(Icons.info_outline),
-                        tooltip: context.l10n.plugin_detailsTitle,
-                        iconSize: 20,
-                      ),
-                      IconButton(
-                        onPressed: onUninstall,
-                        icon: const Icon(Icons.delete_outline),
-                        tooltip: context.l10n.button_uninstall,
-                        iconSize: 20,
-                        color: theme.colorScheme.error,
-                      ),
-                    ],
+                  IconButton(
+                    onPressed: onUninstall,
+                    icon: const Icon(Icons.delete_outline),
+                    tooltip: context.l10n.button_uninstall,
+                    iconSize: 20,
+                    color: theme.colorScheme.error,
                   ),
                 ],
               ),

@@ -685,27 +685,6 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
     }
   }
 
-  /// Toggle plugin enabled/disabled state
-  Future<void> _togglePlugin(String pluginId, bool enabled) async {
-    try {
-      if (enabled) {
-        await _platformCore.pluginManager.enablePlugin(pluginId);
-      } else {
-        await _platformCore.pluginManager.disablePlugin(pluginId);
-      }
-    } catch (e) {
-      if (mounted) {
-        final l10n = context.l10n;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.plugin_operationFailed(e.toString())),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
   /// Toggle plugin auto-start
   Future<void> _toggleAutoStart(String pluginId, bool enabled) async {
     try {
@@ -1288,7 +1267,6 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
   }) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
-    final isEnabled = _platformCore.pluginManager.isPluginEnabled(plugin.id);
     final isAutoStart = ConfigManager.instance.isAutoStartPlugin(plugin.id);
     final pluginTypeName = plugin.type == PluginType.tool
         ? l10n.plugin_typeTool
@@ -1307,7 +1285,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
       elevation: isSmall ? 1 : 2,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: isEnabled ? () => _launchPlugin(plugin) : null,
+        onTap: () => _launchPlugin(plugin),
         child: Padding(
           padding: EdgeInsets.all(padding),
           child: Column(
@@ -1375,25 +1353,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
                       tooltip: isAutoStart
                           ? l10n.autoStartEnabled
                           : l10n.autoStartDisabled,
-                      onPressed: isEnabled
-                          ? () => _toggleAutoStart(plugin.id, !isAutoStart)
-                          : null,
-                      constraints: const BoxConstraints(
-                        minWidth: 32,
-                        minHeight: 32,
-                      ),
-                      padding: EdgeInsets.zero,
-                    ),
-                    // 启用/禁用按钮
-                    IconButton(
-                      icon: Icon(
-                        isEnabled ? Icons.check_circle : Icons.cancel,
-                        color: isEnabled
-                            ? Colors.green
-                            : theme.colorScheme.onSurface.withValues(alpha: 0.4),
-                      ),
-                      tooltip: isEnabled ? l10n.plugin_enabled : l10n.plugin_disabled,
-                      onPressed: () => _togglePlugin(plugin.id, !isEnabled),
+                      onPressed: () => _toggleAutoStart(plugin.id, !isAutoStart),
                       constraints: const BoxConstraints(
                         minWidth: 32,
                         minHeight: 32,
@@ -1422,25 +1382,11 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton.icon(
-                    onPressed: isEnabled ? () => _launchPlugin(plugin) : null,
+                    onPressed: () => _launchPlugin(plugin),
                     icon: const Icon(Icons.play_arrow, size: 18),
                     label: Text(
-                      isEnabled
-                          ? l10n.button_open
-                          : l10n.button_enable,
+                      l10n.button_open,
                       style: TextStyle(fontSize: fontSize),
-                    ),
-                    style: FilledButton.styleFrom(
-                      padding: EdgeInsets.symmetric(
-                        vertical: isMedium ? 8 : 12,
-                        horizontal: 16,
-                      ),
-                      backgroundColor: isEnabled
-                          ? null
-                          : theme.colorScheme.surfaceContainerHighest,
-                      foregroundColor: isEnabled
-                          ? null
-                          : theme.colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                 ),
@@ -1455,7 +1401,6 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
   Widget _buildPluginListTile(PluginDescriptor plugin) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
-    final isEnabled = _platformCore.pluginManager.isPluginEnabled(plugin.id);
     final isAutoStart = ConfigManager.instance.isAutoStartPlugin(plugin.id);
     final pluginTypeName = plugin.type == PluginType.tool
         ? l10n.plugin_typeTool
@@ -1508,26 +1453,18 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
             message: l10n.autoStartDescription,
             child: Switch(
               value: isAutoStart,
-              onChanged: isEnabled
-                  ? (value) => _toggleAutoStart(plugin.id, value)
-                  : null,
+              onChanged: (value) => _toggleAutoStart(plugin.id, value),
             ),
-          ),
-          const SizedBox(width: 8),
-          // Enable/disable switch
-          Switch(
-            value: isEnabled,
-            onChanged: (value) => _togglePlugin(plugin.id, value),
           ),
           const SizedBox(width: 8),
           IconButton(
             icon: const Icon(Icons.launch),
-            onPressed: isEnabled ? () => _launchPlugin(plugin) : null,
+            onPressed: () => _launchPlugin(plugin),
             tooltip: l10n.button_launch,
           ),
         ],
       ),
-      onTap: isEnabled ? () => _launchPlugin(plugin) : null,
+      onTap: () => _launchPlugin(plugin),
     );
   }
 

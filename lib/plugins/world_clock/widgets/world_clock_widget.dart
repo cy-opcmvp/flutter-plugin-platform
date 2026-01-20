@@ -8,12 +8,14 @@ class WorldClockWidget extends StatefulWidget {
   final WorldClockItem worldClock;
   final VoidCallback? onDelete;
   final bool showSeconds;
+  final String timeFormat;
 
   const WorldClockWidget({
     Key? key,
     required this.worldClock,
     this.onDelete,
     this.showSeconds = true,
+    this.timeFormat = '24h',
   }) : super(key: key);
 
   @override
@@ -44,12 +46,12 @@ class _WorldClockWidgetState extends State<WorldClockWidget> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDefault = widget.worldClock.isDefault;
-    final time = widget.worldClock.currentTime;
 
-    // 格式化时间显示
-    final timeStr = widget.showSeconds
-        ? widget.worldClock.formattedTime
-        : '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+    // 格式化时间显示（使用配置的格式）
+    final timeStr = widget.worldClock.getFormattedTime(
+      widget.timeFormat,
+      showSeconds: widget.showSeconds,
+    );
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12.0),

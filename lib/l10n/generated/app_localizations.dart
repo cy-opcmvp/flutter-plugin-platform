@@ -524,18 +524,6 @@ abstract class AppLocalizations {
   /// **'卸载'**
   String get button_uninstall;
 
-  /// No description provided for @button_enable.
-  ///
-  /// In zh, this message translates to:
-  /// **'启用'**
-  String get button_enable;
-
-  /// No description provided for @button_disable.
-  ///
-  /// In zh, this message translates to:
-  /// **'禁用'**
-  String get button_disable;
-
   /// No description provided for @button_update.
   ///
   /// In zh, this message translates to:
@@ -608,18 +596,6 @@ abstract class AppLocalizations {
   /// **'开机自启：已关闭'**
   String get autoStartDisabled;
 
-  /// No description provided for @plugin_enabled.
-  ///
-  /// In zh, this message translates to:
-  /// **'已启用'**
-  String get plugin_enabled;
-
-  /// No description provided for @plugin_disabled.
-  ///
-  /// In zh, this message translates to:
-  /// **'已禁用'**
-  String get plugin_disabled;
-
   /// No description provided for @dialog_confirmTitle.
   ///
   /// In zh, this message translates to:
@@ -673,18 +649,6 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'外部插件'**
   String get plugin_externalTitle;
-
-  /// No description provided for @plugin_statusEnabled.
-  ///
-  /// In zh, this message translates to:
-  /// **'已启用'**
-  String get plugin_statusEnabled;
-
-  /// No description provided for @plugin_statusDisabled.
-  ///
-  /// In zh, this message translates to:
-  /// **'已禁用'**
-  String get plugin_statusDisabled;
 
   /// No description provided for @plugin_statusActive.
   ///
@@ -811,18 +775,6 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'插件 {name} 已移至后台'**
   String plugin_pauseSuccess(String name);
-
-  /// No description provided for @plugin_enableSuccess.
-  ///
-  /// In zh, this message translates to:
-  /// **'插件已启用'**
-  String get plugin_enableSuccess;
-
-  /// No description provided for @plugin_disableSuccess.
-  ///
-  /// In zh, this message translates to:
-  /// **'插件已禁用'**
-  String get plugin_disableSuccess;
 
   /// No description provided for @plugin_installSuccess.
   ///
@@ -1603,12 +1555,6 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'状态'**
   String get plugin_detailsState;
-
-  /// No description provided for @plugin_detailsEnabled.
-  ///
-  /// In zh, this message translates to:
-  /// **'已启用'**
-  String get plugin_detailsEnabled;
 
   /// No description provided for @plugin_detailsType.
   ///
@@ -4099,6 +4045,222 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'列表'**
   String get plugin_view_list;
+
+  /// No description provided for @calculator_settings_title.
+  ///
+  /// In zh, this message translates to:
+  /// **'计算器设置'**
+  String get calculator_settings_title;
+
+  /// No description provided for @calculator_settings_basic.
+  ///
+  /// In zh, this message translates to:
+  /// **'基础设置'**
+  String get calculator_settings_basic;
+
+  /// No description provided for @calculator_settings_display.
+  ///
+  /// In zh, this message translates to:
+  /// **'显示设置'**
+  String get calculator_settings_display;
+
+  /// No description provided for @calculator_settings_interaction.
+  ///
+  /// In zh, this message translates to:
+  /// **'交互设置'**
+  String get calculator_settings_interaction;
+
+  /// No description provided for @calculator_setting_precision.
+  ///
+  /// In zh, this message translates to:
+  /// **'计算精度'**
+  String get calculator_setting_precision;
+
+  /// No description provided for @calculator_decimal_places.
+  ///
+  /// In zh, this message translates to:
+  /// **'位小数'**
+  String get calculator_decimal_places;
+
+  /// No description provided for @calculator_setting_angleMode.
+  ///
+  /// In zh, this message translates to:
+  /// **'角度模式'**
+  String get calculator_setting_angleMode;
+
+  /// No description provided for @calculator_angle_mode_degrees.
+  ///
+  /// In zh, this message translates to:
+  /// **'角度制'**
+  String get calculator_angle_mode_degrees;
+
+  /// No description provided for @calculator_angle_mode_radians.
+  ///
+  /// In zh, this message translates to:
+  /// **'弧度制'**
+  String get calculator_angle_mode_radians;
+
+  /// No description provided for @calculator_angle_mode_degrees_short.
+  ///
+  /// In zh, this message translates to:
+  /// **'角度'**
+  String get calculator_angle_mode_degrees_short;
+
+  /// No description provided for @calculator_angle_mode_radians_short.
+  ///
+  /// In zh, this message translates to:
+  /// **'弧度'**
+  String get calculator_angle_mode_radians_short;
+
+  /// No description provided for @calculator_setting_historySize.
+  ///
+  /// In zh, this message translates to:
+  /// **'历史记录大小'**
+  String get calculator_setting_historySize;
+
+  /// No description provided for @calculator_history_size_description.
+  ///
+  /// In zh, this message translates to:
+  /// **'保存最近 {count} 条计算记录'**
+  String calculator_history_size_description(Object count);
+
+  /// No description provided for @calculator_setting_showGroupingSeparator.
+  ///
+  /// In zh, this message translates to:
+  /// **'显示千分位分隔符'**
+  String get calculator_setting_showGroupingSeparator;
+
+  /// No description provided for @calculator_grouping_separator_description.
+  ///
+  /// In zh, this message translates to:
+  /// **'在大数字中显示逗号分隔，如 1,234.56'**
+  String get calculator_grouping_separator_description;
+
+  /// No description provided for @calculator_setting_enableVibration.
+  ///
+  /// In zh, this message translates to:
+  /// **'启用振动反馈'**
+  String get calculator_setting_enableVibration;
+
+  /// No description provided for @calculator_vibration_description.
+  ///
+  /// In zh, this message translates to:
+  /// **'按键时触觉反馈'**
+  String get calculator_vibration_description;
+
+  /// No description provided for @calculator_setting_buttonSoundVolume.
+  ///
+  /// In zh, this message translates to:
+  /// **'按键音效音量'**
+  String get calculator_setting_buttonSoundVolume;
+
+  /// No description provided for @calculator_config_name.
+  ///
+  /// In zh, this message translates to:
+  /// **'计算器配置'**
+  String get calculator_config_name;
+
+  /// No description provided for @calculator_config_description.
+  ///
+  /// In zh, this message translates to:
+  /// **'自定义计算器的计算精度、角度模式和历史记录'**
+  String get calculator_config_description;
+
+  /// No description provided for @calculator_settings_saved.
+  ///
+  /// In zh, this message translates to:
+  /// **'配置已保存'**
+  String get calculator_settings_saved;
+
+  /// No description provided for @world_clock_settings_title.
+  ///
+  /// In zh, this message translates to:
+  /// **'世界时钟设置'**
+  String get world_clock_settings_title;
+
+  /// No description provided for @world_clock_settings_basic.
+  ///
+  /// In zh, this message translates to:
+  /// **'基础设置'**
+  String get world_clock_settings_basic;
+
+  /// No description provided for @world_clock_settings_display.
+  ///
+  /// In zh, this message translates to:
+  /// **'显示设置'**
+  String get world_clock_settings_display;
+
+  /// No description provided for @world_clock_settings_notification.
+  ///
+  /// In zh, this message translates to:
+  /// **'通知设置'**
+  String get world_clock_settings_notification;
+
+  /// No description provided for @world_clock_setting_defaultTimeZone.
+  ///
+  /// In zh, this message translates to:
+  /// **'默认时区'**
+  String get world_clock_setting_defaultTimeZone;
+
+  /// No description provided for @world_clock_setting_timeFormat.
+  ///
+  /// In zh, this message translates to:
+  /// **'时间格式'**
+  String get world_clock_setting_timeFormat;
+
+  /// No description provided for @world_clock_time_format_12h.
+  ///
+  /// In zh, this message translates to:
+  /// **'12小时制'**
+  String get world_clock_time_format_12h;
+
+  /// No description provided for @world_clock_time_format_24h.
+  ///
+  /// In zh, this message translates to:
+  /// **'24小时制'**
+  String get world_clock_time_format_24h;
+
+  /// No description provided for @world_clock_setting_showSeconds.
+  ///
+  /// In zh, this message translates to:
+  /// **'显示秒数'**
+  String get world_clock_setting_showSeconds;
+
+  /// No description provided for @world_clock_setting_enableNotifications.
+  ///
+  /// In zh, this message translates to:
+  /// **'启用倒计时通知'**
+  String get world_clock_setting_enableNotifications;
+
+  /// No description provided for @world_clock_setting_updateInterval.
+  ///
+  /// In zh, this message translates to:
+  /// **'更新间隔'**
+  String get world_clock_setting_updateInterval;
+
+  /// No description provided for @world_clock_update_interval_description.
+  ///
+  /// In zh, this message translates to:
+  /// **'每 {ms} 毫秒更新一次'**
+  String world_clock_update_interval_description(Object ms);
+
+  /// No description provided for @world_clock_config_name.
+  ///
+  /// In zh, this message translates to:
+  /// **'世界时钟配置'**
+  String get world_clock_config_name;
+
+  /// No description provided for @world_clock_config_description.
+  ///
+  /// In zh, this message translates to:
+  /// **'自定义世界时钟的时区、显示格式和通知'**
+  String get world_clock_config_description;
+
+  /// No description provided for @world_clock_settings_saved.
+  ///
+  /// In zh, this message translates to:
+  /// **'配置已保存'**
+  String get world_clock_settings_saved;
 }
 
 class _AppLocalizationsDelegate

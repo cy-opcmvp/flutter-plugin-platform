@@ -6,13 +6,11 @@ import '../../core/extensions/context_extensions.dart';
 /// Dialog that shows detailed information about a plugin
 class PluginDetailsDialog extends StatelessWidget {
   final PluginInfo pluginInfo;
-  final ValueChanged<bool>? onToggleEnabled;
   final VoidCallback? onUninstall;
 
   const PluginDetailsDialog({
     super.key,
     required this.pluginInfo,
-    this.onToggleEnabled,
     this.onUninstall,
   });
 
@@ -94,7 +92,6 @@ class PluginDetailsDialog extends StatelessWidget {
                       context.l10n.plugin_detailsStatus,
                       [
                         _InfoItem(context.l10n.plugin_detailsState, _getStateDisplayName(context, pluginInfo.state)),
-                        _InfoItem(context.l10n.plugin_detailsEnabled, pluginInfo.isEnabled ? context.l10n.common_yes : context.l10n.common_no),
                         _InfoItem(context.l10n.plugin_detailsType, descriptor.type.name.toUpperCase()),
                         _InfoItem(context.l10n.plugin_detailsPluginId, descriptor.id),
                       ],
@@ -151,18 +148,8 @@ class PluginDetailsDialog extends StatelessWidget {
                 ),
               ),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  // Enable/Disable toggle
-                  Switch(
-                    value: pluginInfo.isEnabled,
-                    onChanged: onToggleEnabled,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    pluginInfo.isEnabled ? context.l10n.plugin_statusEnabled : context.l10n.plugin_statusDisabled,
-                    style: theme.textTheme.bodyMedium,
-                  ),
-                  const Spacer(),
                   // Action buttons
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),

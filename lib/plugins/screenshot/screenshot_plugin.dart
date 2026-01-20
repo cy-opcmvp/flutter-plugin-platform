@@ -16,6 +16,7 @@ import 'services/file_manager_service.dart';
 import 'services/clipboard_service.dart';
 import 'services/hotkey_service.dart';
 import 'widgets/screenshot_main_widget.dart';
+import 'widgets/settings_screen.dart';
 
 /// 智能截图插件
 ///
@@ -166,6 +167,11 @@ class ScreenshotPlugin extends PlatformPluginBase {
   @override
   Widget buildUI(BuildContext context) {
     return _ScreenshotPluginWidget(plugin: this);
+  }
+
+  /// 构建设置界面
+  Widget buildSettingsScreen() {
+    return ScreenshotSettingsScreen(plugin: this);
   }
 
   @override

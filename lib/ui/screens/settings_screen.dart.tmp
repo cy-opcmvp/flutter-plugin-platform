@@ -11,7 +11,6 @@ import 'package:plugin_platform/core/services/locale_provider.dart';
 import 'package:plugin_platform/core/services/config_manager.dart';
 import 'package:plugin_platform/core/services/platform_core.dart';
 import 'package:plugin_platform/core/models/global_config.dart';
-import 'package:plugin_platform/plugins/plugin_registry.dart';
 import 'tag_management_screen.dart';
 
 /// Settings Screen
@@ -198,8 +197,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.schedule),
-                title: Text(l10n.plugin_worldclock_name),
-                subtitle: Text(l10n.plugin_worldclock_description),
+                title: Text(l10n.plugin_world_clock_name),
+                subtitle: Text(l10n.plugin_world_clock_description),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => _openPluginSettings('com.example.worldclock'),
               ),
@@ -335,65 +334,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   /// Open plugin settings screen
-  void _openPluginSettings(String pluginId) async {
-    debugPrint('Opening plugin settings for: $pluginId');
-
-    // First, ensure plugin is loaded
-    final pluginManager = _platformCore.pluginManager;
-    var plugin = pluginManager.getPlugin(pluginId);
-
+  void _openPluginSettings(String pluginId) {
+    final plugin = _platformCore.pluginManager.getPlugin(pluginId);
     if (plugin == null) {
-      debugPrint('Plugin not found: $pluginId');
-      debugPrint('Available plugins: ${pluginManager.getActivePlugins().map((p) => p.id).toList()}');
-
-      // Try to load the plugin
-      try {
-        debugPrint('Attempting to load plugin: $pluginId');
-
-        // Get the plugin descriptor
-        final descriptor = ExamplePluginRegistry.getDescriptor(pluginId);
-        if (descriptor == null) {
-          debugPrint('Plugin descriptor not found: $pluginId');
-          _showErrorMessage();
-          return;
-        }
-
-        await pluginManager.loadPlugin(descriptor);
-        plugin = pluginManager.getPlugin(pluginId);
-
-        if (plugin == null) {
-          debugPrint('Failed to load plugin after loadPlugin call: $pluginId');
-          _showErrorMessage();
-          return;
-        }
-
-        debugPrint('Plugin loaded successfully: $pluginId');
-        await _navigateToSettings(plugin);
-      } catch (e) {
-        debugPrint('Failed to load plugin: $e');
-        _showErrorMessage();
-        return;
-      }
-    } else {
-      await _navigateToSettings(plugin);
-    }
-  }
-
-  /// Navigate to plugin settings screen
-  Future<void> _navigateToSettings(dynamic plugin) async {
-    try {
-      final settingsScreen = plugin.buildSettingsScreen();
-      if (mounted) {
-        await Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => settingsScreen,
-          ),
-        );
-      }
-    } catch (e) {
-      debugPrint('Failed to build settings screen: $e');
       _showErrorMessage();
+      return;
     }
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => plugin.buildSettingsScreen(),
+      ),
+    );
   }
 
   /// Show reset confirmation dialog

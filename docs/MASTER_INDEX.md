@@ -15,15 +15,15 @@
 docs/
 ├── MASTER_INDEX.md                    # 📍 本文件 - 文档主索引
 ├── README.md                          # 📖 文档中心
-├── index.md                           # 📑 详细索引
 ├── project-structure.md               # 🏗️ 项目结构说明
 ├── DOCS_REORGANIZATION.md             # 📋 文档重组记录
-├── PLATFORM_DECOUPLING_DESIGN.md      # 🏗️ 平台解耦架构设计
-
-scripts/                               # 🔧 开发脚本
-├── README.md                          # 脚本说明文档
-├── fix-nuget.ps1                      # NuGet 包修复脚本
-└── install-cppwinrt.ps1               # CppWinRT 安装脚本
+├── platform-decoupling-design.md      # 🏗️ 平台解耦架构设计
+│
+├── archive/                           # 📦 历史文档归档
+│   ├── README.md                      # 归档说明
+│   ├── reports/                       # 历史实施报告
+│   ├── fixes/                         # 历史修复文档
+│   └── audits/                        # 文档审计记录
 │
 ├── guides/                            # 📚 用户指南
 │   ├── getting-started.md            # 快速开始
@@ -34,33 +34,31 @@ scripts/                               # 🔧 开发脚本
 │   ├── desktop-pet-guide.md         # 桌面宠物使用
 │   ├── desktop-pet-platform-support.md  # 桌面宠物平台支持
 │   ├── desktop-pet-usage.md         # 桌面宠物使用说明
-│   └── PLATFORM_SERVICES_USER_GUIDE.md  # 平台服务用户指南
+│   └── platform-services-user-guide.md  # 平台服务用户指南
 │
 ├── platform-services/                 # 🔧 平台服务文档
 │   ├── README.md                    # 服务文档中心
-│   ├── PLATFORM_SERVICES_README.md  # 快速开始
+│   ├── quick-start.md               # 快速开始
 │   ├── STRUCTURE.md                 # 文档结构
-│   └── DOCS_NAVIGATION.md           # 导航指南
+│   └── docs-navigation.md           # 导航指南
 │
 ├── plugins/                          # 🔌 插件文档
 │   ├── screenshot/                  # 截图插件
 │   │   ├── README.md                # 插件概述
-│   │   ├── PLATFORM_SUPPORT_ANALYSIS.md  # 平台支持分析
-│   │   └── PLATFORM_TODO.md         # 平台实现任务
+│   │   ├── platform-support-analysis.md  # 平台支持分析
+│   │   └── platform-todo.md         # 平台实现任务
 │   └── world-clock/                 # 世界时钟插件
 │       ├── README.md                # 插件概述
-│       ├── IMPLEMENTATION.md        # 实现文档
-│       └── UPDATE_v1.1.md           # 更新说明
+│       ├── implementation.md        # 实现文档
+│       └── update-v1.1.md           # 更新说明
 │
 ├── releases/                         # 📦 发布文档
 │   └── RELEASE_NOTES_v0.2.1.md     # v0.2.1 发布说明
 │
 ├── reports/                          # 📊 实施报告
-│   ├── PLATFORM_SERVICES_PHASE0_COMPLETE.md  # 阶段0完成
-│   ├── PLATFORM_SERVICES_PHASE1_COMPLETE.md  # 阶段1完成
 │   ├── PLATFORM_SERVICES_IMPLEMENTATION_COMPLETE.md  # 实施完成
-│   ├── FIXES_WORLD_CLOCK_v1.1.md    # 世界时钟修复报告
-│   └── PLUGIN_ID_FIX_SUMMARY.md     # 插件ID修复报告
+│   ├── CONFIG_FEATURE_AUDIT.md      # 配置功能审计
+│   └── CONFIG_IMPLEMENTATION_PROGRESS.md  # 配置实施进度
 │
 ├── migration/                        # 🔄 迁移指南
 │   ├── migration-guide.md           # 通用迁移指南
@@ -73,9 +71,6 @@ scripts/                               # 🔧 开发脚本
 │
 ├── tools/                            # 🛠️ 工具文档
 │   └── plugin-cli.md                # 插件CLI工具
-│
-├── troubleshooting/                  # 🐛 故障排除
-│   └── desktop-pet-fix.md           # 桌面宠物修复
 │
 └── reference/                        # 📋 参考文档
     └── platform-fallback-values.md  # 平台回退值
@@ -144,8 +139,8 @@ scripts/                               # 🔧 开发脚本
 👉 [世界时钟实现文档](plugins/world-clock/IMPLEMENTATION.md)
 
 #### 排除问题
-👉 [故障排除指南](troubleshooting/)
 👉 [平台服务故障排除](guides/PLATFORM_SERVICES_USER_GUIDE.md#🐛-故障排除)
+👉 [历史修复文档](archive/fixes/) - 历史问题修复记录
 
 #### 迁移升级
 👉 [通用迁移指南](migration/migration-guide.md)
@@ -192,13 +187,11 @@ scripts/                               # 🔧 开发脚本
 
 ### 4. 实施报告
 **适合**: 项目经理、技术审查
-- [平台服务阶段0](reports/PLATFORM_SERVICES_PHASE0_COMPLETE.md)
-- [平台服务阶段1](reports/PLATFORM_SERVICES_PHASE1_COMPLETE.md)
 - [平台服务实施完成](reports/PLATFORM_SERVICES_IMPLEMENTATION_COMPLETE.md)
+- [配置功能审计](reports/CONFIG_FEATURE_AUDIT.md)
+- [配置实施进度](reports/CONFIG_IMPLEMENTATION_PROGRESS.md)
 - [世界时钟实现](plugins/world-clock/IMPLEMENTATION.md)
 - [世界时钟更新](plugins/world-clock/UPDATE_v1.1.md)
-- [修复报告](reports/FIXES_WORLD_CLOCK_v1.1.md)
-- [插件ID修复](reports/PLUGIN_ID_FIX_SUMMARY.md)
 
 ### 5. 发布文档
 **适合**: 所有用户、版本管理
@@ -215,11 +208,7 @@ scripts/                               # 🔧 开发脚本
 - [通用迁移指南](migration/migration-guide.md)
 - [平台环境迁移](migration/platform-environment-migration.md)
 
-### 8. 故障排除
-**适合**: 遇到问题时
-- [桌面宠物修复](troubleshooting/desktop-pet-fix.md)
-
-### 9. 工具文档
+### 8. 工具文档
 **适合**: 使用开发工具
 - [插件CLI工具](tools/plugin-cli.md)
 
@@ -234,7 +223,7 @@ scripts/                               # 🔧 开发脚本
 - ⏰ 任务调度服务
 
 **快速链接**:
-- [快速开始](platform-services/PLATFORM_SERVICES_README.md)
+- [快速开始](platform-services/quick-start.md)
 - [用户指南](guides/PLATFORM_SERVICES_USER_GUIDE.md)
 - [文档中心](platform-services/README.md)
 
@@ -282,11 +271,12 @@ scripts/                               # 🔧 开发脚本
 
 ### 按类型
 - **用户指南**: 8个文档
-- **技术规范**: 16个文档（新增平台解耦架构设计）
-- **实施报告**: 7个文档
+- **技术规范**: 16个文档
+- **实施报告**: 3个文档（其他已归档）
 - **插件文档**: 6个文档
 - **平台服务文档**: 4个文档
 - **发布文档**: 2个文档
+- **归档文档**: 8个文档
 - **其他**: 9个文档
 
 ### 按语言
@@ -336,8 +326,8 @@ scripts/                               # 🔧 开发脚本
 
 ---
 
-**文档版本**: v1.2.0
-**最后更新**: 2026-01-16
+**文档版本**: v1.3.0
+**最后更新**: 2026-01-20
 **维护者**: Flutter Plugin Platform 团队
 
 ---

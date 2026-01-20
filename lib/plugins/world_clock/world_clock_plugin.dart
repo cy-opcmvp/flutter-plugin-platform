@@ -5,8 +5,10 @@ import '../../core/interfaces/i_platform_plugin.dart';
 import '../../core/models/plugin_models.dart';
 import '../../core/utils/platform_capability_helper.dart';
 import 'models/world_clock_models.dart';
+import 'models/world_clock_settings.dart';
 import 'widgets/world_clock_widget.dart';
 import 'widgets/countdown_timer_widget.dart';
+import 'widgets/settings_screen.dart';
 
 /// 世界时钟插件 - 显示多个时区时间并支持倒计时提醒
 ///
@@ -14,20 +16,17 @@ import 'widgets/countdown_timer_widget.dart';
 /// - 所有平台: 完整支持（纯 Dart 实现）
 class WorldClockPlugin extends PlatformPluginBase {
   late PluginContext _context;
-  
+
   // 插件状态变量
   bool _isInitialized = false;
   final List<WorldClockItem> _worldClocks = [];
   final List<CountdownTimer> _countdownTimers = [];
   Timer? _clockUpdateTimer;
   Timer? _countdownUpdateTimer;
-  
-  // 设置选项
-  bool _show24HourFormat = true;
-  bool _showSeconds = true;
-  bool _enableNotifications = true;
-  bool _enableAnimations = true;
-  
+
+  // 插件设置
+  WorldClockSettings _settings = WorldClockSettings.defaultSettings();
+
   // 用于触发UI更新的回调
   VoidCallback? _onStateChanged;
 
@@ -61,17 +60,26 @@ class WorldClockPlugin extends PlatformPluginBase {
   @override
   Future<void> initialize(PluginContext context) async {
     _context = context;
-    
+
     try {
+      // 加载保存的设置
+      final savedSettings = await _context.dataStorage.retrieve<Map<String, dynamic>>('world_clock_settings');
+      if (savedSettings != null) {
+        _settings = WorldClockSettings.fromJson(savedSettings);
+      }
+
       // 加载保存的状态
       await _loadSavedState();
-      
-      // 如果没有保存的时钟，添加默认的北京时间
+
+      // 如果没有保存的时钟，添加默认时区的时钟
       if (_worldClocks.isEmpty) {
+        final defaultTz = _settings.defaultTimeZone;
+        // 从时区ID中提取城市名
+        final cityName = defaultTz.split('/').last.replaceAll('_', ' ');
         _worldClocks.add(WorldClockItem(
-          id: 'beijing',
-          cityName: '北京',
-          timeZone: 'Asia/Shanghai',
+          id: 'default',
+          cityName: cityName,
+          timeZone: defaultTz,
           isDefault: true,
         ));
       }
@@ -113,6 +121,28 @@ class WorldClockPlugin extends PlatformPluginBase {
   Widget buildUI(BuildContext context) {
     return _WorldClockPluginWidget(plugin: this);
   }
+
+  /// 构建设置界面
+  Widget buildSettingsScreen() {
+    return WorldClockSettingsScreen(plugin: this);
+  }
+
+  /// 获取当前设置
+  WorldClockSettings get settings => _settings;
+
+  /// 更新设置
+  void updateSettings(WorldClockSettings settings) {
+    _settings = settings;
+    _saveSettings();
+    // 重启定时器以应用新的更新间隔
+    _clockUpdateTimer?.cancel();
+    _startClockTimer();
+  }
+
+  /// 保存设置
+  Future<void> _saveSettings() async {
+    await _context.dataStorage.store('world_clock_settings', _settings.toJson());
+  }
   
   @override
   Future<void> onStateChanged(PluginState state) async {
@@ -144,10 +174,10 @@ class WorldClockPlugin extends PlatformPluginBase {
       'isInitialized': _isInitialized,
       'worldClocks': _worldClocks.map((clock) => clock.toJson()).toList(),
       'countdownTimers': _countdownTimers.map((timer) => timer.toJson()).toList(),
-      'show24HourFormat': _show24HourFormat,
-      'showSeconds': _showSeconds,
-      'enableNotifications': _enableNotifications,
-      'enableAnimations': _enableAnimations,
+      'show24HourFormat': _settings.timeFormat == '24h',
+      'showSeconds': _settings.showSeconds,
+      'enableNotifications': _settings.enableNotifications,
+      'enableAnimations': true, // 固定为true
       'lastUpdate': DateTime.now().toIso8601String(),
       'version': version,
     };
@@ -173,10 +203,7 @@ class WorldClockPlugin extends PlatformPluginBase {
       }
       
       // 加载设置
-      _show24HourFormat = await _context.dataStorage.retrieve<bool>('show24HourFormat') ?? true;
-      _showSeconds = await _context.dataStorage.retrieve<bool>('showSeconds') ?? true;
-      _enableNotifications = await _context.dataStorage.retrieve<bool>('enableNotifications') ?? true;
-      _enableAnimations = await _context.dataStorage.retrieve<bool>('enableAnimations') ?? true;
+      // 设置已在 initialize() 中加载
     } catch (e) {
       print('Failed to load saved state: $e');
     }
@@ -194,10 +221,7 @@ class WorldClockPlugin extends PlatformPluginBase {
       );
       
       // 保存设置
-      await _context.dataStorage.store('show24HourFormat', _show24HourFormat);
-      await _context.dataStorage.store('showSeconds', _showSeconds);
-      await _context.dataStorage.store('enableNotifications', _enableNotifications);
-      await _context.dataStorage.store('enableAnimations', _enableAnimations);
+      // 设置已通过 _saveSettings() 保存
     } catch (e) {
       print('Failed to save state: $e');
     }
@@ -205,9 +229,10 @@ class WorldClockPlugin extends PlatformPluginBase {
 
   void _startClockTimer() {
     _clockUpdateTimer?.cancel();
-    _clockUpdateTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      _onStateChanged?.call();
-    });
+    _clockUpdateTimer = Timer.periodic(
+      Duration(milliseconds: _settings.updateInterval),
+      (timer) => _onStateChanged?.call(),
+    );
   }
 
   void _startCountdownTimer() {
@@ -240,7 +265,7 @@ class WorldClockPlugin extends PlatformPluginBase {
   }
 
   void _onCountdownComplete(CountdownTimer timer) async {
-    if (_enableNotifications) {
+    if (_settings.enableNotifications) {
       await _context.platformServices.showNotification(
         '倒计时提醒: ${timer.title} 时间到了！'
       );
@@ -281,21 +306,6 @@ class WorldClockPlugin extends PlatformPluginBase {
 
   void _removeCountdownTimer(String timerId) {
     _countdownTimers.removeWhere((timer) => timer.id == timerId);
-    _saveCurrentState();
-    _onStateChanged?.call();
-  }
-  
-  void _updateSettings({
-    bool? show24HourFormat,
-    bool? showSeconds,
-    bool? enableNotifications,
-    bool? enableAnimations,
-  }) {
-    if (show24HourFormat != null) _show24HourFormat = show24HourFormat;
-    if (showSeconds != null) _showSeconds = showSeconds;
-    if (enableNotifications != null) _enableNotifications = enableNotifications;
-    if (enableAnimations != null) _enableAnimations = enableAnimations;
-    
     _saveCurrentState();
     _onStateChanged?.call();
   }
@@ -354,7 +364,15 @@ class _WorldClockPluginWidgetState extends State<_WorldClockPluginWidget> {
           ),
           IconButton(
             icon: const Icon(Icons.settings),
-            onPressed: () => _showSettings(context),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => WorldClockSettingsScreen(
+                    plugin: widget.plugin,
+                  ),
+                ),
+              );
+            },
             tooltip: '设置',
           ),
         ],
@@ -425,7 +443,8 @@ class _WorldClockPluginWidgetState extends State<_WorldClockPluginWidget> {
                           padding: const EdgeInsets.only(bottom: 8.0),
                           child: WorldClockWidget(
                             worldClock: clock,
-                            showSeconds: widget.plugin._showSeconds,
+                            showSeconds: widget.plugin.settings.showSeconds,
+                            timeFormat: widget.plugin.settings.timeFormat,
                             onDelete: clock.isDefault ? null : () {
                               widget.plugin._removeClock(clock.id);
                             },
@@ -497,7 +516,7 @@ class _WorldClockPluginWidgetState extends State<_WorldClockPluginWidget> {
                           padding: const EdgeInsets.only(bottom: 8.0),
                           child: CountdownTimerWidget(
                             countdownTimer: timer,
-                            enableAnimations: widget.plugin._enableAnimations,
+                            enableAnimations: true,
                             onDelete: () {
                               widget.plugin._removeCountdownTimer(timer.id);
                             },
@@ -534,26 +553,6 @@ class _WorldClockPluginWidgetState extends State<_WorldClockPluginWidget> {
       builder: (context) => _AddCountdownDialog(
         onAdd: (title, duration) {
           widget.plugin._addCountdownTimer(title, duration);
-        },
-      ),
-    );
-  }
-
-  void _showSettings(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => _SettingsDialog(
-        show24HourFormat: widget.plugin._show24HourFormat,
-        showSeconds: widget.plugin._showSeconds,
-        enableNotifications: widget.plugin._enableNotifications,
-        enableAnimations: widget.plugin._enableAnimations,
-        onSave: (settings) {
-          widget.plugin._updateSettings(
-            show24HourFormat: settings['show24HourFormat'],
-            showSeconds: settings['showSeconds'],
-            enableNotifications: settings['enableNotifications'],
-            enableAnimations: settings['enableAnimations'],
-          );
         },
       ),
     );
@@ -814,140 +813,6 @@ class _TimePickerColumn extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-// 设置对话框
-class _SettingsDialog extends StatefulWidget {
-  final bool show24HourFormat;
-  final bool showSeconds;
-  final bool enableNotifications;
-  final bool enableAnimations;
-  final Function(Map<String, bool>) onSave;
-
-  const _SettingsDialog({
-    required this.show24HourFormat,
-    required this.showSeconds,
-    required this.enableNotifications,
-    required this.enableAnimations,
-    required this.onSave,
-  });
-
-  @override
-  State<_SettingsDialog> createState() => _SettingsDialogState();
-}
-
-class _SettingsDialogState extends State<_SettingsDialog> {
-  late bool _show24HourFormat;
-  late bool _showSeconds;
-  late bool _enableNotifications;
-  late bool _enableAnimations;
-
-  @override
-  void initState() {
-    super.initState();
-    _show24HourFormat = widget.show24HourFormat;
-    _showSeconds = widget.showSeconds;
-    _enableNotifications = widget.enableNotifications;
-    _enableAnimations = widget.enableAnimations;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 500),
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '世界时钟设置',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Flexible(
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        '显示选项',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
-                      const SizedBox(height: 8),
-                      SwitchListTile(
-                        title: const Text('24小时制'),
-                        subtitle: const Text('使用24小时时间格式'),
-                        value: _show24HourFormat,
-                        onChanged: (value) => setState(() => _show24HourFormat = value),
-                        controlAffinity: ListTileControlAffinity.trailing,
-                      ),
-                      SwitchListTile(
-                        title: const Text('显示秒数'),
-                        subtitle: const Text('在时钟中显示秒数'),
-                        value: _showSeconds,
-                        onChanged: (value) => setState(() => _showSeconds = value),
-                        controlAffinity: ListTileControlAffinity.trailing,
-                      ),
-                      const Divider(),
-                      const SizedBox(height: 8),
-                      const Text(
-                        '功能选项',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
-                      const SizedBox(height: 8),
-                      SwitchListTile(
-                        title: const Text('启用通知'),
-                        subtitle: const Text('倒计时完成时显示通知'),
-                        value: _enableNotifications,
-                        onChanged: (value) => setState(() => _enableNotifications = value),
-                        controlAffinity: ListTileControlAffinity.trailing,
-                      ),
-                      SwitchListTile(
-                        title: const Text('启用动画'),
-                        subtitle: const Text('显示动画效果'),
-                        value: _enableAnimations,
-                        onChanged: (value) => setState(() => _enableAnimations = value),
-                        controlAffinity: ListTileControlAffinity.trailing,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('取消'),
-                  ),
-                  const SizedBox(width: 8),
-                  FilledButton(
-                    onPressed: () {
-                      widget.onSave({
-                        'show24HourFormat': _show24HourFormat,
-                        'showSeconds': _showSeconds,
-                        'enableNotifications': _enableNotifications,
-                        'enableAnimations': _enableAnimations,
-                      });
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text('保存'),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
