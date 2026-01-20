@@ -1,7 +1,6 @@
 #ifndef RUNNER_NATIVE_SCREENSHOT_WINDOW_H_
 #define RUNNER_NATIVE_SCREENSHOT_WINDOW_H_
 
-// 定义 NOMINMAX 以避免 Windows 宏与 std::min/max 冲突
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
@@ -28,16 +27,14 @@ private:
     POINT endPoint_;
     bool isSelecting_;
 
-    HBITMAP hBackgroundBitmap_;  // 捕获的桌面背景
+    HBITMAP hBackgroundBitmap_;
     int screenWidth_;
     int screenHeight_;
 
     static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
-
-    // Helper methods
-    void CaptureDesktopBackground();
-    void DrawSelectionBox(HDC hdc, int x, int y, int width, int height);
-    void DrawMask(HDC hdc, int x, int y, int width, int height);
+    LRESULT HandleMessage(UINT msg, WPARAM wParam, LPARAM lParam);
+    void DrawSelection(HDC hdc);
+    bool CaptureDesktopBackground();
 };
 
-#endif  // RUNNER_NATIVE_SCREENSHOT_WINDOW_H_
+#endif
