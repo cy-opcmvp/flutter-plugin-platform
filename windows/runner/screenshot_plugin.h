@@ -7,9 +7,15 @@
 #endif
 
 #include <windows.h>
+#include <algorithm>  // 必须在 gdiplus.h 之前包含
 #include <vector>
 #include <string>
 #include <tuple>
+
+// 在全局作用域引入 std::min 和 std::max 供 GDI+ 使用
+using std::min;
+using std::max;
+
 #include <gdiplus.h>
 
 // Structure to hold window information with icon
