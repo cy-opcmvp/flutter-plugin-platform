@@ -7,9 +7,7 @@ import './l10n/generated/app_localizations.dart';
 import './core/services/locale_provider.dart';
 import './core/services/platform_service_manager.dart';
 import './core/services/config_manager.dart';
-import './core/models/global_config.dart';
 import './ui/screens/main_platform_screen.dart';
-import './ui/screens/service_test_screen.dart' show ServiceTestScreen;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,13 +34,13 @@ void main() async {
   // 初始化配置管理器
   await ConfigManager.instance.initialize();
   if (kDebugMode) {
-    print('Config manager initialized');
+    debugPrint('Config manager initialized');
   }
 
   // 初始化平台服务
   final servicesInitialized = await PlatformServiceManager.initialize();
   if (kDebugMode) {
-    print('Platform services initialized: $servicesInitialized');
+    debugPrint('Platform services initialized: $servicesInitialized');
   }
 
   // 初始化语言设置
@@ -54,15 +52,12 @@ void main() async {
 
 class PluginPlatformApp extends StatefulWidget {
   final LocaleProvider localeProvider;
-  
-  const PluginPlatformApp({
-    super.key,
-    required this.localeProvider,
-  });
+
+  const PluginPlatformApp({super.key, required this.localeProvider});
 
   @override
   State<PluginPlatformApp> createState() => _PluginPlatformAppState();
-  
+
   /// 获取 LocaleProvider 实例
   static LocaleProvider of(BuildContext context) {
     final state = context.findAncestorStateOfType<_PluginPlatformAppState>();
@@ -70,7 +65,8 @@ class PluginPlatformApp extends StatefulWidget {
   }
 }
 
-class _PluginPlatformAppState extends State<PluginPlatformApp> with WindowListener {
+class _PluginPlatformAppState extends State<PluginPlatformApp>
+    with WindowListener {
   GlobalKey<NavigatorState> _navigatorKey = GlobalKey();
 
   @override

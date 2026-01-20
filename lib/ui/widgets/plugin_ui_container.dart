@@ -80,7 +80,7 @@ class _PluginUIContainerState extends State<PluginUIContainer> {
   Future<Widget> _createWebViewContainer() async {
     final uiConfig = widget.plugin.manifest.uiIntegration;
     final webConfig = uiConfig.containerConfig;
-    
+
     return WebViewContainer(
       plugin: widget.plugin,
       initialUrl: webConfig['entryUrl'] as String? ?? 'about:blank',
@@ -121,7 +121,7 @@ class _PluginUIContainerState extends State<PluginUIContainer> {
     // or use a specialized container UI
     final uiConfig = widget.plugin.manifest.uiIntegration;
     final containerConfig = uiConfig.containerConfig;
-    
+
     if (containerConfig['uiType'] == 'web') {
       return WebViewContainer(
         plugin: widget.plugin,
@@ -160,17 +160,24 @@ class _PluginUIContainerState extends State<PluginUIContainer> {
   Map<String, dynamic> _getSecurityRestrictions() {
     final securityLevel = widget.plugin.securityLevel;
     final securityReqs = widget.plugin.manifest.security;
-    
+
     return {
       'allowedDomains': securityReqs.allowedDomains,
       'blockedDomains': securityReqs.blockedDomains,
       'allowJavaScript': securityLevel != SecurityLevel.isolated,
-      'allowLocalStorage': securityLevel == SecurityLevel.minimal || 
-                          securityLevel == SecurityLevel.standard,
+      'allowLocalStorage':
+          securityLevel == SecurityLevel.minimal ||
+          securityLevel == SecurityLevel.standard,
       'allowGeolocation': false,
-      'allowCamera': widget.plugin.requiredPermissions.contains(Permission.systemCamera),
-      'allowMicrophone': widget.plugin.requiredPermissions.contains(Permission.systemMicrophone),
-      'allowNotifications': widget.plugin.requiredPermissions.contains(Permission.systemNotifications),
+      'allowCamera': widget.plugin.requiredPermissions.contains(
+        Permission.systemCamera,
+      ),
+      'allowMicrophone': widget.plugin.requiredPermissions.contains(
+        Permission.systemMicrophone,
+      ),
+      'allowNotifications': widget.plugin.requiredPermissions.contains(
+        Permission.systemNotifications,
+      ),
     };
   }
 
@@ -183,7 +190,7 @@ class _PluginUIContainerState extends State<PluginUIContainer> {
   @override
   Widget build(BuildContext context) {
     final themeManager = PluginThemeManager();
-    
+
     return themeManager.createThemedWrapper(
       plugin: widget.plugin,
       child: PluginInputRouter(
@@ -268,10 +275,7 @@ class _PluginUIContainerState extends State<PluginUIContainer> {
                   child: Text('Retry'),
                 ),
                 SizedBox(width: 16),
-                TextButton(
-                  onPressed: widget.onClose,
-                  child: Text('Close'),
-                ),
+                TextButton(onPressed: widget.onClose, child: Text('Close')),
               ],
             ),
           ],
@@ -323,7 +327,7 @@ class PluginUIConfig {
   factory PluginUIConfig.fromManifest(PluginManifest manifest) {
     final uiIntegration = manifest.uiIntegration;
     final security = manifest.security;
-    
+
     return PluginUIConfig(
       pluginRuntimeType: PluginRuntimeType.values.firstWhere(
         (type) => type.name == uiIntegration.containerType,

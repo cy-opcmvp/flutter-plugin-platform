@@ -6,8 +6,6 @@ import 'package:flutter/material.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../screenshot_plugin.dart';
 import '../models/screenshot_models.dart';
-import 'screenshot_overlay.dart';
-import 'screenshot_window.dart';
 import 'settings_screen.dart';
 import 'history_screen.dart';
 
@@ -54,8 +52,7 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // 平台支持提示
-              if (!widget.plugin.isAvailable)
-                _buildUnsupportedWarning(context),
+              if (!widget.plugin.isAvailable) _buildUnsupportedWarning(context),
 
               // 快速操作区
               _buildQuickActions(context),
@@ -98,16 +95,16 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
                     Text(
                       '平台功能受限',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onErrorContainer,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        color: Theme.of(context).colorScheme.onErrorContainer,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       '此平台暂不完全支持截图功能。支持的平台：Windows、macOS、Linux',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onErrorContainer,
-                          ),
+                        color: Theme.of(context).colorScheme.onErrorContainer,
+                      ),
                     ),
                   ],
                 ),
@@ -123,9 +120,7 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
   Widget _buildQuickActions(BuildContext context) {
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -141,9 +136,9 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
                 Text(
                   '快速操作',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -187,9 +182,7 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
 
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -205,9 +198,9 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
                 Text(
                   '最近截图',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.secondary,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    color: Theme.of(context).colorScheme.secondary,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -226,7 +219,8 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
                       const SizedBox(height: 16),
                       Text(
                         '暂无截图记录',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
                               color: Theme.of(context).colorScheme.outline,
                             ),
                       ),
@@ -234,8 +228,8 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
                       Text(
                         '点击上方按钮开始截图',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.outline,
-                            ),
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
                       ),
                     ],
                   ),
@@ -266,7 +260,9 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
   Widget _buildStatistics(BuildContext context) {
     final screenshots = widget.plugin.screenshots;
     final totalSize = screenshots.fold<int>(
-        0, (sum, record) => sum + record.fileSize);
+      0,
+      (sum, record) => sum + record.fileSize,
+    );
     final todayCount = screenshots.where((record) {
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
@@ -275,9 +271,7 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
 
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -293,9 +287,9 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
                 Text(
                   '统计信息',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.tertiary,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    color: Theme.of(context).colorScheme.tertiary,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -397,7 +391,9 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
       }
 
       if (result != null) {
-        debugPrint('收到选择结果: ${result.x}, ${result.y}, ${result.width}x${result.height}');
+        debugPrint(
+          '收到选择结果: ${result.x}, ${result.y}, ${result.width}x${result.height}',
+        );
         // 用户选择了区域
         final rect = result.toRect();
         debugPrint('开始捕获区域: $rect');
@@ -582,21 +578,21 @@ class _QuickActionTile extends StatelessWidget {
               Text(
                 title,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: onTap != null
-                          ? Theme.of(context).colorScheme.onSurface
-                          : Theme.of(context).colorScheme.outline,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: onTap != null
+                      ? Theme.of(context).colorScheme.onSurface
+                      : Theme.of(context).colorScheme.outline,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 4),
               Text(
                 subtitle,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: onTap != null
-                          ? Theme.of(context).colorScheme.onSurfaceVariant
-                          : Theme.of(context).colorScheme.outline,
-                    ),
+                  color: onTap != null
+                      ? Theme.of(context).colorScheme.onSurfaceVariant
+                      : Theme.of(context).colorScheme.outline,
+                ),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -685,32 +681,26 @@ class _StatisticItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(
-          icon,
-          size: 32,
-          color: Theme.of(context).colorScheme.tertiary,
-        ),
+        Icon(icon, size: 32, color: Theme.of(context).colorScheme.tertiary),
         const SizedBox(height: 8),
         Text(
           value,
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: Theme.of(context).colorScheme.tertiary,
-                fontWeight: FontWeight.bold,
-              ),
+            color: Theme.of(context).colorScheme.tertiary,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 4),
         Text(
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
       ],
     );
   }
 }
-
-
 
 /// 窗口列表对话框
 class _WindowListDialog extends StatelessWidget {
@@ -773,13 +763,11 @@ class _ScreenshotPreviewScreen extends StatefulWidget {
   final ScreenshotRecord record;
   final VoidCallback? onDelete;
 
-  const _ScreenshotPreviewScreen({
-    required this.record,
-    this.onDelete,
-  });
+  const _ScreenshotPreviewScreen({required this.record, this.onDelete});
 
   @override
-  State<_ScreenshotPreviewScreen> createState() => _ScreenshotPreviewScreenState();
+  State<_ScreenshotPreviewScreen> createState() =>
+      _ScreenshotPreviewScreenState();
 }
 
 class _ScreenshotPreviewScreenState extends State<_ScreenshotPreviewScreen> {
@@ -883,7 +871,10 @@ class _ScreenshotPreviewScreenState extends State<_ScreenshotPreviewScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
                   foregroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -904,10 +895,7 @@ class _ScreenshotPreviewScreenState extends State<_ScreenshotPreviewScreen> {
           children: [
             CircularProgressIndicator(color: Colors.white),
             SizedBox(height: 16),
-            Text(
-              '加载中...',
-              style: TextStyle(color: Colors.white, fontSize: 16),
-            ),
+            Text('加载中...', style: TextStyle(color: Colors.white, fontSize: 16)),
           ],
         ),
       );
@@ -920,10 +908,7 @@ class _ScreenshotPreviewScreenState extends State<_ScreenshotPreviewScreen> {
           children: [
             Icon(Icons.broken_image, size: 80, color: Colors.grey),
             SizedBox(height: 16),
-            Text(
-              '无法加载图片',
-              style: TextStyle(color: Colors.grey, fontSize: 18),
-            ),
+            Text('无法加载图片', style: TextStyle(color: Colors.grey, fontSize: 18)),
           ],
         ),
       );
@@ -1032,4 +1017,3 @@ class _ScreenshotPreviewScreenState extends State<_ScreenshotPreviewScreen> {
         '${date.second.toString().padLeft(2, '0')}';
   }
 }
-

@@ -7,7 +7,7 @@ import '../core/models/plugin_models.dart';
 /// Command-line interface for plugin development
 class PluginCLI {
   static const String version = '1.0.0';
-  
+
   /// Main entry point for the CLI
   static Future<void> main(List<String> args) async {
     if (args.isEmpty) {
@@ -93,7 +93,7 @@ For detailed help on a command, use: plugin-cli <command> --help
   /// Create a new plugin project
   static Future<void> _createCommand(List<String> args) async {
     final options = _parseCreateOptions(args);
-    
+
     if (options['name'] == null) {
       throw ArgumentError('Plugin name is required. Use --name <plugin-name>');
     }
@@ -125,11 +125,12 @@ For detailed help on a command, use: plugin-cli <command> --help
   /// Initialize plugin in existing directory
   static Future<void> _initCommand(List<String> args) async {
     final options = _parseInitOptions(args);
-    final pluginName = options['name'] as String? ?? path.basename(Directory.current.path);
+    final pluginName =
+        options['name'] as String? ?? path.basename(Directory.current.path);
     final pluginType = options['type'] as String? ?? 'executable';
 
     print('Initializing plugin in current directory...');
-    
+
     await _createPluginManifest(
       name: pluginName,
       type: pluginType,
@@ -143,9 +144,11 @@ For detailed help on a command, use: plugin-cli <command> --help
   static Future<void> _buildCommand(List<String> args) async {
     final options = _parseBuildOptions(args);
     final manifestFile = File('plugin_manifest.json');
-    
+
     if (!manifestFile.existsSync()) {
-      throw StateError('No plugin manifest found. Run "plugin-cli init" first.');
+      throw StateError(
+        'No plugin manifest found. Run "plugin-cli init" first.',
+      );
     }
 
     final manifest = await _loadManifest(manifestFile.path);
@@ -166,7 +169,7 @@ For detailed help on a command, use: plugin-cli <command> --help
   /// Package plugin for distribution
   static Future<void> _packageCommand(List<String> args) async {
     final options = _parsePackageOptions(args);
-    
+
     final manifestFile = File('plugin_manifest.json');
     if (!manifestFile.existsSync()) {
       throw StateError('No plugin manifest found in current directory');
@@ -192,21 +195,20 @@ For detailed help on a command, use: plugin-cli <command> --help
   /// Test plugin locally
   static Future<void> _testCommand(List<String> args) async {
     final options = _parseTestOptions(args);
-    
+
     final pluginFile = options['plugin'] as String?;
     final hostVersion = options['host-version'] as String? ?? 'latest';
 
     if (pluginFile == null) {
-      throw ArgumentError('Plugin file is required. Use --plugin <plugin-file>');
+      throw ArgumentError(
+        'Plugin file is required. Use --plugin <plugin-file>',
+      );
     }
 
     print('Testing plugin: $pluginFile');
     print('Host version: $hostVersion');
 
-    await _testPlugin(
-      pluginFile: pluginFile,
-      hostVersion: hostVersion,
-    );
+    await _testPlugin(pluginFile: pluginFile, hostVersion: hostVersion);
 
     print('Plugin test completed successfully!');
   }
@@ -214,7 +216,8 @@ For detailed help on a command, use: plugin-cli <command> --help
   /// Validate plugin manifest and structure
   static Future<void> _validateCommand(List<String> args) async {
     final options = _parseValidateOptions(args);
-    final manifestPath = options['manifest'] as String? ?? 'plugin_manifest.json';
+    final manifestPath =
+        options['manifest'] as String? ?? 'plugin_manifest.json';
 
     print('Validating plugin manifest: $manifestPath');
 
@@ -235,21 +238,20 @@ For detailed help on a command, use: plugin-cli <command> --help
   /// Publish plugin to registry
   static Future<void> _publishCommand(List<String> args) async {
     final options = _parsePublishOptions(args);
-    
+
     final pluginFile = options['plugin'] as String?;
     final registry = options['registry'] as String? ?? 'official';
 
     if (pluginFile == null) {
-      throw ArgumentError('Plugin file is required. Use --plugin <plugin-file>');
+      throw ArgumentError(
+        'Plugin file is required. Use --plugin <plugin-file>',
+      );
     }
 
     print('Publishing plugin: $pluginFile');
     print('Registry: $registry');
 
-    await _publishPlugin(
-      pluginFile: pluginFile,
-      registry: registry,
-    );
+    await _publishPlugin(pluginFile: pluginFile, registry: registry);
 
     print('Plugin published successfully!');
   }
@@ -277,15 +279,15 @@ For detailed help on a command, use: plugin-cli <command> --help
 
   static Map<String, dynamic> _parseCreateOptions(List<String> args) {
     final options = <String, dynamic>{};
-    
+
     for (int i = 0; i < args.length; i += 2) {
       if (i + 1 >= args.length) break;
-      
+
       final key = args[i].replaceFirst('--', '');
       final value = args[i + 1];
       options[key] = value;
     }
-    
+
     return options;
   }
 
@@ -329,11 +331,7 @@ For detailed help on a command, use: plugin-cli <command> --help
     projectDir.createSync(recursive: true);
 
     // Create plugin manifest
-    await _createPluginManifest(
-      name: name,
-      type: type,
-      directory: outputDir,
-    );
+    await _createPluginManifest(name: name, type: type, directory: outputDir);
 
     // Create project structure based on language and type
     await _createProjectStructure(
@@ -416,9 +414,14 @@ For detailed help on a command, use: plugin-cli <command> --help
     }
   }
 
-  static Future<void> _createDartProject(String directory, String type, String name) async {
+  static Future<void> _createDartProject(
+    String directory,
+    String type,
+    String name,
+  ) async {
     // Create pubspec.yaml
-    final pubspecContent = '''
+    final pubspecContent =
+        '''
 name: $name
 description: External plugin for Flutter Plugin Platform
 version: 1.0.0
@@ -440,10 +443,13 @@ flutter:
   uses-material-design: true
 ''';
 
-    await File(path.join(directory, 'pubspec.yaml')).writeAsString(pubspecContent);
+    await File(
+      path.join(directory, 'pubspec.yaml'),
+    ).writeAsString(pubspecContent);
 
     // Create main.dart
-    final mainContent = '''
+    final mainContent =
+        '''
 import 'package:flutter/material.dart';
 // import 'package:plugin_sdk/sdk.dart';
 
@@ -530,7 +536,11 @@ class _MyPluginHomePageState extends State<MyPluginHomePage> {
     await _createReadme(directory, name, 'Dart');
   }
 
-  static Future<void> _createPythonProject(String directory, String type, String name) async {
+  static Future<void> _createPythonProject(
+    String directory,
+    String type,
+    String name,
+  ) async {
     // Create requirements.txt
     final requirementsContent = '''
 # Plugin SDK (when available)
@@ -540,10 +550,13 @@ class _MyPluginHomePageState extends State<MyPluginHomePage> {
 requests>=2.25.0
 ''';
 
-    await File(path.join(directory, 'requirements.txt')).writeAsString(requirementsContent);
+    await File(
+      path.join(directory, 'requirements.txt'),
+    ).writeAsString(requirementsContent);
 
     // Create main.py
-    final mainContent = '''
+    final mainContent =
+        '''
 #!/usr/bin/env python3
 """
 $name Plugin - External plugin for Flutter Plugin Platform
@@ -616,7 +629,8 @@ if __name__ == "__main__":
     await File(path.join(directory, 'main.py')).writeAsString(mainContent);
 
     // Create setup.py
-    final setupContent = '''
+    final setupContent =
+        '''
 from setuptools import setup, find_packages
 
 setup(
@@ -641,9 +655,15 @@ setup(
     await _createReadme(directory, name, 'Python');
   }
 
-  static Future<void> _createNodeProject(String directory, String type, String name, String language) async {
+  static Future<void> _createNodeProject(
+    String directory,
+    String type,
+    String name,
+    String language,
+  ) async {
     // Create package.json
-    final packageContent = '''
+    final packageContent =
+        '''
 {
   "name": "$name",
   "version": "1.0.0",
@@ -666,11 +686,14 @@ setup(
 }
 ''';
 
-    await File(path.join(directory, 'package.json')).writeAsString(packageContent);
+    await File(
+      path.join(directory, 'package.json'),
+    ).writeAsString(packageContent);
 
     // Create main file
     final extension = language == 'typescript' ? 'ts' : 'js';
-    final mainContent = language == 'typescript' ? '''
+    final mainContent = language == 'typescript'
+        ? '''
 import { WebSocket } from 'ws';
 
 interface PluginConfig {
@@ -734,7 +757,8 @@ async function main(): Promise<void> {
 }
 
 main().catch(console.error);
-''' : '''
+'''
+        : '''
 const WebSocket = require('ws');
 
 class ${_toPascalCase(name)}Plugin {
@@ -791,7 +815,9 @@ async function main() {
 main().catch(console.error);
 ''';
 
-    await File(path.join(directory, 'index.$extension')).writeAsString(mainContent);
+    await File(
+      path.join(directory, 'index.$extension'),
+    ).writeAsString(mainContent);
 
     if (language == 'typescript') {
       // Create tsconfig.json
@@ -814,15 +840,26 @@ main().catch(console.error);
 }
 ''';
 
-      await File(path.join(directory, 'tsconfig.json')).writeAsString(tsconfigContent);
+      await File(
+        path.join(directory, 'tsconfig.json'),
+      ).writeAsString(tsconfigContent);
     }
 
-    await _createReadme(directory, name, language == 'typescript' ? 'TypeScript' : 'JavaScript');
+    await _createReadme(
+      directory,
+      name,
+      language == 'typescript' ? 'TypeScript' : 'JavaScript',
+    );
   }
 
-  static Future<void> _createRustProject(String directory, String type, String name) async {
+  static Future<void> _createRustProject(
+    String directory,
+    String type,
+    String name,
+  ) async {
     // Create Cargo.toml
-    final cargoContent = '''
+    final cargoContent =
+        '''
 [package]
 name = "$name"
 version = "1.0.0"
@@ -841,7 +878,8 @@ serde_json = "1.0"
     final srcDir = Directory(path.join(directory, 'src'));
     srcDir.createSync();
 
-    final mainContent = '''
+    final mainContent =
+        '''
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -913,9 +951,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     await _createReadme(directory, name, 'Rust');
   }
 
-  static Future<void> _createGenericProject(String directory, String type, String name) async {
+  static Future<void> _createGenericProject(
+    String directory,
+    String type,
+    String name,
+  ) async {
     // Create a generic script
-    final scriptContent = '''
+    final scriptContent =
+        '''
 #!/bin/bash
 # $name Plugin - External plugin for Flutter Plugin Platform
 
@@ -935,7 +978,10 @@ done
     await File(path.join(directory, 'plugin.sh')).writeAsString(scriptContent);
 
     // Make script executable
-    final result = await Process.run('chmod', ['+x', path.join(directory, 'plugin.sh')]);
+    final result = await Process.run('chmod', [
+      '+x',
+      path.join(directory, 'plugin.sh'),
+    ]);
     if (result.exitCode != 0) {
       print('Warning: Could not make script executable');
     }
@@ -943,8 +989,13 @@ done
     await _createReadme(directory, name, 'Shell Script');
   }
 
-  static Future<void> _createReadme(String directory, String name, String language) async {
-    final readmeContent = '''
+  static Future<void> _createReadme(
+    String directory,
+    String name,
+    String language,
+  ) async {
+    final readmeContent =
+        '''
 # $name Plugin
 
 External plugin for Flutter Plugin Platform written in $language.
@@ -1071,10 +1122,13 @@ MIT License - see LICENSE file for details.
     return PluginManifest.fromJson(json);
   }
 
-  static Future<void> _buildPlugin(PluginManifest manifest, Map<String, dynamic> options) async {
+  static Future<void> _buildPlugin(
+    PluginManifest manifest,
+    Map<String, dynamic> options,
+  ) async {
     // Implementation would depend on the plugin type and language
     print('Building plugin based on manifest configuration...');
-    
+
     // For now, just copy files to build directory
     final sourceFiles = Directory.current.listSync(recursive: true);
     for (final file in sourceFiles) {
@@ -1082,11 +1136,11 @@ MIT License - see LICENSE file for details.
         final relativePath = path.relative(file.path);
         final targetPath = path.join('build', relativePath);
         final targetDir = Directory(path.dirname(targetPath));
-        
+
         if (!targetDir.existsSync()) {
           targetDir.createSync(recursive: true);
         }
-        
+
         await file.copy(targetPath);
       }
     }
@@ -1105,7 +1159,9 @@ MIT License - see LICENSE file for details.
     packageDir.createSync(recursive: true);
 
     // Copy manifest
-    final manifestFile = File(path.join(packageDir.path, 'plugin_manifest.json'));
+    final manifestFile = File(
+      path.join(packageDir.path, 'plugin_manifest.json'),
+    );
     await manifestFile.writeAsString(
       const JsonEncoder.withIndent('  ').convert(manifest.toJson()),
     );
@@ -1113,7 +1169,10 @@ MIT License - see LICENSE file for details.
     // Copy build artifacts
     final buildDir = Directory('build');
     if (buildDir.existsSync()) {
-      await _copyDirectory(buildDir, Directory(path.join(packageDir.path, 'build')));
+      await _copyDirectory(
+        buildDir,
+        Directory(path.join(packageDir.path, 'build')),
+      );
     }
 
     // Create package archive (simplified - would use proper archiving)
@@ -1126,16 +1185,16 @@ MIT License - see LICENSE file for details.
     required String hostVersion,
   }) async {
     print('Testing plugin package...');
-    
+
     // Validate package structure
     print('✓ Package structure validation');
-    
+
     // Test manifest loading
     print('✓ Manifest validation');
-    
+
     // Test plugin initialization (simulated)
     print('✓ Plugin initialization test');
-    
+
     // Test basic communication (simulated)
     print('✓ Communication test');
   }
@@ -1164,26 +1223,33 @@ MIT License - see LICENSE file for details.
     required String registry,
   }) async {
     print('Publishing to registry: $registry');
-    
+
     // In a real implementation, this would:
     // 1. Validate the plugin package
     // 2. Upload to the specified registry
     // 3. Handle authentication and metadata
-    
+
     print('Plugin published successfully (simulated)');
   }
 
-  static Future<void> _copyDirectory(Directory source, Directory destination) async {
+  static Future<void> _copyDirectory(
+    Directory source,
+    Directory destination,
+  ) async {
     if (!destination.existsSync()) {
       destination.createSync(recursive: true);
     }
 
     await for (final entity in source.list(recursive: false)) {
       if (entity is Directory) {
-        final newDirectory = Directory(path.join(destination.path, path.basename(entity.path)));
+        final newDirectory = Directory(
+          path.join(destination.path, path.basename(entity.path)),
+        );
         await _copyDirectory(entity, newDirectory);
       } else if (entity is File) {
-        final newFile = File(path.join(destination.path, path.basename(entity.path)));
+        final newFile = File(
+          path.join(destination.path, path.basename(entity.path)),
+        );
         await entity.copy(newFile.path);
       }
     }
@@ -1192,7 +1258,11 @@ MIT License - see LICENSE file for details.
   static String _toPascalCase(String input) {
     return input
         .split(RegExp(r'[-_\s]+'))
-        .map((word) => word.isEmpty ? '' : word[0].toUpperCase() + word.substring(1).toLowerCase())
+        .map(
+          (word) => word.isEmpty
+              ? ''
+              : word[0].toUpperCase() + word.substring(1).toLowerCase(),
+        )
         .join('');
   }
 }

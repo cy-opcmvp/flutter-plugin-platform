@@ -42,7 +42,9 @@ class PluginDetailsDialog extends StatelessWidget {
                     width: 56,
                     height: 56,
                     decoration: BoxDecoration(
-                      color: _getPluginTypeColor(descriptor.type).withValues(alpha: 0.2),
+                      color: _getPluginTypeColor(
+                        descriptor.type,
+                      ).withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
@@ -66,7 +68,8 @@ class PluginDetailsDialog extends StatelessWidget {
                         Text(
                           'Version ${descriptor.version}',
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.7),
+                            color: theme.colorScheme.onPrimaryContainer
+                                .withValues(alpha: 0.7),
                           ),
                         ),
                       ],
@@ -91,42 +94,65 @@ class PluginDetailsDialog extends StatelessWidget {
                       context,
                       context.l10n.plugin_detailsStatus,
                       [
-                        _InfoItem(context.l10n.plugin_detailsState, _getStateDisplayName(context, pluginInfo.state)),
-                        _InfoItem(context.l10n.plugin_detailsType, descriptor.type.name.toUpperCase()),
-                        _InfoItem(context.l10n.plugin_detailsPluginId, descriptor.id),
+                        _InfoItem(
+                          context.l10n.plugin_detailsState,
+                          _getStateDisplayName(context, pluginInfo.state),
+                        ),
+                        _InfoItem(
+                          context.l10n.plugin_detailsType,
+                          descriptor.type.name.toUpperCase(),
+                        ),
+                        _InfoItem(
+                          context.l10n.plugin_detailsPluginId,
+                          descriptor.id,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 24),
-                    
+
                     // Description
                     if (descriptor.metadata.containsKey('description')) ...[
                       _buildInfoSection(
                         context,
                         context.l10n.plugin_detailsDescription,
-                        [_InfoItem('', descriptor.metadata['description'] as String)],
+                        [
+                          _InfoItem(
+                            '',
+                            descriptor.metadata['description'] as String,
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 24),
                     ],
-                    
+
                     // Installation info
                     _buildInfoSection(
                       context,
                       context.l10n.plugin_detailsInstallation,
                       [
-                        _InfoItem(context.l10n.plugin_detailsInstalled, _formatDateTime(pluginInfo.installedAt)),
+                        _InfoItem(
+                          context.l10n.plugin_detailsInstalled,
+                          _formatDateTime(pluginInfo.installedAt),
+                        ),
                         if (pluginInfo.lastUsed != null)
-                          _InfoItem(context.l10n.plugin_detailsLastUsed, _formatDateTime(pluginInfo.lastUsed!)),
-                        _InfoItem(context.l10n.plugin_detailsEntryPoint, descriptor.entryPoint),
+                          _InfoItem(
+                            context.l10n.plugin_detailsLastUsed,
+                            _formatDateTime(pluginInfo.lastUsed!),
+                          ),
+                        _InfoItem(
+                          context.l10n.plugin_detailsEntryPoint,
+                          descriptor.entryPoint,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 24),
-                    
+
                     // Permissions
                     if (descriptor.requiredPermissions.isNotEmpty) ...[
                       _buildPermissionsSection(context),
                       const SizedBox(height: 24),
                     ],
-                    
+
                     // Metadata
                     if (descriptor.metadata.isNotEmpty) ...[
                       _buildMetadataSection(context),
@@ -175,9 +201,13 @@ class PluginDetailsDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoSection(BuildContext context, String title, List<_InfoItem> items) {
+  Widget _buildInfoSection(
+    BuildContext context,
+    String title,
+    List<_InfoItem> items,
+  ) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -188,42 +218,43 @@ class PluginDetailsDialog extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        ...items.map((item) => Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: item.label.isEmpty
-              ? Text(
-                  item.value,
-                  style: theme.textTheme.bodyMedium,
-                )
-              : Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      width: 100,
-                      child: Text(
-                        '${item.label}:',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+        ...items.map(
+          (item) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: item.label.isEmpty
+                ? Text(item.value, style: theme.textTheme.bodyMedium)
+                : Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: 100,
+                        child: Text(
+                          '${item.label}:',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w500,
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.7,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: Text(
-                        item.value,
-                        style: theme.textTheme.bodyMedium,
+                      Expanded(
+                        child: Text(
+                          item.value,
+                          style: theme.textTheme.bodyMedium,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-        )),
+                    ],
+                  ),
+          ),
+        ),
       ],
     );
   }
 
   Widget _buildPermissionsSection(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -255,15 +286,15 @@ class PluginDetailsDialog extends StatelessWidget {
   Widget _buildMetadataSection(BuildContext context) {
     final theme = Theme.of(context);
     final metadata = pluginInfo.descriptor.metadata;
-    
+
     // Filter out description as it's shown separately
     final filteredMetadata = Map<String, dynamic>.from(metadata);
     filteredMetadata.remove('description');
-    
+
     if (filteredMetadata.isEmpty) {
       return const SizedBox.shrink();
     }
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -274,30 +305,32 @@ class PluginDetailsDialog extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        ...filteredMetadata.entries.map((entry) => Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                width: 100,
-                child: Text(
-                  '${_capitalizeFirst(entry.key)}:',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+        ...filteredMetadata.entries.map(
+          (entry) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 100,
+                  child: Text(
+                    '${_capitalizeFirst(entry.key)}:',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
                   ),
                 ),
-              ),
-              Expanded(
-                child: Text(
-                  entry.value.toString(),
-                  style: theme.textTheme.bodyMedium,
+                Expanded(
+                  child: Text(
+                    entry.value.toString(),
+                    style: theme.textTheme.bodyMedium,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        )),
+        ),
       ],
     );
   }
@@ -335,7 +368,10 @@ class PluginDetailsDialog extends StatelessWidget {
     }
   }
 
-  String _getPermissionDisplayName(BuildContext context, Permission permission) {
+  String _getPermissionDisplayName(
+    BuildContext context,
+    Permission permission,
+  ) {
     switch (permission) {
       case Permission.fileAccess:
         return context.l10n.plugin_permissionFileAccess;

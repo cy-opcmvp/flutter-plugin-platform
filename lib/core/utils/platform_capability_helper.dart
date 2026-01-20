@@ -137,10 +137,7 @@ class PlatformCapabilityHelper {
           TargetPlatform.ios,
           TargetPlatform.web,
         ])
-          platform: PlatformCapability.unsupported(
-            platform,
-            '仅支持 Windows 平台',
-          ),
+          platform: PlatformCapability.unsupported(platform, '仅支持 Windows 平台'),
       },
       hideIfUnsupported: hideIfUnsupported,
     );

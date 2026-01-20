@@ -1,16 +1,19 @@
 library;
 
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 /// 热键服务
 ///
 /// 负责管理系统级全局热键的注册和监听
 class HotkeyService {
-  static const MethodChannel _methodChannel =
-      MethodChannel('com.example.screenshot/hotkey');
-  static const EventChannel _eventChannel =
-      EventChannel('com.example.screenshot/hotkey_events');
+  static const MethodChannel _methodChannel = MethodChannel(
+    'com.example.screenshot/hotkey',
+  );
+  static const EventChannel _eventChannel = EventChannel(
+    'com.example.screenshot/hotkey_events',
+  );
 
   StreamSubscription<dynamic>? _eventSubscription;
   final Map<String, HotkeyCallback> _callbacks = {};
@@ -30,14 +33,14 @@ class HotkeyService {
           _handleHotkeyEvent(event as String);
         },
         onError: (dynamic error) {
-          print('Hotkey event error: $error');
+          debugPrint('Hotkey event error: $error');
         },
       );
 
       _isInitialized = true;
       return true;
     } catch (e) {
-      print('Failed to initialize hotkey service: $e');
+      debugPrint('Failed to initialize hotkey service: $e');
       return false;
     }
   }
@@ -68,7 +71,7 @@ class HotkeyService {
       }
       return false;
     } catch (e) {
-      print('Failed to register hotkey: $e');
+      debugPrint('Failed to register hotkey: $e');
       return false;
     }
   }
@@ -86,7 +89,7 @@ class HotkeyService {
       }
       return false;
     } catch (e) {
-      print('Failed to unregister hotkey: $e');
+      debugPrint('Failed to unregister hotkey: $e');
       return false;
     }
   }

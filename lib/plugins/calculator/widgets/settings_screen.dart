@@ -13,10 +13,7 @@ import '../calculator_plugin.dart';
 class CalculatorSettingsScreen extends StatefulWidget {
   final CalculatorPlugin plugin;
 
-  const CalculatorSettingsScreen({
-    super.key,
-    required this.plugin,
-  });
+  const CalculatorSettingsScreen({super.key, required this.plugin});
 
   @override
   State<CalculatorSettingsScreen> createState() =>
@@ -121,16 +118,15 @@ class _CalculatorSettingsScreenState extends State<CalculatorSettingsScreen> {
                       Text(
                         '${_settings.precision} ${l10n.calculator_decimal_places}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.6),
                         ),
                       ),
                     ],
                   ),
                 ),
-                Text(
-                  '0 - 15',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
+                Text('0 - 15', style: Theme.of(context).textTheme.bodySmall),
               ],
             ),
             const SizedBox(height: 16),
@@ -141,7 +137,9 @@ class _CalculatorSettingsScreenState extends State<CalculatorSettingsScreen> {
               divisions: 15,
               label: '${_settings.precision}',
               onChanged: (value) async {
-                final newSettings = _settings.copyWith(precision: value.toInt());
+                final newSettings = _settings.copyWith(
+                  precision: value.toInt(),
+                );
                 if (await _saveSettings(newSettings)) {
                   setState(() {
                     _settings = newSettings;
@@ -159,9 +157,11 @@ class _CalculatorSettingsScreenState extends State<CalculatorSettingsScreen> {
     return Card(
       child: ListTile(
         title: Text(l10n.calculator_setting_angleMode),
-        subtitle: Text(_settings.angleMode == 'deg'
-            ? l10n.calculator_angle_mode_degrees
-            : l10n.calculator_angle_mode_radians),
+        subtitle: Text(
+          _settings.angleMode == 'deg'
+              ? l10n.calculator_angle_mode_degrees
+              : l10n.calculator_angle_mode_radians,
+        ),
         trailing: SegmentedButton<String>(
           segments: [
             ButtonSegment(
@@ -205,18 +205,19 @@ class _CalculatorSettingsScreenState extends State<CalculatorSettingsScreen> {
                       Text(l10n.calculator_setting_historySize),
                       const SizedBox(height: 4),
                       Text(
-                        l10n.calculator_history_size_description(_settings.historySize),
+                        l10n.calculator_history_size_description(
+                          _settings.historySize,
+                        ),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.6),
                         ),
                       ),
                     ],
                   ),
                 ),
-                Text(
-                  '10 - 500',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
+                Text('10 - 500', style: Theme.of(context).textTheme.bodySmall),
               ],
             ),
             const SizedBox(height: 16),
@@ -227,7 +228,9 @@ class _CalculatorSettingsScreenState extends State<CalculatorSettingsScreen> {
               divisions: 49,
               label: '${_settings.historySize}',
               onChanged: (value) async {
-                final newSettings = _settings.copyWith(historySize: value.toInt());
+                final newSettings = _settings.copyWith(
+                  historySize: value.toInt(),
+                );
                 if (await _saveSettings(newSettings)) {
                   setState(() {
                     _settings = newSettings;
@@ -292,14 +295,18 @@ class _CalculatorSettingsScreenState extends State<CalculatorSettingsScreen> {
                       Text(
                         '${_settings.buttonSoundVolume}%',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.6),
                         ),
                       ),
                     ],
                   ),
                 ),
                 Icon(
-                  _settings.buttonSoundVolume > 0 ? Icons.volume_up : Icons.volume_off,
+                  _settings.buttonSoundVolume > 0
+                      ? Icons.volume_up
+                      : Icons.volume_off,
                   size: 20,
                 ),
               ],
@@ -312,7 +319,9 @@ class _CalculatorSettingsScreenState extends State<CalculatorSettingsScreen> {
               divisions: 20,
               label: '${_settings.buttonSoundVolume}%',
               onChanged: (value) async {
-                final newSettings = _settings.copyWith(buttonSoundVolume: value.toInt());
+                final newSettings = _settings.copyWith(
+                  buttonSoundVolume: value.toInt(),
+                );
                 if (await _saveSettings(newSettings)) {
                   setState(() {
                     _settings = newSettings;

@@ -33,60 +33,69 @@ class PluginThemeManager {
   /// Apply theme to web-based plugins
   Future<void> _applyWebTheme(IExternalPlugin plugin, ThemeData theme) async {
     final themeData = _extractThemeData(theme);
-    
+
     // Send theme data to web plugin via IPC
-    await plugin.sendMessage(IPCMessage(
-      messageId: DateTime.now().millisecondsSinceEpoch.toString(),
-      messageType: 'theme_update',
-      sourceId: 'host',
-      targetId: plugin.id,
-      payload: {
-        'theme': themeData,
-        'type': 'web',
-      },
-    ));
+    await plugin.sendMessage(
+      IPCMessage(
+        messageId: DateTime.now().millisecondsSinceEpoch.toString(),
+        messageType: 'theme_update',
+        sourceId: 'host',
+        targetId: plugin.id,
+        payload: {'theme': themeData, 'type': 'web'},
+      ),
+    );
   }
 
   /// Apply theme to container-based plugins
-  Future<void> _applyContainerTheme(IExternalPlugin plugin, ThemeData theme) async {
+  Future<void> _applyContainerTheme(
+    IExternalPlugin plugin,
+    ThemeData theme,
+  ) async {
     final themeData = _extractThemeData(theme);
-    
+
     // Send theme data to container plugin
-    await plugin.sendMessage(IPCMessage(
-      messageId: DateTime.now().millisecondsSinceEpoch.toString(),
-      messageType: 'theme_update',
-      sourceId: 'host',
-      targetId: plugin.id,
-      payload: {
-        'theme': themeData,
-        'type': 'container',
-        'environment': _getContainerThemeEnvironment(themeData),
-      },
-    ));
+    await plugin.sendMessage(
+      IPCMessage(
+        messageId: DateTime.now().millisecondsSinceEpoch.toString(),
+        messageType: 'theme_update',
+        sourceId: 'host',
+        targetId: plugin.id,
+        payload: {
+          'theme': themeData,
+          'type': 'container',
+          'environment': _getContainerThemeEnvironment(themeData),
+        },
+      ),
+    );
   }
 
   /// Apply theme to native/executable plugins
-  Future<void> _applyNativeTheme(IExternalPlugin plugin, ThemeData theme) async {
+  Future<void> _applyNativeTheme(
+    IExternalPlugin plugin,
+    ThemeData theme,
+  ) async {
     final themeData = _extractThemeData(theme);
-    
+
     // Send theme data to native plugin
-    await plugin.sendMessage(IPCMessage(
-      messageId: DateTime.now().millisecondsSinceEpoch.toString(),
-      messageType: 'theme_update',
-      sourceId: 'host',
-      targetId: plugin.id,
-      payload: {
-        'theme': themeData,
-        'type': 'native',
-        'config': _getNativeThemeConfig(themeData),
-      },
-    ));
+    await plugin.sendMessage(
+      IPCMessage(
+        messageId: DateTime.now().millisecondsSinceEpoch.toString(),
+        messageType: 'theme_update',
+        sourceId: 'host',
+        targetId: plugin.id,
+        payload: {
+          'theme': themeData,
+          'type': 'native',
+          'config': _getNativeThemeConfig(themeData),
+        },
+      ),
+    );
   }
 
   /// Extract theme data from Flutter theme
   Map<String, dynamic> _extractThemeData(ThemeData theme) {
     final colorScheme = theme.colorScheme;
-    
+
     return {
       'brightness': theme.brightness.name,
       'colors': {
@@ -109,11 +118,15 @@ class PluginThemeManager {
         'surface': _colorToHex(colorScheme.surface),
         'surfaceDim': _colorToHex(colorScheme.surfaceDim),
         'surfaceBright': _colorToHex(colorScheme.surfaceBright),
-        'surfaceContainerLowest': _colorToHex(colorScheme.surfaceContainerLowest),
+        'surfaceContainerLowest': _colorToHex(
+          colorScheme.surfaceContainerLowest,
+        ),
         'surfaceContainerLow': _colorToHex(colorScheme.surfaceContainerLow),
         'surfaceContainer': _colorToHex(colorScheme.surfaceContainer),
         'surfaceContainerHigh': _colorToHex(colorScheme.surfaceContainerHigh),
-        'surfaceContainerHighest': _colorToHex(colorScheme.surfaceContainerHighest),
+        'surfaceContainerHighest': _colorToHex(
+          colorScheme.surfaceContainerHighest,
+        ),
         'onSurface': _colorToHex(colorScheme.onSurface),
         'onSurfaceVariant': _colorToHex(colorScheme.onSurfaceVariant),
         'outline': _colorToHex(colorScheme.outline),
@@ -177,7 +190,7 @@ class PluginThemeManager {
   /// Convert TextStyle to map
   Map<String, dynamic>? _textStyleToMap(TextStyle? textStyle) {
     if (textStyle == null) return null;
-    
+
     return {
       'fontSize': textStyle.fontSize,
       'fontWeight': textStyle.fontWeight?.value,
@@ -189,9 +202,11 @@ class PluginThemeManager {
   }
 
   /// Get container theme environment variables
-  Map<String, String> _getContainerThemeEnvironment(Map<String, dynamic> themeData) {
+  Map<String, String> _getContainerThemeEnvironment(
+    Map<String, dynamic> themeData,
+  ) {
     final colors = themeData['colors'] as Map<String, dynamic>;
-    
+
     return {
       'THEME_BRIGHTNESS': themeData['brightness'] as String,
       'THEME_PRIMARY': colors['primary'] as String,
@@ -220,10 +235,10 @@ class PluginThemeManager {
     final spacing = themeData['spacing'] as Map<String, dynamic>;
     final borderRadius = themeData['borderRadius'] as Map<String, dynamic>;
     final elevation = themeData['elevation'] as Map<String, dynamic>;
-    
+
     final cssVariables = StringBuffer();
     cssVariables.writeln(':root {');
-    
+
     // Color variables
     colors.forEach((key, value) {
       final cssKey = key.replaceAllMapped(
@@ -232,11 +247,11 @@ class PluginThemeManager {
       );
       cssVariables.writeln('  --host-color-$cssKey: $value;');
     });
-    
+
     // Typography variables
     final fontFamily = typography['fontFamily'] as String;
     cssVariables.writeln('  --host-font-family: $fontFamily;');
-    
+
     typography.forEach((key, value) {
       if (key != 'fontFamily' && value != null) {
         final styleMap = value as Map<String, dynamic>;
@@ -244,32 +259,40 @@ class PluginThemeManager {
           RegExp(r'([A-Z])'),
           (match) => '-${match.group(1)!.toLowerCase()}',
         );
-        
+
         if (styleMap['fontSize'] != null) {
-          cssVariables.writeln('  --host-font-size-$cssKey: ${styleMap['fontSize']}px;');
+          cssVariables.writeln(
+            '  --host-font-size-$cssKey: ${styleMap['fontSize']}px;',
+          );
         }
         if (styleMap['fontWeight'] != null) {
-          cssVariables.writeln('  --host-font-weight-$cssKey: ${styleMap['fontWeight']};');
+          cssVariables.writeln(
+            '  --host-font-weight-$cssKey: ${styleMap['fontWeight']};',
+          );
         }
         if (styleMap['letterSpacing'] != null) {
-          cssVariables.writeln('  --host-letter-spacing-$cssKey: ${styleMap['letterSpacing']}px;');
+          cssVariables.writeln(
+            '  --host-letter-spacing-$cssKey: ${styleMap['letterSpacing']}px;',
+          );
         }
         if (styleMap['height'] != null) {
-          cssVariables.writeln('  --host-line-height-$cssKey: ${styleMap['height']};');
+          cssVariables.writeln(
+            '  --host-line-height-$cssKey: ${styleMap['height']};',
+          );
         }
       }
     });
-    
+
     // Spacing variables
     spacing.forEach((key, value) {
       cssVariables.writeln('  --host-spacing-$key: ${value}px;');
     });
-    
+
     // Border radius variables
     borderRadius.forEach((key, value) {
       cssVariables.writeln('  --host-border-radius-$key: ${value}px;');
     });
-    
+
     // Elevation variables (as box-shadow)
     elevation.forEach((key, value) {
       final elevationValue = value as double;
@@ -278,19 +301,21 @@ class PluginThemeManager {
       } else {
         final blur = elevationValue * 2;
         final offset = elevationValue / 2;
-        cssVariables.writeln('  --host-elevation-$key: 0 ${offset}px ${blur}px rgba(0, 0, 0, 0.2);');
+        cssVariables.writeln(
+          '  --host-elevation-$key: 0 ${offset}px ${blur}px rgba(0, 0, 0, 0.2);',
+        );
       }
     });
-    
+
     cssVariables.writeln('}');
-    
+
     return cssVariables.toString();
   }
 
   /// Generate theme adaptation script for web plugins
   String generateThemeAdaptationScript(ThemeData theme) {
     final cssVariables = generateCSSVariables(theme);
-    
+
     return '''
 (function() {
   // Inject CSS variables
@@ -331,7 +356,7 @@ class PluginThemeManager {
     return Builder(
       builder: (context) {
         final effectiveTheme = theme ?? Theme.of(context);
-        
+
         return Container(
           decoration: BoxDecoration(
             color: effectiveTheme.colorScheme.surface,
@@ -342,10 +367,7 @@ class PluginThemeManager {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Theme(
-              data: effectiveTheme,
-              child: child,
-            ),
+            child: Theme(data: effectiveTheme, child: child),
           ),
         );
       },
@@ -356,7 +378,7 @@ class PluginThemeManager {
   PluginThemeColors getThemeColors(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return PluginThemeColors(
       primary: colorScheme.primary,
       onPrimary: colorScheme.onPrimary,
@@ -435,7 +457,7 @@ class PluginThemeConfig {
 
   factory PluginThemeConfig.fromManifest(PluginManifest manifest) {
     final uiIntegration = manifest.uiIntegration;
-    
+
     return PluginThemeConfig(
       enableTheming: uiIntegration.supportsTheming,
       adaptToSystemTheme: true,

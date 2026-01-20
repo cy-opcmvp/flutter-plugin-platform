@@ -3,7 +3,7 @@ import 'plugin_models.dart';
 /// Events that can occur in the platform
 abstract class PlatformEvent {
   final DateTime timestamp;
-  
+
   const PlatformEvent({required this.timestamp});
 }
 
@@ -65,24 +65,25 @@ class UserProfile {
     if (userId.trim().isEmpty) {
       return false;
     }
-    
+
     // Display name must be non-empty and reasonable length
     if (displayName.trim().isEmpty || displayName.length > 100) {
       return false;
     }
-    
+
     // Installed plugins must have valid plugin IDs
     for (final pluginId in installedPlugins) {
-      if (pluginId.isEmpty || !RegExp(r'^[a-z0-9]+(\.[a-z0-9]+)*$').hasMatch(pluginId)) {
+      if (pluginId.isEmpty ||
+          !RegExp(r'^[a-z0-9]+(\.[a-z0-9]+)*$').hasMatch(pluginId)) {
         return false;
       }
     }
-    
+
     // Last sync time should not be in the future
     if (lastSyncTime.isAfter(DateTime.now().add(const Duration(minutes: 5)))) {
       return false;
     }
-    
+
     return true;
   }
 
@@ -91,14 +92,15 @@ class UserProfile {
       userId: json['userId'] as String,
       displayName: json['displayName'] as String,
       preferences: json['preferences'] as Map<String, dynamic>,
-      installedPlugins: (json['installedPlugins'] as List<dynamic>).cast<String>(),
+      installedPlugins: (json['installedPlugins'] as List<dynamic>)
+          .cast<String>(),
       lastSyncTime: DateTime.parse(json['lastSyncTime'] as String),
     );
-    
+
     if (!profile.isValid()) {
       throw ArgumentError('Invalid user profile data');
     }
-    
+
     return profile;
   }
 
@@ -140,29 +142,29 @@ class BackendConfig {
     } catch (e) {
       return false;
     }
-    
+
     // API version must be non-empty
     if (apiVersion.trim().isEmpty) {
       return false;
     }
-    
+
     // Timeout must be positive and reasonable (1-300 seconds)
     if (timeoutSeconds <= 0 || timeoutSeconds > 300) {
       return false;
     }
-    
+
     // Endpoints must have valid URLs
     for (final endpoint in endpoints.values) {
       if (endpoint.trim().isEmpty) {
         return false;
       }
     }
-    
+
     // Auth config must be valid
     if (!auth.isValid()) {
       return false;
     }
-    
+
     return true;
   }
 
@@ -174,11 +176,11 @@ class BackendConfig {
       auth: AuthenticationConfig.fromJson(json['auth'] as Map<String, dynamic>),
       timeoutSeconds: json['timeoutSeconds'] as int,
     );
-    
+
     if (!config.isValid()) {
       throw ArgumentError('Invalid backend configuration data');
     }
-    
+
     return config;
   }
 
@@ -198,10 +200,7 @@ class AuthenticationConfig {
   final String type;
   final Map<String, String> credentials;
 
-  const AuthenticationConfig({
-    required this.type,
-    required this.credentials,
-  });
+  const AuthenticationConfig({required this.type, required this.credentials});
 
   /// Validates the authentication configuration for data integrity
   bool isValid() {
@@ -210,20 +209,21 @@ class AuthenticationConfig {
     if (type.trim().isEmpty || !supportedTypes.contains(type.toLowerCase())) {
       return false;
     }
-    
+
     // Credentials validation based on type
     switch (type.toLowerCase()) {
       case 'bearer':
-        return credentials.containsKey('token') && credentials['token']!.isNotEmpty;
+        return credentials.containsKey('token') &&
+            credentials['token']!.isNotEmpty;
       case 'basic':
-        return credentials.containsKey('username') && 
-               credentials.containsKey('password') &&
-               credentials['username']!.isNotEmpty;
+        return credentials.containsKey('username') &&
+            credentials.containsKey('password') &&
+            credentials['username']!.isNotEmpty;
       case 'apikey':
         return credentials.containsKey('key') && credentials['key']!.isNotEmpty;
       case 'oauth2':
-        return credentials.containsKey('clientId') && 
-               credentials['clientId']!.isNotEmpty;
+        return credentials.containsKey('clientId') &&
+            credentials['clientId']!.isNotEmpty;
       case 'none':
         return true;
       default:
@@ -236,27 +236,21 @@ class AuthenticationConfig {
       type: json['type'] as String,
       credentials: Map<String, String>.from(json['credentials'] as Map),
     );
-    
+
     if (!config.isValid()) {
       throw ArgumentError('Invalid authentication configuration data');
     }
-    
+
     return config;
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'type': type,
-      'credentials': credentials,
-    };
+    return {'type': type, 'credentials': credentials};
   }
 }
 
 /// Operation modes
-enum OperationMode {
-  local,
-  online
-}
+enum OperationMode { local, online }
 
 /// Plugin-specific events
 class PluginEvent extends PlatformEvent {
@@ -287,16 +281,15 @@ enum PluginEventType {
   updateDetected,
   hotReloading,
   hotReloaded,
-  rollback
+  rollback,
 }
+
 /// Event fired when a notification is shown
 class NotificationEvent extends PlatformEvent {
   final String message;
 
-  const NotificationEvent({
-    required this.message,
-    required DateTime timestamp,
-  }) : super(timestamp: timestamp);
+  const NotificationEvent({required this.message, required DateTime timestamp})
+    : super(timestamp: timestamp);
 }
 
 /// Event fired when a permission is requested
@@ -315,10 +308,8 @@ class PermissionEvent extends PlatformEvent {
 class UrlOpenedEvent extends PlatformEvent {
   final String url;
 
-  const UrlOpenedEvent({
-    required this.url,
-    required DateTime timestamp,
-  }) : super(timestamp: timestamp);
+  const UrlOpenedEvent({required this.url, required DateTime timestamp})
+    : super(timestamp: timestamp);
 }
 
 /// Represents an environment variable with its value and availability status
@@ -434,7 +425,8 @@ class PlatformCapabilities {
 
   factory PlatformCapabilities.fromJson(Map<String, dynamic> json) {
     return PlatformCapabilities(
-      supportsEnvironmentVariables: json['supportsEnvironmentVariables'] as bool,
+      supportsEnvironmentVariables:
+          json['supportsEnvironmentVariables'] as bool,
       supportsFileSystem: json['supportsFileSystem'] as bool,
       supportsSteamIntegration: json['supportsSteamIntegration'] as bool,
       supportsNativeProcesses: json['supportsNativeProcesses'] as bool,
@@ -464,13 +456,12 @@ class PlatformCapabilities {
 
   @override
   int get hashCode => Object.hash(
-        supportsEnvironmentVariables,
-        supportsFileSystem,
-        supportsSteamIntegration,
-        supportsNativeProcesses,
-        supportsDesktopPet,
-        supportsAlwaysOnTop,
-        supportsSystemTray,
-      );
+    supportsEnvironmentVariables,
+    supportsFileSystem,
+    supportsSteamIntegration,
+    supportsNativeProcesses,
+    supportsDesktopPet,
+    supportsAlwaysOnTop,
+    supportsSystemTray,
+  );
 }
-

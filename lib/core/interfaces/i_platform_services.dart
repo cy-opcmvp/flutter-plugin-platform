@@ -5,22 +5,22 @@ import '../models/plugin_models.dart';
 abstract class IPlatformServices {
   /// Initialize the platform services
   Future<void> initialize();
-  
+
   /// Show a notification to the user
   Future<void> showNotification(String message);
-  
+
   /// Request a specific permission from the user
   Future<void> requestPermission(Permission permission);
-  
+
   /// Open an external URL
   Future<void> openExternalUrl(String url);
-  
+
   /// Stream of platform events
   Stream<PlatformEvent> get eventStream;
-  
+
   /// Get current platform information
   PlatformInfo get platformInfo;
-  
+
   /// Check if a permission is granted
   Future<bool> hasPermission(Permission permission);
 }
@@ -39,8 +39,4 @@ class PlatformInfo {
 }
 
 /// Types of platforms supported
-enum PlatformType {
-  mobile,
-  desktop,
-  steam
-}
+enum PlatformType { mobile, desktop, steam }

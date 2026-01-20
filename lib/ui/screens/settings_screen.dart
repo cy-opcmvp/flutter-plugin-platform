@@ -344,7 +344,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     if (plugin == null) {
       debugPrint('Plugin not found: $pluginId');
-      debugPrint('Available plugins: ${pluginManager.getActivePlugins().map((p) => p.id).toList()}');
+      debugPrint(
+        'Available plugins: ${pluginManager.getActivePlugins().map((p) => p.id).toList()}',
+      );
 
       // Try to load the plugin
       try {
@@ -384,11 +386,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       final settingsScreen = plugin.buildSettingsScreen();
       if (mounted) {
-        await Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => settingsScreen,
-          ),
-        );
+        await Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (context) => settingsScreen));
       }
     } catch (e) {
       debugPrint('Failed to build settings screen: $e');

@@ -9,27 +9,27 @@ import 'package:plugin_platform/core/interfaces/i_platform_services.dart';
 // Mock 实现
 class MockPlatformServices implements IPlatformServices {
   final List<String> notifications = [];
-  
+
   @override
   Future<void> initialize() async {}
-  
+
   @override
   Future<void> showNotification(String message) async {
     notifications.add(message);
   }
-  
+
   @override
   Future<void> requestPermission(Permission permission) async {}
-  
+
   @override
   Future<bool> hasPermission(Permission permission) async => true;
-  
+
   @override
   Future<void> openExternalUrl(String url) async {}
-  
+
   @override
   Stream<PlatformEvent> get eventStream => const Stream.empty();
-  
+
   @override
   PlatformInfo get platformInfo => const PlatformInfo(
     type: PlatformType.desktop,
@@ -40,22 +40,22 @@ class MockPlatformServices implements IPlatformServices {
 
 class MockDataStorage implements IDataStorage {
   final Map<String, dynamic> _storage = {};
-  
+
   @override
   Future<void> store(String key, dynamic value) async {
     _storage[key] = value;
   }
-  
+
   @override
   Future<T?> retrieve<T>(String key) async {
     return _storage[key] as T?;
   }
-  
+
   @override
   Future<void> remove(String key) async {
     _storage.remove(key);
   }
-  
+
   @override
   Future<void> clear() async {
     _storage.clear();
@@ -64,15 +64,22 @@ class MockDataStorage implements IDataStorage {
 
 class MockNetworkAccess implements INetworkAccess {
   @override
-  Future<Map<String, dynamic>> get(String url, {Map<String, String>? headers}) async {
+  Future<Map<String, dynamic>> get(
+    String url, {
+    Map<String, String>? headers,
+  }) async {
     return {'status': 'success', 'data': 'mock data'};
   }
-  
+
   @override
-  Future<Map<String, dynamic>> post(String url, {Map<String, dynamic>? body, Map<String, String>? headers}) async {
+  Future<Map<String, dynamic>> post(
+    String url, {
+    Map<String, dynamic>? body,
+    Map<String, String>? headers,
+  }) async {
     return {'status': 'success'};
   }
-  
+
   @override
   Future<bool> isConnected() async => true;
 }
@@ -90,7 +97,7 @@ void main() {
       mockPlatformServices = MockPlatformServices();
       mockDataStorage = MockDataStorage();
       mockNetworkAccess = MockNetworkAccess();
-      
+
       context = PluginContext(
         platformServices: mockPlatformServices,
         dataStorage: mockDataStorage,
@@ -108,14 +115,14 @@ void main() {
 
     test('Plugin should initialize successfully', () async {
       await plugin.initialize(context);
-      
+
       // 验证初始化通知
       expect(mockPlatformServices.notifications, contains('世界时钟 插件已成功初始化'));
     });
 
     test('Plugin should handle state changes', () async {
       await plugin.initialize(context);
-      
+
       // 测试状态变化
       await plugin.onStateChanged(PluginState.active);
       await plugin.onStateChanged(PluginState.paused);
@@ -124,7 +131,7 @@ void main() {
 
     test('Plugin should save and restore state', () async {
       await plugin.initialize(context);
-      
+
       // 获取初始状态
       final initialState = await plugin.getState();
       expect(initialState, isA<Map<String, dynamic>>());
@@ -135,7 +142,7 @@ void main() {
     test('Plugin should dispose cleanly', () async {
       await plugin.initialize(context);
       await plugin.dispose();
-      
+
       // 验证没有抛出异常
     });
   });
@@ -217,7 +224,9 @@ void main() {
     });
 
     test('CountdownTimer should format remaining time correctly', () {
-      final endTime = DateTime.now().add(const Duration(hours: 1, minutes: 30, seconds: 45));
+      final endTime = DateTime.now().add(
+        const Duration(hours: 1, minutes: 30, seconds: 45),
+      );
       final timer = CountdownTimer(
         id: 'test',
         title: '测试倒计时',

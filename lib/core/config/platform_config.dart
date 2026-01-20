@@ -6,7 +6,7 @@ import '../services/platform_environment.dart';
 class PlatformConfig {
   static const String _steamAppId = 'YOUR_STEAM_APP_ID';
   static const String _mobileAppId = 'com.example.plugin_platform';
-  
+
   /// Get current platform type
   static PlatformType get currentPlatform {
     if (kIsWeb) {
@@ -22,26 +22,26 @@ class PlatformConfig {
     }
     return PlatformType.unknown;
   }
-  
+
   /// Check if running in Steam environment
   static bool _isSteamEnvironment() {
     // On web platform, Steam is never available
     if (kIsWeb) {
       return false;
     }
-    
+
     // On mobile platforms, Steam is not available
     if (Platform.isAndroid || Platform.isIOS) {
       return false;
     }
-    
+
     // Only check for Steam on desktop platforms
     // Check for Steam environment variables or Steam API availability
     final platformEnv = PlatformEnvironment.instance;
     return platformEnv.containsKey('STEAM_COMPAT_DATA_PATH') ||
-           platformEnv.containsKey('SteamAppId');
+        platformEnv.containsKey('SteamAppId');
   }
-  
+
   /// Get platform-specific configuration
   static Map<String, dynamic> getPlatformConfig() {
     switch (currentPlatform) {
@@ -76,7 +76,7 @@ class PlatformConfig {
         return {};
     }
   }
-  
+
   /// Get supported features for current platform
   static Set<String> getSupportedFeatures() {
     switch (currentPlatform) {
@@ -112,10 +112,4 @@ class PlatformConfig {
 }
 
 /// Platform types
-enum PlatformType {
-  mobile,
-  desktop,
-  steam,
-  web,
-  unknown
-}
+enum PlatformType { mobile, desktop, steam, web, unknown }

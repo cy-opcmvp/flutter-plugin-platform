@@ -4,31 +4,31 @@ import '../models/plugin_models.dart';
 abstract class IHotReloadManager {
   /// Initialize the hot-reload manager
   Future<void> initialize();
-  
+
   /// Shutdown the hot-reload manager
   Future<void> shutdown();
-  
+
   /// Check for plugin updates
   Future<List<PluginUpdateInfo>> checkForUpdates();
-  
+
   /// Hot-reload a plugin with a new version
   Future<void> hotReloadPlugin(String pluginId, PluginDescriptor newDescriptor);
-  
+
   /// Rollback a plugin to its previous version
   Future<void> rollbackPlugin(String pluginId);
-  
+
   /// Get available rollback versions for a plugin
   List<String> getAvailableVersions(String pluginId);
-  
+
   /// Enable/disable automatic update detection
   void setAutoUpdateDetection(bool enabled);
-  
+
   /// Get current auto-update detection status
   bool get isAutoUpdateDetectionEnabled;
-  
+
   /// Stream of hot-reload events
   Stream<HotReloadEvent> get eventStream;
-  
+
   /// Dispose the hot-reload manager
   Future<void> dispose();
 }
@@ -111,7 +111,9 @@ class PluginVersionInfo {
   factory PluginVersionInfo.fromJson(Map<String, dynamic> json) {
     return PluginVersionInfo(
       version: json['version'] as String,
-      descriptor: PluginDescriptor.fromJson(json['descriptor'] as Map<String, dynamic>),
+      descriptor: PluginDescriptor.fromJson(
+        json['descriptor'] as Map<String, dynamic>,
+      ),
       installedAt: DateTime.parse(json['installedAt'] as String),
       isActive: json['isActive'] as bool,
       metadata: json['metadata'] as Map<String, dynamic>,

@@ -2,6 +2,7 @@ library;
 
 import 'dart:io';
 import 'package:flutter/material.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 import '../models/screenshot_models.dart';
 import '../screenshot_plugin.dart';
 
@@ -9,23 +10,22 @@ import '../screenshot_plugin.dart';
 class ScreenshotHistoryScreen extends StatefulWidget {
   final ScreenshotPlugin plugin;
 
-  const ScreenshotHistoryScreen({
-    super.key,
-    required this.plugin,
-  });
+  const ScreenshotHistoryScreen({super.key, required this.plugin});
 
   @override
-  State<ScreenshotHistoryScreen> createState() => _ScreenshotHistoryScreenState();
+  State<ScreenshotHistoryScreen> createState() =>
+      _ScreenshotHistoryScreenState();
 }
 
 class _ScreenshotHistoryScreenState extends State<ScreenshotHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final screenshots = widget.plugin.screenshots;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('截图历史'),
+        title: Text(l10n.screenshot_history_title),
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
         elevation: 0,
@@ -34,7 +34,7 @@ class _ScreenshotHistoryScreenState extends State<ScreenshotHistoryScreen> {
             IconButton(
               icon: const Icon(Icons.delete_sweep),
               onPressed: _confirmClearAll,
-              tooltip: '清空历史',
+              tooltip: l10n.screenshot_clear_history,
             ),
         ],
       ),
@@ -46,6 +46,7 @@ class _ScreenshotHistoryScreenState extends State<ScreenshotHistoryScreen> {
 
   /// 构建空状态
   Widget _buildEmptyState() {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -57,17 +58,17 @@ class _ScreenshotHistoryScreenState extends State<ScreenshotHistoryScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            '暂无截图记录',
+            l10n.screenshot_no_records,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.outline,
-                ),
+              color: Theme.of(context).colorScheme.outline,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
-            '开始截图后，历史记录将显示在这里',
+            l10n.screenshot_history_hint,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.outline,
-                ),
+              color: Theme.of(context).colorScheme.outline,
+            ),
           ),
         ],
       ),
@@ -115,15 +116,16 @@ class _ScreenshotHistoryScreenState extends State<ScreenshotHistoryScreen> {
 
   /// 确认清空所有历史
   void _confirmClearAll() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('确认清空'),
-        content: const Text('确定要清空所有截图历史吗？此操作无法撤销。'),
+        title: Text(l10n.screenshot_confirm_clear_history),
+        content: Text(l10n.screenshot_confirm_clear_history_message),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('取消'),
+            child: Text(l10n.common_cancel),
           ),
           FilledButton(
             onPressed: () async {
@@ -136,7 +138,7 @@ class _ScreenshotHistoryScreenState extends State<ScreenshotHistoryScreen> {
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
-            child: const Text('清空'),
+            child: Text(l10n.screenshot_clear),
           ),
         ],
       ),
@@ -229,10 +231,7 @@ class _ScreenshotThumbnail extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.bottomCenter,
           end: Alignment.topCenter,
-          colors: [
-            Colors.black.withOpacity(0.7),
-            Colors.transparent,
-          ],
+          colors: [Colors.black.withOpacity(0.7), Colors.transparent],
         ),
       ),
       padding: const EdgeInsets.all(8),
@@ -242,19 +241,12 @@ class _ScreenshotThumbnail extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
-                _getTypeIcon(record.type),
-                size: 16,
-                color: Colors.white,
-              ),
+              Icon(_getTypeIcon(record.type), size: 16, color: Colors.white),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
                   _formatDate(record.createdAt),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                  ),
+                  style: const TextStyle(color: Colors.white, fontSize: 12),
                 ),
               ),
             ],
@@ -262,10 +254,7 @@ class _ScreenshotThumbnail extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             record.formattedFileSize,
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 11,
-            ),
+            style: const TextStyle(color: Colors.white70, fontSize: 11),
           ),
         ],
       ),
@@ -284,19 +273,25 @@ class _ScreenshotThumbnail extends StatelessWidget {
   }
 
   String _formatDate(DateTime date) {
+    final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final diff = now.difference(date);
 
     if (diff.inMinutes < 1) {
-      return '刚刚';
+      return l10n.screenshot_recent;
     } else if (diff.inHours < 1) {
-      return '${diff.inMinutes} 分钟前';
+      return l10n.screenshot_minutes_ago.replaceAll(
+        '{minutes}',
+        '${diff.inMinutes}',
+      );
     } else if (diff.inDays < 1) {
-      return '${diff.inHours} 小时前';
+      return l10n.screenshot_hours_ago.replaceAll('{hours}', '${diff.inHours}');
     } else if (diff.inDays < 7) {
-      return '${diff.inDays} 天前';
+      return l10n.screenshot_days_ago.replaceAll('{days}', '${diff.inDays}');
     } else {
-      return '${date.month}月${date.day}日';
+      return l10n.screenshot_date_format
+          .replaceAll('{month}', '${date.month}')
+          .replaceAll('{day}', '${date.day}');
     }
   }
 }
@@ -308,7 +303,8 @@ class _ScreenshotPreviewScreen extends StatefulWidget {
   const _ScreenshotPreviewScreen({required this.record});
 
   @override
-  State<_ScreenshotPreviewScreen> createState() => _ScreenshotPreviewScreenState();
+  State<_ScreenshotPreviewScreen> createState() =>
+      _ScreenshotPreviewScreenState();
 }
 
 class _ScreenshotPreviewScreenState extends State<_ScreenshotPreviewScreen> {
@@ -418,9 +414,7 @@ class _ScreenshotPreviewScreenState extends State<_ScreenshotPreviewScreen> {
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
-          Expanded(
-            child: Text(value),
-          ),
+          Expanded(child: Text(value)),
         ],
       ),
     );

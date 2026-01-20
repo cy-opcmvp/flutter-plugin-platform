@@ -75,12 +75,16 @@ class _PluginManagementScreenState extends State<PluginManagementScreen> {
 
   List<PluginInfo> get _filteredPlugins {
     var filtered = _pluginInfos.where((info) {
-      final matchesSearch = _searchQuery.isEmpty ||
-          info.descriptor.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+      final matchesSearch =
+          _searchQuery.isEmpty ||
+          info.descriptor.name.toLowerCase().contains(
+            _searchQuery.toLowerCase(),
+          ) ||
           info.descriptor.id.toLowerCase().contains(_searchQuery.toLowerCase());
-      
-      final matchesType = _filterType == null || info.descriptor.type == _filterType;
-      
+
+      final matchesType =
+          _filterType == null || info.descriptor.type == _filterType;
+
       return matchesSearch && matchesType;
     }).toList();
 
@@ -114,7 +118,7 @@ class _PluginManagementScreenState extends State<PluginManagementScreen> {
       try {
         await _pluginManager.uninstallPlugin(pluginId);
         await _loadPlugins();
-        
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -153,7 +157,9 @@ class _PluginManagementScreenState extends State<PluginManagementScreen> {
         id: 'com.example.sample_${DateTime.now().millisecondsSinceEpoch}',
         name: 'Sample Plugin ${_availablePlugins.length + 1}',
         version: '1.0.0',
-        type: _availablePlugins.length % 2 == 0 ? PluginType.tool : PluginType.game,
+        type: _availablePlugins.length % 2 == 0
+            ? PluginType.tool
+            : PluginType.game,
         requiredPermissions: [Permission.storage],
         metadata: {
           'description': 'A sample plugin for demonstration purposes',
@@ -258,9 +264,7 @@ class _PluginManagementScreenState extends State<PluginManagementScreen> {
             ),
           ),
           // Plugin list
-          Expanded(
-            child: _buildPluginList(),
-          ),
+          Expanded(child: _buildPluginList()),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -274,9 +278,7 @@ class _PluginManagementScreenState extends State<PluginManagementScreen> {
   Widget _buildPluginList() {
     final l10n = context.l10n;
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (_error != null) {
@@ -320,7 +322,9 @@ class _PluginManagementScreenState extends State<PluginManagementScreen> {
             Icon(
               Icons.extension_off,
               size: 64,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(

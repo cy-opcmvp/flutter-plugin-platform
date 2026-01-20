@@ -6,6 +6,7 @@
 library;
 
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'disposable.dart';
 
 /// Exception thrown when a requested service is not registered
@@ -174,7 +175,7 @@ class ServiceLocator {
           await service.dispose();
         } catch (e) {
           // Log error but continue disposing other services
-          print('Error disposing service: $e');
+          debugPrint('Error disposing service: $e');
         }
       }
     }
@@ -193,10 +194,7 @@ class ServiceLocator {
   /// Returns a list of all service types that are currently registered
   /// (either as singletons or factories).
   List<Type> get registeredTypes {
-    return [
-      ..._services.keys,
-      ..._factories.keys,
-    ];
+    return [..._services.keys, ..._factories.keys];
   }
 
   /// Get the count of registered services

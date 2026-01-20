@@ -6,14 +6,17 @@ library;
 
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart' as flutter_services;  // For SystemSound on Windows
+import 'package:flutter/services.dart'
+    as flutter_services; // For SystemSound on Windows
 import 'package:just_audio/just_audio.dart';
-import 'package:plugin_platform/core/interfaces/services/i_audio_service.dart' as platform;
+import 'package:plugin_platform/core/interfaces/services/i_audio_service.dart'
+    as platform;
 import 'package:plugin_platform/core/services/disposable.dart';
 
 /// Audio service implementation
 class AudioServiceImpl extends platform.IAudioService implements Disposable {
-  final Map<String, dynamic> _players = {};  // Use dynamic for platform-specific players
+  final Map<String, dynamic> _players =
+      {}; // Use dynamic for platform-specific players
   final Map<platform.SystemSoundType, String> _systemSoundPaths = {
     platform.SystemSoundType.notification: 'assets/audio/notification.mp3',
     platform.SystemSoundType.alarm: 'assets/audio/alarm.mp3',
@@ -27,7 +30,8 @@ class AudioServiceImpl extends platform.IAudioService implements Disposable {
   // Note: Flutter's SystemSoundType only has: click and alert
   // Since click often has no sound on Windows, we use alert for most sounds
   // but vary the pattern to make them distinguishable
-  final Map<platform.SystemSoundType, List<flutter_services.SystemSoundType>> _windowsSystemSounds = {
+  final Map<platform.SystemSoundType, List<flutter_services.SystemSoundType>>
+  _windowsSystemSounds = {
     platform.SystemSoundType.notification: [
       flutter_services.SystemSoundType.alert,
       flutter_services.SystemSoundType.click,
@@ -59,7 +63,7 @@ class AudioServiceImpl extends platform.IAudioService implements Disposable {
 
   double _globalVolume = 1.0;
   bool _isInitialized = false;
-  bool _useJustAudio = true;  // Flag to determine which audio system to use
+  bool _useJustAudio = true; // Flag to determine which audio system to use
 
   @override
   bool get isInitialized => _isInitialized;
@@ -78,7 +82,9 @@ class AudioServiceImpl extends platform.IAudioService implements Disposable {
         _isInitialized = true;
 
         if (kDebugMode) {
-          print('AudioService: Windows platform detected - using SystemSound');
+          debugPrint(
+            'AudioService: Windows platform detected - using SystemSound',
+          );
         }
 
         return true;
@@ -94,14 +100,16 @@ class AudioServiceImpl extends platform.IAudioService implements Disposable {
         _isInitialized = true;
 
         if (kDebugMode) {
-          print('AudioService: Initialized successfully (using just_audio)');
+          debugPrint(
+            'AudioService: Initialized successfully (using just_audio)',
+          );
         }
 
         return true;
       } catch (e) {
         if (kDebugMode) {
-          print('AudioService: just_audio initialization failed: $e');
-          print('AudioService: Falling back to SystemSound');
+          debugPrint('AudioService: just_audio initialization failed: $e');
+          debugPrint('AudioService: Falling back to SystemSound');
         }
         // Fallback to SystemSound
         _useJustAudio = false;
@@ -110,7 +118,7 @@ class AudioServiceImpl extends platform.IAudioService implements Disposable {
       }
     } catch (e) {
       if (kDebugMode) {
-        print('AudioService: Initialization failed: $e');
+        debugPrint('AudioService: Initialization failed: $e');
       }
       _isInitialized = false;
       return false;
@@ -131,7 +139,9 @@ class AudioServiceImpl extends platform.IAudioService implements Disposable {
     // Windows platform: Limited support - use SystemSound for notification-like sounds
     if (!_useJustAudio) {
       if (kDebugMode) {
-        print('AudioService: [Windows] Custom sound playback not supported, using SystemSound instead');
+        debugPrint(
+          'AudioService: [Windows] Custom sound playback not supported, using SystemSound instead',
+        );
       }
       // Fallback to system click sound
       flutter_services.SystemSound.play(flutter_services.SystemSoundType.click);
@@ -159,11 +169,11 @@ class AudioServiceImpl extends platform.IAudioService implements Disposable {
       await player.play();
 
       if (kDebugMode) {
-        print('AudioService: Playing sound $soundPath (loop: $loop)');
+        debugPrint('AudioService: Playing sound $soundPath (loop: $loop)');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('AudioService: Error playing sound: $e');
+        debugPrint('AudioService: Error playing sound: $e');
       }
       rethrow;
     }
@@ -192,19 +202,25 @@ class AudioServiceImpl extends platform.IAudioService implements Disposable {
           }
 
           if (kDebugMode) {
-            print('AudioService: [Windows] Playing sound pattern for $soundType (${soundSequence.length} sounds)');
+            debugPrint(
+              'AudioService: [Windows] Playing sound pattern for $soundType (${soundSequence.length} sounds)',
+            );
           }
         } else {
           // Fallback
-          flutter_services.SystemSound.play(flutter_services.SystemSoundType.alert);
+          flutter_services.SystemSound.play(
+            flutter_services.SystemSoundType.alert,
+          );
           if (kDebugMode) {
-            print('AudioService: [Windows] Playing fallback sound for $soundType');
+            debugPrint(
+              'AudioService: [Windows] Playing fallback sound for $soundType',
+            );
           }
         }
         return;
       } catch (e) {
         if (kDebugMode) {
-          print('AudioService: [Windows] Error playing system sound: $e');
+          debugPrint('AudioService: [Windows] Error playing system sound: $e');
         }
         // Silently fail on Windows
         return;
@@ -215,7 +231,7 @@ class AudioServiceImpl extends platform.IAudioService implements Disposable {
     final soundPath = _systemSoundPaths[soundType];
     if (soundPath == null) {
       if (kDebugMode) {
-        print('AudioService: No sound path for $soundType');
+        debugPrint('AudioService: No sound path for $soundType');
       }
       return;
     }
@@ -229,11 +245,11 @@ class AudioServiceImpl extends platform.IAudioService implements Disposable {
       await player.play();
 
       if (kDebugMode) {
-        print('AudioService: Playing system sound $soundType');
+        debugPrint('AudioService: Playing system sound $soundType');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('AudioService: Error playing system sound: $e');
+        debugPrint('AudioService: Error playing system sound: $e');
       }
       rethrow;
     }
@@ -271,20 +287,19 @@ class AudioServiceImpl extends platform.IAudioService implements Disposable {
       _players[playerId] = player;
 
       if (kDebugMode) {
-        print('AudioService: Playing music $musicPath (loop: $loop)');
+        debugPrint('AudioService: Playing music $musicPath (loop: $loop)');
       }
 
       return playerId;
     } catch (e) {
       if (kDebugMode) {
-        print('AudioService: Error playing music: $e');
+        debugPrint('AudioService: Error playing music: $e');
       }
       rethrow;
     }
   }
 
   /// Stop a specific sound
-  @override
   Future<void> stopSound(String soundId) async {
     final player = _players[soundId];
     if (player != null) {
@@ -294,11 +309,11 @@ class AudioServiceImpl extends platform.IAudioService implements Disposable {
         _players.remove(soundId);
 
         if (kDebugMode) {
-          print('AudioService: Stopped sound $soundId');
+          debugPrint('AudioService: Stopped sound $soundId');
         }
       } catch (e) {
         if (kDebugMode) {
-          print('AudioService: Error stopping sound: $e');
+          debugPrint('AudioService: Error stopping sound: $e');
         }
       }
     }
@@ -318,11 +333,11 @@ class AudioServiceImpl extends platform.IAudioService implements Disposable {
       try {
         await player.pause();
         if (kDebugMode) {
-          print('AudioService: Paused music $playerId');
+          debugPrint('AudioService: Paused music $playerId');
         }
       } catch (e) {
         if (kDebugMode) {
-          print('AudioService: Error pausing music: $e');
+          debugPrint('AudioService: Error pausing music: $e');
         }
       }
     }
@@ -336,11 +351,11 @@ class AudioServiceImpl extends platform.IAudioService implements Disposable {
       try {
         await player.play();
         if (kDebugMode) {
-          print('AudioService: Resumed music $playerId');
+          debugPrint('AudioService: Resumed music $playerId');
         }
       } catch (e) {
         if (kDebugMode) {
-          print('AudioService: Error resuming music: $e');
+          debugPrint('AudioService: Error resuming music: $e');
         }
       }
     }
@@ -354,7 +369,9 @@ class AudioServiceImpl extends platform.IAudioService implements Disposable {
     // Windows: SystemSound doesn't support volume control
     if (!_useJustAudio) {
       if (kDebugMode) {
-        print('AudioService: [Windows] Volume control not supported for SystemSound');
+        debugPrint(
+          'AudioService: [Windows] Volume control not supported for SystemSound',
+        );
       }
       return;
     }
@@ -365,13 +382,13 @@ class AudioServiceImpl extends platform.IAudioService implements Disposable {
         await player.setVolume(_globalVolume);
       } catch (e) {
         if (kDebugMode) {
-          print('AudioService: Error setting volume: $e');
+          debugPrint('AudioService: Error setting volume: $e');
         }
       }
     }
 
     if (kDebugMode) {
-      print('AudioService: Global volume set to $_globalVolume');
+      debugPrint('AudioService: Global volume set to $_globalVolume');
     }
   }
 
@@ -381,7 +398,9 @@ class AudioServiceImpl extends platform.IAudioService implements Disposable {
     // Windows: SystemSound plays once and doesn't need stopping
     if (!_useJustAudio) {
       if (kDebugMode) {
-        print('AudioService: [Windows] Stop all - no active players to stop');
+        debugPrint(
+          'AudioService: [Windows] Stop all - no active players to stop',
+        );
       }
       return;
     }
@@ -398,7 +417,7 @@ class AudioServiceImpl extends platform.IAudioService implements Disposable {
           await player.dispose();
         } catch (e) {
           if (kDebugMode) {
-            print('AudioService: Error stopping player $playerId: $e');
+            debugPrint('AudioService: Error stopping player $playerId: $e');
           }
         }
       }
@@ -412,7 +431,7 @@ class AudioServiceImpl extends platform.IAudioService implements Disposable {
     _players['_warmup'] = warmupPlayer;
 
     if (kDebugMode) {
-      print('AudioService: Stopped all audio playback');
+      debugPrint('AudioService: Stopped all audio playback');
     }
   }
 
@@ -450,7 +469,7 @@ class AudioServiceImpl extends platform.IAudioService implements Disposable {
         await player.dispose();
       } catch (e) {
         if (kDebugMode) {
-          print('AudioService: Error disposing player: $e');
+          debugPrint('AudioService: Error disposing player: $e');
         }
       }
     }
@@ -459,7 +478,7 @@ class AudioServiceImpl extends platform.IAudioService implements Disposable {
     _isInitialized = false;
 
     if (kDebugMode) {
-      print('AudioService: Disposed (using just_audio)');
+      debugPrint('AudioService: Disposed (using just_audio)');
     }
   }
 }

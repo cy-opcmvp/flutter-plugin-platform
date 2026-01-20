@@ -24,7 +24,8 @@ abstract class DistributionChannel {
   Future<PluginPackage> downloadPlugin(String pluginId, String version);
 
   /// Search for plugins in this channel
-  Future<List<PluginRegistryEntry>> searchPlugins(String query, {
+  Future<List<PluginRegistryEntry>> searchPlugins(
+    String query, {
     String? category,
     List<String>? tags,
     String? author,
@@ -63,25 +64,30 @@ class DirectDownloadChannel extends DistributionChannel {
     }
 
     if (registryEntry.version != version) {
-      throw Exception('Plugin $pluginId version $version not available. Available: ${registryEntry.version}');
+      throw Exception(
+        'Plugin $pluginId version $version not available. Available: ${registryEntry.version}',
+      );
     }
 
     try {
       // Download plugin package
       final packageData = await _downloadFromUrl(registryEntry.downloadUrl);
-      
+
       // Verify package integrity
       await _verifyPackageIntegrity(packageData, registryEntry);
-      
+
       // Parse and return plugin package
       return await _parsePluginPackage(packageData, registryEntry);
     } catch (e) {
-      throw Exception('Failed to download plugin $pluginId from direct URL: $e');
+      throw Exception(
+        'Failed to download plugin $pluginId from direct URL: $e',
+      );
     }
   }
 
   @override
-  Future<List<PluginRegistryEntry>> searchPlugins(String query, {
+  Future<List<PluginRegistryEntry>> searchPlugins(
+    String query, {
     String? category,
     List<String>? tags,
     String? author,
@@ -93,29 +99,39 @@ class DirectDownloadChannel extends DistributionChannel {
       final lowerQuery = query.toLowerCase();
       results = results.where((entry) {
         return entry.name.toLowerCase().contains(lowerQuery) ||
-               entry.description.toLowerCase().contains(lowerQuery) ||
-               entry.tags.any((tag) => tag.toLowerCase().contains(lowerQuery));
+            entry.description.toLowerCase().contains(lowerQuery) ||
+            entry.tags.any((tag) => tag.toLowerCase().contains(lowerQuery));
       }).toList();
     }
 
     // Apply category filter
     if (category != null && category.isNotEmpty) {
-      results = results.where((entry) => 
-          entry.category.toLowerCase() == category.toLowerCase()).toList();
+      results = results
+          .where(
+            (entry) => entry.category.toLowerCase() == category.toLowerCase(),
+          )
+          .toList();
     }
 
     // Apply tags filter
     if (tags != null && tags.isNotEmpty) {
       results = results.where((entry) {
-        return tags.any((tag) => entry.tags.any((entryTag) => 
-            entryTag.toLowerCase() == tag.toLowerCase()));
+        return tags.any(
+          (tag) => entry.tags.any(
+            (entryTag) => entryTag.toLowerCase() == tag.toLowerCase(),
+          ),
+        );
       }).toList();
     }
 
     // Apply author filter
     if (author != null && author.isNotEmpty) {
-      results = results.where((entry) => 
-          entry.author.toLowerCase().contains(author.toLowerCase())).toList();
+      results = results
+          .where(
+            (entry) =>
+                entry.author.toLowerCase().contains(author.toLowerCase()),
+          )
+          .toList();
     }
 
     return results;
@@ -140,12 +156,15 @@ class DirectDownloadChannel extends DistributionChannel {
   @override
   Future<ChannelStatistics> getStatistics() async {
     final totalPlugins = _pluginRegistry.length;
-    final totalDownloads = _pluginRegistry.values
-        .fold(0, (sum, entry) => sum + entry.statistics.downloadCount);
-    
+    final totalDownloads = _pluginRegistry.values.fold(
+      0,
+      (sum, entry) => sum + entry.statistics.downloadCount,
+    );
+
     final categoryCounts = <String, int>{};
     for (final entry in _pluginRegistry.values) {
-      categoryCounts[entry.category] = (categoryCounts[entry.category] ?? 0) + 1;
+      categoryCounts[entry.category] =
+          (categoryCounts[entry.category] ?? 0) + 1;
     }
 
     return ChannelStatistics(
@@ -189,23 +208,32 @@ class DirectDownloadChannel extends DistributionChannel {
       final response = await request.close();
 
       if (response.statusCode != 200) {
-        throw Exception('HTTP ${response.statusCode}: Failed to download from $url');
+        throw Exception(
+          'HTTP ${response.statusCode}: Failed to download from $url',
+        );
       }
 
-      final bytes = await response.fold<List<int>>([], (previous, element) => previous..addAll(element));
+      final bytes = await response.fold<List<int>>(
+        [],
+        (previous, element) => previous..addAll(element),
+      );
       return Uint8List.fromList(bytes);
     } catch (e) {
       throw Exception('Failed to download from URL $url: $e');
     }
   }
 
-  Future<void> _verifyPackageIntegrity(Uint8List packageData, PluginRegistryEntry registryEntry) async {
+  Future<void> _verifyPackageIntegrity(
+    Uint8List packageData,
+    PluginRegistryEntry registryEntry,
+  ) async {
     if (packageData.isEmpty) {
       throw Exception('Downloaded package is empty');
     }
 
     // Verify signature if required
-    if (registryEntry.securityStatus.requiresSignature && !registryEntry.securityStatus.hasSignature) {
+    if (registryEntry.securityStatus.requiresSignature &&
+        !registryEntry.securityStatus.hasSignature) {
       throw Exception('Plugin requires signature but none provided');
     }
 
@@ -215,7 +243,10 @@ class DirectDownloadChannel extends DistributionChannel {
     }
   }
 
-  Future<PluginPackage> _parsePluginPackage(Uint8List packageData, PluginRegistryEntry registryEntry) async {
+  Future<PluginPackage> _parsePluginPackage(
+    Uint8List packageData,
+    PluginRegistryEntry registryEntry,
+  ) async {
     try {
       // Create plugin package from registry entry and downloaded data
       final manifest = PluginManifest(
@@ -316,32 +347,37 @@ class PackageManagerChannel extends DistributionChannel {
     }
 
     if (registryEntry.version != version) {
-      throw Exception('Plugin $pluginId version $version not available. Available: ${registryEntry.version}');
+      throw Exception(
+        'Plugin $pluginId version $version not available. Available: ${registryEntry.version}',
+      );
     }
 
     try {
       // Install using package manager
       final packageData = await _installFromPackageManager(pluginId, version);
-      
+
       // Verify package integrity
       await _verifyPackageIntegrity(packageData, registryEntry);
-      
+
       // Parse and return plugin package
       return await _parsePluginPackage(packageData, registryEntry);
     } catch (e) {
-      throw Exception('Failed to install plugin $pluginId from package manager: $e');
+      throw Exception(
+        'Failed to install plugin $pluginId from package manager: $e',
+      );
     }
   }
 
   @override
-  Future<List<PluginRegistryEntry>> searchPlugins(String query, {
+  Future<List<PluginRegistryEntry>> searchPlugins(
+    String query, {
     String? category,
     List<String>? tags,
     String? author,
   }) async {
     // Search in package manager registry
     await _refreshPackageManagerRegistry();
-    
+
     var results = _pluginRegistry.values.toList();
 
     // Apply filters similar to DirectDownloadChannel
@@ -349,26 +385,36 @@ class PackageManagerChannel extends DistributionChannel {
       final lowerQuery = query.toLowerCase();
       results = results.where((entry) {
         return entry.name.toLowerCase().contains(lowerQuery) ||
-               entry.description.toLowerCase().contains(lowerQuery) ||
-               entry.tags.any((tag) => tag.toLowerCase().contains(lowerQuery));
+            entry.description.toLowerCase().contains(lowerQuery) ||
+            entry.tags.any((tag) => tag.toLowerCase().contains(lowerQuery));
       }).toList();
     }
 
     if (category != null && category.isNotEmpty) {
-      results = results.where((entry) => 
-          entry.category.toLowerCase() == category.toLowerCase()).toList();
+      results = results
+          .where(
+            (entry) => entry.category.toLowerCase() == category.toLowerCase(),
+          )
+          .toList();
     }
 
     if (tags != null && tags.isNotEmpty) {
       results = results.where((entry) {
-        return tags.any((tag) => entry.tags.any((entryTag) => 
-            entryTag.toLowerCase() == tag.toLowerCase()));
+        return tags.any(
+          (tag) => entry.tags.any(
+            (entryTag) => entryTag.toLowerCase() == tag.toLowerCase(),
+          ),
+        );
       }).toList();
     }
 
     if (author != null && author.isNotEmpty) {
-      results = results.where((entry) => 
-          entry.author.toLowerCase().contains(author.toLowerCase())).toList();
+      results = results
+          .where(
+            (entry) =>
+                entry.author.toLowerCase().contains(author.toLowerCase()),
+          )
+          .toList();
     }
 
     return results;
@@ -389,23 +435,26 @@ class PackageManagerChannel extends DistributionChannel {
 
   @override
   bool isValid() {
-    return channelId.isNotEmpty && 
-           name.isNotEmpty && 
-           packageManagerType.isNotEmpty &&
-           _isSupportedPackageManager();
+    return channelId.isNotEmpty &&
+        name.isNotEmpty &&
+        packageManagerType.isNotEmpty &&
+        _isSupportedPackageManager();
   }
 
   @override
   Future<ChannelStatistics> getStatistics() async {
     await _refreshPackageManagerRegistry();
-    
+
     final totalPlugins = _pluginRegistry.length;
-    final totalDownloads = _pluginRegistry.values
-        .fold(0, (sum, entry) => sum + entry.statistics.downloadCount);
-    
+    final totalDownloads = _pluginRegistry.values.fold(
+      0,
+      (sum, entry) => sum + entry.statistics.downloadCount,
+    );
+
     final categoryCounts = <String, int>{};
     for (final entry in _pluginRegistry.values) {
-      categoryCounts[entry.category] = (categoryCounts[entry.category] ?? 0) + 1;
+      categoryCounts[entry.category] =
+          (categoryCounts[entry.category] ?? 0) + 1;
     }
 
     return ChannelStatistics(
@@ -428,19 +477,24 @@ class PackageManagerChannel extends DistributionChannel {
   }
 
   /// Install plugin from package manager
-  Future<Uint8List> _installFromPackageManager(String pluginId, String version) async {
+  Future<Uint8List> _installFromPackageManager(
+    String pluginId,
+    String version,
+  ) async {
     final command = _buildInstallCommand(pluginId, version);
-    
+
     try {
       final result = await Process.run(command[0], command.sublist(1));
-      
+
       if (result.exitCode != 0) {
         throw Exception('Package manager command failed: ${result.stderr}');
       }
 
       // For simulation, return mock package data
       // In real implementation, this would read the installed package
-      final mockPackageData = utf8.encode('mock-package-data-$pluginId-$version');
+      final mockPackageData = utf8.encode(
+        'mock-package-data-$pluginId-$version',
+      );
       return Uint8List.fromList(mockPackageData);
     } catch (e) {
       throw Exception('Failed to execute package manager command: $e');
@@ -518,7 +572,10 @@ class PackageManagerChannel extends DistributionChannel {
     }
   }
 
-  Future<void> _verifyPackageIntegrity(Uint8List packageData, PluginRegistryEntry registryEntry) async {
+  Future<void> _verifyPackageIntegrity(
+    Uint8List packageData,
+    PluginRegistryEntry registryEntry,
+  ) async {
     if (packageData.isEmpty) {
       throw Exception('Package data is empty');
     }
@@ -527,7 +584,10 @@ class PackageManagerChannel extends DistributionChannel {
     // Additional verification could be added here
   }
 
-  Future<PluginPackage> _parsePluginPackage(Uint8List packageData, PluginRegistryEntry registryEntry) async {
+  Future<PluginPackage> _parsePluginPackage(
+    Uint8List packageData,
+    PluginRegistryEntry registryEntry,
+  ) async {
     // Similar to DirectDownloadChannel but with package manager specific handling
     try {
       final manifest = PluginManifest(
@@ -623,38 +683,43 @@ class PluginStoreChannel extends DistributionChannel {
   @override
   Future<PluginPackage> downloadPlugin(String pluginId, String version) async {
     await _refreshCache();
-    
+
     final registryEntry = _cachedPlugins[pluginId];
     if (registryEntry == null) {
       throw Exception('Plugin $pluginId not found in plugin store');
     }
 
     if (registryEntry.version != version) {
-      throw Exception('Plugin $pluginId version $version not available. Available: ${registryEntry.version}');
+      throw Exception(
+        'Plugin $pluginId version $version not available. Available: ${registryEntry.version}',
+      );
     }
 
     try {
       // Download from plugin store API
       final packageData = await _downloadFromStore(pluginId, version);
-      
+
       // Verify package integrity
       await _verifyPackageIntegrity(packageData, registryEntry);
-      
+
       // Parse and return plugin package
       return await _parsePluginPackage(packageData, registryEntry);
     } catch (e) {
-      throw Exception('Failed to download plugin $pluginId from plugin store: $e');
+      throw Exception(
+        'Failed to download plugin $pluginId from plugin store: $e',
+      );
     }
   }
 
   @override
-  Future<List<PluginRegistryEntry>> searchPlugins(String query, {
+  Future<List<PluginRegistryEntry>> searchPlugins(
+    String query, {
     String? category,
     List<String>? tags,
     String? author,
   }) async {
     await _refreshCache();
-    
+
     var results = _cachedPlugins.values.toList();
 
     // Apply filters
@@ -662,26 +727,36 @@ class PluginStoreChannel extends DistributionChannel {
       final lowerQuery = query.toLowerCase();
       results = results.where((entry) {
         return entry.name.toLowerCase().contains(lowerQuery) ||
-               entry.description.toLowerCase().contains(lowerQuery) ||
-               entry.tags.any((tag) => tag.toLowerCase().contains(lowerQuery));
+            entry.description.toLowerCase().contains(lowerQuery) ||
+            entry.tags.any((tag) => tag.toLowerCase().contains(lowerQuery));
       }).toList();
     }
 
     if (category != null && category.isNotEmpty) {
-      results = results.where((entry) => 
-          entry.category.toLowerCase() == category.toLowerCase()).toList();
+      results = results
+          .where(
+            (entry) => entry.category.toLowerCase() == category.toLowerCase(),
+          )
+          .toList();
     }
 
     if (tags != null && tags.isNotEmpty) {
       results = results.where((entry) {
-        return tags.any((tag) => entry.tags.any((entryTag) => 
-            entryTag.toLowerCase() == tag.toLowerCase()));
+        return tags.any(
+          (tag) => entry.tags.any(
+            (entryTag) => entryTag.toLowerCase() == tag.toLowerCase(),
+          ),
+        );
       }).toList();
     }
 
     if (author != null && author.isNotEmpty) {
-      results = results.where((entry) => 
-          entry.author.toLowerCase().contains(author.toLowerCase())).toList();
+      results = results
+          .where(
+            (entry) =>
+                entry.author.toLowerCase().contains(author.toLowerCase()),
+          )
+          .toList();
     }
 
     return results;
@@ -703,25 +778,28 @@ class PluginStoreChannel extends DistributionChannel {
   @override
   bool isValid() {
     final storeUri = Uri.tryParse(storeUrl);
-    return channelId.isNotEmpty && 
-           name.isNotEmpty && 
-           storeUrl.isNotEmpty &&
-           storeUri != null &&
-           storeUri.hasAbsolutePath &&
-           apiKey.isNotEmpty;
+    return channelId.isNotEmpty &&
+        name.isNotEmpty &&
+        storeUrl.isNotEmpty &&
+        storeUri != null &&
+        storeUri.hasAbsolutePath &&
+        apiKey.isNotEmpty;
   }
 
   @override
   Future<ChannelStatistics> getStatistics() async {
     await _refreshCache();
-    
+
     final totalPlugins = _cachedPlugins.length;
-    final totalDownloads = _cachedPlugins.values
-        .fold(0, (sum, entry) => sum + entry.statistics.downloadCount);
-    
+    final totalDownloads = _cachedPlugins.values.fold(
+      0,
+      (sum, entry) => sum + entry.statistics.downloadCount,
+    );
+
     final categoryCounts = <String, int>{};
     for (final entry in _cachedPlugins.values) {
-      categoryCounts[entry.category] = (categoryCounts[entry.category] ?? 0) + 1;
+      categoryCounts[entry.category] =
+          (categoryCounts[entry.category] ?? 0) + 1;
     }
 
     return ChannelStatistics(
@@ -736,28 +814,34 @@ class PluginStoreChannel extends DistributionChannel {
   /// Get featured plugins from store
   Future<List<PluginRegistryEntry>> getFeaturedPlugins({int limit = 10}) async {
     await _refreshCache();
-    
+
     final featured = _cachedPlugins.values
         .where((entry) => entry.tags.contains('featured'))
         .toList();
-    
-    featured.sort((a, b) => b.statistics.averageRating.compareTo(a.statistics.averageRating));
+
+    featured.sort(
+      (a, b) =>
+          b.statistics.averageRating.compareTo(a.statistics.averageRating),
+    );
     return featured.take(limit).toList();
   }
 
   /// Get popular plugins from store
   Future<List<PluginRegistryEntry>> getPopularPlugins({int limit = 10}) async {
     await _refreshCache();
-    
+
     final popular = _cachedPlugins.values.toList();
-    popular.sort((a, b) => b.statistics.downloadCount.compareTo(a.statistics.downloadCount));
+    popular.sort(
+      (a, b) =>
+          b.statistics.downloadCount.compareTo(a.statistics.downloadCount),
+    );
     return popular.take(limit).toList();
   }
 
   /// Refresh plugin cache from store
   Future<void> _refreshCache() async {
     final now = DateTime.now();
-    if (_lastCacheUpdate != null && 
+    if (_lastCacheUpdate != null &&
         now.difference(_lastCacheUpdate!).inMinutes < 15) {
       return; // Cache is still fresh
     }
@@ -780,21 +864,23 @@ class PluginStoreChannel extends DistributionChannel {
       final request = await _httpClient.getUrl(uri);
       request.headers.set('Authorization', 'Bearer $apiKey');
       request.headers.set('Content-Type', 'application/json');
-      
+
       final response = await request.close();
-      
+
       if (response.statusCode != 200) {
         throw Exception('Store API returned ${response.statusCode}');
       }
 
       final responseBody = await response.transform(utf8.decoder).join();
       final jsonData = json.decode(responseBody) as Map<String, dynamic>;
-      
+
       final pluginsList = jsonData['plugins'] as List<dynamic>;
-      
+
       _cachedPlugins.clear();
       for (final pluginJson in pluginsList) {
-        final entry = PluginRegistryEntry.fromJson(pluginJson as Map<String, dynamic>);
+        final entry = PluginRegistryEntry.fromJson(
+          pluginJson as Map<String, dynamic>,
+        );
         _cachedPlugins[entry.pluginId] = entry;
       }
     } catch (e) {
@@ -806,17 +892,22 @@ class PluginStoreChannel extends DistributionChannel {
   /// Download plugin from store
   Future<Uint8List> _downloadFromStore(String pluginId, String version) async {
     try {
-      final uri = Uri.parse('$storeUrl/api/plugins/$pluginId/download?version=$version');
+      final uri = Uri.parse(
+        '$storeUrl/api/plugins/$pluginId/download?version=$version',
+      );
       final request = await _httpClient.getUrl(uri);
       request.headers.set('Authorization', 'Bearer $apiKey');
-      
+
       final response = await request.close();
-      
+
       if (response.statusCode != 200) {
         throw Exception('Store download API returned ${response.statusCode}');
       }
 
-      final bytes = await response.fold<List<int>>([], (previous, element) => previous..addAll(element));
+      final bytes = await response.fold<List<int>>(
+        [],
+        (previous, element) => previous..addAll(element),
+      );
       return Uint8List.fromList(bytes);
     } catch (e) {
       throw Exception('Failed to download from plugin store: $e');
@@ -897,7 +988,10 @@ class PluginStoreChannel extends DistributionChannel {
     }
   }
 
-  Future<void> _verifyPackageIntegrity(Uint8List packageData, PluginRegistryEntry registryEntry) async {
+  Future<void> _verifyPackageIntegrity(
+    Uint8List packageData,
+    PluginRegistryEntry registryEntry,
+  ) async {
     if (packageData.isEmpty) {
       throw Exception('Downloaded package is empty');
     }
@@ -907,12 +1001,16 @@ class PluginStoreChannel extends DistributionChannel {
       throw Exception('Plugin is not verified by the store');
     }
 
-    if (registryEntry.securityStatus.requiresSignature && !registryEntry.securityStatus.hasSignature) {
+    if (registryEntry.securityStatus.requiresSignature &&
+        !registryEntry.securityStatus.hasSignature) {
       throw Exception('Plugin requires signature but none provided');
     }
   }
 
-  Future<PluginPackage> _parsePluginPackage(Uint8List packageData, PluginRegistryEntry registryEntry) async {
+  Future<PluginPackage> _parsePluginPackage(
+    Uint8List packageData,
+    PluginRegistryEntry registryEntry,
+  ) async {
     try {
       final manifest = PluginManifest(
         id: registryEntry.pluginId,
@@ -1011,7 +1109,8 @@ class ChannelStatistics {
       channelId: json['channelId'] as String,
       totalPlugins: json['totalPlugins'] as int,
       totalDownloads: json['totalDownloads'] as int,
-      categoryCounts: (json['categoryCounts'] as Map<String, dynamic>).cast<String, int>(),
+      categoryCounts: (json['categoryCounts'] as Map<String, dynamic>)
+          .cast<String, int>(),
       lastUpdated: DateTime.parse(json['lastUpdated'] as String),
     );
   }

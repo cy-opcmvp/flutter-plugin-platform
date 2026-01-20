@@ -10,16 +10,12 @@ class ErrorCaptureException implements Exception {
   const ErrorCaptureException(this.message, {this.pluginId, this.cause});
 
   @override
-  String toString() => 'ErrorCaptureException: $message${pluginId != null ? ' (Plugin: $pluginId)' : ''}';
+  String toString() =>
+      'ErrorCaptureException: $message${pluginId != null ? ' (Plugin: $pluginId)' : ''}';
 }
 
 /// Severity levels for errors
-enum ErrorSeverity {
-  low,
-  medium,
-  high,
-  critical
-}
+enum ErrorSeverity { low, medium, high, critical }
 
 /// Types of errors that can be captured
 enum ErrorType {
@@ -32,7 +28,7 @@ enum ErrorType {
   fileSystemError,
   validationError,
   timeoutError,
-  unknownError
+  unknownError,
 }
 
 /// Captured error information
@@ -81,7 +77,9 @@ class CapturedError {
       id: json['id'] as String,
       pluginId: json['pluginId'] as String?,
       type: ErrorType.values.firstWhere((e) => e.toString() == json['type']),
-      severity: ErrorSeverity.values.firstWhere((e) => e.toString() == json['severity']),
+      severity: ErrorSeverity.values.firstWhere(
+        (e) => e.toString() == json['severity'],
+      ),
       message: json['message'] as String,
       stackTrace: json['stackTrace'] as String?,
       timestamp: DateTime.parse(json['timestamp'] as String),
@@ -155,7 +153,7 @@ class DebugInterface {
   /// Add debug log
   void addDebugLog(String message) {
     _debugLogs.add('[${DateTime.now().toIso8601String()}] $message');
-    
+
     // Keep only last 500 log entries
     if (_debugLogs.length > 500) {
       _debugLogs.removeRange(0, _debugLogs.length - 500);
@@ -187,7 +185,8 @@ class DebugInterface {
   }
 
   /// Get watched variables
-  Map<String, dynamic> getWatchedVariables() => Map.unmodifiable(_watchedVariables);
+  Map<String, dynamic> getWatchedVariables() =>
+      Map.unmodifiable(_watchedVariables);
 
   /// Clear all debug data
   void clear() {
@@ -200,16 +199,18 @@ class DebugInterface {
 
 /// Error capture and debugging manager
 class ErrorCaptureManager {
-  final StreamController<CapturedError> _errorController = StreamController<CapturedError>.broadcast();
-  final StreamController<CrashReport> _crashController = StreamController<CrashReport>.broadcast();
-  
+  final StreamController<CapturedError> _errorController =
+      StreamController<CapturedError>.broadcast();
+  final StreamController<CrashReport> _crashController =
+      StreamController<CrashReport>.broadcast();
+
   bool _isInitialized = false;
   bool _isErrorCaptureEnabled = false;
   final Map<String, CapturedError> _capturedErrors = {};
   final Map<String, CrashReport> _crashReports = {};
   final Map<String, DebugInterface> _debugInterfaces = {};
   final List<String> _systemBreadcrumbs = [];
-  
+
   int _maxStoredErrors = 1000;
   int _maxStoredCrashes = 100;
   int _maxBreadcrumbs = 100;
@@ -217,10 +218,10 @@ class ErrorCaptureManager {
   /// Initialize the error capture manager
   Future<void> initialize() async {
     if (_isInitialized) return;
-    
+
     // Set up global error handlers
     await _setupGlobalErrorHandlers();
-    
+
     _isInitialized = true;
     _isErrorCaptureEnabled = true;
   }
@@ -228,10 +229,10 @@ class ErrorCaptureManager {
   /// Shutdown the error capture manager
   Future<void> shutdown() async {
     if (!_isInitialized) return;
-    
+
     await _errorController.close();
     await _crashController.close();
-    
+
     _isInitialized = false;
     _isErrorCaptureEnabled = false;
   }
@@ -266,12 +267,12 @@ class ErrorCaptureManager {
     List<String>? breadcrumbs,
   }) async {
     _ensureInitialized();
-    
+
     if (!_isErrorCaptureEnabled) return '';
-    
+
     final errorId = _generateErrorId();
     final systemInfo = await _collectSystemInfo();
-    
+
     final error = CapturedError(
       id: errorId,
       pluginId: pluginId,
@@ -284,19 +285,19 @@ class ErrorCaptureManager {
       breadcrumbs: breadcrumbs ?? List.from(_systemBreadcrumbs),
       systemInfo: systemInfo,
     );
-    
+
     // Store error
     _capturedErrors[errorId] = error;
-    
+
     // Maintain storage limits
     _maintainErrorStorageLimits();
-    
+
     // Emit error event
     _errorController.add(error);
-    
+
     // Add to system breadcrumbs
     _addSystemBreadcrumb('Error captured: ${error.type} - ${error.message}');
-    
+
     return errorId;
   }
 
@@ -310,17 +311,17 @@ class ErrorCaptureManager {
     Map<String, dynamic>? performanceMetrics,
   }) async {
     _ensureInitialized();
-    
+
     if (!_isErrorCaptureEnabled) return '';
-    
+
     final crashId = _generateCrashId();
     final systemState = await _collectSystemInfo();
-    
+
     // Get related errors for this plugin
     final relatedErrors = _capturedErrors.values
         .where((error) => error.pluginId == pluginId)
         .toList();
-    
+
     final crashReport = CrashReport(
       id: crashId,
       pluginId: pluginId,
@@ -333,30 +334,30 @@ class ErrorCaptureManager {
       performanceMetrics: performanceMetrics ?? {},
       relatedErrors: relatedErrors,
     );
-    
+
     // Store crash report
     _crashReports[crashId] = crashReport;
-    
+
     // Maintain storage limits
     _maintainCrashStorageLimits();
-    
+
     // Emit crash event
     _crashController.add(crashReport);
-    
+
     // Add to system breadcrumbs
     _addSystemBreadcrumb('Plugin crash: $pluginId - $crashReason');
-    
+
     return crashId;
   }
 
   /// Get debug interface for a plugin
   DebugInterface getDebugInterface(String pluginId) {
     _ensureInitialized();
-    
+
     if (!_debugInterfaces.containsKey(pluginId)) {
       _debugInterfaces[pluginId] = DebugInterface(pluginId);
     }
-    
+
     return _debugInterfaces[pluginId]!;
   }
 
@@ -368,26 +369,26 @@ class ErrorCaptureManager {
   /// Get all captured errors
   List<CapturedError> getCapturedErrors({String? pluginId}) {
     _ensureInitialized();
-    
+
     if (pluginId != null) {
       return _capturedErrors.values
           .where((error) => error.pluginId == pluginId)
           .toList();
     }
-    
+
     return _capturedErrors.values.toList();
   }
 
   /// Get all crash reports
   List<CrashReport> getCrashReports({String? pluginId}) {
     _ensureInitialized();
-    
+
     if (pluginId != null) {
       return _crashReports.values
           .where((report) => report.pluginId == pluginId)
           .toList();
     }
-    
+
     return _crashReports.values.toList();
   }
 
@@ -406,10 +407,13 @@ class ErrorCaptureManager {
   /// Add system breadcrumb
   void addSystemBreadcrumb(String breadcrumb) {
     _systemBreadcrumbs.add('[${DateTime.now().toIso8601String()}] $breadcrumb');
-    
+
     // Maintain breadcrumb limits
     if (_systemBreadcrumbs.length > _maxBreadcrumbs) {
-      _systemBreadcrumbs.removeRange(0, _systemBreadcrumbs.length - _maxBreadcrumbs);
+      _systemBreadcrumbs.removeRange(
+        0,
+        _systemBreadcrumbs.length - _maxBreadcrumbs,
+      );
     }
   }
 
@@ -419,7 +423,7 @@ class ErrorCaptureManager {
   /// Clear all captured data
   void clearAll() {
     _ensureInitialized();
-    
+
     _capturedErrors.clear();
     _crashReports.clear();
     _debugInterfaces.clear();
@@ -429,13 +433,13 @@ class ErrorCaptureManager {
   /// Clear data for a specific plugin
   void clearPluginData(String pluginId) {
     _ensureInitialized();
-    
+
     // Remove errors for this plugin
     _capturedErrors.removeWhere((key, error) => error.pluginId == pluginId);
-    
+
     // Remove crash reports for this plugin
     _crashReports.removeWhere((key, report) => report.pluginId == pluginId);
-    
+
     // Remove debug interface for this plugin
     _debugInterfaces.remove(pluginId);
   }
@@ -443,25 +447,24 @@ class ErrorCaptureManager {
   /// Export error data for analysis
   Future<Map<String, dynamic>> exportErrorData({String? pluginId}) async {
     _ensureInitialized();
-    
+
     final errors = getCapturedErrors(pluginId: pluginId);
     final crashes = getCrashReports(pluginId: pluginId);
-    
+
     return {
       'exportTime': DateTime.now().toIso8601String(),
       'pluginId': pluginId,
       'errors': errors.map((e) => e.toJson()).toList(),
       'crashes': crashes.map((c) => c.toJson()).toList(),
       'systemBreadcrumbs': _systemBreadcrumbs,
-      'debugInterfaces': _debugInterfaces.map((key, value) => MapEntry(
-        key,
-        {
+      'debugInterfaces': _debugInterfaces.map(
+        (key, value) => MapEntry(key, {
           'debugData': value.getDebugData(),
           'debugLogs': value.getDebugLogs(),
           'breakpoints': value.getBreakpoints(),
           'watchedVariables': value.getWatchedVariables(),
-        },
-      )),
+        }),
+      ),
     };
   }
 
@@ -485,7 +488,9 @@ class ErrorCaptureManager {
 
   void _ensureInitialized() {
     if (!_isInitialized) {
-      throw StateError('ErrorCaptureManager not initialized. Call initialize() first.');
+      throw StateError(
+        'ErrorCaptureManager not initialized. Call initialize() first.',
+      );
     }
   }
 
@@ -514,19 +519,12 @@ class ErrorCaptureManager {
 
   Map<String, dynamic> _getMemoryUsage() {
     // In a real implementation, this would collect actual memory usage
-    return {
-      'used': 0,
-      'available': 0,
-      'total': 0,
-    };
+    return {'used': 0, 'available': 0, 'total': 0};
   }
 
   Map<String, dynamic> _getCpuUsage() {
     // In a real implementation, this would collect actual CPU usage
-    return {
-      'percentage': 0.0,
-      'cores': Platform.numberOfProcessors,
-    };
+    return {'percentage': 0.0, 'cores': Platform.numberOfProcessors};
   }
 
   void _addSystemBreadcrumb(String breadcrumb) {
@@ -538,8 +536,10 @@ class ErrorCaptureManager {
       // Remove oldest errors
       final sortedErrors = _capturedErrors.entries.toList()
         ..sort((a, b) => a.value.timestamp.compareTo(b.value.timestamp));
-      
-      final toRemove = sortedErrors.take(_capturedErrors.length - _maxStoredErrors);
+
+      final toRemove = sortedErrors.take(
+        _capturedErrors.length - _maxStoredErrors,
+      );
       for (final entry in toRemove) {
         _capturedErrors.remove(entry.key);
       }
@@ -551,8 +551,10 @@ class ErrorCaptureManager {
       // Remove oldest crash reports
       final sortedCrashes = _crashReports.entries.toList()
         ..sort((a, b) => a.value.crashTime.compareTo(b.value.crashTime));
-      
-      final toRemove = sortedCrashes.take(_crashReports.length - _maxStoredCrashes);
+
+      final toRemove = sortedCrashes.take(
+        _crashReports.length - _maxStoredCrashes,
+      );
       for (final entry in toRemove) {
         _crashReports.remove(entry.key);
       }

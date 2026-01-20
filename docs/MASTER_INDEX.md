@@ -136,7 +136,7 @@ docs/
 
 #### 查看实施报告
 👉 [平台服务实施完成](reports/PLATFORM_SERVICES_IMPLEMENTATION_COMPLETE.md)
-👉 [世界时钟实现文档](plugins/world-clock/IMPLEMENTATION.md)
+👉 [世界时钟实现文档](plugins/world-clock/implementation.md)
 
 #### 排除问题
 👉 [平台服务故障排除](guides/PLATFORM_SERVICES_USER_GUIDE.md#🐛-故障排除)
@@ -190,7 +190,7 @@ docs/
 - [平台服务实施完成](reports/PLATFORM_SERVICES_IMPLEMENTATION_COMPLETE.md)
 - [配置功能审计](reports/CONFIG_FEATURE_AUDIT.md)
 - [配置实施进度](reports/CONFIG_IMPLEMENTATION_PROGRESS.md)
-- [世界时钟实现](plugins/world-clock/IMPLEMENTATION.md)
+- [世界时钟实现](plugins/world-clock/implementation.md)
 - [世界时钟更新](plugins/world-clock/UPDATE_v1.1.md)
 
 ### 5. 发布文档

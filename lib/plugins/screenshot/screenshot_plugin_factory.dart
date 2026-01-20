@@ -32,13 +32,20 @@ class ScreenshotPluginFactory {
         Permission.fileSystemRead,
       ],
       metadata: {
-        'description': l10n?.plugin_screenshot_description ??
+        'description':
+            l10n?.plugin_screenshot_description ??
             '类似 Snipaste 的专业截图工具，支持区域截图、全屏截图、窗口截图、图片标注和编辑',
         'author': 'Plugin Platform Team',
         'email': 'support@pluginplatform.com',
         'website': 'https://pluginplatform.com',
         'category': 'productivity',
-        'tags': const ['screenshot', 'capture', 'annotation', 'productivity', 'snipaste'],
+        'tags': const [
+          'screenshot',
+          'capture',
+          'annotation',
+          'productivity',
+          'snipaste',
+        ],
         'icon': 'screenshot',
         'minPlatformVersion': '1.0.0',
         'supportedPlatforms': const ['windows', 'macos', 'linux'],
@@ -47,9 +54,7 @@ class ScreenshotPluginFactory {
         'documentation': 'https://docs.pluginplatform.com/plugins/screenshot',
         'sourceCode': 'https://github.com/pluginplatform/screenshot-plugin',
         'license': 'MIT',
-        'changelog': const {
-          '1.0.0': '初始版本发布 - 支持基础截图功能',
-        },
+        'changelog': const {'1.0.0': '初始版本发布 - 支持基础截图功能'},
         'features': const [
           '区域截图（手动框选）',
           '全屏截图',

@@ -1,7 +1,6 @@
 library;
 
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 
 /// JSON 校验结果
 class JsonValidationResult {
@@ -43,7 +42,9 @@ class JsonValidationResult {
   @override
   String toString() {
     if (isValid) return 'Valid JSON';
-    final location = errorLine != null ? ' (line $errorLine, column $errorColumn)' : '';
+    final location = errorLine != null
+        ? ' (line $errorLine, column $errorColumn)'
+        : '';
     final path = errorPath != null ? ' at $errorPath' : '';
     return 'Validation Error: $errorMessage$path$location';
   }
@@ -82,7 +83,10 @@ class JsonSchema {
       description: json['description'] as String?,
       properties: json['properties'] != null
           ? (json['properties'] as Map<String, dynamic>).map(
-              (key, value) => MapEntry(key, JsonSchema.fromJson(value as Map<String, dynamic>)),
+              (key, value) => MapEntry(
+                key,
+                JsonSchema.fromJson(value as Map<String, dynamic>),
+              ),
             )
           : null,
       items: json['items'] != null
@@ -102,10 +106,13 @@ class JsonSchema {
     final json = <String, dynamic>{'type': type};
     if (description != null) json['description'] = description;
     if (properties != null) {
-      json['properties'] = properties!.map((key, value) => MapEntry(key, value.toJson()));
+      json['properties'] = properties!.map(
+        (key, value) => MapEntry(key, value.toJson()),
+      );
     }
     if (items != null) json['items'] = items!.toJson();
-    if (additionalProperties != null) json['additionalProperties'] = additionalProperties;
+    if (additionalProperties != null)
+      json['additionalProperties'] = additionalProperties;
     if (defaultValue != null) json['default'] = defaultValue;
     if (enumValues != null) json['enum'] = enumValues;
     if (minimum != null) json['minimum'] = minimum;
@@ -148,9 +155,7 @@ class JsonValidator {
         column: column,
       );
     } catch (e) {
-      return JsonValidationResult.failure(
-        message: e.toString(),
-      );
+      return JsonValidationResult.failure(message: e.toString());
     }
   }
 

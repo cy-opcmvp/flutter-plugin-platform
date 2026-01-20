@@ -81,20 +81,16 @@ class FeatureManager {
   ///
   /// Returns a list of features that match the given status
   List<FeatureMetadata> getFeaturesByStatus(FeatureStatus status) {
-    return _features.values
-        .where((f) => f.status == status)
-        .toList()
-        ..sort((a, b) => a.id.compareTo(b.id));
+    return _features.values.where((f) => f.status == status).toList()
+      ..sort((a, b) => a.id.compareTo(b.id));
   }
 
   /// Get all available features (implemented or partial)
   ///
   /// This returns features that can actually be used by users
   List<FeatureMetadata> getAvailableFeatures() {
-    return _features.values
-        .where((f) => f.isAvailable)
-        .toList()
-        ..sort((a, b) => a.id.compareTo(b.id));
+    return _features.values.where((f) => f.isAvailable).toList()
+      ..sort((a, b) => a.id.compareTo(b.id));
   }
 
   /// Get all planned features
@@ -142,10 +138,8 @@ class FeatureManager {
   ///
   /// Returns a list of features that have this feature as a dependency
   List<FeatureMetadata> getDependentFeatures(String id) {
-    return _features.values
-        .where((f) => f.dependencies.contains(id))
-        .toList()
-        ..sort((a, b) => a.id.compareTo(b.id));
+    return _features.values.where((f) => f.dependencies.contains(id)).toList()
+      ..sort((a, b) => a.id.compareTo(b.id));
   }
 
   /// Get features for a specific operation mode
@@ -158,6 +152,6 @@ class FeatureManager {
         .whereType<FeatureMetadata>()
         .where((f) => f.isAvailable)
         .toList()
-        ..sort((a, b) => a.id.compareTo(b.id));
+      ..sort((a, b) => a.id.compareTo(b.id));
   }
 }

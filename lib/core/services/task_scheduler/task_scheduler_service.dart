@@ -71,13 +71,15 @@ class TaskSchedulerServiceImpl extends ITaskSchedulerService
       _isInitialized = true;
 
       if (kDebugMode) {
-        print('TaskSchedulerService: Initialized with ${_tasks.length} tasks');
+        debugPrint(
+          'TaskSchedulerService: Initialized with ${_tasks.length} tasks',
+        );
       }
 
       return true;
     } catch (e) {
       if (kDebugMode) {
-        print('TaskSchedulerService: Initialization failed: $e');
+        debugPrint('TaskSchedulerService: Initialization failed: $e');
       }
       _isInitialized = false;
       return false;
@@ -119,7 +121,9 @@ class TaskSchedulerServiceImpl extends ITaskSchedulerService
     task.timer = Timer(delay, () => _executeTask(task));
 
     if (kDebugMode) {
-      print('TaskSchedulerService: Scheduled one-shot task $taskId for $scheduledTime');
+      debugPrint(
+        'TaskSchedulerService: Scheduled one-shot task $taskId for $scheduledTime',
+      );
     }
 
     return taskId;
@@ -156,7 +160,9 @@ class TaskSchedulerServiceImpl extends ITaskSchedulerService
     task.timer = Timer.periodic(interval, (_) => _executeTask(task));
 
     if (kDebugMode) {
-      print('TaskSchedulerService: Scheduled periodic task $taskId every $interval');
+      debugPrint(
+        'TaskSchedulerService: Scheduled periodic task $taskId every $interval',
+      );
     }
 
     return taskId;
@@ -175,7 +181,7 @@ class TaskSchedulerServiceImpl extends ITaskSchedulerService
       await _removePersistedTask(taskId);
 
       if (kDebugMode) {
-        print('TaskSchedulerService: Cancelled task $taskId');
+        debugPrint('TaskSchedulerService: Cancelled task $taskId');
       }
     }
   }
@@ -194,7 +200,7 @@ class TaskSchedulerServiceImpl extends ITaskSchedulerService
     }
 
     if (kDebugMode) {
-      print('TaskSchedulerService: Cancelled all tasks');
+      debugPrint('TaskSchedulerService: Cancelled all tasks');
     }
   }
 
@@ -205,15 +211,19 @@ class TaskSchedulerServiceImpl extends ITaskSchedulerService
       return [];
     }
 
-    return _tasks.values.map((task) => ScheduledTask(
-      id: task.id,
-      type: task.type,
-      scheduledTime: task.scheduledTime,
-      interval: task.interval,
-      data: task.data,
-      isActive: task.isActive,
-      isPaused: task.isPaused,
-    )).toList();
+    return _tasks.values
+        .map(
+          (task) => ScheduledTask(
+            id: task.id,
+            type: task.type,
+            scheduledTime: task.scheduledTime,
+            interval: task.interval,
+            data: task.data,
+            isActive: task.isActive,
+            isPaused: task.isPaused,
+          ),
+        )
+        .toList();
   }
 
   /// Pause a task
@@ -229,7 +239,7 @@ class TaskSchedulerServiceImpl extends ITaskSchedulerService
       task.timer?.cancel();
 
       if (kDebugMode) {
-        print('TaskSchedulerService: Paused task $taskId');
+        debugPrint('TaskSchedulerService: Paused task $taskId');
       }
     }
   }
@@ -256,7 +266,7 @@ class TaskSchedulerServiceImpl extends ITaskSchedulerService
       }
 
       if (kDebugMode) {
-        print('TaskSchedulerService: Resumed task $taskId');
+        debugPrint('TaskSchedulerService: Resumed task $taskId');
       }
     }
   }
@@ -269,17 +279,15 @@ class TaskSchedulerServiceImpl extends ITaskSchedulerService
 
     try {
       if (kDebugMode) {
-        print('TaskSchedulerService: Executing task ${task.id}');
+        debugPrint('TaskSchedulerService: Executing task ${task.id}');
       }
 
       await task.callback(task.data);
 
       // Emit completion event
-      _completeController.add(TaskEvent(
-        taskId: task.id,
-        data: task.data,
-        timestamp: DateTime.now(),
-      ));
+      _completeController.add(
+        TaskEvent(taskId: task.id, data: task.data, timestamp: DateTime.now()),
+      );
 
       // For one-shot tasks, remove after execution
       if (task.type == 'one_shot') {
@@ -289,22 +297,26 @@ class TaskSchedulerServiceImpl extends ITaskSchedulerService
         await _removePersistedTask(task.id);
 
         if (kDebugMode) {
-          print('TaskSchedulerService: Completed one-shot task ${task.id}');
+          debugPrint(
+            'TaskSchedulerService: Completed one-shot task ${task.id}',
+          );
         }
       }
     } catch (e, stackTrace) {
       if (kDebugMode) {
-        print('TaskSchedulerService: Error executing task ${task.id}: $e');
-        print(stackTrace);
+        debugPrint('TaskSchedulerService: Error executing task ${task.id}: $e');
+        debugPrint(stackTrace);
       }
 
       // Emit failure event
-      _failedController.add(TaskEvent(
-        taskId: task.id,
-        data: task.data,
-        timestamp: DateTime.now(),
-        error: e.toString(),
-      ));
+      _failedController.add(
+        TaskEvent(
+          taskId: task.id,
+          data: task.data,
+          timestamp: DateTime.now(),
+          error: e.toString(),
+        ),
+      );
     }
   }
 
@@ -324,11 +336,13 @@ class TaskSchedulerServiceImpl extends ITaskSchedulerService
       await _prefs!.setString('task_${task.id}', taskJson);
 
       if (kDebugMode) {
-        print('TaskSchedulerService: Persisted task ${task.id}');
+        debugPrint('TaskSchedulerService: Persisted task ${task.id}');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('TaskSchedulerService: Error persisting task ${task.id}: $e');
+        debugPrint(
+          'TaskSchedulerService: Error persisting task ${task.id}: $e',
+        );
       }
     }
   }
@@ -341,11 +355,13 @@ class TaskSchedulerServiceImpl extends ITaskSchedulerService
       await _prefs!.remove('task_$taskId');
 
       if (kDebugMode) {
-        print('TaskSchedulerService: Removed persisted task $taskId');
+        debugPrint('TaskSchedulerService: Removed persisted task $taskId');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('TaskSchedulerService: Error removing persisted task $taskId: $e');
+        debugPrint(
+          'TaskSchedulerService: Error removing persisted task $taskId: $e',
+        );
       }
     }
   }
@@ -376,17 +392,19 @@ class TaskSchedulerServiceImpl extends ITaskSchedulerService
           // In a real implementation, you'd need a way to register callbacks
           // For now, we just log them
           if (kDebugMode) {
-            print('TaskSchedulerService: Found persisted task ${taskData['id']} without callback');
+            debugPrint(
+              'TaskSchedulerService: Found persisted task ${taskData['id']} without callback',
+            );
           }
         }
       }
 
       if (kDebugMode) {
-        print('TaskSchedulerService: Restored tasks from storage');
+        debugPrint('TaskSchedulerService: Restored tasks from storage');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('TaskSchedulerService: Error restoring tasks: $e');
+        debugPrint('TaskSchedulerService: Error restoring tasks: $e');
       }
     }
   }
@@ -402,7 +420,7 @@ class TaskSchedulerServiceImpl extends ITaskSchedulerService
     _isInitialized = false;
 
     if (kDebugMode) {
-      print('TaskSchedulerService: Disposed');
+      debugPrint('TaskSchedulerService: Disposed');
     }
   }
 }

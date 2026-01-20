@@ -305,7 +305,9 @@ void main() {
         // Arrange
         locator.registerSingleton<TestService>(TestService('test-1'));
         locator.registerSingleton<TestService>(TestService('test-2'));
-        locator.registerFactory<DisposableService>(() => DisposableService('test'));
+        locator.registerFactory<DisposableService>(
+          () => DisposableService('test'),
+        );
 
         // Act
         final count = locator.serviceCount;
@@ -332,7 +334,9 @@ void main() {
       test('should clear both singletons and factories', () {
         // Arrange
         locator.registerSingleton<TestService>(TestService('singleton'));
-        locator.registerFactory<DisposableService>(() => DisposableService('factory'));
+        locator.registerFactory<DisposableService>(
+          () => DisposableService('factory'),
+        );
 
         // Act
         locator.clear();
@@ -354,7 +358,9 @@ void main() {
 
       test('should maintain state across tests', () {
         // Arrange
-        ServiceLocator.instance.registerSingleton<TestService>(TestService('global'));
+        ServiceLocator.instance.registerSingleton<TestService>(
+          TestService('global'),
+        );
 
         // Act
         final locator2 = ServiceLocator.instance;

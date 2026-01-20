@@ -2221,4 +2221,216 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get world_clock_settings_saved => '配置已保存';
+
+  @override
+  String get world_clock_add_clock => '添加时钟';
+
+  @override
+  String get world_clock_no_clocks => '暂无时钟';
+
+  @override
+  String get world_clock_add_clock_hint => '点击右上角 + 添加时钟';
+
+  @override
+  String get world_clock_city_name => '城市名称';
+
+  @override
+  String get world_clock_city_name_hint => '输入城市名称';
+
+  @override
+  String get world_clock_time_zone => '时区';
+
+  @override
+  String get world_clock_set_time => '设置时间';
+
+  @override
+  String get world_clock_hours => '小时';
+
+  @override
+  String get world_clock_minutes => '分钟';
+
+  @override
+  String get world_clock_seconds => '秒';
+
+  @override
+  String get world_clock_loading => '加载中...';
+
+  @override
+  String get world_clock_no_image => '无法加载图片';
+
+  @override
+  String get world_clock_countdown_completed => '已完成';
+
+  @override
+  String get world_clock_countdown_almost_complete => '即将完成！';
+
+  @override
+  String world_clock_remaining_minutes(Object minutes) {
+    return '剩余 $minutes 分钟';
+  }
+
+  @override
+  String world_clock_remaining_hours_minutes(Object hours, Object minutes) {
+    return '剩余 $hours 小时 $minutes 分钟';
+  }
+
+  @override
+  String world_clock_remaining_days_hours(Object days, Object hours) {
+    return '剩余 $days 天 $hours 小时';
+  }
+
+  @override
+  String get world_clock_confirm_delete => '确认删除';
+
+  @override
+  String world_clock_confirm_delete_countdown_message(Object title) {
+    return '确定要删除倒计时 \"$title\" 吗？';
+  }
+
+  @override
+  String world_clock_plugin_initialized(Object name) {
+    return '$name 插件已成功初始化';
+  }
+
+  @override
+  String world_clock_plugin_init_failed(Object error, Object name) {
+    return '$name 插件初始化失败: $error';
+  }
+
+  @override
+  String get screenshot_tool_pen_label => '画笔';
+
+  @override
+  String get screenshot_tool_rectangle_label => '矩形';
+
+  @override
+  String get screenshot_tool_arrow_label => '箭头';
+
+  @override
+  String get screenshot_tool_text_label => '文字';
+
+  @override
+  String get screenshot_tool_mosaic_label => '马赛克';
+
+  @override
+  String get screenshot_undo_tooltip => '撤销';
+
+  @override
+  String get screenshot_redo_tooltip => '重做';
+
+  @override
+  String get screenshot_save_tooltip => '保存';
+
+  @override
+  String get screenshot_copy_to_clipboard => '复制到剪贴板';
+
+  @override
+  String get screenshot_share => '分享';
+
+  @override
+  String get screenshot_loading => '加载中...';
+
+  @override
+  String get screenshot_unable_load_image => '无法加载图片';
+
+  @override
+  String get screenshot_history_title => '截图历史';
+
+  @override
+  String get screenshot_clear_history => '清空历史';
+
+  @override
+  String get screenshot_confirm_clear_history => '确认清空';
+
+  @override
+  String get screenshot_confirm_clear_history_message =>
+      '确定要清空所有截图历史吗？此操作无法撤销。';
+
+  @override
+  String get screenshot_clear => '清空';
+
+  @override
+  String get screenshot_no_records => '暂无截图记录';
+
+  @override
+  String get screenshot_history_hint => '开始截图后，历史记录将显示在这里';
+
+  @override
+  String get screenshot_recent => '刚刚';
+
+  @override
+  String screenshot_minutes_ago(Object minutes) {
+    return '$minutes 分钟前';
+  }
+
+  @override
+  String screenshot_hours_ago(Object hours) {
+    return '$hours 小时前';
+  }
+
+  @override
+  String screenshot_days_ago(Object days) {
+    return '$days 天前';
+  }
+
+  @override
+  String screenshot_date_format(Object day, Object month) {
+    return '$month月$day日';
+  }
+
+  @override
+  String screenshot_datetime_format(
+    Object day,
+    Object hour,
+    Object minute,
+    Object month,
+    Object second,
+    Object year,
+  ) {
+    return '$year年$month月$day日 $hour:$minute:$second';
+  }
+
+  @override
+  String get screenshot_type_fullscreen => '全屏';
+
+  @override
+  String get screenshot_detail_info => '详细信息';
+
+  @override
+  String get screenshot_info_file_path => '文件路径';
+
+  @override
+  String get screenshot_info_file_size => '文件大小';
+
+  @override
+  String get screenshot_info_type => '截图类型';
+
+  @override
+  String get screenshot_info_created => '创建时间';
+
+  @override
+  String get screenshot_info_dimensions => '图片尺寸';
+
+  @override
+  String screenshot_shortcut_edit_pending(Object action) {
+    return '快捷键编辑功能待实现：$action';
+  }
+
+  @override
+  String get screenshot_editor_title => '编辑截图';
+
+  @override
+  String get image_editor_pen => '画笔';
+
+  @override
+  String get image_editor_rectangle => '矩形';
+
+  @override
+  String get image_editor_arrow => '箭头';
+
+  @override
+  String get image_editor_text => '文字';
+
+  @override
+  String get image_editor_mosaic => '马赛克';
 }

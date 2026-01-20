@@ -33,14 +33,14 @@ class PlatformServiceManager {
       await _initializeServices(locator);
 
       if (kDebugMode) {
-        print('$_tag: All services initialized successfully');
+        debugPrint('$_tag: All services initialized successfully');
       }
 
       return true;
     } catch (e, stackTrace) {
       if (kDebugMode) {
-        print('$_tag: Initialization failed: $e');
-        print(stackTrace);
+        debugPrint('$_tag: Initialization failed: $e');
+        debugPrint(stackTrace);
       }
       return false;
     }
@@ -49,18 +49,14 @@ class PlatformServiceManager {
   /// Register all services with the service locator
   static void _registerServices(ServiceLocator locator) {
     if (kDebugMode) {
-      print('$_tag: Registering services...');
+      debugPrint('$_tag: Registering services...');
     }
 
     // Register notification service
-    locator.registerSingleton<INotificationService>(
-      NotificationServiceImpl(),
-    );
+    locator.registerSingleton<INotificationService>(NotificationServiceImpl());
 
     // Register audio service
-    locator.registerSingleton<IAudioService>(
-      AudioServiceImpl(),
-    );
+    locator.registerSingleton<IAudioService>(AudioServiceImpl());
 
     // Register task scheduler service
     locator.registerSingleton<ITaskSchedulerService>(
@@ -68,35 +64,39 @@ class PlatformServiceManager {
     );
 
     if (kDebugMode) {
-      print('$_tag: Services registered');
+      debugPrint('$_tag: Services registered');
     }
   }
 
   /// Initialize all services
   static Future<void> _initializeServices(ServiceLocator locator) async {
     if (kDebugMode) {
-      print('$_tag: Initializing services...');
+      debugPrint('$_tag: Initializing services...');
     }
 
     // Initialize notification service
     final notificationService = locator.get<INotificationService>();
     final notificationInitialized = await notificationService.initialize();
     if (kDebugMode) {
-      print('$_tag: Notification service initialized: $notificationInitialized');
+      debugPrint(
+        '$_tag: Notification service initialized: $notificationInitialized',
+      );
     }
 
     // Initialize audio service
     final audioService = locator.get<IAudioService>();
     final audioInitialized = await audioService.initialize();
     if (kDebugMode) {
-      print('$_tag: Audio service initialized: $audioInitialized');
+      debugPrint('$_tag: Audio service initialized: $audioInitialized');
     }
 
     // Initialize task scheduler service
     final taskSchedulerService = locator.get<ITaskSchedulerService>();
     final taskSchedulerInitialized = await taskSchedulerService.initialize();
     if (kDebugMode) {
-      print('$_tag: Task scheduler service initialized: $taskSchedulerInitialized');
+      debugPrint(
+        '$_tag: Task scheduler service initialized: $taskSchedulerInitialized',
+      );
     }
   }
 
@@ -125,13 +125,13 @@ class PlatformServiceManager {
   /// This should be called during app shutdown.
   static Future<void> dispose() async {
     if (kDebugMode) {
-      print('$_tag: Disposing all services...');
+      debugPrint('$_tag: Disposing all services...');
     }
 
     await ServiceLocator.instance.disposeAll();
 
     if (kDebugMode) {
-      print('$_tag: All services disposed');
+      debugPrint('$_tag: All services disposed');
     }
   }
 }

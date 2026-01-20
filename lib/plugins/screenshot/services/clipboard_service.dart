@@ -116,7 +116,9 @@ class ClipboardService {
 
       // 显示提示
       debugPrint('Image saved to: ${tempFile.path}');
-      debugPrint('For full clipboard support, platform-specific code is needed');
+      debugPrint(
+        'For full clipboard support, platform-specific code is needed',
+      );
 
       return true;
     } catch (e) {

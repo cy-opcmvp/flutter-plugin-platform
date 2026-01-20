@@ -89,7 +89,7 @@ test/plugins/
 └── world_clock_test.dart            # 单元测试
 
 文档/
-├── WORLD_CLOCK_IMPLEMENTATION.md    # 实现总结
+├── world_clock_implementation.md    # 实现总结
 └── PLUGIN_ID_FIX_SUMMARY.md        # 修复总结
 ```
 

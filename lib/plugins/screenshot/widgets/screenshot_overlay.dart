@@ -61,9 +61,7 @@ class _ScreenshotOverlayState extends State<ScreenshotOverlay> {
           ),
 
           // 半透明蒙版层（在选择区域外显示）
-          Positioned.fill(
-            child: _buildDimOverlay(),
-          ),
+          Positioned.fill(child: _buildDimOverlay()),
 
           // 手势检测层
           Positioned.fill(
@@ -156,10 +154,7 @@ class _ScreenshotOverlayState extends State<ScreenshotOverlay> {
             width: rect.width,
             height: rect.height,
             decoration: BoxDecoration(
-              border: Border.all(
-                color: Colors.red,
-                width: _borderWidth,
-              ),
+              border: Border.all(color: Colors.red, width: _borderWidth),
             ),
           ),
         ),
@@ -169,7 +164,6 @@ class _ScreenshotOverlayState extends State<ScreenshotOverlay> {
         _buildHandle(rect.right, rect.top), // 右上
         _buildHandle(rect.left, rect.bottom), // 左下
         _buildHandle(rect.right, rect.bottom), // 右下
-
         // 尺寸标签
         _buildSizeLabel(rect),
       ],
@@ -360,9 +354,6 @@ class _ScreenshotTriggerState extends State<ScreenshotTrigger> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onLongPress: _startCapture,
-      child: widget.child,
-    );
+    return GestureDetector(onLongPress: _startCapture, child: widget.child);
   }
 }

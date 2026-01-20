@@ -7,15 +7,15 @@ import 'mobile_services.dart';
 /// Concrete implementation of mobile services
 class MobileServicesImpl implements IMobileServices {
   static const MethodChannel _channel = MethodChannel('mobile_services');
-  
+
   bool _isInitialized = false;
   DeviceOrientation _currentOrientation = DeviceOrientation.portraitUp;
-  final StreamController<DeviceOrientation> _orientationController = 
+  final StreamController<DeviceOrientation> _orientationController =
       StreamController<DeviceOrientation>.broadcast();
-  
+
   final List<MobileGestureHandler> _gestureHandlers = [];
   AppLifecycleHandler? _lifecycleHandler;
-  
+
   // Touch optimization settings
   final Map<String, dynamic> _touchSettings = {
     'touch_target_size': 44.0, // Minimum touch target size in dp
@@ -28,20 +28,20 @@ class MobileServicesImpl implements IMobileServices {
   @override
   Future<void> initialize() async {
     if (_isInitialized) return;
-    
+
     try {
       // Initialize mobile platform services
       await _channel.invokeMethod('initialize');
-      
+
       // Set up orientation monitoring
       await _setupOrientationMonitoring();
-      
+
       // Configure touch optimization
       await _configureTouchOptimization();
-      
+
       // Set up app lifecycle monitoring
       _setupAppLifecycleMonitoring();
-      
+
       _isInitialized = true;
     } catch (e) {
       // Fallback initialization for testing
@@ -50,14 +50,17 @@ class MobileServicesImpl implements IMobileServices {
   }
 
   @override
-  Future<void> setPreferredOrientations(List<DeviceOrientation> orientations) async {
+  Future<void> setPreferredOrientations(
+    List<DeviceOrientation> orientations,
+  ) async {
     if (!_isInitialized) await initialize();
-    
+
     try {
       await SystemChrome.setPreferredOrientations(orientations);
-      
+
       // Update current orientation if it's not in the preferred list
-      if (!orientations.contains(_currentOrientation) && orientations.isNotEmpty) {
+      if (!orientations.contains(_currentOrientation) &&
+          orientations.isNotEmpty) {
         _currentOrientation = orientations.first;
         _orientationController.add(_currentOrientation);
       }
@@ -74,12 +77,13 @@ class MobileServicesImpl implements IMobileServices {
   DeviceOrientation get currentOrientation => _currentOrientation;
 
   @override
-  Stream<DeviceOrientation> get orientationStream => _orientationController.stream;
+  Stream<DeviceOrientation> get orientationStream =>
+      _orientationController.stream;
 
   @override
   Future<void> showMobileNotification(MobileNotification notification) async {
     if (!_isInitialized) return;
-    
+
     try {
       await _channel.invokeMethod('showNotification', {
         'title': notification.title,
@@ -98,7 +102,7 @@ class MobileServicesImpl implements IMobileServices {
   @override
   Future<bool> requestMobilePermission(MobilePermission permission) async {
     if (!_isInitialized) return false;
-    
+
     try {
       final result = await _channel.invokeMethod('requestPermission', {
         'permission': permission.toString().split('.').last,
@@ -113,7 +117,7 @@ class MobileServicesImpl implements IMobileServices {
   @override
   Future<bool> hasMobilePermission(MobilePermission permission) async {
     if (!_isInitialized) return false;
-    
+
     try {
       final result = await _channel.invokeMethod('hasPermission', {
         'permission': permission.toString().split('.').last,
@@ -133,7 +137,7 @@ class MobileServicesImpl implements IMobileServices {
   @override
   Future<MobileDeviceInfo> getDeviceInfo() async {
     if (!_isInitialized) await initialize();
-    
+
     try {
       final result = await _channel.invokeMethod('getDeviceInfo');
       if (result != null) {
@@ -149,11 +153,11 @@ class MobileServicesImpl implements IMobileServices {
     } catch (e) {
       // Return default device info if platform call fails
     }
-    
+
     // Fallback device info
     return const MobileDeviceInfo(
       model: 'Unknown',
-      manufacturer: 'Unknown', 
+      manufacturer: 'Unknown',
       osVersion: 'Unknown',
       screenWidth: 375.0,
       screenHeight: 667.0,
@@ -189,7 +193,7 @@ class MobileServicesImpl implements IMobileServices {
         // Continue with other handlers if one fails
       }
     }
-    
+
     // Provide haptic feedback if enabled
     if (_touchSettings['haptic_feedback_enabled'] == true) {
       try {
@@ -207,7 +211,7 @@ class MobileServicesImpl implements IMobileServices {
       endPosition: endPosition,
       direction: direction,
     );
-    
+
     for (final handler in _gestureHandlers) {
       try {
         handler.onSwipe(details);
@@ -215,7 +219,7 @@ class MobileServicesImpl implements IMobileServices {
         // Continue with other handlers if one fails
       }
     }
-    
+
     // Provide haptic feedback for swipes
     if (_touchSettings['haptic_feedback_enabled'] == true) {
       try {
@@ -246,7 +250,7 @@ class MobileServicesImpl implements IMobileServices {
         // Continue with other handlers if one fails
       }
     }
-    
+
     // Provide haptic feedback for long press
     if (_touchSettings['haptic_feedback_enabled'] == true) {
       try {
@@ -260,7 +264,7 @@ class MobileServicesImpl implements IMobileServices {
   SwipeDirection _calculateSwipeDirection(Offset start, Offset end) {
     final dx = end.dx - start.dx;
     final dy = end.dy - start.dy;
-    
+
     if (dx.abs() > dy.abs()) {
       return dx > 0 ? SwipeDirection.right : SwipeDirection.left;
     } else {
@@ -318,7 +322,7 @@ class MobileServicesImpl implements IMobileServices {
 
   void _handleAppLifecycleChange(String? state) {
     if (_lifecycleHandler == null) return;
-    
+
     switch (state) {
       case 'resumed':
         _lifecycleHandler!.onResumed();
@@ -344,26 +348,26 @@ class MobileServicesImpl implements IMobileServices {
 
   bool isLandscape() {
     return _currentOrientation == DeviceOrientation.landscapeLeft ||
-           _currentOrientation == DeviceOrientation.landscapeRight;
+        _currentOrientation == DeviceOrientation.landscapeRight;
   }
 
   bool isPortrait() {
     return _currentOrientation == DeviceOrientation.portraitUp ||
-           _currentOrientation == DeviceOrientation.portraitDown;
+        _currentOrientation == DeviceOrientation.portraitDown;
   }
 
   // Touch target optimization
   double getOptimalTouchTargetSize(MobileDeviceInfo deviceInfo) {
     final baseSize = _touchSettings['touch_target_size'] as double;
     final pixelRatio = deviceInfo.pixelRatio;
-    
+
     // Adjust touch target size based on pixel density
     if (pixelRatio > 3.0) {
       return baseSize * 1.2; // Larger targets for high-density screens
     } else if (pixelRatio < 2.0) {
       return baseSize * 0.9; // Smaller targets for low-density screens
     }
-    
+
     return baseSize;
   }
 

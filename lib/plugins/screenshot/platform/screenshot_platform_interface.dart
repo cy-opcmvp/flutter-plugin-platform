@@ -2,6 +2,7 @@ library;
 
 import 'dart:typed_data';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import '../models/screenshot_models.dart';
 
@@ -19,7 +20,12 @@ class RegionSelectedEvent {
     required this.height,
   });
 
-  Rect toRect() => Rect.fromLTWH(x.toDouble(), y.toDouble(), width.toDouble(), height.toDouble());
+  Rect toRect() => Rect.fromLTWH(
+    x.toDouble(),
+    y.toDouble(),
+    width.toDouble(),
+    height.toDouble(),
+  );
 }
 
 /// 截图平台接口抽象
@@ -92,7 +98,9 @@ abstract class ScreenshotPlatformInterface {
 
 /// Windows 平台截图服务实现
 class WindowsScreenshotService implements ScreenshotPlatformInterface {
-  static const MethodChannel _channel = MethodChannel('com.example.screenshot/screenshot');
+  static const MethodChannel _channel = MethodChannel(
+    'com.example.screenshot/screenshot',
+  );
 
   WindowsScreenshotService();
 
@@ -109,7 +117,7 @@ class WindowsScreenshotService implements ScreenshotPlatformInterface {
       final List<int> dataList = List<int>.from(result);
       return Uint8List.fromList(dataList);
     } catch (e) {
-      print('Failed to capture full screen: $e');
+      debugPrint('Failed to capture full screen: $e');
       return null;
     }
   }
@@ -128,7 +136,7 @@ class WindowsScreenshotService implements ScreenshotPlatformInterface {
       final List<int> dataList = List<int>.from(result);
       return Uint8List.fromList(dataList);
     } catch (e) {
-      print('Failed to capture region: $e');
+      debugPrint('Failed to capture region: $e');
       return null;
     }
   }
@@ -144,7 +152,7 @@ class WindowsScreenshotService implements ScreenshotPlatformInterface {
       final List<int> dataList = List<int>.from(result);
       return Uint8List.fromList(dataList);
     } catch (e) {
-      print('Failed to capture window: $e');
+      debugPrint('Failed to capture window: $e');
       return null;
     }
   }
@@ -167,17 +175,24 @@ class WindowsScreenshotService implements ScreenshotPlatformInterface {
           iconBytes = Uint8List.fromList(iconData);
         }
 
-        windows.add(WindowInfo(
-          id: map['id'] as String,
-          title: map['title'] as String,
-          bounds: Rect.fromLTWH(0, 0, 0, 0), // Bounds not provided by Windows API
-          appName: map['appName'] as String?,
-          icon: iconBytes,
-        ));
+        windows.add(
+          WindowInfo(
+            id: map['id'] as String,
+            title: map['title'] as String,
+            bounds: Rect.fromLTWH(
+              0,
+              0,
+              0,
+              0,
+            ), // Bounds not provided by Windows API
+            appName: map['appName'] as String?,
+            icon: iconBytes,
+          ),
+        );
       }
       return windows;
     } catch (e) {
-      print('Failed to get available windows: $e');
+      debugPrint('Failed to get available windows: $e');
       return [];
     }
   }
@@ -191,7 +206,7 @@ class WindowsScreenshotService implements ScreenshotPlatformInterface {
       // In a real implementation, you would query the actual screen dimensions
       return Rect.fromLTWH(0, 0, 1920, 1080); // Default fallback
     } catch (e) {
-      print('Failed to get primary screen size: $e');
+      debugPrint('Failed to get primary screen size: $e');
       return null;
     }
   }
@@ -202,7 +217,7 @@ class WindowsScreenshotService implements ScreenshotPlatformInterface {
       final result = await _channel.invokeMethod('showNativeRegionCapture');
       return result == true;
     } catch (e) {
-      print('Failed to show native region capture: $e');
+      debugPrint('Failed to show native region capture: $e');
       return false;
     }
   }
@@ -224,7 +239,7 @@ class WindowsScreenshotService implements ScreenshotPlatformInterface {
         height: map['height'] as int,
       );
     } catch (e) {
-      print('Failed to get region selection result: $e');
+      debugPrint('Failed to get region selection result: $e');
       return null;
     }
   }
@@ -339,17 +354,23 @@ class FallbackScreenshotService implements ScreenshotPlatformInterface {
 
   @override
   Future<Uint8List?> captureFullScreen() async {
-    throw UnsupportedError('Screenshot capture is not supported on this platform');
+    throw UnsupportedError(
+      'Screenshot capture is not supported on this platform',
+    );
   }
 
   @override
   Future<Uint8List?> captureRegion(Rect rect) async {
-    throw UnsupportedError('Screenshot capture is not supported on this platform');
+    throw UnsupportedError(
+      'Screenshot capture is not supported on this platform',
+    );
   }
 
   @override
   Future<Uint8List?> captureWindow(String windowId) async {
-    throw UnsupportedError('Screenshot capture is not supported on this platform');
+    throw UnsupportedError(
+      'Screenshot capture is not supported on this platform',
+    );
   }
 
   @override
@@ -364,11 +385,15 @@ class FallbackScreenshotService implements ScreenshotPlatformInterface {
 
   @override
   Future<bool> showNativeRegionCapture() async {
-    throw UnsupportedError('Native window capture is not supported on this platform');
+    throw UnsupportedError(
+      'Native window capture is not supported on this platform',
+    );
   }
 
   @override
   Future<RegionSelectedEvent?> getRegionSelectionResult() async {
-    throw UnsupportedError('Native window capture is not supported on this platform');
+    throw UnsupportedError(
+      'Native window capture is not supported on this platform',
+    );
   }
 }

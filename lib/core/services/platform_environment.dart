@@ -12,13 +12,10 @@ class PlatformEnvironment {
   // Private constructor for singleton
   PlatformEnvironment._() {
     // Log platform detection on initialization
-    _logger.logPlatformDetection(
-      isWeb ? 'Web' : 'Native',
-      {
-        'supportsEnvironmentVariables': !isWeb,
-        'supportsFileSystem': !isWeb,
-      },
-    );
+    _logger.logPlatformDetection(isWeb ? 'Web' : 'Native', {
+      'supportsEnvironmentVariables': !isWeb,
+      'supportsFileSystem': !isWeb,
+    });
   }
 
   // Logger instance
@@ -144,7 +141,7 @@ class PlatformEnvironment {
       } else {
         fallbackPath = '/home/default';
       }
-      
+
       _logger.logWarning('Using fallback home path: $fallbackPath');
       return fallbackPath;
     } catch (e) {
@@ -168,7 +165,7 @@ class PlatformEnvironment {
 
     try {
       final home = getHomePath();
-      
+
       if (Platform.isWindows) {
         return '$home\\Documents';
       } else {
@@ -220,7 +217,7 @@ class PlatformEnvironment {
       } else {
         fallbackPath = '/tmp';
       }
-      
+
       _logger.logWarning('Using fallback temp path: $fallbackPath');
       return fallbackPath;
     } catch (e) {
@@ -256,7 +253,7 @@ class PlatformEnvironment {
 
       // Fallback based on platform
       final home = getHomePath();
-      
+
       String fallbackPath;
       if (Platform.isWindows) {
         fallbackPath = '$home\\AppData\\Roaming';
@@ -265,7 +262,7 @@ class PlatformEnvironment {
       } else {
         fallbackPath = '$home/.config';
       }
-      
+
       _logger.logWarning('Using fallback app data path: $fallbackPath');
       return fallbackPath;
     } catch (e) {

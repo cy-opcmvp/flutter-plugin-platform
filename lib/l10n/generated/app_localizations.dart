@@ -4261,6 +4261,373 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'配置已保存'**
   String get world_clock_settings_saved;
+
+  /// No description provided for @world_clock_add_clock.
+  ///
+  /// In zh, this message translates to:
+  /// **'添加时钟'**
+  String get world_clock_add_clock;
+
+  /// No description provided for @world_clock_no_clocks.
+  ///
+  /// In zh, this message translates to:
+  /// **'暂无时钟'**
+  String get world_clock_no_clocks;
+
+  /// No description provided for @world_clock_add_clock_hint.
+  ///
+  /// In zh, this message translates to:
+  /// **'点击右上角 + 添加时钟'**
+  String get world_clock_add_clock_hint;
+
+  /// No description provided for @world_clock_city_name.
+  ///
+  /// In zh, this message translates to:
+  /// **'城市名称'**
+  String get world_clock_city_name;
+
+  /// No description provided for @world_clock_city_name_hint.
+  ///
+  /// In zh, this message translates to:
+  /// **'输入城市名称'**
+  String get world_clock_city_name_hint;
+
+  /// No description provided for @world_clock_time_zone.
+  ///
+  /// In zh, this message translates to:
+  /// **'时区'**
+  String get world_clock_time_zone;
+
+  /// No description provided for @world_clock_set_time.
+  ///
+  /// In zh, this message translates to:
+  /// **'设置时间'**
+  String get world_clock_set_time;
+
+  /// No description provided for @world_clock_hours.
+  ///
+  /// In zh, this message translates to:
+  /// **'小时'**
+  String get world_clock_hours;
+
+  /// No description provided for @world_clock_minutes.
+  ///
+  /// In zh, this message translates to:
+  /// **'分钟'**
+  String get world_clock_minutes;
+
+  /// No description provided for @world_clock_seconds.
+  ///
+  /// In zh, this message translates to:
+  /// **'秒'**
+  String get world_clock_seconds;
+
+  /// No description provided for @world_clock_loading.
+  ///
+  /// In zh, this message translates to:
+  /// **'加载中...'**
+  String get world_clock_loading;
+
+  /// No description provided for @world_clock_no_image.
+  ///
+  /// In zh, this message translates to:
+  /// **'无法加载图片'**
+  String get world_clock_no_image;
+
+  /// No description provided for @world_clock_countdown_completed.
+  ///
+  /// In zh, this message translates to:
+  /// **'已完成'**
+  String get world_clock_countdown_completed;
+
+  /// No description provided for @world_clock_countdown_almost_complete.
+  ///
+  /// In zh, this message translates to:
+  /// **'即将完成！'**
+  String get world_clock_countdown_almost_complete;
+
+  /// No description provided for @world_clock_remaining_minutes.
+  ///
+  /// In zh, this message translates to:
+  /// **'剩余 {minutes} 分钟'**
+  String world_clock_remaining_minutes(Object minutes);
+
+  /// No description provided for @world_clock_remaining_hours_minutes.
+  ///
+  /// In zh, this message translates to:
+  /// **'剩余 {hours} 小时 {minutes} 分钟'**
+  String world_clock_remaining_hours_minutes(Object hours, Object minutes);
+
+  /// No description provided for @world_clock_remaining_days_hours.
+  ///
+  /// In zh, this message translates to:
+  /// **'剩余 {days} 天 {hours} 小时'**
+  String world_clock_remaining_days_hours(Object days, Object hours);
+
+  /// No description provided for @world_clock_confirm_delete.
+  ///
+  /// In zh, this message translates to:
+  /// **'确认删除'**
+  String get world_clock_confirm_delete;
+
+  /// No description provided for @world_clock_confirm_delete_countdown_message.
+  ///
+  /// In zh, this message translates to:
+  /// **'确定要删除倒计时 \"{title}\" 吗？'**
+  String world_clock_confirm_delete_countdown_message(Object title);
+
+  /// No description provided for @world_clock_plugin_initialized.
+  ///
+  /// In zh, this message translates to:
+  /// **'{name} 插件已成功初始化'**
+  String world_clock_plugin_initialized(Object name);
+
+  /// No description provided for @world_clock_plugin_init_failed.
+  ///
+  /// In zh, this message translates to:
+  /// **'{name} 插件初始化失败: {error}'**
+  String world_clock_plugin_init_failed(Object error, Object name);
+
+  /// No description provided for @screenshot_tool_pen_label.
+  ///
+  /// In zh, this message translates to:
+  /// **'画笔'**
+  String get screenshot_tool_pen_label;
+
+  /// No description provided for @screenshot_tool_rectangle_label.
+  ///
+  /// In zh, this message translates to:
+  /// **'矩形'**
+  String get screenshot_tool_rectangle_label;
+
+  /// No description provided for @screenshot_tool_arrow_label.
+  ///
+  /// In zh, this message translates to:
+  /// **'箭头'**
+  String get screenshot_tool_arrow_label;
+
+  /// No description provided for @screenshot_tool_text_label.
+  ///
+  /// In zh, this message translates to:
+  /// **'文字'**
+  String get screenshot_tool_text_label;
+
+  /// No description provided for @screenshot_tool_mosaic_label.
+  ///
+  /// In zh, this message translates to:
+  /// **'马赛克'**
+  String get screenshot_tool_mosaic_label;
+
+  /// No description provided for @screenshot_undo_tooltip.
+  ///
+  /// In zh, this message translates to:
+  /// **'撤销'**
+  String get screenshot_undo_tooltip;
+
+  /// No description provided for @screenshot_redo_tooltip.
+  ///
+  /// In zh, this message translates to:
+  /// **'重做'**
+  String get screenshot_redo_tooltip;
+
+  /// No description provided for @screenshot_save_tooltip.
+  ///
+  /// In zh, this message translates to:
+  /// **'保存'**
+  String get screenshot_save_tooltip;
+
+  /// No description provided for @screenshot_copy_to_clipboard.
+  ///
+  /// In zh, this message translates to:
+  /// **'复制到剪贴板'**
+  String get screenshot_copy_to_clipboard;
+
+  /// No description provided for @screenshot_share.
+  ///
+  /// In zh, this message translates to:
+  /// **'分享'**
+  String get screenshot_share;
+
+  /// No description provided for @screenshot_loading.
+  ///
+  /// In zh, this message translates to:
+  /// **'加载中...'**
+  String get screenshot_loading;
+
+  /// No description provided for @screenshot_unable_load_image.
+  ///
+  /// In zh, this message translates to:
+  /// **'无法加载图片'**
+  String get screenshot_unable_load_image;
+
+  /// No description provided for @screenshot_history_title.
+  ///
+  /// In zh, this message translates to:
+  /// **'截图历史'**
+  String get screenshot_history_title;
+
+  /// No description provided for @screenshot_clear_history.
+  ///
+  /// In zh, this message translates to:
+  /// **'清空历史'**
+  String get screenshot_clear_history;
+
+  /// No description provided for @screenshot_confirm_clear_history.
+  ///
+  /// In zh, this message translates to:
+  /// **'确认清空'**
+  String get screenshot_confirm_clear_history;
+
+  /// No description provided for @screenshot_confirm_clear_history_message.
+  ///
+  /// In zh, this message translates to:
+  /// **'确定要清空所有截图历史吗？此操作无法撤销。'**
+  String get screenshot_confirm_clear_history_message;
+
+  /// No description provided for @screenshot_clear.
+  ///
+  /// In zh, this message translates to:
+  /// **'清空'**
+  String get screenshot_clear;
+
+  /// No description provided for @screenshot_no_records.
+  ///
+  /// In zh, this message translates to:
+  /// **'暂无截图记录'**
+  String get screenshot_no_records;
+
+  /// No description provided for @screenshot_history_hint.
+  ///
+  /// In zh, this message translates to:
+  /// **'开始截图后，历史记录将显示在这里'**
+  String get screenshot_history_hint;
+
+  /// No description provided for @screenshot_recent.
+  ///
+  /// In zh, this message translates to:
+  /// **'刚刚'**
+  String get screenshot_recent;
+
+  /// No description provided for @screenshot_minutes_ago.
+  ///
+  /// In zh, this message translates to:
+  /// **'{minutes} 分钟前'**
+  String screenshot_minutes_ago(Object minutes);
+
+  /// No description provided for @screenshot_hours_ago.
+  ///
+  /// In zh, this message translates to:
+  /// **'{hours} 小时前'**
+  String screenshot_hours_ago(Object hours);
+
+  /// No description provided for @screenshot_days_ago.
+  ///
+  /// In zh, this message translates to:
+  /// **'{days} 天前'**
+  String screenshot_days_ago(Object days);
+
+  /// No description provided for @screenshot_date_format.
+  ///
+  /// In zh, this message translates to:
+  /// **'{month}月{day}日'**
+  String screenshot_date_format(Object day, Object month);
+
+  /// No description provided for @screenshot_datetime_format.
+  ///
+  /// In zh, this message translates to:
+  /// **'{year}年{month}月{day}日 {hour}:{minute}:{second}'**
+  String screenshot_datetime_format(
+    Object day,
+    Object hour,
+    Object minute,
+    Object month,
+    Object second,
+    Object year,
+  );
+
+  /// No description provided for @screenshot_type_fullscreen.
+  ///
+  /// In zh, this message translates to:
+  /// **'全屏'**
+  String get screenshot_type_fullscreen;
+
+  /// No description provided for @screenshot_detail_info.
+  ///
+  /// In zh, this message translates to:
+  /// **'详细信息'**
+  String get screenshot_detail_info;
+
+  /// No description provided for @screenshot_info_file_path.
+  ///
+  /// In zh, this message translates to:
+  /// **'文件路径'**
+  String get screenshot_info_file_path;
+
+  /// No description provided for @screenshot_info_file_size.
+  ///
+  /// In zh, this message translates to:
+  /// **'文件大小'**
+  String get screenshot_info_file_size;
+
+  /// No description provided for @screenshot_info_type.
+  ///
+  /// In zh, this message translates to:
+  /// **'截图类型'**
+  String get screenshot_info_type;
+
+  /// No description provided for @screenshot_info_created.
+  ///
+  /// In zh, this message translates to:
+  /// **'创建时间'**
+  String get screenshot_info_created;
+
+  /// No description provided for @screenshot_info_dimensions.
+  ///
+  /// In zh, this message translates to:
+  /// **'图片尺寸'**
+  String get screenshot_info_dimensions;
+
+  /// No description provided for @screenshot_shortcut_edit_pending.
+  ///
+  /// In zh, this message translates to:
+  /// **'快捷键编辑功能待实现：{action}'**
+  String screenshot_shortcut_edit_pending(Object action);
+
+  /// No description provided for @screenshot_editor_title.
+  ///
+  /// In zh, this message translates to:
+  /// **'编辑截图'**
+  String get screenshot_editor_title;
+
+  /// No description provided for @image_editor_pen.
+  ///
+  /// In zh, this message translates to:
+  /// **'画笔'**
+  String get image_editor_pen;
+
+  /// No description provided for @image_editor_rectangle.
+  ///
+  /// In zh, this message translates to:
+  /// **'矩形'**
+  String get image_editor_rectangle;
+
+  /// No description provided for @image_editor_arrow.
+  ///
+  /// In zh, this message translates to:
+  /// **'箭头'**
+  String get image_editor_arrow;
+
+  /// No description provided for @image_editor_text.
+  ///
+  /// In zh, this message translates to:
+  /// **'文字'**
+  String get image_editor_text;
+
+  /// No description provided for @image_editor_mosaic.
+  ///
+  /// In zh, this message translates to:
+  /// **'马赛克'**
+  String get image_editor_mosaic;
 }
 
 class _AppLocalizationsDelegate

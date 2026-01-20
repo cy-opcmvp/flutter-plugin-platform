@@ -125,9 +125,7 @@ class _JsonEditorScreenState extends State<JsonEditorScreen> {
             _buildValidationBar(context),
 
             // JSON 编辑器
-            Expanded(
-              child: _buildEditor(context),
-            ),
+            Expanded(child: _buildEditor(context)),
 
             // 底部操作栏
             _buildBottomBar(context, l10n),
@@ -158,8 +156,8 @@ class _JsonEditorScreenState extends State<JsonEditorScreen> {
                 child: Text(
                   widget.configDescription!,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSecondaryContainer,
-                      ),
+                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                  ),
                 ),
               ),
             ],
@@ -194,12 +192,13 @@ class _JsonEditorScreenState extends State<JsonEditorScreen> {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              _validationResult!.errorMessage ?? (isValid ? 'Valid JSON' : 'Invalid JSON'),
+              _validationResult!.errorMessage ??
+                  (isValid ? 'Valid JSON' : 'Invalid JSON'),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: isValid
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.error,
-                  ),
+                color: isValid
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.error,
+              ),
             ),
           ),
         ],
@@ -283,7 +282,10 @@ class _JsonEditorScreenState extends State<JsonEditorScreen> {
           const SizedBox(width: 8),
           // 保存按钮
           FilledButton(
-            onPressed: _isValidating || _isSaving || !(_validationResult?.isValid ?? false)
+            onPressed:
+                _isValidating ||
+                    _isSaving ||
+                    !(_validationResult?.isValid ?? false)
                 ? null
                 : _saveJson,
             child: _isSaving
@@ -344,7 +346,9 @@ class _JsonEditorScreenState extends State<JsonEditorScreen> {
         SnackBar(
           content: Text(_validationResult.toString()),
           duration: const Duration(seconds: 3),
-          backgroundColor: _validationResult!.isValid ? Colors.green : Colors.red,
+          backgroundColor: _validationResult!.isValid
+              ? Colors.green
+              : Colors.red,
         ),
       );
     }
@@ -460,7 +464,9 @@ class _JsonEditorScreenState extends State<JsonEditorScreen> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(AppLocalizations.of(context)!.json_editor_save_failed),
+              content: Text(
+                AppLocalizations.of(context)!.json_editor_save_failed,
+              ),
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );

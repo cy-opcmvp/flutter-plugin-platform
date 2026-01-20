@@ -35,7 +35,7 @@ class ExecutablePluginHelper {
   /// Handle process signals from host
   static Future<void> _handleProcessSignal(HostEvent event) async {
     final signal = event.data['signal'] as String;
-    
+
     switch (signal) {
       case 'SIGTERM':
       case 'SIGINT':
@@ -56,7 +56,7 @@ class ExecutablePluginHelper {
     final resourceType = event.data['resourceType'] as String;
     final currentUsage = event.data['currentUsage'] as num;
     final limit = event.data['limit'] as num;
-    
+
     await PluginSDK.logWarning(
       'Resource limit warning: $resourceType usage at ${(currentUsage / limit * 100).toStringAsFixed(1)}%',
       {
@@ -73,16 +73,13 @@ class ExecutablePluginHelper {
     required int memoryUsageMB,
     Map<String, dynamic>? additionalMetrics,
   }) async {
-    await PluginSDK.callHostAPI<void>(
-      'reportProcessMetrics',
-      {
-        'pluginId': PluginSDK.instance.pluginId,
-        'cpuUsage': cpuUsage,
-        'memoryUsageMB': memoryUsageMB,
-        'timestamp': DateTime.now().toIso8601String(),
-        ...?additionalMetrics,
-      },
-    );
+    await PluginSDK.callHostAPI<void>('reportProcessMetrics', {
+      'pluginId': PluginSDK.instance.pluginId,
+      'cpuUsage': cpuUsage,
+      'memoryUsageMB': memoryUsageMB,
+      'timestamp': DateTime.now().toIso8601String(),
+      ...?additionalMetrics,
+    });
   }
 }
 
@@ -118,7 +115,7 @@ class WebPluginHelper {
   /// Handle WebView ready event
   static Future<void> _handleWebViewReady(HostEvent event) async {
     await PluginSDK.logInfo('WebView container ready');
-    
+
     // Inject plugin bridge script
     await injectBridgeScript();
   }
@@ -127,22 +124,18 @@ class WebPluginHelper {
   static Future<void> _handleNavigationBlocked(HostEvent event) async {
     final blockedUrl = event.data['url'] as String;
     final reason = event.data['reason'] as String;
-    
-    await PluginSDK.logWarning(
-      'Navigation blocked: $blockedUrl',
-      {'reason': reason},
-    );
+
+    await PluginSDK.logWarning('Navigation blocked: $blockedUrl', {
+      'reason': reason,
+    });
   }
 
   /// Handle security violations
   static Future<void> _handleSecurityViolation(HostEvent event) async {
     final violationType = event.data['type'] as String;
     final details = event.data['details'] as Map<String, dynamic>;
-    
-    await PluginSDK.logError(
-      'Security violation: $violationType',
-      details,
-    );
+
+    await PluginSDK.logError('Security violation: $violationType', details);
   }
 
   /// Inject JavaScript bridge for host communication
@@ -187,32 +180,23 @@ class WebPluginHelper {
       };
     ''';
 
-    await PluginSDK.callHostAPI<void>(
-      'injectScript',
-      {'script': bridgeScript},
-    );
+    await PluginSDK.callHostAPI<void>('injectScript', {'script': bridgeScript});
   }
 
   /// Navigate to a new URL within the plugin
   static Future<void> navigate(String url) async {
-    await PluginSDK.callHostAPI<void>(
-      'navigateWebView',
-      {
-        'pluginId': PluginSDK.instance.pluginId,
-        'url': url,
-      },
-    );
+    await PluginSDK.callHostAPI<void>('navigateWebView', {
+      'pluginId': PluginSDK.instance.pluginId,
+      'url': url,
+    });
   }
 
   /// Update WebView security policy
   static Future<void> updateSecurityPolicy(Map<String, dynamic> policy) async {
-    await PluginSDK.callHostAPI<void>(
-      'updateWebViewSecurityPolicy',
-      {
-        'pluginId': PluginSDK.instance.pluginId,
-        'policy': policy,
-      },
-    );
+    await PluginSDK.callHostAPI<void>('updateWebViewSecurityPolicy', {
+      'pluginId': PluginSDK.instance.pluginId,
+      'policy': policy,
+    });
   }
 }
 
@@ -255,7 +239,7 @@ class ContainerPluginHelper {
   static Future<void> _handleContainerStopped(HostEvent event) async {
     final containerId = event.data['containerId'] as String;
     final exitCode = event.data['exitCode'] as int;
-    
+
     await PluginSDK.logInfo(
       'Container stopped: $containerId (exit code: $exitCode)',
     );
@@ -265,7 +249,7 @@ class ContainerPluginHelper {
   static Future<void> _handleHealthCheck(HostEvent event) async {
     // Perform health check and report status
     final healthStatus = await performHealthCheck();
-    
+
     await PluginSDK.sendEvent('health_check_response', {
       'pluginId': PluginSDK.instance.pluginId,
       'status': healthStatus['status'],
@@ -289,27 +273,20 @@ class ContainerPluginHelper {
     } catch (e) {
       return {
         'status': 'unhealthy',
-        'details': {
-          'error': e.toString(),
-        },
+        'details': {'error': e.toString()},
       };
     }
   }
 
   /// Get container logs
-  static Future<List<String>> getLogs({
-    int? lines,
-    DateTime? since,
-  }) async {
-    final result = await PluginSDK.callHostAPI<List<dynamic>>(
-      'getContainerLogs',
-      {
-        'pluginId': PluginSDK.instance.pluginId,
-        'lines': lines,
-        'since': since?.toIso8601String(),
-      },
-    );
-    
+  static Future<List<String>> getLogs({int? lines, DateTime? since}) async {
+    final result =
+        await PluginSDK.callHostAPI<List<dynamic>>('getContainerLogs', {
+          'pluginId': PluginSDK.instance.pluginId,
+          'lines': lines,
+          'since': since?.toIso8601String(),
+        });
+
     return result.cast<String>();
   }
 
@@ -338,7 +315,7 @@ class PluginConfigHelper {
     try {
       final config = await PluginSDK.getPluginConfig();
       final value = config[key];
-      
+
       if (value is T) {
         return value;
       } else if (value != null) {
@@ -355,7 +332,7 @@ class PluginConfigHelper {
           }
         }
       }
-      
+
       return defaultValue;
     } catch (e) {
       await PluginSDK.logWarning('Failed to get config for key $key: $e');
@@ -365,27 +342,24 @@ class PluginConfigHelper {
 
   /// Set configuration value
   static Future<void> setConfig(String key, dynamic value) async {
-    await PluginSDK.callHostAPI<void>(
-      'setPluginConfig',
-      {
-        'pluginId': PluginSDK.instance.pluginId,
-        'key': key,
-        'value': value,
-      },
-    );
+    await PluginSDK.callHostAPI<void>('setPluginConfig', {
+      'pluginId': PluginSDK.instance.pluginId,
+      'key': key,
+      'value': value,
+    });
   }
 
   /// Get all configuration as typed map
   static Future<Map<String, T>> getTypedConfig<T>() async {
     final config = await PluginSDK.getPluginConfig();
     final typedConfig = <String, T>{};
-    
+
     for (final entry in config.entries) {
       if (entry.value is T) {
         typedConfig[entry.key] = entry.value as T;
       }
     }
-    
+
     return typedConfig;
   }
 }
@@ -404,23 +378,23 @@ class PluginLifecycleHelper {
     if (onInitialize != null) {
       PluginSDK.onHostEvent('plugin_initialize', (_) async => onInitialize());
     }
-    
+
     if (onStart != null) {
       PluginSDK.onHostEvent('plugin_start', (_) async => onStart());
     }
-    
+
     if (onPause != null) {
       PluginSDK.onHostEvent('plugin_pause', (_) async => onPause());
     }
-    
+
     if (onResume != null) {
       PluginSDK.onHostEvent('plugin_resume', (_) async => onResume());
     }
-    
+
     if (onStop != null) {
       PluginSDK.onHostEvent('plugin_stop', (_) async => onStop());
     }
-    
+
     if (onDestroy != null) {
       PluginSDK.onHostEvent('plugin_destroy', (_) async => onDestroy());
     }
@@ -431,7 +405,7 @@ class PluginLifecycleHelper {
     await PluginSDK.updateStatus(PluginState.active, {
       'readyTime': DateTime.now().toIso8601String(),
     });
-    
+
     await PluginSDK.sendEvent('plugin_ready', {
       'pluginId': PluginSDK.instance.pluginId,
       'timestamp': DateTime.now().toIso8601String(),
@@ -440,7 +414,7 @@ class PluginLifecycleHelper {
 
   /// Report plugin error
   static Future<void> reportError(
-    String error, 
+    String error,
     Map<String, dynamic>? context,
   ) async {
     await PluginSDK.updateStatus(PluginState.error, {
@@ -448,18 +422,18 @@ class PluginLifecycleHelper {
       'context': context ?? {},
       'errorTime': DateTime.now().toIso8601String(),
     });
-    
+
     await PluginSDK.logError('Plugin error: $error', context);
   }
 
   /// Graceful shutdown
   static Future<void> gracefulShutdown() async {
     await PluginSDK.logInfo('Initiating graceful shutdown');
-    
+
     await PluginSDK.updateStatus(PluginState.inactive, {
       'shutdownTime': DateTime.now().toIso8601String(),
     });
-    
+
     await PluginSDK.shutdown();
   }
 }

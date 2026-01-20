@@ -1,7 +1,5 @@
 library;
 
-import 'package:flutter/foundation.dart';
-
 /// 截图插件配置
 ///
 /// 包含截图插件的所有配置项
@@ -57,7 +55,8 @@ class ScreenshotConfig {
   factory ScreenshotConfig.fromJson(Map<String, dynamic> json) {
     return ScreenshotConfig(
       savePath: json['savePath'] as String? ?? '{documents}/Screenshots',
-      filenameFormat: json['filenameFormat'] as String? ?? 'screenshot_{timestamp}',
+      filenameFormat:
+          json['filenameFormat'] as String? ?? 'screenshot_{timestamp}',
       imageFormat: json['imageFormat'] as String? ?? 'png',
       imageQuality: json['imageQuality'] as int? ?? 95,
       autoCopyToClipboard: json['autoCopyToClipboard'] as bool? ?? true,
@@ -95,18 +94,18 @@ class ScreenshotConfig {
 
   /// 获取默认配置
   static ScreenshotConfig get defaultConfig => ScreenshotConfig(
-        savePath: '{documents}/Screenshots',
-        filenameFormat: 'screenshot_{timestamp}',
-        imageFormat: 'png',
-        imageQuality: 95,
-        autoCopyToClipboard: true,
-        showPreview: true,
-        saveHistory: true,
-        maxHistoryCount: 100,
-        historyRetentionDays: 30,
-        shortcuts: Map<String, String>.from(_defaultShortcuts),
-        pinSettings: PinScreenshotConfig.defaultConfig,
-      );
+    savePath: '{documents}/Screenshots',
+    filenameFormat: 'screenshot_{timestamp}',
+    imageFormat: 'png',
+    imageQuality: 95,
+    autoCopyToClipboard: true,
+    showPreview: true,
+    saveHistory: true,
+    maxHistoryCount: 100,
+    historyRetentionDays: 30,
+    shortcuts: Map<String, String>.from(_defaultShortcuts),
+    pinSettings: PinScreenshotConfig.defaultConfig,
+  );
 
   /// 复制并修改部分配置
   ScreenshotConfig copyWith({

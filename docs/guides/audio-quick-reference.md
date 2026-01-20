@@ -91,7 +91,7 @@
 
 ## 📚 详细文档
 
-完整指南: [WINDOWS_AUDIO_SOLUTION.md](WINDOWS_AUDIO_SOLUTION.md)
+完整指南: [windows-audio-solution.md](windows-audio-solution.md)
 
 ---
 

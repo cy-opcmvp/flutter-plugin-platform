@@ -1,8 +1,5 @@
 library;
 
-import 'dart:convert';
-import 'package:flutter/foundation.dart';
-
 /// 全局应用配置
 ///
 /// 包含应用的所有全局设置，从配置文件读取
@@ -29,9 +26,7 @@ class GlobalConfig {
   /// 从 JSON 创建实例
   factory GlobalConfig.fromJson(Map<String, dynamic> json) {
     return GlobalConfig(
-      app: AppConfig.fromJson(
-        json['app'] as Map<String, dynamic>? ?? {},
-      ),
+      app: AppConfig.fromJson(json['app'] as Map<String, dynamic>? ?? {}),
       features: FeatureConfig.fromJson(
         json['features'] as Map<String, dynamic>? ?? {},
       ),
@@ -269,9 +264,7 @@ class AudioServiceConfig {
   const AudioServiceConfig({required this.enabled});
 
   factory AudioServiceConfig.fromJson(Map<String, dynamic> json) {
-    return AudioServiceConfig(
-      enabled: json['enabled'] as bool? ?? true,
-    );
+    return AudioServiceConfig(enabled: json['enabled'] as bool? ?? true);
   }
 
   Map<String, dynamic> toJson() {
@@ -288,9 +281,7 @@ class NotificationServiceConfig {
   const NotificationServiceConfig({required this.enabled});
 
   factory NotificationServiceConfig.fromJson(Map<String, dynamic> json) {
-    return NotificationServiceConfig(
-      enabled: json['enabled'] as bool? ?? true,
-    );
+    return NotificationServiceConfig(enabled: json['enabled'] as bool? ?? true);
   }
 
   Map<String, dynamic> toJson() {
@@ -321,10 +312,10 @@ class TaskSchedulerServiceConfig {
 
 /// 插件视图模式枚举
 enum PluginViewMode {
-  largeIcon,     // 大图标
-  mediumIcon,    // 中图标（默认）
-  smallIcon,     // 小图标
-  list;          // 列表
+  largeIcon, // 大图标
+  mediumIcon, // 中图标（默认）
+  smallIcon, // 小图标
+  list, // 列表
 }
 
 /// 高级配置

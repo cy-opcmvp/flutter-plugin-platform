@@ -26,12 +26,21 @@ class WorldClockPluginFactory {
         Permission.platformServices,
       ],
       metadata: {
-        'description': l10n?.plugin_worldclock_description ?? '显示多个时区的时间，支持倒计时提醒功能，默认显示北京时间',
+        'description':
+            l10n?.plugin_worldclock_description ??
+            '显示多个时区的时间，支持倒计时提醒功能，默认显示北京时间',
         'author': 'Plugin Platform Team',
         'email': 'support@pluginplatform.com',
         'website': 'https://pluginplatform.com',
         'category': 'productivity',
-        'tags': const ['clock', 'time', 'timezone', 'countdown', 'timer', 'productivity'],
+        'tags': const [
+          'clock',
+          'time',
+          'timezone',
+          'countdown',
+          'timer',
+          'productivity',
+        ],
         'icon': 'access_time',
         'minPlatformVersion': '1.0.0',
         'supportedPlatforms': const ['mobile', 'desktop', 'web'],
@@ -40,9 +49,7 @@ class WorldClockPluginFactory {
         'documentation': 'https://docs.pluginplatform.com/plugins/world-clock',
         'sourceCode': 'https://github.com/pluginplatform/world-clock-plugin',
         'license': 'MIT',
-        'changelog': const {
-          '1.0.0': '初始版本发布 - 支持世界时钟显示和倒计时提醒功能',
-        },
+        'changelog': const {'1.0.0': '初始版本发布 - 支持世界时钟显示和倒计时提醒功能'},
         'features': const [
           '多时区时间显示',
           '默认北京时间',

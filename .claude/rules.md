@@ -34,7 +34,7 @@
 - ❌ 临时修复脚本（`fix-xxx.ps1`）
 - ❌ 临时文档（`*_FIX.md`）
 - ❌ 实施报告（`FIXES_SUMMARY.md`）
-- ❌ 插件详细文档（`WORLD_CLOCK_IMPLEMENTATION.md`）
+- ❌ 插件详细文档（`world_clock_implementation.md`）
 
 ### 2. 代码规范
 
@@ -80,7 +80,7 @@
 ```
 docs/plugins/{plugin-name}/
 ├── README.md              # 插件概述
-├── IMPLEMENTATION.md      # 实现文档
+├── implementation.md      # 实现文档
 └── UPDATE_v{version}.md  # 版本更新说明
 ```
 

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import '../interfaces/i_plugin.dart';
 import '../interfaces/i_plugin_manager.dart';
 import '../models/plugin_models.dart';
@@ -7,18 +8,18 @@ import '../models/plugin_models.dart';
 /// Implements requirements 1.2, 1.4 for plugin launching and state preservation
 class PluginLauncher {
   final IPluginManager _pluginManager;
-  
+
   // Currently active plugin
   IPlugin? _currentPlugin;
-  
+
   // Plugin state storage for background plugins
   final Map<String, Map<String, dynamic>> _pluginStates = {};
-  
+
   // Background plugins that are loaded but not currently active
   final Map<String, IPlugin> _backgroundPlugins = {};
-  
+
   // Event stream for plugin switching events
-  final StreamController<PluginLaunchEvent> _eventController = 
+  final StreamController<PluginLaunchEvent> _eventController =
       StreamController<PluginLaunchEvent>.broadcast();
 
   PluginLauncher(this._pluginManager);
@@ -27,7 +28,8 @@ class PluginLauncher {
   IPlugin? get currentPlugin => _currentPlugin;
 
   /// All background plugins
-  Map<String, IPlugin> get backgroundPlugins => Map.unmodifiable(_backgroundPlugins);
+  Map<String, IPlugin> get backgroundPlugins =>
+      Map.unmodifiable(_backgroundPlugins);
 
   /// Stream of plugin launch events
   Stream<PluginLaunchEvent> get eventStream => _eventController.stream;
@@ -49,7 +51,7 @@ class PluginLauncher {
 
       // Load the new plugin
       final plugin = await _pluginManager.loadPlugin(descriptor);
-      
+
       // Set as current plugin
       _currentPlugin = plugin;
 
@@ -57,20 +59,24 @@ class PluginLauncher {
       await _restorePluginState(plugin);
 
       // Emit launch event
-      _eventController.add(PluginLaunchEvent(
-        type: PluginLaunchEventType.launched,
-        pluginId: plugin.id,
-        timestamp: DateTime.now(),
-      ));
+      _eventController.add(
+        PluginLaunchEvent(
+          type: PluginLaunchEventType.launched,
+          pluginId: plugin.id,
+          timestamp: DateTime.now(),
+        ),
+      );
 
       return plugin;
     } catch (e) {
-      _eventController.add(PluginLaunchEvent(
-        type: PluginLaunchEventType.launchFailed,
-        pluginId: descriptor.id,
-        timestamp: DateTime.now(),
-        error: e.toString(),
-      ));
+      _eventController.add(
+        PluginLaunchEvent(
+          type: PluginLaunchEventType.launchFailed,
+          pluginId: descriptor.id,
+          timestamp: DateTime.now(),
+          error: e.toString(),
+        ),
+      );
       rethrow;
     }
   }
@@ -104,20 +110,24 @@ class PluginLauncher {
       await _restorePluginState(_currentPlugin!);
 
       // Emit switch event
-      _eventController.add(PluginLaunchEvent(
-        type: PluginLaunchEventType.switched,
-        pluginId: pluginId,
-        timestamp: DateTime.now(),
-      ));
+      _eventController.add(
+        PluginLaunchEvent(
+          type: PluginLaunchEventType.switched,
+          pluginId: pluginId,
+          timestamp: DateTime.now(),
+        ),
+      );
 
       return _currentPlugin!;
     } catch (e) {
-      _eventController.add(PluginLaunchEvent(
-        type: PluginLaunchEventType.switchFailed,
-        pluginId: pluginId,
-        timestamp: DateTime.now(),
-        error: e.toString(),
-      ));
+      _eventController.add(
+        PluginLaunchEvent(
+          type: PluginLaunchEventType.switchFailed,
+          pluginId: pluginId,
+          timestamp: DateTime.now(),
+          error: e.toString(),
+        ),
+      );
       rethrow;
     }
   }
@@ -137,31 +147,36 @@ class PluginLauncher {
 
       // Unload the current plugin
       await _pluginManager.unloadPlugin(_currentPlugin!.id);
-      
+
       // Remove from background plugins if it exists there
       _backgroundPlugins.remove(closingPluginId);
-      
+
       // Clear current plugin
       _currentPlugin = null;
 
       // Switch to another plugin if requested
-      if (switchToPluginId != null && _backgroundPlugins.containsKey(switchToPluginId)) {
+      if (switchToPluginId != null &&
+          _backgroundPlugins.containsKey(switchToPluginId)) {
         await _switchToPlugin(switchToPluginId);
       }
 
       // Emit close event
-      _eventController.add(PluginLaunchEvent(
-        type: PluginLaunchEventType.closed,
-        pluginId: closingPluginId,
-        timestamp: DateTime.now(),
-      ));
+      _eventController.add(
+        PluginLaunchEvent(
+          type: PluginLaunchEventType.closed,
+          pluginId: closingPluginId,
+          timestamp: DateTime.now(),
+        ),
+      );
     } catch (e) {
-      _eventController.add(PluginLaunchEvent(
-        type: PluginLaunchEventType.closeFailed,
-        pluginId: _currentPlugin?.id ?? 'unknown',
-        timestamp: DateTime.now(),
-        error: e.toString(),
-      ));
+      _eventController.add(
+        PluginLaunchEvent(
+          type: PluginLaunchEventType.closeFailed,
+          pluginId: _currentPlugin?.id ?? 'unknown',
+          timestamp: DateTime.now(),
+          error: e.toString(),
+        ),
+      );
       rethrow;
     }
   }
@@ -181,20 +196,24 @@ class PluginLauncher {
       await _moveCurrentToBackground();
 
       // Emit pause event
-      _eventController.add(PluginLaunchEvent(
-        type: PluginLaunchEventType.paused,
-        pluginId: _currentPlugin!.id,
-        timestamp: DateTime.now(),
-      ));
+      _eventController.add(
+        PluginLaunchEvent(
+          type: PluginLaunchEventType.paused,
+          pluginId: _currentPlugin!.id,
+          timestamp: DateTime.now(),
+        ),
+      );
 
       _currentPlugin = null;
     } catch (e) {
-      _eventController.add(PluginLaunchEvent(
-        type: PluginLaunchEventType.pauseFailed,
-        pluginId: _currentPlugin?.id ?? 'unknown',
-        timestamp: DateTime.now(),
-        error: e.toString(),
-      ));
+      _eventController.add(
+        PluginLaunchEvent(
+          type: PluginLaunchEventType.pauseFailed,
+          pluginId: _currentPlugin?.id ?? 'unknown',
+          timestamp: DateTime.now(),
+          error: e.toString(),
+        ),
+      );
       rethrow;
     }
   }
@@ -211,7 +230,8 @@ class PluginLauncher {
 
   /// Check if a plugin is currently loaded (active or background)
   bool isPluginLoaded(String pluginId) {
-    return (_currentPlugin?.id == pluginId) || _backgroundPlugins.containsKey(pluginId);
+    return (_currentPlugin?.id == pluginId) ||
+        _backgroundPlugins.containsKey(pluginId);
   }
 
   /// Get plugin state for a specific plugin
@@ -229,12 +249,12 @@ class PluginLauncher {
     try {
       final state = await _currentPlugin!.getState();
       _pluginStates[_currentPlugin!.id] = state;
-      
+
       // Also notify plugin of state change
       await _currentPlugin!.onStateChanged(PluginState.paused);
     } catch (e) {
       // Log error but don't fail the operation
-      print('Failed to save plugin state for ${_currentPlugin!.id}: $e');
+      debugPrint('Failed to save plugin state for ${_currentPlugin!.id}: $e');
     }
   }
 
@@ -249,7 +269,7 @@ class PluginLauncher {
       }
     } catch (e) {
       // Log error but don't fail the operation
-      print('Failed to restore plugin state for ${plugin.id}: $e');
+      debugPrint('Failed to restore plugin state for ${plugin.id}: $e');
     }
   }
 
@@ -262,12 +282,14 @@ class PluginLauncher {
     try {
       // Notify plugin it's being paused
       await _currentPlugin!.onStateChanged(PluginState.paused);
-      
+
       // Move to background
       _backgroundPlugins[_currentPlugin!.id] = _currentPlugin!;
     } catch (e) {
       // Log error but continue
-      print('Failed to move plugin ${_currentPlugin!.id} to background: $e');
+      debugPrint(
+        'Failed to move plugin ${_currentPlugin!.id} to background: $e',
+      );
     }
   }
 
@@ -283,14 +305,16 @@ class PluginLauncher {
         final state = await plugin.getState();
         _pluginStates[plugin.id] = state;
       } catch (e) {
-        print('Failed to save state for background plugin ${plugin.id}: $e');
+        debugPrint(
+          'Failed to save state for background plugin ${plugin.id}: $e',
+        );
       }
     }
 
     // Clear all references
     _currentPlugin = null;
     _backgroundPlugins.clear();
-    
+
     // Close event stream
     await _eventController.close();
   }

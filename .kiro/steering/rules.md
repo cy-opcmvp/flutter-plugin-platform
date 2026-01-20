@@ -76,7 +76,7 @@
 ```
 docs/plugins/{plugin-name}/
 ├── README.md              # 插件概述
-├── IMPLEMENTATION.md      # 实现文档
+├── implementation.md      # 实现文档
 └── UPDATE_v{version}.md  # 版本更新说明
 ```
 

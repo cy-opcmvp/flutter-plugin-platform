@@ -69,24 +69,27 @@ class ResourceUsage {
   /// Check if usage exceeds limits
   bool exceedsLimits(ResourceLimits limits) {
     final executionTime = DateTime.now().difference(startTime);
-    
+
     return memoryUsageMB > limits.maxMemoryMB ||
-           cpuTimeMs > limits.maxCpuTimeMs ||
-           networkRequests > limits.maxNetworkRequests ||
-           fileOperations > limits.maxFileOperations ||
-           executionTime > limits.maxExecutionTime;
+        cpuTimeMs > limits.maxCpuTimeMs ||
+        networkRequests > limits.maxNetworkRequests ||
+        fileOperations > limits.maxFileOperations ||
+        executionTime > limits.maxExecutionTime;
   }
 
   /// Get usage as percentage of limits
   Map<String, double> getUsagePercentages(ResourceLimits limits) {
     final executionTime = DateTime.now().difference(startTime);
-    
+
     return {
       'memory': (memoryUsageMB / limits.maxMemoryMB) * 100,
       'cpu': (cpuTimeMs / limits.maxCpuTimeMs) * 100,
       'network': (networkRequests / limits.maxNetworkRequests) * 100,
       'fileOps': (fileOperations / limits.maxFileOperations) * 100,
-      'time': (executionTime.inMilliseconds / limits.maxExecutionTime.inMilliseconds) * 100,
+      'time':
+          (executionTime.inMilliseconds /
+              limits.maxExecutionTime.inMilliseconds) *
+          100,
     };
   }
 
@@ -107,7 +110,7 @@ enum SecurityViolationType {
   resourceLimitExceeded,
   maliciousActivity,
   invalidOperation,
-  sandboxEscape
+  sandboxEscape,
 }
 
 /// Security violation record
@@ -144,8 +147,9 @@ class PluginSandbox {
   final ResourceLimits limits;
   final ResourceUsage _usage = ResourceUsage();
   final List<SecurityViolation> _violations = [];
-  final StreamController<SecurityViolation> _violationController = StreamController<SecurityViolation>.broadcast();
-  
+  final StreamController<SecurityViolation> _violationController =
+      StreamController<SecurityViolation>.broadcast();
+
   bool _isActive = false;
   Timer? _resourceMonitor;
 
@@ -170,25 +174,29 @@ class PluginSandbox {
   /// Start the sandbox
   void start() {
     if (_isActive) return;
-    
+
     _isActive = true;
     _usage.startTime = DateTime.now();
-    
+
     // Start resource monitoring
-    _resourceMonitor = Timer.periodic(const Duration(seconds: 1), _monitorResources);
+    _resourceMonitor = Timer.periodic(
+      const Duration(seconds: 1),
+      _monitorResources,
+    );
   }
 
   /// Stop the sandbox
   void stop() {
     if (!_isActive) return;
-    
+
     _isActive = false;
     _resourceMonitor?.cancel();
     _resourceMonitor = null;
   }
 
   /// Execute operation within sandbox with permission and resource checks
-  Future<T> executeInSandbox<T>(Future<T> Function() operation, {
+  Future<T> executeInSandbox<T>(
+    Future<T> Function() operation, {
     Permission? requiredPermission,
     String? operationDescription,
   }) async {
@@ -200,7 +208,8 @@ class PluginSandbox {
     if (requiredPermission != null && !hasPermission(requiredPermission)) {
       final violation = SecurityViolation(
         type: SecurityViolationType.unauthorizedPermission,
-        description: 'Plugin attempted to use ${requiredPermission.name} without permission',
+        description:
+            'Plugin attempted to use ${requiredPermission.name} without permission',
         timestamp: DateTime.now(),
         pluginId: pluginId,
         details: {
@@ -209,7 +218,10 @@ class PluginSandbox {
         },
       );
       _recordViolation(violation);
-      throw SandboxException('Permission ${requiredPermission.name} not granted', pluginId);
+      throw SandboxException(
+        'Permission ${requiredPermission.name} not granted',
+        pluginId,
+      );
     }
 
     // Check resource limits before execution
@@ -238,24 +250,26 @@ class PluginSandbox {
       final startTime = DateTime.now();
       final result = await operation();
       final executionTime = DateTime.now().difference(startTime);
-      
+
       // Update resource usage
       _usage.cpuTimeMs += executionTime.inMilliseconds;
-      
+
       // Track specific operation types
       if (requiredPermission == Permission.networkAccess) {
         _usage.networkRequests++;
       } else if (requiredPermission == Permission.fileAccess) {
         _usage.fileOperations++;
       }
-      
+
       return result;
     } catch (e) {
       // Log potential security issues
-      if (e.toString().contains('security') || e.toString().contains('unauthorized')) {
+      if (e.toString().contains('security') ||
+          e.toString().contains('unauthorized')) {
         final violation = SecurityViolation(
           type: SecurityViolationType.maliciousActivity,
-          description: 'Potential security violation during operation execution',
+          description:
+              'Potential security violation during operation execution',
           timestamp: DateTime.now(),
           pluginId: pluginId,
           details: {
@@ -278,7 +292,7 @@ class PluginSandbox {
   bool validateOperation(String operation, Map<String, dynamic> parameters) {
     // Basic operation validation
     if (operation.isEmpty) return false;
-    
+
     // Check for potentially dangerous operations
     final dangerousOperations = [
       'eval',
@@ -289,22 +303,21 @@ class PluginSandbox {
       'file_write_system',
       'network_raw_socket',
     ];
-    
-    if (dangerousOperations.any((dangerous) => operation.toLowerCase().contains(dangerous))) {
+
+    if (dangerousOperations.any(
+      (dangerous) => operation.toLowerCase().contains(dangerous),
+    )) {
       final violation = SecurityViolation(
         type: SecurityViolationType.maliciousActivity,
         description: 'Plugin attempted dangerous operation: $operation',
         timestamp: DateTime.now(),
         pluginId: pluginId,
-        details: {
-          'operation': operation,
-          'parameters': parameters,
-        },
+        details: {'operation': operation, 'parameters': parameters},
       );
       _recordViolation(violation);
       return false;
     }
-    
+
     return true;
   }
 
@@ -317,7 +330,7 @@ class PluginSandbox {
 
     // Simulate memory usage tracking (in a real implementation, this would use actual metrics)
     _usage.memoryUsageMB = _simulateMemoryUsage();
-    
+
     // Check if limits are exceeded
     if (_usage.exceedsLimits(limits)) {
       final violation = SecurityViolation(
@@ -331,7 +344,7 @@ class PluginSandbox {
         },
       );
       _recordViolation(violation);
-      
+
       // Force stop the sandbox
       stop();
     }
@@ -363,7 +376,8 @@ class PluginSandbox {
 class PermissionManager {
   final Map<String, Set<Permission>> _pluginPermissions = {};
   final Map<Permission, List<String>> _permissionRequests = {};
-  final StreamController<PermissionEvent> _eventController = StreamController<PermissionEvent>.broadcast();
+  final StreamController<PermissionEvent> _eventController =
+      StreamController<PermissionEvent>.broadcast();
 
   /// Stream of permission events
   Stream<PermissionEvent> get eventStream => _eventController.stream;
@@ -372,14 +386,16 @@ class PermissionManager {
   void grantPermissions(String pluginId, Set<Permission> permissions) {
     _pluginPermissions.putIfAbsent(pluginId, () => <Permission>{});
     _pluginPermissions[pluginId]!.addAll(permissions);
-    
+
     for (final permission in permissions) {
-      _eventController.add(PermissionEvent(
-        pluginId: pluginId,
-        permission: permission,
-        granted: true,
-        timestamp: DateTime.now(),
-      ));
+      _eventController.add(
+        PermissionEvent(
+          pluginId: pluginId,
+          permission: permission,
+          granted: true,
+          timestamp: DateTime.now(),
+        ),
+      );
     }
   }
 
@@ -388,14 +404,16 @@ class PermissionManager {
     final currentPermissions = _pluginPermissions[pluginId];
     if (currentPermissions != null) {
       currentPermissions.removeAll(permissions);
-      
+
       for (final permission in permissions) {
-        _eventController.add(PermissionEvent(
-          pluginId: pluginId,
-          permission: permission,
-          granted: false,
-          timestamp: DateTime.now(),
-        ));
+        _eventController.add(
+          PermissionEvent(
+            pluginId: pluginId,
+            permission: permission,
+            granted: false,
+            timestamp: DateTime.now(),
+          ),
+        );
       }
     }
   }
@@ -414,15 +432,15 @@ class PermissionManager {
   Future<bool> requestPermission(String pluginId, Permission permission) async {
     // Add to request queue
     _permissionRequests.putIfAbsent(permission, () => []).add(pluginId);
-    
+
     // In a real implementation, this would show a user dialog
     // For now, we'll auto-grant based on permission type
     final shouldGrant = _shouldAutoGrant(permission);
-    
+
     if (shouldGrant) {
       grantPermissions(pluginId, {permission});
     }
-    
+
     return shouldGrant;
   }
 
@@ -460,7 +478,7 @@ class PermissionManager {
   /// Remove all permissions for a plugin
   void removePlugin(String pluginId) {
     _pluginPermissions.remove(pluginId);
-    
+
     // Remove from request queues
     for (final requests in _permissionRequests.values) {
       requests.removeWhere((id) => id == pluginId);

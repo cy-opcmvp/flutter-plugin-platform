@@ -16,11 +16,7 @@ enum ScreenshotType {
 }
 
 /// 图片格式枚举
-enum ImageFormat {
-  png,
-  jpeg,
-  webp,
-}
+enum ImageFormat { png, jpeg, webp }
 
 /// 截图记录模型
 class ScreenshotRecord {
@@ -200,12 +196,7 @@ class Rect {
   double get bottom => top + height;
 
   Map<String, dynamic> toJson() {
-    return {
-      'left': left,
-      'top': top,
-      'width': width,
-      'height': height,
-    };
+    return {'left': left, 'top': top, 'width': width, 'height': height};
   }
 
   factory Rect.fromJson(Map<String, dynamic> json) {

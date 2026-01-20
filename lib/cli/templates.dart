@@ -1,25 +1,29 @@
-
-
 /// Template system for generating plugin project files
 class PluginTemplates {
   /// Get template content for a specific file type and language
-  static String getTemplate(String templateName, Map<String, String> variables) {
+  static String getTemplate(
+    String templateName,
+    Map<String, String> variables,
+  ) {
     final template = _templates[templateName];
     if (template == null) {
       throw ArgumentError('Template not found: $templateName');
     }
-    
+
     return _replaceVariables(template, variables);
   }
 
   /// Replace template variables with actual values
-  static String _replaceVariables(String template, Map<String, String> variables) {
+  static String _replaceVariables(
+    String template,
+    Map<String, String> variables,
+  ) {
     String result = template;
-    
+
     for (final entry in variables.entries) {
       result = result.replaceAll('{{${entry.key}}}', entry.value);
     }
-    
+
     return result;
   }
 

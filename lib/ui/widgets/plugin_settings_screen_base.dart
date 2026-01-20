@@ -58,7 +58,8 @@ abstract class PluginSettingsScreen<T extends Object, S extends Object>
   });
 
   @override
-  State<PluginSettingsScreen<T, S>> createState() => _PluginSettingsScreenState<T, S>();
+  State<PluginSettingsScreen<T, S>> createState() =>
+      _PluginSettingsScreenState<T, S>();
 }
 
 class _PluginSettingsScreenState<T extends Object, S extends Object>
@@ -146,16 +147,9 @@ class _PluginSettingsScreenState<T extends Object, S extends Object>
   }) {
     return SwitchListTile(
       secondary: secondary,
-      title: Text(
-        title,
-        overflow: TextOverflow.ellipsis,
-      ),
+      title: Text(title, overflow: TextOverflow.ellipsis),
       subtitle: subtitle != null
-          ? Text(
-              subtitle,
-              overflow: TextOverflow.ellipsis,
-              maxLines: 2,
-            )
+          ? Text(subtitle, overflow: TextOverflow.ellipsis, maxLines: 2)
           : null,
       value: value,
       onChanged: (newValue) async {
@@ -178,16 +172,10 @@ class _PluginSettingsScreenState<T extends Object, S extends Object>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
+            Text(title, style: Theme.of(context).textTheme.titleSmall),
             if (subtitle != null) ...[
               const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
+              Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
             ],
             const SizedBox(height: 16),
             SegmentedButton<T>(
@@ -214,16 +202,11 @@ class _PluginSettingsScreenState<T extends Object, S extends Object>
   }) {
     return ListTile(
       leading: leading != null ? Icon(leading) : null,
-      title: Text(
-        title,
-        overflow: TextOverflow.ellipsis,
-      ),
-      subtitle: Text(
-        subtitle,
-        overflow: TextOverflow.ellipsis,
-        maxLines: 2,
-      ),
-      trailing: trailing != null ? Icon(trailing) : const Icon(Icons.chevron_right),
+      title: Text(title, overflow: TextOverflow.ellipsis),
+      subtitle: Text(subtitle, overflow: TextOverflow.ellipsis, maxLines: 2),
+      trailing: trailing != null
+          ? Icon(trailing)
+          : const Icon(Icons.chevron_right),
       onTap: onTap,
       contentPadding: EdgeInsets.zero,
     );
@@ -247,10 +230,7 @@ class _PluginSettingsScreenState<T extends Object, S extends Object>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
+            Text(title, style: Theme.of(context).textTheme.titleSmall),
             const SizedBox(height: 8),
             Row(
               children: [

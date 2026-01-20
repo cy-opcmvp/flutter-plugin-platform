@@ -36,16 +36,18 @@ class WorldClockItem {
       // 12小时制
       final period = hour >= 12 ? 'PM' : 'AM';
       final displayHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
-      timeStr = '${displayHour.toString().padLeft(2, '0')}:'
-                '${minute.toString().padLeft(2, '0')}';
+      timeStr =
+          '${displayHour.toString().padLeft(2, '0')}:'
+          '${minute.toString().padLeft(2, '0')}';
       if (showSeconds) {
         timeStr += ':${second.toString().padLeft(2, '0')}';
       }
       timeStr += ' $period';
     } else {
       // 24小时制
-      timeStr = '${hour.toString().padLeft(2, '0')}:'
-               '${minute.toString().padLeft(2, '0')}';
+      timeStr =
+          '${hour.toString().padLeft(2, '0')}:'
+          '${minute.toString().padLeft(2, '0')}';
       if (showSeconds) {
         timeStr += ':${second.toString().padLeft(2, '0')}';
       }
@@ -140,36 +142,36 @@ class CountdownTimer {
   /// 获取剩余时间
   Duration get remainingTime {
     if (isCompleted) return Duration.zero;
-    
+
     final now = DateTime.now();
     if (endTime.isBefore(now)) {
       return Duration.zero;
     }
-    
+
     return endTime.difference(now);
   }
 
   /// 获取格式化的剩余时间字符串
   String get formattedRemainingTime {
     final remaining = remainingTime;
-    
+
     if (remaining == Duration.zero) {
       return '00:00:00';
     }
-    
+
     final hours = remaining.inHours;
     final minutes = remaining.inMinutes % 60;
     final seconds = remaining.inSeconds % 60;
-    
+
     return '${hours.toString().padLeft(2, '0')}:'
-           '${minutes.toString().padLeft(2, '0')}:'
-           '${seconds.toString().padLeft(2, '0')}';
+        '${minutes.toString().padLeft(2, '0')}:'
+        '${seconds.toString().padLeft(2, '0')}';
   }
 
   /// 获取进度百分比 (0.0 - 1.0)
   double getProgress(Duration originalDuration) {
     if (isCompleted) return 1.0;
-    
+
     final elapsed = originalDuration - remainingTime;
     return elapsed.inMilliseconds / originalDuration.inMilliseconds;
   }

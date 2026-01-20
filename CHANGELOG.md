@@ -395,7 +395,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 📝 统一文档示例与插件ID验证规则
 
 ### Documentation
-- [世界时钟实现文档](docs/plugins/world-clock/IMPLEMENTATION.md)
+- [世界时钟实现文档](docs/plugins/world-clock/implementation.md)
 - [世界时钟更新说明](docs/plugins/world-clock/UPDATE_v1.1.md)
 - [插件ID修复报告](docs/reports/PLUGIN_ID_FIX_SUMMARY.md)
 - [v0.2.1 发布说明](docs/releases/RELEASE_NOTES_v0.2.1.md)

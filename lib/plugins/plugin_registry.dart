@@ -24,11 +24,16 @@ class ExamplePluginRegistry {
 
   /// Gets all available example plugin descriptors
   static List<PluginDescriptor> getAllDescriptors({BuildContext? context}) {
-    return _factories.values.map((factory) => factory.getDescriptor(context: context)).toList();
+    return _factories.values
+        .map((factory) => factory.getDescriptor(context: context))
+        .toList();
   }
 
   /// Gets a specific plugin descriptor by ID
-  static PluginDescriptor? getDescriptor(String pluginId, {BuildContext? context}) {
+  static PluginDescriptor? getDescriptor(
+    String pluginId, {
+    BuildContext? context,
+  }) {
     final factory = _factories[pluginId];
     return factory?.getDescriptor(context: context);
   }

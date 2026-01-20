@@ -31,8 +31,9 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
   late final TextEditingController _notificationBodyController;
   final TextEditingController _countdownSecondsController =
       TextEditingController(text: '10');
-  final TextEditingController _taskIntervalController =
-      TextEditingController(text: '5');
+  final TextEditingController _taskIntervalController = TextEditingController(
+    text: '5',
+  );
 
   final List<String> _logs = [];
   final ScrollController _logScrollController = ScrollController();
@@ -58,8 +59,10 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final l10n = AppLocalizations.of(context);
       if (l10n != null) {
-        _notificationTitleController.text = l10n.serviceTest_defaultNotificationTitle;
-        _notificationBodyController.text = l10n.serviceTest_defaultNotificationBody;
+        _notificationTitleController.text =
+            l10n.serviceTest_defaultNotificationTitle;
+        _notificationBodyController.text =
+            l10n.serviceTest_defaultNotificationBody;
         _addLog(l10n.serviceTest_serviceTestInitialized);
       }
     });
@@ -87,52 +90,62 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
   }
 
   void _checkPermissions() async {
-    final granted = await PlatformServiceManager.notification.checkPermissions();
+    final granted = await PlatformServiceManager.notification
+        .checkPermissions();
     setState(() {
       _notificationPermissionGranted = granted;
     });
   }
 
   void _setupTaskListeners() {
-    _taskCompleteSubscription = PlatformServiceManager.taskScheduler.onTaskComplete.listen((event) {
-      if (!mounted) return;
+    _taskCompleteSubscription = PlatformServiceManager
+        .taskScheduler
+        .onTaskComplete
+        .listen((event) {
+          if (!mounted) return;
 
-      final l10n = AppLocalizations.of(context);
-      if (l10n != null) {
-        _addLog('✅ ${l10n.serviceTest_taskCompleted}: ${event.taskId}');
-      }
-      _refreshActiveTasks();
-    });
+          final l10n = AppLocalizations.of(context);
+          if (l10n != null) {
+            _addLog('✅ ${l10n.serviceTest_taskCompleted}: ${event.taskId}');
+          }
+          _refreshActiveTasks();
+        });
 
-    _taskFailedSubscription = PlatformServiceManager.taskScheduler.onTaskFailed.listen((event) {
-      if (!mounted) return;
+    _taskFailedSubscription = PlatformServiceManager.taskScheduler.onTaskFailed
+        .listen((event) {
+          if (!mounted) return;
 
-      final l10n = AppLocalizations.of(context);
-      if (l10n != null) {
-        _addLog('❌ ${l10n.serviceTest_taskFailed}: ${event.taskId} - ${event.error}');
-      }
-      _refreshActiveTasks();
-    });
+          final l10n = AppLocalizations.of(context);
+          if (l10n != null) {
+            _addLog(
+              '❌ ${l10n.serviceTest_taskFailed}: ${event.taskId} - ${event.error}',
+            );
+          }
+          _refreshActiveTasks();
+        });
   }
 
   void _setupNotificationListener() {
-    _notificationClickSubscription = PlatformServiceManager.notification.onNotificationClick.listen((event) {
-      // Check if widget is still mounted before using context
-      if (!mounted) return;
+    _notificationClickSubscription = PlatformServiceManager
+        .notification
+        .onNotificationClick
+        .listen((event) {
+          // Check if widget is still mounted before using context
+          if (!mounted) return;
 
-      // On Windows, show notification as SnackBar
-      if (Theme.of(context).platform == TargetPlatform.windows) {
-        final payload = event.payload;
-        if (payload != null && payload.contains('|')) {
-          final parts = payload.split('|');
-          if (parts.length >= 2) {
-            final title = parts[0];
-            final body = parts[1];
-            _showNotificationSnackBar(title, body);
+          // On Windows, show notification as SnackBar
+          if (Theme.of(context).platform == TargetPlatform.windows) {
+            final payload = event.payload;
+            if (payload != null && payload.contains('|')) {
+              final parts = payload.split('|');
+              if (parts.length >= 2) {
+                final title = parts[0];
+                final body = parts[1];
+                _showNotificationSnackBar(title, body);
+              }
+            }
           }
-        }
-      }
-    });
+        });
   }
 
   void _showNotificationSnackBar(String title, String body) {
@@ -148,10 +161,7 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
+            Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 4),
             Text(body),
           ],
@@ -179,7 +189,9 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
 
   void _addLog(String message) {
     setState(() {
-      _logs.add('[${DateTime.now().toIso8601String().substring(11, 19)}] $message');
+      _logs.add(
+        '[${DateTime.now().toIso8601String().substring(11, 19)}] $message',
+      );
     });
 
     // Scroll to bottom
@@ -205,9 +217,18 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
           title: Text(l10n.serviceTest_title),
           bottom: TabBar(
             tabs: [
-              Tab(text: l10n.serviceTest_notifications, icon: const Icon(Icons.notifications)),
-              Tab(text: l10n.serviceTest_audio, icon: const Icon(Icons.volume_up)),
-              Tab(text: l10n.serviceTest_tasks, icon: const Icon(Icons.schedule)),
+              Tab(
+                text: l10n.serviceTest_notifications,
+                icon: const Icon(Icons.notifications),
+              ),
+              Tab(
+                text: l10n.serviceTest_audio,
+                icon: const Icon(Icons.volume_up),
+              ),
+              Tab(
+                text: l10n.serviceTest_tasks,
+                icon: const Icon(Icons.schedule),
+              ),
             ],
           ),
         ),
@@ -363,7 +384,8 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
   }
 
   Widget _buildAudioTab(AppLocalizations l10n) {
-    final audioServiceAvailable = PlatformServiceManager.isServiceAvailable<IAudioService>();
+    final audioServiceAvailable =
+        PlatformServiceManager.isServiceAvailable<IAudioService>();
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -389,7 +411,10 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.info_outline, color: Colors.orange.shade700),
+                          Icon(
+                            Icons.info_outline,
+                            color: Colors.orange.shade700,
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -457,10 +482,19 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                           value: 0.8,
                           divisions: 10,
                           label: '80%',
-                          onChanged: PlatformServiceManager.isServiceAvailable<IAudioService>()
+                          onChanged:
+                              PlatformServiceManager.isServiceAvailable<
+                                IAudioService
+                              >()
                               ? (value) {
-                                  PlatformServiceManager.audio.setGlobalVolume(value);
-                                  _addLog(l10n.serviceTest_volumeSet((value * 100).toInt()));
+                                  PlatformServiceManager.audio.setGlobalVolume(
+                                    value,
+                                  );
+                                  _addLog(
+                                    l10n.serviceTest_volumeSet(
+                                      (value * 100).toInt(),
+                                    ),
+                                  );
                                 }
                               : null,
                         ),
@@ -473,7 +507,8 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
           ),
           const SizedBox(height: 16),
           ElevatedButton.icon(
-            onPressed: PlatformServiceManager.isServiceAvailable<IAudioService>()
+            onPressed:
+                PlatformServiceManager.isServiceAvailable<IAudioService>()
                 ? () {
                     PlatformServiceManager.audio.stopAll();
                     _addLog(l10n.serviceTest_stoppedAllAudio);
@@ -507,16 +542,24 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
         onTap: PlatformServiceManager.isServiceAvailable<IAudioService>()
             ? () async {
                 try {
-                  await PlatformServiceManager.audio.playSystemSound(soundType: soundType);
+                  await PlatformServiceManager.audio.playSystemSound(
+                    soundType: soundType,
+                  );
                   _addLog('✅ ${l10n.serviceTest_copied}: $label');
                 } catch (e) {
                   _addLog('❌ ${l10n.serviceTest_errorPlayingSound}: $e');
-                  _showErrorDialog('${l10n.serviceTest_errorPlayingSound}: $e', l10n);
+                  _showErrorDialog(
+                    '${l10n.serviceTest_errorPlayingSound}: $e',
+                    l10n,
+                  );
                 }
               }
             : () {
                 _addLog('⚠️ ${l10n.serviceTest_audioServiceUnavailable}');
-                _showErrorDialog(l10n.serviceTest_audioServiceNotAvailable, l10n);
+                _showErrorDialog(
+                  l10n.serviceTest_audioServiceNotAvailable,
+                  l10n,
+                );
               },
       ),
     );
@@ -545,7 +588,9 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                       ),
                       if (_activeCountdown != null)
                         Chip(
-                          label: Text('$_activeCountdown ${l10n.serviceTest_seconds}'),
+                          label: Text(
+                            '$_activeCountdown ${l10n.serviceTest_seconds}',
+                          ),
                           backgroundColor: Colors.blue.shade100,
                         ),
                     ],
@@ -675,23 +720,28 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                       child: Text(l10n.serviceTest_noActiveTasks),
                     )
                   else
-                    ..._activeTasks.map((task) => ListTile(
-                          leading: const Icon(Icons.schedule),
-                          title: Text(task.id),
-                          subtitle: Text(
-                              task.type == 'one_shot'
-                                  ? '${l10n.serviceTest_at} ${task.scheduledTime}'
-                                  : '${l10n.serviceTest_every} ${task.interval}'),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.cancel),
-                            onPressed: () async {
-                              await PlatformServiceManager.taskScheduler
-                                  .cancelTask(task.id);
-                              _addLog('✅ ${l10n.serviceTest_taskCancelled}: ${task.id}');
-                              await _refreshActiveTasks();
-                            },
-                          ),
-                        )),
+                    ..._activeTasks.map(
+                      (task) => ListTile(
+                        leading: const Icon(Icons.schedule),
+                        title: Text(task.id),
+                        subtitle: Text(
+                          task.type == 'one_shot'
+                              ? '${l10n.serviceTest_at} ${task.scheduledTime}'
+                              : '${l10n.serviceTest_every} ${task.interval}',
+                        ),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.cancel),
+                          onPressed: () async {
+                            await PlatformServiceManager.taskScheduler
+                                .cancelTask(task.id);
+                            _addLog(
+                              '✅ ${l10n.serviceTest_taskCancelled}: ${task.id}',
+                            );
+                            await _refreshActiveTasks();
+                          },
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -714,9 +764,7 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
         children: [
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade800,
-            ),
+            decoration: BoxDecoration(color: Colors.grey.shade800),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -733,16 +781,24 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                       _logs.clear();
                     });
                   },
-                  icon: const Icon(Icons.clear, size: 16, color: Colors.white70),
-                  label: Text(l10n.serviceTest_clear,
-                      style: const TextStyle(color: Colors.white70)),
+                  icon: const Icon(
+                    Icons.clear,
+                    size: 16,
+                    color: Colors.white70,
+                  ),
+                  label: Text(
+                    l10n.serviceTest_clear,
+                    style: const TextStyle(color: Colors.white70),
+                  ),
                 ),
                 TextButton.icon(
                   onPressed: _logs.isEmpty
                       ? null
                       : () {
                           final logText = _logs.join('\n');
-                          flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: logText));
+                          flutter_services.Clipboard.setData(
+                            flutter_services.ClipboardData(text: logText),
+                          );
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(l10n.serviceTest_allLogsCopied),
@@ -750,9 +806,15 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                             ),
                           );
                         },
-                  icon: const Icon(Icons.copy_all, size: 16, color: Colors.white70),
-                  label: Text(l10n.serviceTest_copyAll,
-                      style: const TextStyle(color: Colors.white70)),
+                  icon: const Icon(
+                    Icons.copy_all,
+                    size: 16,
+                    color: Colors.white70,
+                  ),
+                  label: Text(
+                    l10n.serviceTest_copyAll,
+                    style: const TextStyle(color: Colors.white70),
+                  ),
                 ),
               ],
             ),
@@ -766,7 +828,9 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                 return InkWell(
                   onTap: () {
                     // Copy single log entry on tap
-                    flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: _logs[index]));
+                    flutter_services.Clipboard.setData(
+                      flutter_services.ClipboardData(text: _logs[index]),
+                    );
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(l10n.serviceTest_logCopied),
@@ -776,7 +840,9 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
                   },
                   onLongPress: () {
                     // Copy single log entry on long press
-                    flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: _logs[index]));
+                    flutter_services.Clipboard.setData(
+                      flutter_services.ClipboardData(text: _logs[index]),
+                    );
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(l10n.serviceTest_logCopied),
@@ -813,8 +879,11 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
     setState(() {
       _notificationPermissionGranted = granted;
     });
-    _addLog(l10n.serviceTest_notificationPermission(
-        granted ? l10n.serviceTest_granted : l10n.serviceTest_denied));
+    _addLog(
+      l10n.serviceTest_notificationPermission(
+        granted ? l10n.serviceTest_granted : l10n.serviceTest_denied,
+      ),
+    );
   }
 
   Future<void> _showImmediateNotification() async {
@@ -829,7 +898,10 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
       _addLog('✅ ${l10n.serviceTest_notificationShown}');
     } catch (e) {
       _addLog('❌ ${l10n.serviceTest_errorShowingNotification}: $e');
-      _showErrorDialog('${l10n.serviceTest_errorShowingNotification}: $e', l10n);
+      _showErrorDialog(
+        '${l10n.serviceTest_errorShowingNotification}: $e',
+        l10n,
+      );
     }
   }
 
@@ -847,7 +919,10 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
       _addLog('✅ ${l10n.serviceTest_notificationScheduled}');
     } catch (e) {
       _addLog('❌ ${l10n.serviceTest_errorSchedulingNotification}: $e');
-      _showErrorDialog('${l10n.serviceTest_errorSchedulingNotification}: $e', l10n);
+      _showErrorDialog(
+        '${l10n.serviceTest_errorSchedulingNotification}: $e',
+        l10n,
+      );
     }
   }
 
@@ -858,7 +933,10 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
       _addLog('✅ ${l10n.serviceTest_allNotificationsCancelled}');
     } catch (e) {
       _addLog('❌ ${l10n.serviceTest_errorCancellingNotifications}: $e');
-      _showErrorDialog('${l10n.serviceTest_errorCancellingNotifications}: $e', l10n);
+      _showErrorDialog(
+        '${l10n.serviceTest_errorCancellingNotifications}: $e',
+        l10n,
+      );
     }
   }
 
@@ -881,8 +959,9 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
           // Play notification sound (if available)
           if (PlatformServiceManager.isServiceAvailable<IAudioService>()) {
             try {
-              await PlatformServiceManager.audio
-                  .playSystemSound(soundType: SystemSoundType.notification);
+              await PlatformServiceManager.audio.playSystemSound(
+                soundType: SystemSoundType.notification,
+              );
             } catch (e) {
               _addLog('⚠️ ${l10n.serviceTest_couldNotPlaySound}: $e');
             }
@@ -943,7 +1022,10 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
       _addLog('✅ ${l10n.serviceTest_countdownCancelled}');
     } catch (e) {
       _addLog('❌ ${l10n.serviceTest_errorCancellingCountdown}: $e');
-      _showErrorDialog('${l10n.serviceTest_errorCancellingCountdown}: $e', l10n);
+      _showErrorDialog(
+        '${l10n.serviceTest_errorCancellingCountdown}: $e',
+        l10n,
+      );
     }
   }
 
@@ -958,21 +1040,22 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
     try {
       final taskId = await PlatformServiceManager.taskScheduler
           .schedulePeriodicTask(
-        taskId: 'periodic_${DateTime.now().millisecondsSinceEpoch}',
-        interval: Duration(seconds: interval),
-        callback: (data) async {
-          // Play a short sound (if available)
-          if (PlatformServiceManager.isServiceAvailable<IAudioService>()) {
-            try {
-              await PlatformServiceManager.audio
-                  .playSystemSound(soundType: SystemSoundType.click);
-            } catch (e) {
-              _addLog('⚠️ ${l10n.serviceTest_couldNotPlaySound}: $e');
-            }
-          }
-          _addLog('🔄 ${l10n.serviceTest_periodicTaskExecuted}');
-        },
-      );
+            taskId: 'periodic_${DateTime.now().millisecondsSinceEpoch}',
+            interval: Duration(seconds: interval),
+            callback: (data) async {
+              // Play a short sound (if available)
+              if (PlatformServiceManager.isServiceAvailable<IAudioService>()) {
+                try {
+                  await PlatformServiceManager.audio.playSystemSound(
+                    soundType: SystemSoundType.click,
+                  );
+                } catch (e) {
+                  _addLog('⚠️ ${l10n.serviceTest_couldNotPlaySound}: $e');
+                }
+              }
+              _addLog('🔄 ${l10n.serviceTest_periodicTaskExecuted}');
+            },
+          );
 
       setState(() {
         _activeTaskId = taskId;
@@ -982,7 +1065,10 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
       _addLog('✅ ${l10n.serviceTest_periodicTaskStarted(interval)}');
     } catch (e) {
       _addLog('❌ ${l10n.serviceTest_errorStartingPeriodicTask}: $e');
-      _showErrorDialog('${l10n.serviceTest_errorStartingPeriodicTask}: $e', l10n);
+      _showErrorDialog(
+        '${l10n.serviceTest_errorStartingPeriodicTask}: $e',
+        l10n,
+      );
     }
   }
 
@@ -1001,7 +1087,10 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
       _addLog('✅ ${l10n.serviceTest_periodicTaskCancelled}');
     } catch (e) {
       _addLog('❌ ${l10n.serviceTest_errorCancellingPeriodicTask}: $e');
-      _showErrorDialog('${l10n.serviceTest_errorCancellingPeriodicTask}: $e', l10n);
+      _showErrorDialog(
+        '${l10n.serviceTest_errorCancellingPeriodicTask}: $e',
+        l10n,
+      );
     }
   }
 
@@ -1010,13 +1099,13 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(l10n.serviceTest_error),
-        content: SelectionArea(
-          child: Text(message),
-        ),
+        content: SelectionArea(child: Text(message)),
         actions: [
           TextButton.icon(
             onPressed: () {
-              flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: message));
+              flutter_services.Clipboard.setData(
+                flutter_services.ClipboardData(text: message),
+              );
               Navigator.of(context).pop();
               _addLog('✅ ${l10n.serviceTest_errorMessage}');
             },

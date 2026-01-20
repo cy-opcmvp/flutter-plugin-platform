@@ -20,7 +20,7 @@ class PluginCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final descriptor = pluginInfo.descriptor;
     final theme = Theme.of(context);
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: InkWell(
@@ -38,7 +38,9 @@ class PluginCard extends StatelessWidget {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: _getPluginTypeColor(descriptor.type).withValues(alpha: 0.1),
+                      color: _getPluginTypeColor(
+                        descriptor.type,
+                      ).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
@@ -71,7 +73,9 @@ class PluginCard extends StatelessWidget {
                         Text(
                           'v${descriptor.version} • ${descriptor.type.name.toUpperCase()}',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.6,
+                            ),
                           ),
                         ),
                         if (descriptor.metadata.containsKey('description')) ...[
@@ -110,7 +114,8 @@ class PluginCard extends StatelessWidget {
                 ],
               ),
               // Additional info row
-              if (pluginInfo.lastUsed != null || descriptor.requiredPermissions.isNotEmpty) ...[
+              if (pluginInfo.lastUsed != null ||
+                  descriptor.requiredPermissions.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 const Divider(height: 1),
                 const SizedBox(height: 8),
@@ -120,31 +125,44 @@ class PluginCard extends StatelessWidget {
                       Icon(
                         Icons.access_time,
                         size: 16,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.6,
+                        ),
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        context.l10n.plugin_lastUsed(_formatDate(context, pluginInfo.lastUsed!)),
+                        context.l10n.plugin_lastUsed(
+                          _formatDate(context, pluginInfo.lastUsed!),
+                        ),
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.6,
+                          ),
                         ),
                       ),
                     ],
-                    if (pluginInfo.lastUsed != null && descriptor.requiredPermissions.isNotEmpty)
+                    if (pluginInfo.lastUsed != null &&
+                        descriptor.requiredPermissions.isNotEmpty)
                       const SizedBox(width: 16),
                     if (descriptor.requiredPermissions.isNotEmpty) ...[
                       Icon(
                         Icons.security,
                         size: 16,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.6,
+                        ),
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        descriptor.requiredPermissions.length == 1 
-                            ? context.l10n.plugin_permissionCountSingle 
-                            : context.l10n.plugin_permissionCount(descriptor.requiredPermissions.length),
+                        descriptor.requiredPermissions.length == 1
+                            ? context.l10n.plugin_permissionCountSingle
+                            : context.l10n.plugin_permissionCount(
+                                descriptor.requiredPermissions.length,
+                              ),
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.6,
+                          ),
                         ),
                       ),
                     ],
@@ -162,7 +180,7 @@ class PluginCard extends StatelessWidget {
     final theme = Theme.of(context);
     Color chipColor;
     String statusText;
-    
+
     switch (pluginInfo.state) {
       case PluginState.active:
         chipColor = Colors.green;

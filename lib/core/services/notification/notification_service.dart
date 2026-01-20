@@ -18,7 +18,8 @@ class NotificationServiceImpl extends platform.INotificationService
   final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
 
-  final StreamController<platform.NotificationEvent> _notificationClickController =
+  final StreamController<platform.NotificationEvent>
+  _notificationClickController =
       StreamController<platform.NotificationEvent>.broadcast();
 
   bool _isInitialized = false;
@@ -42,7 +43,9 @@ class NotificationServiceImpl extends platform.INotificationService
       // Skip initialization and mark as successful to prevent crashes
       if (defaultTargetPlatform == TargetPlatform.windows) {
         if (kDebugMode) {
-          print('NotificationService: Windows platform detected - using UI notifications');
+          debugPrint(
+            'NotificationService: Windows platform detected - using UI notifications',
+          );
         }
         _isInitialized = true;
         return true;
@@ -52,8 +55,9 @@ class NotificationServiceImpl extends platform.INotificationService
       tz_data.initializeTimeZones();
 
       // Android initialization settings
-      const androidSettings =
-          AndroidInitializationSettings('@mipmap/ic_launcher');
+      const androidSettings = AndroidInitializationSettings(
+        '@mipmap/ic_launcher',
+      );
 
       // iOS initialization settings
       const iosSettings = DarwinInitializationSettings(
@@ -85,14 +89,14 @@ class NotificationServiceImpl extends platform.INotificationService
       _isInitialized = result ?? false;
 
       if (_isInitialized && kDebugMode) {
-        print('NotificationService: Initialized successfully');
+        debugPrint('NotificationService: Initialized successfully');
       }
 
       return _isInitialized;
     } catch (e, stackTrace) {
       if (kDebugMode) {
-        print('NotificationService: Initialization failed: $e');
-        print('StackTrace: $stackTrace');
+        debugPrint('NotificationService: Initialization failed: $e');
+        debugPrint('StackTrace: $stackTrace');
       }
       _isInitialized = false;
       return false;
@@ -108,15 +112,19 @@ class NotificationServiceImpl extends platform.INotificationService
 
     // Check platform-specific permissions
     if (defaultTargetPlatform == TargetPlatform.android) {
-      final androidPlugin = _plugin.resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>();
+      final androidPlugin = _plugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
       if (androidPlugin == null) return false;
 
       final granted = await androidPlugin.areNotificationsEnabled();
       return granted ?? false;
     } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-      final iosPlugin = _plugin.resolvePlatformSpecificImplementation<
-          IOSFlutterLocalNotificationsPlugin>();
+      final iosPlugin = _plugin
+          .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin
+          >();
       if (iosPlugin == null) return false;
 
       final granted = await iosPlugin.checkPermissions();
@@ -135,15 +143,19 @@ class NotificationServiceImpl extends platform.INotificationService
     }
 
     if (defaultTargetPlatform == TargetPlatform.android) {
-      final androidPlugin = _plugin.resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>();
+      final androidPlugin = _plugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
       if (androidPlugin == null) return false;
 
       final granted = await androidPlugin.requestNotificationsPermission();
       return granted ?? false;
     } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-      final iosPlugin = _plugin.resolvePlatformSpecificImplementation<
-          IOSFlutterLocalNotificationsPlugin>();
+      final iosPlugin = _plugin
+          .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin
+          >();
       if (iosPlugin == null) return false;
 
       final granted = await iosPlugin.requestPermissions(
@@ -164,7 +176,8 @@ class NotificationServiceImpl extends platform.INotificationService
     required String title,
     required String body,
     String? payload,
-    platform.NotificationPriority priority = platform.NotificationPriority.normal,
+    platform.NotificationPriority priority =
+        platform.NotificationPriority.normal,
     String? sound,
   }) async {
     if (!_isInitialized) {
@@ -174,15 +187,19 @@ class NotificationServiceImpl extends platform.INotificationService
     // Windows platform: Emit notification event for UI to handle
     if (defaultTargetPlatform == TargetPlatform.windows) {
       if (kDebugMode) {
-        print('NotificationService: [Windows] Emitting notification event: $title - $body');
+        debugPrint(
+          'NotificationService: [Windows] Emitting notification event: $title - $body',
+        );
       }
 
       // Emit event so UI can display SnackBar or similar
-      _notificationClickController.add(platform.NotificationEvent(
-        id: id,
-        payload: '$title|$body',  // Encode title and body in payload
-        timestamp: DateTime.now(),
-      ));
+      _notificationClickController.add(
+        platform.NotificationEvent(
+          id: id,
+          payload: '$title|$body', // Encode title and body in payload
+          timestamp: DateTime.now(),
+        ),
+      );
 
       return;
     }
@@ -199,11 +216,11 @@ class NotificationServiceImpl extends platform.INotificationService
       );
 
       if (kDebugMode) {
-        print('NotificationService: Showed notification $id');
+        debugPrint('NotificationService: Showed notification $id');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('NotificationService: Error showing notification: $e');
+        debugPrint('NotificationService: Error showing notification: $e');
       }
       rethrow;
     }
@@ -217,7 +234,8 @@ class NotificationServiceImpl extends platform.INotificationService
     required String body,
     required DateTime scheduledTime,
     String? payload,
-    platform.NotificationPriority priority = platform.NotificationPriority.normal,
+    platform.NotificationPriority priority =
+        platform.NotificationPriority.normal,
     String? sound,
   }) async {
     if (!_isInitialized) {
@@ -232,7 +250,9 @@ class NotificationServiceImpl extends platform.INotificationService
     // Use task scheduler instead
     if (defaultTargetPlatform == TargetPlatform.windows) {
       if (kDebugMode) {
-        print('NotificationService: Scheduled notifications not supported on Windows, showing immediately');
+        debugPrint(
+          'NotificationService: Scheduled notifications not supported on Windows, showing immediately',
+        );
       }
       // Fall back to immediate notification
       await showNotification(
@@ -263,7 +283,9 @@ class NotificationServiceImpl extends platform.INotificationService
     );
 
     if (kDebugMode) {
-      print('NotificationService: Scheduled notification $id for $scheduledTime');
+      debugPrint(
+        'NotificationService: Scheduled notification $id for $scheduledTime',
+      );
     }
   }
 
@@ -277,7 +299,9 @@ class NotificationServiceImpl extends platform.INotificationService
     // Windows platform: No-op since notifications aren't supported
     if (defaultTargetPlatform == TargetPlatform.windows) {
       if (kDebugMode) {
-        print('NotificationService: [Windows] Cancel notification $id (no-op)');
+        debugPrint(
+          'NotificationService: [Windows] Cancel notification $id (no-op)',
+        );
       }
       return;
     }
@@ -286,11 +310,11 @@ class NotificationServiceImpl extends platform.INotificationService
       await _plugin.cancel(int.tryParse(id) ?? 0);
 
       if (kDebugMode) {
-        print('NotificationService: Cancelled notification $id');
+        debugPrint('NotificationService: Cancelled notification $id');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('NotificationService: Error cancelling notification: $e');
+        debugPrint('NotificationService: Error cancelling notification: $e');
       }
       rethrow;
     }
@@ -306,7 +330,9 @@ class NotificationServiceImpl extends platform.INotificationService
     // Windows platform: No-op since notifications aren't supported
     if (defaultTargetPlatform == TargetPlatform.windows) {
       if (kDebugMode) {
-        print('NotificationService: [Windows] Cancel all notifications (no-op)');
+        debugPrint(
+          'NotificationService: [Windows] Cancel all notifications (no-op)',
+        );
       }
       return;
     }
@@ -315,11 +341,13 @@ class NotificationServiceImpl extends platform.INotificationService
       await _plugin.cancelAll();
 
       if (kDebugMode) {
-        print('NotificationService: Cancelled all notifications');
+        debugPrint('NotificationService: Cancelled all notifications');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('NotificationService: Error cancelling all notifications: $e');
+        debugPrint(
+          'NotificationService: Error cancelling all notifications: $e',
+        );
       }
       rethrow;
     }
@@ -338,7 +366,9 @@ class NotificationServiceImpl extends platform.INotificationService
     // For now, return empty list.
 
     if (kDebugMode) {
-      print('NotificationService: getActiveNotifications not fully implemented');
+      debugPrint(
+        'NotificationService: getActiveNotifications not fully implemented',
+      );
     }
 
     return [];
@@ -377,7 +407,9 @@ class NotificationServiceImpl extends platform.INotificationService
   }
 
   /// Convert platform.NotificationPriority to Android importance
-  Importance _convertPriorityToImportance(platform.NotificationPriority priority) {
+  Importance _convertPriorityToImportance(
+    platform.NotificationPriority priority,
+  ) {
     switch (priority) {
       case platform.NotificationPriority.low:
         return Importance.low;
@@ -391,7 +423,9 @@ class NotificationServiceImpl extends platform.INotificationService
   }
 
   /// Convert platform.NotificationPriority to Android priority
-  Priority _convertPriorityToAndroidPriority(platform.NotificationPriority priority) {
+  Priority _convertPriorityToAndroidPriority(
+    platform.NotificationPriority priority,
+  ) {
     switch (priority) {
       case platform.NotificationPriority.low:
         return Priority.low;
@@ -415,7 +449,7 @@ class NotificationServiceImpl extends platform.INotificationService
     _notificationClickController.add(event);
 
     if (kDebugMode) {
-      print('NotificationService: Notification clicked: $event');
+      debugPrint('NotificationService: Notification clicked: $event');
     }
   }
 
@@ -426,7 +460,7 @@ class NotificationServiceImpl extends platform.INotificationService
     _isInitialized = false;
 
     if (kDebugMode) {
-      print('NotificationService: Disposed');
+      debugPrint('NotificationService: Disposed');
     }
   }
 }

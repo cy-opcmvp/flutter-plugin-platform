@@ -128,11 +128,7 @@ class _WorldClockWidgetState extends State<WorldClockWidget> {
                     ),
                   ],
                 ),
-                child: Icon(
-                  Icons.location_city,
-                  color: Colors.white,
-                  size: 28,
-                ),
+                child: Icon(Icons.location_city, color: Colors.white, size: 28),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -147,7 +143,9 @@ class _WorldClockWidgetState extends State<WorldClockWidget> {
                             widget.worldClock.cityName,
                             style: theme.textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: isDefault ? theme.colorScheme.primary : null,
+                              color: isDefault
+                                  ? theme.colorScheme.primary
+                                  : null,
                             ),
                           ),
                         ),
@@ -168,7 +166,9 @@ class _WorldClockWidgetState extends State<WorldClockWidget> {
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
-                                  color: theme.colorScheme.primary.withOpacity(0.3),
+                                  color: theme.colorScheme.primary.withOpacity(
+                                    0.3,
+                                  ),
                                   blurRadius: 4,
                                   offset: const Offset(0, 2),
                                 ),
@@ -237,15 +237,26 @@ class _WorldClockWidgetState extends State<WorldClockWidget> {
                     ),
                     const SizedBox(height: 6),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
-                        color: (isDefault ? theme.colorScheme.primary : theme.colorScheme.secondary).withOpacity(0.1),
+                        color:
+                            (isDefault
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.secondary)
+                                .withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
                         widget.worldClock.formattedDate,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: (isDefault ? theme.colorScheme.primary : theme.colorScheme.secondary).withOpacity(0.8),
+                          color:
+                              (isDefault
+                                      ? theme.colorScheme.primary
+                                      : theme.colorScheme.secondary)
+                                  .withOpacity(0.8),
                           fontWeight: FontWeight.w500,
                           fontSize: 12,
                         ),
@@ -292,9 +303,9 @@ class _WorldClockWidgetState extends State<WorldClockWidget> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(l10n.worldClock_confirmDelete),
-        content: Text(l10n.worldClock_confirmDeleteClock(
-          widget.worldClock.cityName,
-        )),
+        content: Text(
+          l10n.worldClock_confirmDeleteClock(widget.worldClock.cityName),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -329,7 +340,8 @@ class CompactWorldClockWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<CompactWorldClockWidget> createState() => _CompactWorldClockWidgetState();
+  State<CompactWorldClockWidget> createState() =>
+      _CompactWorldClockWidgetState();
 }
 
 class _CompactWorldClockWidgetState extends State<CompactWorldClockWidget> {
@@ -459,9 +471,9 @@ class _LargeClockWidgetState extends State<LargeClockWidget> {
               color: theme.primaryColor,
             ),
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           // 时区信息
           Text(
             widget.worldClock.timeZone,
@@ -469,9 +481,9 @@ class _LargeClockWidgetState extends State<LargeClockWidget> {
               color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // 大时钟显示
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -498,9 +510,9 @@ class _LargeClockWidgetState extends State<LargeClockWidget> {
               ],
             ],
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // 日期显示
           Text(
             widget.worldClock.formattedDate,

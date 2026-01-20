@@ -9,25 +9,25 @@ import 'platform_environment.dart';
 abstract class PlatformAdapter {
   /// Launch a plugin using platform-specific mechanisms
   Future<void> launchPlugin(PluginLaunchConfig config);
-  
+
   /// Terminate a plugin process using platform-specific methods
   Future<void> terminatePlugin(String pluginId);
-  
+
   /// Create IPC channel using platform-appropriate mechanism
   Future<IPCChannel> createIPCChannel(String pluginId);
-  
+
   /// Set up sandbox environment for plugin
   Future<void> setupSandbox(SandboxConfig config);
-  
+
   /// Enforce resource limits using platform capabilities
   Future<void> enforceResourceLimits(ResourceLimits limits);
-  
+
   /// Get platform-specific plugin launcher
   ExternalPluginLauncher getLauncher(PluginRuntimeType runtimeType);
-  
+
   /// Check if platform supports specific plugin runtime type
   bool supportsRuntimeType(PluginRuntimeType runtimeType);
-  
+
   /// Get platform-specific configuration for plugin
   Map<String, dynamic> getPlatformConfig(PluginRuntimeType runtimeType);
 }
@@ -36,31 +36,31 @@ abstract class PlatformAdapter {
 class WindowsPlatformAdapter extends PlatformAdapter {
   final Map<String, Process> _processes = {};
   final Map<PluginRuntimeType, ExternalPluginLauncher> _launchers = {};
-  
+
   WindowsPlatformAdapter() {
     _initializeLaunchers();
   }
-  
+
   void _initializeLaunchers() {
     _launchers[PluginRuntimeType.executable] = ExecutablePluginLauncher();
     _launchers[PluginRuntimeType.webApp] = WebPluginLauncher();
     _launchers[PluginRuntimeType.container] = ContainerPluginLauncher();
   }
-  
+
   @override
   Future<void> launchPlugin(PluginLaunchConfig config) async {
     final launcher = getLauncher(config.pluginRuntimeType);
-    
+
     // Windows-specific pre-launch setup
     await _setupWindowsEnvironment(config);
-    
+
     // Launch using appropriate launcher
     final processId = await launcher.launchPlugin(config);
-    
+
     // Windows-specific post-launch configuration
     await _configureWindowsProcess(config.pluginId, processId);
   }
-  
+
   @override
   Future<void> terminatePlugin(String pluginId) async {
     final process = _processes[pluginId];
@@ -80,35 +80,37 @@ class WindowsPlatformAdapter extends PlatformAdapter {
       _processes.remove(pluginId);
     }
   }
-  
+
   @override
   Future<IPCChannel> createIPCChannel(String pluginId) async {
     // Windows uses named pipes for IPC
     return WindowsNamedPipeChannel(pluginId);
   }
-  
+
   @override
   Future<void> setupSandbox(SandboxConfig config) async {
     // Windows-specific sandboxing using AppContainer or Job Objects
     await _createWindowsJobObject(config);
     await _configureWindowsAppContainer(config);
   }
-  
+
   @override
   Future<void> enforceResourceLimits(ResourceLimits limits) async {
     // Windows-specific resource limiting using Job Objects
     await _setWindowsJobLimits(limits);
   }
-  
+
   @override
   ExternalPluginLauncher getLauncher(PluginRuntimeType runtimeType) {
     final launcher = _launchers[runtimeType];
     if (launcher == null) {
-      throw UnsupportedError('Runtime type $runtimeType not supported on Windows');
+      throw UnsupportedError(
+        'Runtime type $runtimeType not supported on Windows',
+      );
     }
     return launcher;
   }
-  
+
   @override
   bool supportsRuntimeType(PluginRuntimeType runtimeType) {
     switch (runtimeType) {
@@ -122,7 +124,7 @@ class WindowsPlatformAdapter extends PlatformAdapter {
         return true; // Windows supports PowerShell/batch scripts
     }
   }
-  
+
   @override
   Map<String, dynamic> getPlatformConfig(PluginRuntimeType runtimeType) {
     switch (runtimeType) {
@@ -131,24 +133,18 @@ class WindowsPlatformAdapter extends PlatformAdapter {
           'fileExtension': '.exe',
           'pathSeparator': '\\',
           'environmentVariables': {
-            'PATH': PlatformEnvironment.instance.getVariable('PATH', defaultValue: 'C:\\Windows\\System32')
+            'PATH': PlatformEnvironment.instance.getVariable(
+              'PATH',
+              defaultValue: 'C:\\Windows\\System32',
+            ),
           },
         };
       case PluginRuntimeType.webApp:
-        return {
-          'webViewEngine': 'WebView2',
-          'securityZone': 'Internet',
-        };
+        return {'webViewEngine': 'WebView2', 'securityZone': 'Internet'};
       case PluginRuntimeType.container:
-        return {
-          'containerRuntime': 'Docker Desktop',
-          'networkMode': 'nat',
-        };
+        return {'containerRuntime': 'Docker Desktop', 'networkMode': 'nat'};
       case PluginRuntimeType.native:
-        return {
-          'libraryExtension': '.dll',
-          'architecture': 'x64',
-        };
+        return {'libraryExtension': '.dll', 'architecture': 'x64'};
       case PluginRuntimeType.script:
         return {
           'scriptEngine': 'PowerShell',
@@ -156,25 +152,25 @@ class WindowsPlatformAdapter extends PlatformAdapter {
         };
     }
   }
-  
+
   Future<void> _setupWindowsEnvironment(PluginLaunchConfig config) async {
     // Windows-specific environment setup
     // Set up Windows-specific paths, registry entries, etc.
   }
-  
+
   Future<void> _configureWindowsProcess(String pluginId, int processId) async {
     // Windows-specific process configuration
     // Set process priority, affinity, etc.
   }
-  
+
   Future<void> _createWindowsJobObject(SandboxConfig config) async {
     // Create Windows Job Object for process isolation
   }
-  
+
   Future<void> _configureWindowsAppContainer(SandboxConfig config) async {
     // Configure Windows AppContainer for security isolation
   }
-  
+
   Future<void> _setWindowsJobLimits(ResourceLimits limits) async {
     // Set resource limits using Windows Job Objects
   }
@@ -184,31 +180,31 @@ class WindowsPlatformAdapter extends PlatformAdapter {
 class LinuxPlatformAdapter extends PlatformAdapter {
   final Map<String, Process> _processes = {};
   final Map<PluginRuntimeType, ExternalPluginLauncher> _launchers = {};
-  
+
   LinuxPlatformAdapter() {
     _initializeLaunchers();
   }
-  
+
   void _initializeLaunchers() {
     _launchers[PluginRuntimeType.executable] = ExecutablePluginLauncher();
     _launchers[PluginRuntimeType.webApp] = WebPluginLauncher();
     _launchers[PluginRuntimeType.container] = ContainerPluginLauncher();
   }
-  
+
   @override
   Future<void> launchPlugin(PluginLaunchConfig config) async {
     final launcher = getLauncher(config.pluginRuntimeType);
-    
+
     // Linux-specific pre-launch setup
     await _setupLinuxEnvironment(config);
-    
+
     // Launch using appropriate launcher
     final processId = await launcher.launchPlugin(config);
-    
+
     // Linux-specific post-launch configuration
     await _configureLinuxProcess(config.pluginId, processId);
   }
-  
+
   @override
   Future<void> terminatePlugin(String pluginId) async {
     final process = _processes[pluginId];
@@ -217,7 +213,7 @@ class LinuxPlatformAdapter extends PlatformAdapter {
       try {
         // Send SIGTERM first for graceful shutdown
         Process.killPid(process.pid, ProcessSignal.sigterm);
-        
+
         // Wait a bit, then force kill if needed
         await Future.delayed(const Duration(seconds: 5));
         if (await _isProcessRunning(process.pid)) {
@@ -230,13 +226,13 @@ class LinuxPlatformAdapter extends PlatformAdapter {
       _processes.remove(pluginId);
     }
   }
-  
+
   @override
   Future<IPCChannel> createIPCChannel(String pluginId) async {
     // Linux uses Unix domain sockets for IPC
     return LinuxUnixSocketChannel(pluginId);
   }
-  
+
   @override
   Future<void> setupSandbox(SandboxConfig config) async {
     // Linux-specific sandboxing using namespaces and cgroups
@@ -244,22 +240,24 @@ class LinuxPlatformAdapter extends PlatformAdapter {
     await _setupLinuxCgroups(config);
     await _configureLinuxSeccomp(config);
   }
-  
+
   @override
   Future<void> enforceResourceLimits(ResourceLimits limits) async {
     // Linux-specific resource limiting using cgroups
     await _setLinuxCgroupLimits(limits);
   }
-  
+
   @override
   ExternalPluginLauncher getLauncher(PluginRuntimeType runtimeType) {
     final launcher = _launchers[runtimeType];
     if (launcher == null) {
-      throw UnsupportedError('Runtime type $runtimeType not supported on Linux');
+      throw UnsupportedError(
+        'Runtime type $runtimeType not supported on Linux',
+      );
     }
     return launcher;
   }
-  
+
   @override
   bool supportsRuntimeType(PluginRuntimeType runtimeType) {
     switch (runtimeType) {
@@ -273,7 +271,7 @@ class LinuxPlatformAdapter extends PlatformAdapter {
         return true; // Linux supports shell scripts
     }
   }
-  
+
   @override
   Map<String, dynamic> getPlatformConfig(PluginRuntimeType runtimeType) {
     switch (runtimeType) {
@@ -282,15 +280,15 @@ class LinuxPlatformAdapter extends PlatformAdapter {
           'fileExtension': '',
           'pathSeparator': '/',
           'environmentVariables': {
-            'PATH': PlatformEnvironment.instance.getVariable('PATH', defaultValue: '/usr/local/bin:/usr/bin:/bin')
+            'PATH': PlatformEnvironment.instance.getVariable(
+              'PATH',
+              defaultValue: '/usr/local/bin:/usr/bin:/bin',
+            ),
           },
           'permissions': '755',
         };
       case PluginRuntimeType.webApp:
-        return {
-          'webViewEngine': 'WebKitGTK',
-          'displayServer': 'X11/Wayland',
-        };
+        return {'webViewEngine': 'WebKitGTK', 'displayServer': 'X11/Wayland'};
       case PluginRuntimeType.container:
         return {
           'containerRuntime': 'Docker/Podman',
@@ -298,42 +296,36 @@ class LinuxPlatformAdapter extends PlatformAdapter {
           'cgroupVersion': 'v2',
         };
       case PluginRuntimeType.native:
-        return {
-          'libraryExtension': '.so',
-          'architecture': 'x86_64',
-        };
+        return {'libraryExtension': '.so', 'architecture': 'x86_64'};
       case PluginRuntimeType.script:
-        return {
-          'scriptEngine': 'bash',
-          'shebang': '#!/bin/bash',
-        };
+        return {'scriptEngine': 'bash', 'shebang': '#!/bin/bash'};
     }
   }
-  
+
   Future<void> _setupLinuxEnvironment(PluginLaunchConfig config) async {
     // Linux-specific environment setup
   }
-  
+
   Future<void> _configureLinuxProcess(String pluginId, int processId) async {
     // Linux-specific process configuration
   }
-  
+
   Future<void> _createLinuxNamespaces(SandboxConfig config) async {
     // Create Linux namespaces for isolation
   }
-  
+
   Future<void> _setupLinuxCgroups(SandboxConfig config) async {
     // Set up cgroups for resource control
   }
-  
+
   Future<void> _configureLinuxSeccomp(SandboxConfig config) async {
     // Configure seccomp for system call filtering
   }
-  
+
   Future<void> _setLinuxCgroupLimits(ResourceLimits limits) async {
     // Set resource limits using cgroups
   }
-  
+
   Future<bool> _isProcessRunning(int pid) async {
     try {
       final result = await Process.run('kill', ['-0', pid.toString()]);
@@ -348,31 +340,31 @@ class LinuxPlatformAdapter extends PlatformAdapter {
 class MacOSPlatformAdapter extends PlatformAdapter {
   final Map<String, Process> _processes = {};
   final Map<PluginRuntimeType, ExternalPluginLauncher> _launchers = {};
-  
+
   MacOSPlatformAdapter() {
     _initializeLaunchers();
   }
-  
+
   void _initializeLaunchers() {
     _launchers[PluginRuntimeType.executable] = ExecutablePluginLauncher();
     _launchers[PluginRuntimeType.webApp] = WebPluginLauncher();
     _launchers[PluginRuntimeType.container] = ContainerPluginLauncher();
   }
-  
+
   @override
   Future<void> launchPlugin(PluginLaunchConfig config) async {
     final launcher = getLauncher(config.pluginRuntimeType);
-    
+
     // macOS-specific pre-launch setup
     await _setupMacOSEnvironment(config);
-    
+
     // Launch using appropriate launcher
     final processId = await launcher.launchPlugin(config);
-    
+
     // macOS-specific post-launch configuration
     await _configureMacOSProcess(config.pluginId, processId);
   }
-  
+
   @override
   Future<void> terminatePlugin(String pluginId) async {
     final process = _processes[pluginId];
@@ -381,7 +373,7 @@ class MacOSPlatformAdapter extends PlatformAdapter {
       try {
         // Use launchctl for managed processes
         await Process.run('kill', ['-TERM', process.pid.toString()]);
-        
+
         // Wait and force kill if needed
         await Future.delayed(const Duration(seconds: 3));
         if (await _isProcessRunning(process.pid)) {
@@ -393,35 +385,37 @@ class MacOSPlatformAdapter extends PlatformAdapter {
       _processes.remove(pluginId);
     }
   }
-  
+
   @override
   Future<IPCChannel> createIPCChannel(String pluginId) async {
     // macOS uses Unix domain sockets or Mach ports
     return MacOSMachPortChannel(pluginId);
   }
-  
+
   @override
   Future<void> setupSandbox(SandboxConfig config) async {
     // macOS-specific sandboxing using App Sandbox
     await _configureMacOSAppSandbox(config);
     await _setupMacOSEntitlements(config);
   }
-  
+
   @override
   Future<void> enforceResourceLimits(ResourceLimits limits) async {
     // macOS-specific resource limiting
     await _setMacOSResourceLimits(limits);
   }
-  
+
   @override
   ExternalPluginLauncher getLauncher(PluginRuntimeType runtimeType) {
     final launcher = _launchers[runtimeType];
     if (launcher == null) {
-      throw UnsupportedError('Runtime type $runtimeType not supported on macOS');
+      throw UnsupportedError(
+        'Runtime type $runtimeType not supported on macOS',
+      );
     }
     return launcher;
   }
-  
+
   @override
   bool supportsRuntimeType(PluginRuntimeType runtimeType) {
     switch (runtimeType) {
@@ -435,7 +429,7 @@ class MacOSPlatformAdapter extends PlatformAdapter {
         return true; // macOS supports shell scripts
     }
   }
-  
+
   @override
   Map<String, dynamic> getPlatformConfig(PluginRuntimeType runtimeType) {
     switch (runtimeType) {
@@ -444,20 +438,17 @@ class MacOSPlatformAdapter extends PlatformAdapter {
           'fileExtension': '',
           'pathSeparator': '/',
           'environmentVariables': {
-            'PATH': PlatformEnvironment.instance.getVariable('PATH', defaultValue: '/usr/local/bin:/usr/bin:/bin')
+            'PATH': PlatformEnvironment.instance.getVariable(
+              'PATH',
+              defaultValue: '/usr/local/bin:/usr/bin:/bin',
+            ),
           },
           'bundleSupport': true,
         };
       case PluginRuntimeType.webApp:
-        return {
-          'webViewEngine': 'WKWebView',
-          'sandboxed': true,
-        };
+        return {'webViewEngine': 'WKWebView', 'sandboxed': true};
       case PluginRuntimeType.container:
-        return {
-          'containerRuntime': 'Docker Desktop',
-          'networkMode': 'bridge',
-        };
+        return {'containerRuntime': 'Docker Desktop', 'networkMode': 'bridge'};
       case PluginRuntimeType.native:
         return {
           'libraryExtension': '.dylib',
@@ -465,33 +456,30 @@ class MacOSPlatformAdapter extends PlatformAdapter {
           'architecture': 'arm64/x86_64',
         };
       case PluginRuntimeType.script:
-        return {
-          'scriptEngine': 'zsh',
-          'shebang': '#!/bin/zsh',
-        };
+        return {'scriptEngine': 'zsh', 'shebang': '#!/bin/zsh'};
     }
   }
-  
+
   Future<void> _setupMacOSEnvironment(PluginLaunchConfig config) async {
     // macOS-specific environment setup
   }
-  
+
   Future<void> _configureMacOSProcess(String pluginId, int processId) async {
     // macOS-specific process configuration
   }
-  
+
   Future<void> _configureMacOSAppSandbox(SandboxConfig config) async {
     // Configure macOS App Sandbox
   }
-  
+
   Future<void> _setupMacOSEntitlements(SandboxConfig config) async {
     // Set up macOS entitlements for sandbox
   }
-  
+
   Future<void> _setMacOSResourceLimits(ResourceLimits limits) async {
     // Set resource limits using macOS mechanisms
   }
-  
+
   Future<bool> _isProcessRunning(int pid) async {
     try {
       final result = await Process.run('kill', ['-0', pid.toString()]);
@@ -509,7 +497,7 @@ class SandboxConfig {
   final List<Permission> allowedPermissions;
   final ResourceLimits resourceLimits;
   final Map<String, dynamic> platformSpecific;
-  
+
   const SandboxConfig({
     required this.pluginId,
     required this.securityLevel,
@@ -522,9 +510,9 @@ class SandboxConfig {
 /// Abstract IPC channel for platform-specific communication
 abstract class IPCChannel {
   final String pluginId;
-  
+
   IPCChannel(this.pluginId);
-  
+
   Future<void> connect();
   Future<void> disconnect();
   Future<void> sendMessage(Map<String, dynamic> message);
@@ -534,22 +522,22 @@ abstract class IPCChannel {
 /// Windows named pipe IPC channel
 class WindowsNamedPipeChannel extends IPCChannel {
   WindowsNamedPipeChannel(super.pluginId);
-  
+
   @override
   Future<void> connect() async {
     // Connect to Windows named pipe
   }
-  
+
   @override
   Future<void> disconnect() async {
     // Disconnect from named pipe
   }
-  
+
   @override
   Future<void> sendMessage(Map<String, dynamic> message) async {
     // Send message through named pipe
   }
-  
+
   @override
   Stream<Map<String, dynamic>> get messageStream {
     // Return stream of messages from named pipe
@@ -560,22 +548,22 @@ class WindowsNamedPipeChannel extends IPCChannel {
 /// Linux Unix socket IPC channel
 class LinuxUnixSocketChannel extends IPCChannel {
   LinuxUnixSocketChannel(super.pluginId);
-  
+
   @override
   Future<void> connect() async {
     // Connect to Unix domain socket
   }
-  
+
   @override
   Future<void> disconnect() async {
     // Disconnect from Unix socket
   }
-  
+
   @override
   Future<void> sendMessage(Map<String, dynamic> message) async {
     // Send message through Unix socket
   }
-  
+
   @override
   Stream<Map<String, dynamic>> get messageStream {
     // Return stream of messages from Unix socket
@@ -586,26 +574,25 @@ class LinuxUnixSocketChannel extends IPCChannel {
 /// macOS Mach port IPC channel
 class MacOSMachPortChannel extends IPCChannel {
   MacOSMachPortChannel(super.pluginId);
-  
+
   @override
   Future<void> connect() async {
     // Connect to Mach port
   }
-  
+
   @override
   Future<void> disconnect() async {
     // Disconnect from Mach port
   }
-  
+
   @override
   Future<void> sendMessage(Map<String, dynamic> message) async {
     // Send message through Mach port
   }
-  
+
   @override
   Stream<Map<String, dynamic>> get messageStream {
     // Return stream of messages from Mach port
     return const Stream.empty();
   }
 }
-

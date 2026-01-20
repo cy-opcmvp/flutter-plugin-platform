@@ -6,11 +6,11 @@ import 'steam_integration.dart';
 /// Concrete implementation of Steam integration
 class SteamIntegrationImpl implements ISteamIntegration {
   static const MethodChannel _channel = MethodChannel('steam_integration');
-  
+
   bool _isInitialized = false;
   bool _isDesktopPetMode = false;
   bool _isAlwaysOnTop = false;
-  
+
   // Desktop pet preferences
   Map<String, dynamic> _petPreferences = {
     'position': {'x': 100.0, 'y': 100.0},
@@ -24,12 +24,12 @@ class SteamIntegrationImpl implements ISteamIntegration {
   @override
   Future<void> initialize() async {
     if (_isInitialized) return;
-    
+
     try {
       // Initialize Steam API if available
       final result = await _channel.invokeMethod('initialize');
       _isInitialized = result == true;
-      
+
       // Load user preferences for desktop pet
       await _loadPetPreferences();
     } catch (e) {
@@ -41,7 +41,7 @@ class SteamIntegrationImpl implements ISteamIntegration {
   @override
   Future<void> enableDesktopPetMode() async {
     if (!_isInitialized) await initialize();
-    
+
     try {
       // Enable desktop pet mode
       await _channel.invokeMethod('enableDesktopPetMode', {
@@ -49,19 +49,18 @@ class SteamIntegrationImpl implements ISteamIntegration {
         'size': _petPreferences['size'],
         'opacity': _petPreferences['opacity'],
       });
-      
+
       _isDesktopPetMode = true;
-      
+
       // Set always on top if enabled in preferences
       if (_petPreferences['always_on_top'] == true) {
         await setAlwaysOnTop(true);
       }
-      
+
       // Start interactive behaviors if enabled
       if (_petPreferences['interactions_enabled'] == true) {
         await _startInteractiveBehaviors();
       }
-      
     } catch (e) {
       // Fallback implementation for testing/development
       _isDesktopPetMode = true;
@@ -71,15 +70,14 @@ class SteamIntegrationImpl implements ISteamIntegration {
   @override
   Future<void> disableDesktopPetMode() async {
     if (!_isInitialized) return;
-    
+
     try {
       await _channel.invokeMethod('disableDesktopPetMode');
       _isDesktopPetMode = false;
       _isAlwaysOnTop = false;
-      
+
       // Stop interactive behaviors
       await _stopInteractiveBehaviors();
-      
     } catch (e) {
       // Fallback implementation
       _isDesktopPetMode = false;
@@ -93,15 +91,16 @@ class SteamIntegrationImpl implements ISteamIntegration {
   @override
   Future<void> setAlwaysOnTop(bool alwaysOnTop) async {
     if (!_isInitialized) return;
-    
+
     try {
-      await _channel.invokeMethod('setAlwaysOnTop', {'alwaysOnTop': alwaysOnTop});
+      await _channel.invokeMethod('setAlwaysOnTop', {
+        'alwaysOnTop': alwaysOnTop,
+      });
       _isAlwaysOnTop = alwaysOnTop;
-      
+
       // Update preferences
       _petPreferences['always_on_top'] = alwaysOnTop;
       await _savePetPreferences();
-      
     } catch (e) {
       // Fallback implementation
       _isAlwaysOnTop = alwaysOnTop;
@@ -111,7 +110,7 @@ class SteamIntegrationImpl implements ISteamIntegration {
   @override
   Future<SteamUserInfo?> getSteamUserInfo() async {
     if (!_isInitialized) return null;
-    
+
     try {
       final result = await _channel.invokeMethod('getSteamUserInfo');
       if (result != null) {
@@ -124,14 +123,14 @@ class SteamIntegrationImpl implements ISteamIntegration {
     } catch (e) {
       // Return null if Steam is not available
     }
-    
+
     return null;
   }
 
   @override
   Future<void> openSteamWorkshop() async {
     if (!_isInitialized) return;
-    
+
     try {
       await _channel.invokeMethod('openSteamWorkshop');
     } catch (e) {
@@ -145,11 +144,9 @@ class SteamIntegrationImpl implements ISteamIntegration {
   @override
   Future<void> uploadToWorkshop(String pluginId) async {
     if (!_isInitialized) return;
-    
+
     try {
-      await _channel.invokeMethod('uploadToWorkshop', {
-        'pluginId': pluginId,
-      });
+      await _channel.invokeMethod('uploadToWorkshop', {'pluginId': pluginId});
     } catch (e) {
       throw Exception('Failed to upload plugin to Steam Workshop: $e');
     }
@@ -158,7 +155,7 @@ class SteamIntegrationImpl implements ISteamIntegration {
   @override
   Future<void> downloadFromWorkshop(String workshopId) async {
     if (!_isInitialized) return;
-    
+
     try {
       await _channel.invokeMethod('downloadFromWorkshop', {
         'workshopId': workshopId,
@@ -171,28 +168,32 @@ class SteamIntegrationImpl implements ISteamIntegration {
   @override
   Future<List<SteamAchievement>> getAchievements() async {
     if (!_isInitialized) return [];
-    
+
     try {
       final result = await _channel.invokeMethod('getAchievements');
       if (result is List) {
-        return result.map((achievement) => SteamAchievement(
-          id: achievement['id'] ?? '',
-          name: achievement['name'] ?? '',
-          description: achievement['description'] ?? '',
-          isUnlocked: achievement['isUnlocked'] ?? false,
-        )).toList();
+        return result
+            .map(
+              (achievement) => SteamAchievement(
+                id: achievement['id'] ?? '',
+                name: achievement['name'] ?? '',
+                description: achievement['description'] ?? '',
+                isUnlocked: achievement['isUnlocked'] ?? false,
+              ),
+            )
+            .toList();
       }
     } catch (e) {
       // Return empty list if Steam is not available
     }
-    
+
     return [];
   }
 
   @override
   Future<void> unlockAchievement(String achievementId) async {
     if (!_isInitialized) return;
-    
+
     try {
       await _channel.invokeMethod('unlockAchievement', {
         'achievementId': achievementId,
@@ -206,7 +207,7 @@ class SteamIntegrationImpl implements ISteamIntegration {
   Future<void> updatePetPreferences(Map<String, dynamic> preferences) async {
     _petPreferences.addAll(preferences);
     await _savePetPreferences();
-    
+
     // Apply changes if in desktop pet mode
     if (_isDesktopPetMode) {
       await _applyPetPreferences();
@@ -237,19 +238,18 @@ class SteamIntegrationImpl implements ISteamIntegration {
 
   Future<void> _applyPetPreferences() async {
     if (!_isDesktopPetMode) return;
-    
+
     try {
       await _channel.invokeMethod('updatePetAppearance', {
         'position': _petPreferences['position'],
         'size': _petPreferences['size'],
         'opacity': _petPreferences['opacity'],
       });
-      
+
       // Update always on top setting
       if (_petPreferences['always_on_top'] != _isAlwaysOnTop) {
         await setAlwaysOnTop(_petPreferences['always_on_top'] ?? false);
       }
-      
     } catch (e) {
       // Silently fail if platform channel is not available
     }
@@ -257,7 +257,7 @@ class SteamIntegrationImpl implements ISteamIntegration {
 
   Future<void> _startInteractiveBehaviors() async {
     if (!_petPreferences['interactions_enabled']) return;
-    
+
     try {
       await _channel.invokeMethod('startInteractiveBehaviors', {
         'animations_enabled': _petPreferences['animations_enabled'],
@@ -278,7 +278,7 @@ class SteamIntegrationImpl implements ISteamIntegration {
   // Smooth transition between modes
   Future<void> transitionToDesktopPet() async {
     if (_isDesktopPetMode) return;
-    
+
     try {
       // Animate transition to desktop pet mode
       await _channel.invokeMethod('transitionToDesktopPet', {
@@ -286,9 +286,8 @@ class SteamIntegrationImpl implements ISteamIntegration {
         'target_position': _petPreferences['position'],
         'target_size': _petPreferences['size'],
       });
-      
+
       _isDesktopPetMode = true;
-      
     } catch (e) {
       // Fallback to instant transition
       await enableDesktopPetMode();
@@ -297,16 +296,15 @@ class SteamIntegrationImpl implements ISteamIntegration {
 
   Future<void> transitionToFullApplication() async {
     if (!_isDesktopPetMode) return;
-    
+
     try {
       // Animate transition to full application mode
       await _channel.invokeMethod('transitionToFullApplication', {
         'duration': 500, // milliseconds
       });
-      
+
       _isDesktopPetMode = false;
       _isAlwaysOnTop = false;
-      
     } catch (e) {
       // Fallback to instant transition
       await disableDesktopPetMode();

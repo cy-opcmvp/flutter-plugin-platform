@@ -4,34 +4,34 @@ import 'steam_integration_impl.dart';
 abstract class ISteamIntegration {
   /// Initialize Steam integration
   Future<void> initialize();
-  
+
   /// Enable desktop pet mode
   Future<void> enableDesktopPetMode();
-  
+
   /// Disable desktop pet mode
   Future<void> disableDesktopPetMode();
-  
+
   /// Check if in desktop pet mode
   bool get isDesktopPetMode;
-  
+
   /// Set window to always on top
   Future<void> setAlwaysOnTop(bool alwaysOnTop);
-  
+
   /// Get Steam user information
   Future<SteamUserInfo?> getSteamUserInfo();
-  
+
   /// Access Steam Workshop
   Future<void> openSteamWorkshop();
-  
+
   /// Upload plugin to Steam Workshop
   Future<void> uploadToWorkshop(String pluginId);
-  
+
   /// Download plugin from Steam Workshop
   Future<void> downloadFromWorkshop(String workshopId);
-  
+
   /// Get Steam achievements
   Future<List<SteamAchievement>> getAchievements();
-  
+
   /// Unlock achievement
   Future<void> unlockAchievement(String achievementId);
 }

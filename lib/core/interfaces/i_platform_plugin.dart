@@ -1,26 +1,21 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import '../models/plugin_models.dart';
 import 'i_plugin.dart';
 
 /// 平台枚举
-enum TargetPlatform {
-  windows,
-  macos,
-  linux,
-  android,
-  ios,
-  web,
-}
+enum TargetPlatform { windows, macos, linux, android, ios, web }
 
 /// 功能能力类型
 enum CapabilityType {
   /// 完整支持
   full,
+
   /// 部分支持（有限制）
   partial,
+
   /// 不支持
   unsupported,
+
   /// 计划中
   planned,
 }
@@ -51,13 +46,17 @@ class PlatformCapability {
   });
 
   /// 是否支持该功能
-  bool get isSupported => type == CapabilityType.full || type == CapabilityType.partial;
+  bool get isSupported =>
+      type == CapabilityType.full || type == CapabilityType.partial;
 
   /// 是否完全支持
   bool get isFullySupported => type == CapabilityType.full;
 
   /// 创建完整支持的能力
-  factory PlatformCapability.fullSupported(TargetPlatform platform, String description) {
+  factory PlatformCapability.fullSupported(
+    TargetPlatform platform,
+    String description,
+  ) {
     return PlatformCapability(
       platform: platform,
       type: CapabilityType.full,
@@ -114,14 +113,17 @@ class PlatformCapability {
       'type': type.name,
       'description': description,
       if (limitations != null) 'limitations': limitations,
-      if (implementationStatus != null) 'implementationStatus': implementationStatus,
+      if (implementationStatus != null)
+        'implementationStatus': implementationStatus,
     };
   }
 
   /// 从 JSON 创建
   factory PlatformCapability.fromJson(Map<String, dynamic> json) {
     return PlatformCapability(
-      platform: TargetPlatform.values.firstWhere((p) => p.name == json['platform']),
+      platform: TargetPlatform.values.firstWhere(
+        (p) => p.name == json['platform'],
+      ),
       type: CapabilityType.values.firstWhere((t) => t.name == json['type']),
       description: json['description'],
       limitations: json['limitations'],
@@ -151,17 +153,15 @@ class PluginPlatformCapabilities {
   PlatformCapability get currentPlatformCapability {
     final currentPlatform = _getCurrentPlatform();
     return capabilities[currentPlatform] ??
-        PlatformCapability.unsupported(
-          currentPlatform,
-          '未在此平台实现',
-        );
+        PlatformCapability.unsupported(currentPlatform, '未在此平台实现');
   }
 
   /// 当前平台是否支持
   bool get isCurrentPlatformSupported => currentPlatformCapability.isSupported;
 
   /// 当前平台是否完全支持
-  bool get isCurrentPlatformFullySupported => currentPlatformCapability.isFullySupported;
+  bool get isCurrentPlatformFullySupported =>
+      currentPlatformCapability.isFullySupported;
 
   /// 获取当前平台
   TargetPlatform _getCurrentPlatform() {
@@ -269,9 +269,7 @@ abstract class PlatformPluginBase implements IPlatformPlugin {
   Widget buildUnsupportedPlatformUI(BuildContext context) {
     final capability = currentCapability;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(name),
-      ),
+      appBar: AppBar(title: Text(name)),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -287,27 +285,25 @@ abstract class PlatformPluginBase implements IPlatformPlugin {
               ),
               const SizedBox(height: 24),
               Text(
-                capability.type == CapabilityType.planned
-                    ? '功能开发中'
-                    : '暂不支持',
+                capability.type == CapabilityType.planned ? '功能开发中' : '暂不支持',
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: 16),
               Text(
                 capability.description,
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey[600],
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
               ),
               if (capability.limitations != null) ...[
                 const SizedBox(height: 12),
                 Text(
                   '限制: ${capability.limitations}',
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.orange[700],
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: Colors.orange[700]),
                 ),
               ],
               const SizedBox(height: 24),

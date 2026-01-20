@@ -5,31 +5,31 @@ import 'mobile_services_impl.dart';
 abstract class IMobileServices {
   /// Initialize mobile services
   Future<void> initialize();
-  
+
   /// Handle device orientation changes
   Future<void> setPreferredOrientations(List<DeviceOrientation> orientations);
-  
+
   /// Get current device orientation
   DeviceOrientation get currentOrientation;
-  
+
   /// Stream of orientation changes
   Stream<DeviceOrientation> get orientationStream;
-  
+
   /// Show mobile-specific notifications
   Future<void> showMobileNotification(MobileNotification notification);
-  
+
   /// Request mobile permissions
   Future<bool> requestMobilePermission(MobilePermission permission);
-  
+
   /// Check mobile permission status
   Future<bool> hasMobilePermission(MobilePermission permission);
-  
+
   /// Handle mobile gestures
   void registerGestureHandler(MobileGestureHandler handler);
-  
+
   /// Get device information
   Future<MobileDeviceInfo> getDeviceInfo();
-  
+
   /// Handle app lifecycle changes
   void setAppLifecycleHandler(AppLifecycleHandler handler);
 }
@@ -57,7 +57,7 @@ enum MobilePermission {
   storage,
   notifications,
   contacts,
-  calendar
+  calendar,
 }
 
 /// Mobile gesture handler

@@ -114,7 +114,8 @@ class ScreenshotSettings extends BasePluginSettings {
     return ScreenshotSettings(
       version: json['version'] as String? ?? '1.0.0',
       savePath: json['savePath'] as String? ?? '{documents}/Screenshots',
-      filenameFormat: json['filenameFormat'] as String? ?? 'screenshot_{timestamp}',
+      filenameFormat:
+          json['filenameFormat'] as String? ?? 'screenshot_{timestamp}',
       imageFormat: ImageFormat.values.firstWhere(
         (e) => e.name == json['imageFormat'] as String?,
         orElse: () => ImageFormat.png,
@@ -188,7 +189,8 @@ class ScreenshotSettings extends BasePluginSettings {
       showPreview: showPreview ?? this.showPreview,
       saveHistory: saveHistory ?? this.saveHistory,
       maxHistoryCount: maxHistoryCount ?? this.maxHistoryCount,
-      historyRetentionPeriod: historyRetentionPeriod ?? this.historyRetentionPeriod,
+      historyRetentionPeriod:
+          historyRetentionPeriod ?? this.historyRetentionPeriod,
       shortcuts: shortcuts ?? this.shortcuts,
       pinSettings: pinSettings ?? this.pinSettings,
     );
@@ -270,11 +272,7 @@ class PinSettings {
 }
 
 /// 图片格式枚举
-enum ImageFormat {
-  png,
-  jpeg,
-  webp,
-}
+enum ImageFormat { png, jpeg, webp }
 
 /// 图片格式扩展
 extension ImageFormatExtension on ImageFormat {

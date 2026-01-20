@@ -298,10 +298,7 @@ class ScreenshotPlugin extends PlatformPluginBase {
   }
 
   /// 处理截图
-  Future<void> _processScreenshot(
-    Uint8List bytes,
-    ScreenshotType type,
-  ) async {
+  Future<void> _processScreenshot(Uint8List bytes, ScreenshotType type) async {
     try {
       // 保存到文件（不传入 filename，让 FileManagerService 自动生成唯一的文件名）
       final filePath = await _fileManager.saveScreenshot(bytes);
@@ -428,13 +425,16 @@ class ScreenshotPlugin extends PlatformPluginBase {
       }
 
       // 加载截图历史记录（仅加载元数据，不加载实际文件）
-      final screenshotsData =
-          await _context.dataStorage.retrieve<List<dynamic>>('screenshots');
+      final screenshotsData = await _context.dataStorage
+          .retrieve<List<dynamic>>('screenshots');
       if (screenshotsData != null) {
         _screenshots.clear();
         _screenshots.addAll(
           screenshotsData
-              .map((data) => ScreenshotRecord.fromJson(data as Map<String, dynamic>))
+              .map(
+                (data) =>
+                    ScreenshotRecord.fromJson(data as Map<String, dynamic>),
+              )
               .toList(),
         );
       }
@@ -451,11 +451,11 @@ class ScreenshotPlugin extends PlatformPluginBase {
       await ConfigManager.instance.savePluginConfig(id, config.toJson());
 
       // 只保存最近 100 条记录的元数据到 dataStorage
-      final screenshotsToSave = _screenshots.take(100).map((s) => s.toJson()).toList();
-      await _context.dataStorage.store(
-        'screenshots',
-        screenshotsToSave,
-      );
+      final screenshotsToSave = _screenshots
+          .take(100)
+          .map((s) => s.toJson())
+          .toList();
+      await _context.dataStorage.store('screenshots', screenshotsToSave);
     } catch (e) {
       debugPrint('Failed to save state: $e');
     }
@@ -533,11 +533,7 @@ class _ScreenshotPluginWidgetState extends State<_ScreenshotPluginWidget> {
   @override
   Widget build(BuildContext context) {
     if (!widget.plugin._isInitialized) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return ScreenshotMainWidget(plugin: widget.plugin);

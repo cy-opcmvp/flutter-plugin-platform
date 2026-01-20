@@ -14,7 +14,8 @@ class HotReloadException implements Exception {
   const HotReloadException(this.message, {this.pluginId, this.cause});
 
   @override
-  String toString() => 'HotReloadException: $message${pluginId != null ? ' (Plugin: $pluginId)' : ''}';
+  String toString() =>
+      'HotReloadException: $message${pluginId != null ? ' (Plugin: $pluginId)' : ''}';
 }
 
 /// Implementation of hot-reload manager
@@ -22,8 +23,9 @@ class HotReloadManager implements IHotReloadManager {
   final IPluginManager _pluginManager;
   final Map<String, List<PluginVersionInfo>> _versionHistory = {};
   final Map<String, Timer> _updateCheckTimers = {};
-  final StreamController<HotReloadEvent> _eventController = StreamController<HotReloadEvent>.broadcast();
-  
+  final StreamController<HotReloadEvent> _eventController =
+      StreamController<HotReloadEvent>.broadcast();
+
   bool _isInitialized = false;
   bool _autoUpdateDetectionEnabled = false;
   Duration _updateCheckInterval = const Duration(minutes: 5);
@@ -39,7 +41,7 @@ class HotReloadManager implements IHotReloadManager {
   @override
   Future<void> initialize() async {
     if (_isInitialized) return;
-    
+
     await _loadVersionHistory();
     _isInitialized = true;
   }
@@ -47,16 +49,16 @@ class HotReloadManager implements IHotReloadManager {
   @override
   Future<void> shutdown() async {
     if (!_isInitialized) return;
-    
+
     // Stop all update check timers
     for (final timer in _updateCheckTimers.values) {
       timer.cancel();
     }
     _updateCheckTimers.clear();
-    
+
     // Close event stream
     await _eventController.close();
-    
+
     _isInitialized = false;
   }
 
@@ -66,59 +68,75 @@ class HotReloadManager implements IHotReloadManager {
   @override
   Future<List<PluginUpdateInfo>> checkForUpdates() async {
     _ensureInitialized();
-    
+
     final updates = <PluginUpdateInfo>[];
     final availablePlugins = await _pluginManager.getAvailablePlugins();
-    
+
     for (final plugin in availablePlugins) {
       final updateInfo = await _checkPluginForUpdate(plugin);
       if (updateInfo != null) {
         updates.add(updateInfo);
-        
+
         // Emit update detected event
-        _eventController.add(HotReloadEvent(
-          type: HotReloadEventType.updateDetected,
-          pluginId: plugin.id,
-          version: updateInfo.newVersion,
-          timestamp: DateTime.now(),
-          data: {
-            'currentVersion': updateInfo.currentVersion,
-            'newVersion': updateInfo.newVersion,
-            'isCompatible': updateInfo.isCompatible,
-          },
-        ));
+        _eventController.add(
+          HotReloadEvent(
+            type: HotReloadEventType.updateDetected,
+            pluginId: plugin.id,
+            version: updateInfo.newVersion,
+            timestamp: DateTime.now(),
+            data: {
+              'currentVersion': updateInfo.currentVersion,
+              'newVersion': updateInfo.newVersion,
+              'isCompatible': updateInfo.isCompatible,
+            },
+          ),
+        );
       }
     }
-    
+
     return updates;
   }
 
   @override
-  Future<void> hotReloadPlugin(String pluginId, PluginDescriptor newDescriptor) async {
+  Future<void> hotReloadPlugin(
+    String pluginId,
+    PluginDescriptor newDescriptor,
+  ) async {
     _ensureInitialized();
-    
+
     // Emit reload started event
-    _eventController.add(HotReloadEvent(
-      type: HotReloadEventType.reloadStarted,
-      pluginId: pluginId,
-      version: newDescriptor.version,
-      timestamp: DateTime.now(),
-    ));
+    _eventController.add(
+      HotReloadEvent(
+        type: HotReloadEventType.reloadStarted,
+        pluginId: pluginId,
+        version: newDescriptor.version,
+        timestamp: DateTime.now(),
+      ),
+    );
 
     try {
       // Get current plugin info
       final currentPluginInfo = await _pluginManager.getPluginInfo(pluginId);
       if (currentPluginInfo == null) {
-        throw HotReloadException('Plugin $pluginId not found', pluginId: pluginId);
+        throw HotReloadException(
+          'Plugin $pluginId not found',
+          pluginId: pluginId,
+        );
       }
 
       // Validate new descriptor
       if (!newDescriptor.isValid()) {
-        throw HotReloadException('Invalid new plugin descriptor', pluginId: pluginId);
+        throw HotReloadException(
+          'Invalid new plugin descriptor',
+          pluginId: pluginId,
+        );
       }
 
       // Check version compatibility
-      if (!_isVersionCompatible(currentPluginInfo.descriptor.version, newDescriptor.version)) {
+      if (!_isVersionCompatible(
+        currentPluginInfo.descriptor.version,
+        newDescriptor.version,
+      )) {
         throw HotReloadException(
           'Version ${newDescriptor.version} is not compatible with current version ${currentPluginInfo.descriptor.version}',
           pluginId: pluginId,
@@ -130,7 +148,9 @@ class HotReloadManager implements IHotReloadManager {
 
       // Get current plugin state to preserve it
       final currentPlugin = _pluginManager.getPlugin(pluginId);
-      final preservedState = currentPlugin != null ? await _extractPluginState(currentPlugin) : null;
+      final preservedState = currentPlugin != null
+          ? await _extractPluginState(currentPlugin)
+          : null;
 
       // Unload current plugin
       if (currentPlugin != null) {
@@ -153,28 +173,31 @@ class HotReloadManager implements IHotReloadManager {
       await _updateVersionHistory(pluginId, newDescriptor);
 
       // Emit reload completed event
-      _eventController.add(HotReloadEvent(
-        type: HotReloadEventType.reloadCompleted,
-        pluginId: pluginId,
-        version: newDescriptor.version,
-        timestamp: DateTime.now(),
-        data: {
-          'previousVersion': currentPluginInfo.descriptor.version,
-          'newVersion': newDescriptor.version,
-          'statePreserved': preservedState != null,
-        },
-      ));
-
+      _eventController.add(
+        HotReloadEvent(
+          type: HotReloadEventType.reloadCompleted,
+          pluginId: pluginId,
+          version: newDescriptor.version,
+          timestamp: DateTime.now(),
+          data: {
+            'previousVersion': currentPluginInfo.descriptor.version,
+            'newVersion': newDescriptor.version,
+            'statePreserved': preservedState != null,
+          },
+        ),
+      );
     } catch (e) {
       // Emit reload failed event
-      _eventController.add(HotReloadEvent(
-        type: HotReloadEventType.reloadFailed,
-        pluginId: pluginId,
-        version: newDescriptor.version,
-        timestamp: DateTime.now(),
-        data: {'error': e.toString()},
-      ));
-      
+      _eventController.add(
+        HotReloadEvent(
+          type: HotReloadEventType.reloadFailed,
+          pluginId: pluginId,
+          version: newDescriptor.version,
+          timestamp: DateTime.now(),
+          data: {'error': e.toString()},
+        ),
+      );
+
       rethrow;
     }
   }
@@ -182,19 +205,24 @@ class HotReloadManager implements IHotReloadManager {
   @override
   Future<void> rollbackPlugin(String pluginId) async {
     _ensureInitialized();
-    
+
     // Emit rollback started event
-    _eventController.add(HotReloadEvent(
-      type: HotReloadEventType.rollbackStarted,
-      pluginId: pluginId,
-      timestamp: DateTime.now(),
-    ));
+    _eventController.add(
+      HotReloadEvent(
+        type: HotReloadEventType.rollbackStarted,
+        pluginId: pluginId,
+        timestamp: DateTime.now(),
+      ),
+    );
 
     try {
       // Get version history for the plugin
       final versions = _versionHistory[pluginId];
       if (versions == null || versions.isEmpty) {
-        throw HotReloadException('No previous versions available for rollback', pluginId: pluginId);
+        throw HotReloadException(
+          'No previous versions available for rollback',
+          pluginId: pluginId,
+        );
       }
 
       // Find the most recent non-active version
@@ -204,7 +232,9 @@ class HotReloadManager implements IHotReloadManager {
 
       // Get current plugin state to preserve it
       final currentPlugin = _pluginManager.getPlugin(pluginId);
-      final preservedState = currentPlugin != null ? await _extractPluginState(currentPlugin) : null;
+      final preservedState = currentPlugin != null
+          ? await _extractPluginState(currentPlugin)
+          : null;
 
       // Unload current plugin
       if (currentPlugin != null) {
@@ -216,7 +246,9 @@ class HotReloadManager implements IHotReloadManager {
       await _pluginManager.registerPlugin(previousVersion.descriptor);
 
       // Load previous plugin version
-      final rolledBackPlugin = await _pluginManager.loadPlugin(previousVersion.descriptor);
+      final rolledBackPlugin = await _pluginManager.loadPlugin(
+        previousVersion.descriptor,
+      );
 
       // Restore preserved state if available
       if (preservedState != null) {
@@ -227,26 +259,29 @@ class HotReloadManager implements IHotReloadManager {
       await _markVersionAsActive(pluginId, previousVersion.version);
 
       // Emit rollback completed event
-      _eventController.add(HotReloadEvent(
-        type: HotReloadEventType.rollbackCompleted,
-        pluginId: pluginId,
-        version: previousVersion.version,
-        timestamp: DateTime.now(),
-        data: {
-          'rolledBackToVersion': previousVersion.version,
-          'statePreserved': preservedState != null,
-        },
-      ));
-
+      _eventController.add(
+        HotReloadEvent(
+          type: HotReloadEventType.rollbackCompleted,
+          pluginId: pluginId,
+          version: previousVersion.version,
+          timestamp: DateTime.now(),
+          data: {
+            'rolledBackToVersion': previousVersion.version,
+            'statePreserved': preservedState != null,
+          },
+        ),
+      );
     } catch (e) {
       // Emit rollback failed event
-      _eventController.add(HotReloadEvent(
-        type: HotReloadEventType.rollbackFailed,
-        pluginId: pluginId,
-        timestamp: DateTime.now(),
-        data: {'error': e.toString()},
-      ));
-      
+      _eventController.add(
+        HotReloadEvent(
+          type: HotReloadEventType.rollbackFailed,
+          pluginId: pluginId,
+          timestamp: DateTime.now(),
+          data: {'error': e.toString()},
+        ),
+      );
+
       rethrow;
     }
   }
@@ -254,17 +289,17 @@ class HotReloadManager implements IHotReloadManager {
   @override
   List<String> getAvailableVersions(String pluginId) {
     _ensureInitialized();
-    
+
     final versions = _versionHistory[pluginId];
     if (versions == null) return [];
-    
+
     return versions.map((v) => v.version).toList()..sort();
   }
 
   @override
   void setAutoUpdateDetection(bool enabled) {
     _autoUpdateDetectionEnabled = enabled;
-    
+
     if (enabled) {
       _startAutoUpdateDetection();
     } else {
@@ -278,7 +313,7 @@ class HotReloadManager implements IHotReloadManager {
   /// Set the interval for automatic update checks
   void setUpdateCheckInterval(Duration interval) {
     _updateCheckInterval = interval;
-    
+
     if (_autoUpdateDetectionEnabled) {
       _stopAutoUpdateDetection();
       _startAutoUpdateDetection();
@@ -297,7 +332,9 @@ class HotReloadManager implements IHotReloadManager {
 
   void _ensureInitialized() {
     if (!_isInitialized) {
-      throw StateError('HotReloadManager not initialized. Call initialize() first.');
+      throw StateError(
+        'HotReloadManager not initialized. Call initialize() first.',
+      );
     }
   }
 
@@ -312,13 +349,16 @@ class HotReloadManager implements IHotReloadManager {
     // For now, this is a no-op
   }
 
-  Future<PluginUpdateInfo?> _checkPluginForUpdate(PluginDescriptor currentPlugin) async {
+  Future<PluginUpdateInfo?> _checkPluginForUpdate(
+    PluginDescriptor currentPlugin,
+  ) async {
     // In a real implementation, this would check external sources for updates
     // For now, we'll simulate by checking if there's a newer version in our mock system
-    
+
     // Mock update detection - randomly decide if there's an update
     final random = DateTime.now().millisecondsSinceEpoch % 10;
-    if (random < 2) { // 20% chance of having an update
+    if (random < 2) {
+      // 20% chance of having an update
       final newVersion = _generateNextVersion(currentPlugin.version);
       final newDescriptor = PluginDescriptor(
         id: currentPlugin.id,
@@ -329,7 +369,7 @@ class HotReloadManager implements IHotReloadManager {
         metadata: {...currentPlugin.metadata, 'updated': true},
         entryPoint: currentPlugin.entryPoint,
       );
-      
+
       return PluginUpdateInfo(
         pluginId: currentPlugin.id,
         currentVersion: currentPlugin.version,
@@ -340,7 +380,7 @@ class HotReloadManager implements IHotReloadManager {
         changeLog: ['Bug fixes', 'Performance improvements'],
       );
     }
-    
+
     return null;
   }
 
@@ -358,16 +398,19 @@ class HotReloadManager implements IHotReloadManager {
     // Simple compatibility check - major version must be the same
     final currentParts = currentVersion.split('.');
     final newParts = newVersion.split('.');
-    
+
     if (currentParts.isEmpty || newParts.isEmpty) return false;
-    
+
     // Major version must be the same for compatibility
     return currentParts[0] == newParts[0];
   }
 
-  Future<void> _storeVersionInHistory(String pluginId, PluginDescriptor descriptor) async {
+  Future<void> _storeVersionInHistory(
+    String pluginId,
+    PluginDescriptor descriptor,
+  ) async {
     final versions = _versionHistory[pluginId] ?? [];
-    
+
     // Mark all existing versions as inactive
     for (final version in versions) {
       final updatedVersion = PluginVersionInfo(
@@ -379,7 +422,7 @@ class HotReloadManager implements IHotReloadManager {
       );
       versions[versions.indexOf(version)] = updatedVersion;
     }
-    
+
     // Add current version to history
     final versionInfo = PluginVersionInfo(
       version: descriptor.version,
@@ -388,16 +431,19 @@ class HotReloadManager implements IHotReloadManager {
       isActive: false,
       metadata: {'storedForRollback': true},
     );
-    
+
     versions.add(versionInfo);
     _versionHistory[pluginId] = versions;
-    
+
     await _saveVersionHistory();
   }
 
-  Future<void> _updateVersionHistory(String pluginId, PluginDescriptor newDescriptor) async {
+  Future<void> _updateVersionHistory(
+    String pluginId,
+    PluginDescriptor newDescriptor,
+  ) async {
     final versions = _versionHistory[pluginId] ?? [];
-    
+
     // Mark all existing versions as inactive
     for (int i = 0; i < versions.length; i++) {
       final version = versions[i];
@@ -409,7 +455,7 @@ class HotReloadManager implements IHotReloadManager {
         metadata: version.metadata,
       );
     }
-    
+
     // Add new version as active
     final newVersionInfo = PluginVersionInfo(
       version: newDescriptor.version,
@@ -418,17 +464,17 @@ class HotReloadManager implements IHotReloadManager {
       isActive: true,
       metadata: {'hotReloaded': true},
     );
-    
+
     versions.add(newVersionInfo);
     _versionHistory[pluginId] = versions;
-    
+
     await _saveVersionHistory();
   }
 
   Future<void> _markVersionAsActive(String pluginId, String version) async {
     final versions = _versionHistory[pluginId];
     if (versions == null) return;
-    
+
     for (int i = 0; i < versions.length; i++) {
       final versionInfo = versions[i];
       versions[i] = PluginVersionInfo(
@@ -439,7 +485,7 @@ class HotReloadManager implements IHotReloadManager {
         metadata: versionInfo.metadata,
       );
     }
-    
+
     await _saveVersionHistory();
   }
 
@@ -453,7 +499,10 @@ class HotReloadManager implements IHotReloadManager {
     };
   }
 
-  Future<void> _restorePluginState(IPlugin plugin, Map<String, dynamic> state) async {
+  Future<void> _restorePluginState(
+    IPlugin plugin,
+    Map<String, dynamic> state,
+  ) async {
     // In a real implementation, this would restore the plugin's state
     // For now, we'll just simulate the restoration
     await plugin.onStateChanged(PluginState.active);
@@ -461,7 +510,7 @@ class HotReloadManager implements IHotReloadManager {
 
   void _startAutoUpdateDetection() {
     _stopAutoUpdateDetection(); // Stop any existing timers
-    
+
     // Start update check timer for each plugin
     _pluginManager.getAvailablePlugins().then((plugins) {
       for (final plugin in plugins) {
@@ -470,24 +519,26 @@ class HotReloadManager implements IHotReloadManager {
             final updateInfo = await _checkPluginForUpdate(plugin);
             if (updateInfo != null) {
               // Emit update detected event
-              _eventController.add(HotReloadEvent(
-                type: HotReloadEventType.updateDetected,
-                pluginId: plugin.id,
-                version: updateInfo.newVersion,
-                timestamp: DateTime.now(),
-                data: {
-                  'currentVersion': updateInfo.currentVersion,
-                  'newVersion': updateInfo.newVersion,
-                  'isCompatible': updateInfo.isCompatible,
-                  'autoDetected': true,
-                },
-              ));
+              _eventController.add(
+                HotReloadEvent(
+                  type: HotReloadEventType.updateDetected,
+                  pluginId: plugin.id,
+                  version: updateInfo.newVersion,
+                  timestamp: DateTime.now(),
+                  data: {
+                    'currentVersion': updateInfo.currentVersion,
+                    'newVersion': updateInfo.newVersion,
+                    'isCompatible': updateInfo.isCompatible,
+                    'autoDetected': true,
+                  },
+                ),
+              );
             }
           } catch (e) {
             // Log error but continue checking
           }
         });
-        
+
         _updateCheckTimers[plugin.id] = timer;
       }
     });

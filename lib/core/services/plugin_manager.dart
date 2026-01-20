@@ -22,7 +22,8 @@ class PluginException implements Exception {
   const PluginException(this.message, {this.pluginId, this.cause});
 
   @override
-  String toString() => 'PluginException: $message${pluginId != null ? ' (Plugin: $pluginId)' : ''}';
+  String toString() =>
+      'PluginException: $message${pluginId != null ? ' (Plugin: $pluginId)' : ''}';
 }
 
 /// Security validation result
@@ -39,12 +40,7 @@ class SecurityValidationResult {
 }
 
 /// Security levels for plugins
-enum SecurityLevel {
-  low,
-  medium,
-  high,
-  critical
-}
+enum SecurityLevel { low, medium, high, critical }
 
 /// Plugin registry entry
 class PluginRegistryEntry {
@@ -73,8 +69,12 @@ class PluginRegistryEntry {
     return PluginRegistryEntry(
       descriptor: PluginDescriptor.fromJson(json['descriptor']),
       installedAt: DateTime.parse(json['installedAt']),
-      lastUsed: json['lastUsed'] != null ? DateTime.parse(json['lastUsed']) : null,
-      securityLevel: SecurityLevel.values.firstWhere((e) => e.name == json['securityLevel']),
+      lastUsed: json['lastUsed'] != null
+          ? DateTime.parse(json['lastUsed'])
+          : null,
+      securityLevel: SecurityLevel.values.firstWhere(
+        (e) => e.name == json['securityLevel'],
+      ),
     );
   }
 }
@@ -87,9 +87,10 @@ class PluginManager implements IPluginManager {
   final Map<String, PluginSandbox> _pluginSandboxes = {};
   final IPlatformServices _platformServices;
   final PermissionManager _permissionManager = PermissionManager();
-  final StreamController<PluginEvent> _eventController = StreamController<PluginEvent>.broadcast();
+  final StreamController<PluginEvent> _eventController =
+      StreamController<PluginEvent>.broadcast();
   late final IHotReloadManager _hotReloadManager;
-  
+
   bool _isInitialized = false;
 
   PluginManager(this._platformServices) {
@@ -99,7 +100,7 @@ class PluginManager implements IPluginManager {
   /// Initialize the plugin manager
   Future<void> initialize() async {
     if (_isInitialized) return;
-    
+
     await _loadPluginRegistry();
     await _hotReloadManager.initialize();
     _isInitialized = true;
@@ -108,22 +109,22 @@ class PluginManager implements IPluginManager {
   /// Shutdown the plugin manager
   Future<void> shutdown() async {
     if (!_isInitialized) return;
-    
+
     // Shutdown hot-reload manager
     await _hotReloadManager.shutdown();
-    
+
     // Unload all active plugins
     final activePluginIds = List<String>.from(_activePlugins.keys);
     for (final pluginId in activePluginIds) {
       await unloadPlugin(pluginId);
     }
-    
+
     // Clear registry
     _pluginRegistry.clear();
-    
+
     // Close event stream
     await _eventController.close();
-    
+
     _isInitialized = false;
   }
 
@@ -133,14 +134,17 @@ class PluginManager implements IPluginManager {
   @override
   Future<IPlugin> loadPlugin(PluginDescriptor descriptor) async {
     _ensureInitialized();
-    
+
     if (_activePlugins.containsKey(descriptor.id)) {
       throw PluginException('Plugin ${descriptor.id} is already loaded');
     }
 
     // Validate plugin descriptor
     if (!descriptor.isValid()) {
-      throw PluginException('Invalid plugin descriptor', pluginId: descriptor.id);
+      throw PluginException(
+        'Invalid plugin descriptor',
+        pluginId: descriptor.id,
+      );
     }
 
     // Check if plugin is registered
@@ -155,7 +159,7 @@ class PluginManager implements IPluginManager {
         pluginId: descriptor.id,
         initialState: PluginState.inactive,
       );
-      
+
       final runtimeInfo = PluginRuntimeInfo(
         descriptor: descriptor,
         stateManager: stateManager,
@@ -165,26 +169,34 @@ class PluginManager implements IPluginManager {
 
       // Transition to loading state
       if (!stateManager.transitionTo(PluginState.loading)) {
-        throw PluginException('Failed to transition plugin to loading state', pluginId: descriptor.id);
+        throw PluginException(
+          'Failed to transition plugin to loading state',
+          pluginId: descriptor.id,
+        );
       }
 
       // Grant permissions to plugin
-      _permissionManager.grantPermissions(descriptor.id, descriptor.requiredPermissions.toSet());
+      _permissionManager.grantPermissions(
+        descriptor.id,
+        descriptor.requiredPermissions.toSet(),
+      );
 
       // Create sandbox for plugin
-      final resourceLimits = ResourceLimits.fromSecurityLevel(registryEntry.securityLevel);
+      final resourceLimits = ResourceLimits.fromSecurityLevel(
+        registryEntry.securityLevel,
+      );
       final sandbox = PluginSandbox(
         pluginId: descriptor.id,
         allowedPermissions: descriptor.requiredPermissions.toSet(),
         limits: resourceLimits,
       );
-      
+
       _pluginSandboxes[descriptor.id] = sandbox;
       sandbox.start();
 
       // Create plugin instance (simplified - in real implementation would load from entry point)
       final plugin = _createPluginInstance(descriptor);
-      
+
       // Create plugin context
       final context = PluginContext(
         platformServices: _platformServices,
@@ -201,7 +213,10 @@ class PluginManager implements IPluginManager {
 
       // Transition to active state
       if (!stateManager.transitionTo(PluginState.active)) {
-        throw PluginException('Failed to transition plugin to active state', pluginId: descriptor.id);
+        throw PluginException(
+          'Failed to transition plugin to active state',
+          pluginId: descriptor.id,
+        );
       }
 
       _activePlugins[descriptor.id] = plugin;
@@ -210,25 +225,29 @@ class PluginManager implements IPluginManager {
       _updateLastUsedTime(descriptor.id);
 
       // Emit plugin loaded event
-      _eventController.add(PluginEvent(
-        type: PluginEventType.loaded,
-        pluginId: descriptor.id,
-        timestamp: DateTime.now(),
-      ));
+      _eventController.add(
+        PluginEvent(
+          type: PluginEventType.loaded,
+          pluginId: descriptor.id,
+          timestamp: DateTime.now(),
+        ),
+      );
 
       return plugin;
     } catch (e) {
       // Transition to error state if something went wrong
       final runtimeInfo = _pluginRuntimeInfo[descriptor.id];
       runtimeInfo?.stateManager.transitionTo(PluginState.error);
-      
-      _eventController.add(PluginEvent(
-        type: PluginEventType.error,
-        pluginId: descriptor.id,
-        timestamp: DateTime.now(),
-        data: {'error': e.toString()},
-      ));
-      
+
+      _eventController.add(
+        PluginEvent(
+          type: PluginEventType.error,
+          pluginId: descriptor.id,
+          timestamp: DateTime.now(),
+          data: {'error': e.toString()},
+        ),
+      );
+
       rethrow;
     }
   }
@@ -236,7 +255,7 @@ class PluginManager implements IPluginManager {
   @override
   Future<void> unloadPlugin(String pluginId) async {
     _ensureInitialized();
-    
+
     final plugin = _activePlugins[pluginId];
     if (plugin == null) {
       throw PluginException('Plugin $pluginId is not loaded');
@@ -244,7 +263,10 @@ class PluginManager implements IPluginManager {
 
     final runtimeInfo = _pluginRuntimeInfo[pluginId];
     if (runtimeInfo == null) {
-      throw PluginException('Plugin runtime info not found', pluginId: pluginId);
+      throw PluginException(
+        'Plugin runtime info not found',
+        pluginId: pluginId,
+      );
     }
 
     try {
@@ -275,22 +297,26 @@ class PluginManager implements IPluginManager {
       _permissionManager.removePlugin(pluginId);
 
       // Emit plugin unloaded event
-      _eventController.add(PluginEvent(
-        type: PluginEventType.unloaded,
-        pluginId: pluginId,
-        timestamp: DateTime.now(),
-      ));
+      _eventController.add(
+        PluginEvent(
+          type: PluginEventType.unloaded,
+          pluginId: pluginId,
+          timestamp: DateTime.now(),
+        ),
+      );
     } catch (e) {
       // Transition to error state
       runtimeInfo.stateManager.transitionTo(PluginState.error);
-      
-      _eventController.add(PluginEvent(
-        type: PluginEventType.error,
-        pluginId: pluginId,
-        timestamp: DateTime.now(),
-        data: {'error': e.toString()},
-      ));
-      
+
+      _eventController.add(
+        PluginEvent(
+          type: PluginEventType.error,
+          pluginId: pluginId,
+          timestamp: DateTime.now(),
+          data: {'error': e.toString()},
+        ),
+      );
+
       rethrow;
     }
   }
@@ -338,9 +364,12 @@ class PluginManager implements IPluginManager {
   @override
   Future<void> registerPlugin(PluginDescriptor descriptor) async {
     _ensureInitialized();
-    
+
     if (!descriptor.isValid()) {
-      throw PluginException('Invalid plugin descriptor', pluginId: descriptor.id);
+      throw PluginException(
+        'Invalid plugin descriptor',
+        pluginId: descriptor.id,
+      );
     }
 
     if (_pluginRegistry.containsKey(descriptor.id)) {
@@ -356,17 +385,19 @@ class PluginManager implements IPluginManager {
     _pluginRegistry[descriptor.id] = entry;
     await _savePluginRegistry();
 
-    _eventController.add(PluginEvent(
-      type: PluginEventType.registered,
-      pluginId: descriptor.id,
-      timestamp: DateTime.now(),
-    ));
+    _eventController.add(
+      PluginEvent(
+        type: PluginEventType.registered,
+        pluginId: descriptor.id,
+        timestamp: DateTime.now(),
+      ),
+    );
   }
 
   @override
   Future<void> unregisterPlugin(String pluginId) async {
     _ensureInitialized();
-    
+
     // Unload plugin if it's currently loaded
     if (_activePlugins.containsKey(pluginId)) {
       await unloadPlugin(pluginId);
@@ -375,50 +406,59 @@ class PluginManager implements IPluginManager {
     _pluginRegistry.remove(pluginId);
     await _savePluginRegistry();
 
-    _eventController.add(PluginEvent(
-      type: PluginEventType.unregistered,
-      pluginId: pluginId,
-      timestamp: DateTime.now(),
-    ));
+    _eventController.add(
+      PluginEvent(
+        type: PluginEventType.unregistered,
+        pluginId: pluginId,
+        timestamp: DateTime.now(),
+      ),
+    );
   }
 
   @override
   Future<void> installPlugin(PluginPackage package) async {
     _ensureInitialized();
-    
+
     // Validate plugin package
     if (!await validatePlugin(package)) {
-      throw PluginException('Plugin validation failed', pluginId: package.descriptor.id);
+      throw PluginException(
+        'Plugin validation failed',
+        pluginId: package.descriptor.id,
+      );
     }
 
     // Register the plugin
     await registerPlugin(package.descriptor);
 
-    _eventController.add(PluginEvent(
-      type: PluginEventType.installed,
-      pluginId: package.descriptor.id,
-      timestamp: DateTime.now(),
-    ));
+    _eventController.add(
+      PluginEvent(
+        type: PluginEventType.installed,
+        pluginId: package.descriptor.id,
+        timestamp: DateTime.now(),
+      ),
+    );
   }
 
   @override
   Future<void> uninstallPlugin(String pluginId) async {
     _ensureInitialized();
-    
+
     // Unregister the plugin (this will also unload it if loaded)
     await unregisterPlugin(pluginId);
 
-    _eventController.add(PluginEvent(
-      type: PluginEventType.uninstalled,
-      pluginId: pluginId,
-      timestamp: DateTime.now(),
-    ));
+    _eventController.add(
+      PluginEvent(
+        type: PluginEventType.uninstalled,
+        pluginId: pluginId,
+        timestamp: DateTime.now(),
+      ),
+    );
   }
 
   @override
   Future<PluginInfo?> getPluginInfo(String pluginId) async {
     _ensureInitialized();
-    
+
     final entry = _pluginRegistry[pluginId];
     if (entry == null) return null;
 
@@ -452,47 +492,55 @@ class PluginManager implements IPluginManager {
   }
 
   /// Request permission for plugin
-  Future<bool> requestPluginPermission(String pluginId, Permission permission) async {
+  Future<bool> requestPluginPermission(
+    String pluginId,
+    Permission permission,
+  ) async {
     return await _permissionManager.requestPermission(pluginId, permission);
   }
 
   @override
-  Future<void> hotReloadPlugin(String pluginId, PluginDescriptor newDescriptor) async {
+  Future<void> hotReloadPlugin(
+    String pluginId,
+    PluginDescriptor newDescriptor,
+  ) async {
     _ensureInitialized();
-    
+
     if (!supportsHotReload(pluginId)) {
       throw PluginException('Plugin $pluginId does not support hot-reloading');
     }
-    
+
     // Emit hot-reloading event
-    _eventController.add(PluginEvent(
-      type: PluginEventType.hotReloading,
-      pluginId: pluginId,
-      timestamp: DateTime.now(),
-      data: {
-        'newVersion': newDescriptor.version,
-      },
-    ));
-    
+    _eventController.add(
+      PluginEvent(
+        type: PluginEventType.hotReloading,
+        pluginId: pluginId,
+        timestamp: DateTime.now(),
+        data: {'newVersion': newDescriptor.version},
+      ),
+    );
+
     try {
       await _hotReloadManager.hotReloadPlugin(pluginId, newDescriptor);
-      
+
       // Emit hot-reloaded event
-      _eventController.add(PluginEvent(
-        type: PluginEventType.hotReloaded,
-        pluginId: pluginId,
-        timestamp: DateTime.now(),
-        data: {
-          'newVersion': newDescriptor.version,
-        },
-      ));
+      _eventController.add(
+        PluginEvent(
+          type: PluginEventType.hotReloaded,
+          pluginId: pluginId,
+          timestamp: DateTime.now(),
+          data: {'newVersion': newDescriptor.version},
+        ),
+      );
     } catch (e) {
-      _eventController.add(PluginEvent(
-        type: PluginEventType.error,
-        pluginId: pluginId,
-        timestamp: DateTime.now(),
-        data: {'error': 'Hot-reload failed: ${e.toString()}'},
-      ));
+      _eventController.add(
+        PluginEvent(
+          type: PluginEventType.error,
+          pluginId: pluginId,
+          timestamp: DateTime.now(),
+          data: {'error': 'Hot-reload failed: ${e.toString()}'},
+        ),
+      );
       rethrow;
     }
   }
@@ -500,14 +548,14 @@ class PluginManager implements IPluginManager {
   @override
   bool supportsHotReload(String pluginId) {
     _ensureInitialized();
-    
+
     final plugin = _activePlugins[pluginId];
     if (plugin == null) return false;
-    
+
     // Check if plugin supports hot-reloading based on metadata
     final registryEntry = _pluginRegistry[pluginId];
     if (registryEntry == null) return false;
-    
+
     final metadata = registryEntry.descriptor.metadata;
     return metadata['supportsHotReload'] == true;
   }
@@ -519,7 +567,7 @@ class PluginManager implements IPluginManager {
   Future<void> dispose() async {
     // Dispose hot-reload manager
     await _hotReloadManager.dispose();
-    
+
     // Unload all active plugins
     final activePluginIds = _activePlugins.keys.toList();
     for (final pluginId in activePluginIds) {
@@ -550,7 +598,9 @@ class PluginManager implements IPluginManager {
 
   void _ensureInitialized() {
     if (!_isInitialized) {
-      throw StateError('PluginManager not initialized. Call initialize() first.');
+      throw StateError(
+        'PluginManager not initialized. Call initialize() first.',
+      );
     }
   }
 
@@ -558,7 +608,7 @@ class PluginManager implements IPluginManager {
     // In a real implementation, this would load from persistent storage
     // For now, we'll load the example plugins
     _pluginRegistry.clear();
-    
+
     // Load example plugins
     final exampleDescriptors = ExamplePluginRegistry.getAllDescriptors();
     for (final descriptor in exampleDescriptors) {
@@ -582,7 +632,7 @@ class PluginManager implements IPluginManager {
     if (examplePlugin != null) {
       return examplePlugin;
     }
-    
+
     // In a real implementation, this would dynamically load the plugin
     // from the entry point. For now, we'll create a mock plugin.
     return _MockPlugin(descriptor);
@@ -615,18 +665,24 @@ class PluginManager implements IPluginManager {
     return digest.toString();
   }
 
-  Future<SecurityValidationResult> _performSecurityValidation(PluginPackage package) async {
+  Future<SecurityValidationResult> _performSecurityValidation(
+    PluginPackage package,
+  ) async {
     final violations = <String>[];
-    
+
     // Basic security checks
-    if (package.descriptor.requiredPermissions.contains(Permission.fileAccess)) {
+    if (package.descriptor.requiredPermissions.contains(
+      Permission.fileAccess,
+    )) {
       // Check if file access is justified
       if (!package.descriptor.metadata.containsKey('fileAccessReason')) {
         violations.add('File access permission requires justification');
       }
     }
 
-    if (package.descriptor.requiredPermissions.contains(Permission.networkAccess)) {
+    if (package.descriptor.requiredPermissions.contains(
+      Permission.networkAccess,
+    )) {
       // Check if network access is justified
       if (!package.descriptor.metadata.containsKey('networkAccessReason')) {
         violations.add('Network access permission requires justification');
@@ -654,7 +710,7 @@ class PluginManager implements IPluginManager {
 
 class _MockPlugin implements IPlugin {
   final PluginDescriptor _descriptor;
-  
+
   _MockPlugin(this._descriptor);
 
   @override
@@ -727,13 +783,20 @@ class _MockNetworkAccess implements INetworkAccess {
   _MockNetworkAccess(String pluginId);
 
   @override
-  Future<Map<String, dynamic>> get(String url, {Map<String, String>? headers}) async {
+  Future<Map<String, dynamic>> get(
+    String url, {
+    Map<String, String>? headers,
+  }) async {
     // Mock GET request
     return {'status': 'success', 'data': 'mock response'};
   }
 
   @override
-  Future<Map<String, dynamic>> post(String url, {Map<String, dynamic>? body, Map<String, String>? headers}) async {
+  Future<Map<String, dynamic>> post(
+    String url, {
+    Map<String, dynamic>? body,
+    Map<String, String>? headers,
+  }) async {
     // Mock POST request
     return {'status': 'success', 'data': 'mock response'};
   }

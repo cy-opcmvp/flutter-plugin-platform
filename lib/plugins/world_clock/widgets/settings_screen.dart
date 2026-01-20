@@ -13,10 +13,7 @@ import '../world_clock_plugin.dart';
 class WorldClockSettingsScreen extends StatefulWidget {
   final WorldClockPlugin plugin;
 
-  const WorldClockSettingsScreen({
-    super.key,
-    required this.plugin,
-  });
+  const WorldClockSettingsScreen({super.key, required this.plugin});
 
   @override
   State<WorldClockSettingsScreen> createState() =>
@@ -96,19 +93,15 @@ class _WorldClockSettingsScreenState extends State<WorldClockSettingsScreen> {
     return Card(
       child: ListTile(
         title: Text(l10n.world_clock_setting_timeFormat),
-        subtitle: Text(_settings.timeFormat == '24h'
-            ? l10n.world_clock_time_format_24h
-            : l10n.world_clock_time_format_12h),
+        subtitle: Text(
+          _settings.timeFormat == '24h'
+              ? l10n.world_clock_time_format_24h
+              : l10n.world_clock_time_format_12h,
+        ),
         trailing: SegmentedButton<String>(
           segments: [
-            ButtonSegment(
-              value: '12h',
-              label: Text('12'),
-            ),
-            ButtonSegment(
-              value: '24h',
-              label: Text('24'),
-            ),
+            ButtonSegment(value: '12h', label: Text('12')),
+            ButtonSegment(value: '24h', label: Text('24')),
           ],
           selected: {_settings.timeFormat},
           onSelectionChanged: (Set<String> selection) async {
@@ -143,7 +136,7 @@ class _WorldClockSettingsScreenState extends State<WorldClockSettingsScreen> {
   Widget _buildEnableNotificationsTile(AppLocalizations l10n) {
     return SwitchListTile(
       title: Text(l10n.world_clock_setting_enableNotifications),
-      subtitle: Text('倒计时完成时显示通知'),
+      subtitle: Text(l10n.world_clock_enable_notifications_desc),
       value: _settings.enableNotifications,
       onChanged: (value) async {
         final newSettings = _settings.copyWith(enableNotifications: value);
@@ -178,7 +171,9 @@ class _WorldClockSettingsScreenState extends State<WorldClockSettingsScreen> {
               divisions: 99,
               label: '${_settings.updateInterval}',
               onChanged: (value) async {
-                final newSettings = _settings.copyWith(updateInterval: value.toInt());
+                final newSettings = _settings.copyWith(
+                  updateInterval: value.toInt(),
+                );
                 if (await _saveSettings(newSettings)) {
                   setState(() {
                     _settings = newSettings;

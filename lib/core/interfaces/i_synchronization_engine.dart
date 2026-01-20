@@ -1,20 +1,13 @@
-
-
 /// Synchronization conflict types
 enum ConflictType {
   dataModified,
   dataDeleted,
   versionMismatch,
-  timestampConflict
+  timestampConflict,
 }
 
 /// Synchronization conflict resolution strategies
-enum ConflictResolution {
-  useLocal,
-  useRemote,
-  merge,
-  userChoice
-}
+enum ConflictResolution { useLocal, useRemote, merge, userChoice }
 
 /// Represents a synchronization conflict
 class SyncConflict {
@@ -59,13 +52,7 @@ class SyncResult {
 }
 
 /// Synchronization status
-enum SyncStatus {
-  idle,
-  syncing,
-  conflict,
-  error,
-  offline
-}
+enum SyncStatus { idle, syncing, conflict, error, offline }
 
 /// Interface for the synchronization engine
 abstract class ISynchronizationEngine {
@@ -79,7 +66,10 @@ abstract class ISynchronizationEngine {
   Future<SyncResult> synchronizeKey(String key);
 
   /// Resolve a synchronization conflict
-  Future<void> resolveConflict(SyncConflict conflict, ConflictResolution resolution);
+  Future<void> resolveConflict(
+    SyncConflict conflict,
+    ConflictResolution resolution,
+  );
 
   /// Handle network interruption recovery
   Future<void> handleNetworkRecovery();

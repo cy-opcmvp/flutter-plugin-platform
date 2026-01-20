@@ -52,7 +52,6 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
   // 标签筛选相关
   List<Tag> _tags = [];
   Set<String> _selectedTagIds = {};
-  TagFilter _tagFilter = const TagFilter();
 
   // Plugin launching state
   IPlugin? _currentPlugin;
@@ -183,7 +182,6 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
   void _onTagSelectionChanged(Set<String> selectedTagIds) {
     setState(() {
       _selectedTagIds = selectedTagIds;
-      _tagFilter = TagFilter(selectedTagIds: selectedTagIds);
       _applyTagFilter();
     });
   }
@@ -1331,7 +1329,9 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
                           Text(
                             'v${plugin.version} • $pluginTypeName',
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                              color: theme.colorScheme.onSurface.withValues(
+                                alpha: 0.6,
+                              ),
                               fontSize: fontSize,
                             ),
                             maxLines: 1,
@@ -1348,12 +1348,15 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
                         isAutoStart ? Icons.star : Icons.star_border,
                         color: isAutoStart
                             ? Colors.amber
-                            : theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                            : theme.colorScheme.onSurface.withValues(
+                                alpha: 0.4,
+                              ),
                       ),
                       tooltip: isAutoStart
                           ? l10n.autoStartEnabled
                           : l10n.autoStartDisabled,
-                      onPressed: () => _toggleAutoStart(plugin.id, !isAutoStart),
+                      onPressed: () =>
+                          _toggleAutoStart(plugin.id, !isAutoStart),
                       constraints: const BoxConstraints(
                         minWidth: 32,
                         minHeight: 32,
@@ -1375,8 +1378,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
                   overflow: TextOverflow.ellipsis,
                 ),
               // 将按钮推到底部
-              if (showDescription || showButton)
-                const Spacer(),
+              if (showDescription || showButton) const Spacer(),
               // Launch button
               if (showButton)
                 SizedBox(

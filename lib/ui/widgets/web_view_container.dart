@@ -89,7 +89,8 @@ class _WebViewContainerState extends State<WebViewContainer> {
 
   /// Get JavaScript mode based on security restrictions
   JavaScriptMode _getJavaScriptMode() {
-    final allowJS = widget.securityRestrictions['allowJavaScript'] as bool? ?? true;
+    final allowJS =
+        widget.securityRestrictions['allowJavaScript'] as bool? ?? true;
     return allowJS ? JavaScriptMode.unrestricted : JavaScriptMode.disabled;
   }
 
@@ -97,32 +98,34 @@ class _WebViewContainerState extends State<WebViewContainer> {
   NavigationDecision _handleNavigationRequest(NavigationRequest request) {
     final url = request.url;
     final uri = Uri.tryParse(url);
-    
+
     if (uri == null) {
       return NavigationDecision.prevent;
     }
 
     // Check allowed domains
-    final allowedDomains = widget.securityRestrictions['allowedDomains'] as List<String>? ?? [];
-    final blockedDomains = widget.securityRestrictions['blockedDomains'] as List<String>? ?? [];
-    
+    final allowedDomains =
+        widget.securityRestrictions['allowedDomains'] as List<String>? ?? [];
+    final blockedDomains =
+        widget.securityRestrictions['blockedDomains'] as List<String>? ?? [];
+
     // Block explicitly blocked domains
     if (blockedDomains.any((domain) => uri.host.contains(domain))) {
       return NavigationDecision.prevent;
     }
-    
+
     // If allowed domains are specified, only allow those
     if (allowedDomains.isNotEmpty) {
       if (!allowedDomains.any((domain) => uri.host.contains(domain))) {
         return NavigationDecision.prevent;
       }
     }
-    
+
     // Block dangerous protocols
     if (!['http', 'https', 'about', 'data'].contains(uri.scheme)) {
       return NavigationDecision.prevent;
     }
-    
+
     return NavigationDecision.navigate;
   }
 
@@ -131,7 +134,7 @@ class _WebViewContainerState extends State<WebViewContainer> {
     try {
       // Parse message and forward to plugin via IPC
       final messageData = message.message;
-      
+
       // Create IPC message for the plugin
       final ipcMessage = IPCMessage(
         messageId: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -140,7 +143,7 @@ class _WebViewContainerState extends State<WebViewContainer> {
         targetId: widget.plugin.id,
         payload: {'message': messageData},
       );
-      
+
       // Send to plugin
       widget.plugin.sendMessage(ipcMessage);
     } catch (e) {
@@ -150,7 +153,8 @@ class _WebViewContainerState extends State<WebViewContainer> {
 
   /// Inject security policies into the web page
   Future<void> _injectSecurityPolicies() async {
-    final securityScript = '''
+    final securityScript =
+        '''
       (function() {
         // Disable certain APIs based on security level
         ${_generateSecurityScript()}
@@ -169,7 +173,7 @@ class _WebViewContainerState extends State<WebViewContainer> {
         window.dispatchEvent(new CustomEvent('pluginHostReady'));
       })();
     ''';
-    
+
     await _controller.runJavaScript(securityScript);
   }
 
@@ -177,7 +181,7 @@ class _WebViewContainerState extends State<WebViewContainer> {
   String _generateSecurityScript() {
     final restrictions = widget.securityRestrictions;
     final scripts = <String>[];
-    
+
     // Disable geolocation if not allowed
     if (!(restrictions['allowGeolocation'] as bool? ?? false)) {
       scripts.add('''
@@ -188,9 +192,9 @@ class _WebViewContainerState extends State<WebViewContainer> {
         }
       ''');
     }
-    
+
     // Disable camera/microphone if not allowed
-    if (!(restrictions['allowCamera'] as bool? ?? false) || 
+    if (!(restrictions['allowCamera'] as bool? ?? false) ||
         !(restrictions['allowMicrophone'] as bool? ?? false)) {
       scripts.add('''
         if (navigator.mediaDevices) {
@@ -200,7 +204,7 @@ class _WebViewContainerState extends State<WebViewContainer> {
         }
       ''');
     }
-    
+
     // Disable notifications if not allowed
     if (!(restrictions['allowNotifications'] as bool? ?? false)) {
       scripts.add('''
@@ -211,7 +215,7 @@ class _WebViewContainerState extends State<WebViewContainer> {
         }
       ''');
     }
-    
+
     // Disable local storage if not allowed
     if (!(restrictions['allowLocalStorage'] as bool? ?? true)) {
       scripts.add('''
@@ -227,7 +231,7 @@ class _WebViewContainerState extends State<WebViewContainer> {
         } catch (e) {}
       ''');
     }
-    
+
     return scripts.join('\n');
   }
 
@@ -236,15 +240,13 @@ class _WebViewContainerState extends State<WebViewContainer> {
     if (!widget.plugin.manifest.uiIntegration.supportsTheming) {
       return;
     }
-    
+
     final theme = Theme.of(context);
     final themeManager = PluginThemeManager();
     final themeScript = themeManager.generateThemeAdaptationScript(theme);
-    
+
     await _controller.runJavaScript(themeScript);
   }
-
-
 
   /// Get theme data as JSON string for JavaScript injection
   String _getThemeData() {
@@ -252,7 +254,9 @@ class _WebViewContainerState extends State<WebViewContainer> {
     final themeData = {
       'primaryColor': theme.primaryColor.value.toRadixString(16),
       'backgroundColor': theme.scaffoldBackgroundColor.value.toRadixString(16),
-      'textColor': theme.textTheme.bodyLarge?.color?.value.toRadixString(16) ?? 'ff000000',
+      'textColor':
+          theme.textTheme.bodyLarge?.color?.value.toRadixString(16) ??
+          'ff000000',
       'isDark': theme.brightness == Brightness.dark,
     };
     return "'${themeData.toString().replaceAll("'", "\\'")}'";
@@ -289,20 +293,19 @@ class _WebViewContainerState extends State<WebViewContainer> {
         if (_isLoading)
           LinearProgressIndicator(
             value: _loadingProgress,
-            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+            backgroundColor: Theme.of(
+              context,
+            ).colorScheme.surfaceContainerHighest,
             valueColor: AlwaysStoppedAnimation<Color>(
               Theme.of(context).colorScheme.primary,
             ),
           ),
-        
+
         // Web view
-        Expanded(
-          child: WebViewWidget(controller: _controller),
-        ),
-        
+        Expanded(child: WebViewWidget(controller: _controller)),
+
         // Navigation bar (optional)
-        if (_shouldShowNavigationBar())
-          _buildNavigationBar(),
+        if (_shouldShowNavigationBar()) _buildNavigationBar(),
       ],
     );
   }

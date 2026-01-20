@@ -1808,7 +1808,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screenshot_copy_failed => 'Failed to copy to clipboard';
 
   @override
-  String get screenshot_image_load_failed => 'Failed to load image';
+  String get screenshot_image_load_failed => 'Image load failed';
 
   @override
   String get screenshot_file_not_exists => 'File does not exist';
@@ -2300,4 +2300,217 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get world_clock_settings_saved => 'Settings saved';
+
+  @override
+  String get world_clock_add_clock => 'Add Clock';
+
+  @override
+  String get world_clock_no_clocks => 'No Clocks';
+
+  @override
+  String get world_clock_add_clock_hint => 'Click + in top right to add clock';
+
+  @override
+  String get world_clock_city_name => 'City Name';
+
+  @override
+  String get world_clock_city_name_hint => 'Enter city name';
+
+  @override
+  String get world_clock_time_zone => 'Time Zone';
+
+  @override
+  String get world_clock_set_time => 'Set Time';
+
+  @override
+  String get world_clock_hours => 'Hours';
+
+  @override
+  String get world_clock_minutes => 'Minutes';
+
+  @override
+  String get world_clock_seconds => 'Seconds';
+
+  @override
+  String get world_clock_loading => 'Loading...';
+
+  @override
+  String get world_clock_no_image => 'Unable to load image';
+
+  @override
+  String get world_clock_countdown_completed => 'Completed';
+
+  @override
+  String get world_clock_countdown_almost_complete => 'Almost complete!';
+
+  @override
+  String world_clock_remaining_minutes(Object minutes) {
+    return '$minutes minutes remaining';
+  }
+
+  @override
+  String world_clock_remaining_hours_minutes(Object hours, Object minutes) {
+    return '$hours hours $minutes minutes remaining';
+  }
+
+  @override
+  String world_clock_remaining_days_hours(Object days, Object hours) {
+    return '$days days $hours hours remaining';
+  }
+
+  @override
+  String get world_clock_confirm_delete => 'Confirm Delete';
+
+  @override
+  String world_clock_confirm_delete_countdown_message(Object title) {
+    return 'Are you sure you want to delete countdown \"$title\"?';
+  }
+
+  @override
+  String world_clock_plugin_initialized(Object name) {
+    return '$name plugin initialized successfully';
+  }
+
+  @override
+  String world_clock_plugin_init_failed(Object error, Object name) {
+    return '$name plugin initialization failed: $error';
+  }
+
+  @override
+  String get screenshot_tool_pen_label => 'Pen';
+
+  @override
+  String get screenshot_tool_rectangle_label => 'Rectangle';
+
+  @override
+  String get screenshot_tool_arrow_label => 'Arrow';
+
+  @override
+  String get screenshot_tool_text_label => 'Text';
+
+  @override
+  String get screenshot_tool_mosaic_label => 'Mosaic';
+
+  @override
+  String get screenshot_undo_tooltip => 'Undo';
+
+  @override
+  String get screenshot_redo_tooltip => 'Redo';
+
+  @override
+  String get screenshot_save_tooltip => 'Save';
+
+  @override
+  String get screenshot_copy_to_clipboard => 'Copy to Clipboard';
+
+  @override
+  String get screenshot_share => 'Share';
+
+  @override
+  String get screenshot_loading => 'Loading...';
+
+  @override
+  String get screenshot_unable_load_image => 'Unable to load image';
+
+  @override
+  String get screenshot_history_title => 'Screenshot History';
+
+  @override
+  String get screenshot_clear_history => 'Clear History';
+
+  @override
+  String get screenshot_confirm_clear_history => 'Confirm Clear';
+
+  @override
+  String get screenshot_confirm_clear_history_message =>
+      'Are you sure you want to clear all screenshot history? This cannot be undone.';
+
+  @override
+  String get screenshot_clear => 'Clear';
+
+  @override
+  String get screenshot_no_records => 'No screenshots yet';
+
+  @override
+  String get screenshot_history_hint =>
+      'Screenshot history will appear here after taking screenshots';
+
+  @override
+  String get screenshot_recent => 'Just now';
+
+  @override
+  String screenshot_minutes_ago(Object minutes) {
+    return '$minutes minutes ago';
+  }
+
+  @override
+  String screenshot_hours_ago(Object hours) {
+    return '$hours hours ago';
+  }
+
+  @override
+  String screenshot_days_ago(Object days) {
+    return '$days days ago';
+  }
+
+  @override
+  String screenshot_date_format(Object day, Object month) {
+    return '$month/$day';
+  }
+
+  @override
+  String screenshot_datetime_format(
+    Object day,
+    Object hour,
+    Object minute,
+    Object month,
+    Object second,
+    Object year,
+  ) {
+    return '$year/$month/$day $hour:$minute:$second';
+  }
+
+  @override
+  String get screenshot_type_fullscreen => 'Full Screen';
+
+  @override
+  String get screenshot_detail_info => 'Detail Info';
+
+  @override
+  String get screenshot_info_file_path => 'File Path';
+
+  @override
+  String get screenshot_info_file_size => 'File Size';
+
+  @override
+  String get screenshot_info_type => 'Screenshot Type';
+
+  @override
+  String get screenshot_info_created => 'Created';
+
+  @override
+  String get screenshot_info_dimensions => 'Dimensions';
+
+  @override
+  String screenshot_shortcut_edit_pending(Object action) {
+    return 'Shortcut edit feature pending: $action';
+  }
+
+  @override
+  String get screenshot_editor_title => 'Edit Screenshot';
+
+  @override
+  String get image_editor_pen => 'Pen';
+
+  @override
+  String get image_editor_rectangle => 'Rectangle';
+
+  @override
+  String get image_editor_arrow => 'Arrow';
+
+  @override
+  String get image_editor_text => 'Text';
+
+  @override
+  String get image_editor_mosaic => 'Mosaic';
 }

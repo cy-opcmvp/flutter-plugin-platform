@@ -69,7 +69,9 @@ class _PluginInputRouterState extends State<PluginInputRouter> {
     widget.onInputEvent?.call(inputEvent);
 
     // Return handled to consume the event for plugin-specific keys
-    return _shouldConsumeKeyEvent(event) ? KeyEventResult.handled : KeyEventResult.ignored;
+    return _shouldConsumeKeyEvent(event)
+        ? KeyEventResult.handled
+        : KeyEventResult.ignored;
   }
 
   /// Handle pointer events (mouse, touch)
@@ -161,13 +163,15 @@ class _PluginInputRouterState extends State<PluginInputRouter> {
   void _routeInputEvent(InputEvent event) {
     if (!widget.plugin.isConnected) return;
 
-    widget.plugin.sendMessage(IPCMessage(
-      messageId: DateTime.now().millisecondsSinceEpoch.toString(),
-      messageType: 'input_event',
-      sourceId: 'host',
-      targetId: widget.plugin.id,
-      payload: event.toJson(),
-    ));
+    widget.plugin.sendMessage(
+      IPCMessage(
+        messageId: DateTime.now().millisecondsSinceEpoch.toString(),
+        messageType: 'input_event',
+        sourceId: 'host',
+        targetId: widget.plugin.id,
+        payload: event.toJson(),
+      ),
+    );
   }
 
   /// Get key event type
@@ -181,7 +185,7 @@ class _PluginInputRouterState extends State<PluginInputRouter> {
   /// Get key modifiers
   Set<KeyModifier> _getKeyModifiers(KeyEvent event) {
     final modifiers = <KeyModifier>{};
-    
+
     if (HardwareKeyboard.instance.isControlPressed) {
       modifiers.add(KeyModifier.control);
     }
@@ -194,14 +198,14 @@ class _PluginInputRouterState extends State<PluginInputRouter> {
     if (HardwareKeyboard.instance.isMetaPressed) {
       modifiers.add(KeyModifier.meta);
     }
-    
+
     return modifiers;
   }
 
   /// Get pointer modifiers
   Set<KeyModifier> _getPointerModifiers(PointerEvent event) {
     final modifiers = <KeyModifier>{};
-    
+
     if (HardwareKeyboard.instance.isControlPressed) {
       modifiers.add(KeyModifier.control);
     }
@@ -214,14 +218,14 @@ class _PluginInputRouterState extends State<PluginInputRouter> {
     if (HardwareKeyboard.instance.isMetaPressed) {
       modifiers.add(KeyModifier.meta);
     }
-    
+
     return modifiers;
   }
 
   /// Get mouse button from buttons bitmask
   MouseButton _getMouseButton(int buttons) {
-    if (buttons & 1 != 0) return MouseButton.left;   // Primary button
-    if (buttons & 2 != 0) return MouseButton.right;  // Secondary button
+    if (buttons & 1 != 0) return MouseButton.left; // Primary button
+    if (buttons & 2 != 0) return MouseButton.right; // Secondary button
     if (buttons & 4 != 0) return MouseButton.middle; // Middle button
     return MouseButton.none;
   }
@@ -229,8 +233,9 @@ class _PluginInputRouterState extends State<PluginInputRouter> {
   /// Check if key event should be consumed by plugin
   bool _shouldConsumeKeyEvent(KeyEvent event) {
     // Let plugin handle specific key combinations
-    final supportedInputMethods = widget.plugin.manifest.uiIntegration.supportedInputMethods;
-    
+    final supportedInputMethods =
+        widget.plugin.manifest.uiIntegration.supportedInputMethods;
+
     if (!supportedInputMethods.contains('keyboard')) {
       return false;
     }
@@ -266,12 +271,16 @@ class _PluginInputRouterState extends State<PluginInputRouter> {
             _focusNode.requestFocus();
           },
           child: Container(
-            decoration: _isActive ? BoxDecoration(
-              border: Border.all(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
-                width: 2,
-              ),
-            ) : null,
+            decoration: _isActive
+                ? BoxDecoration(
+                    border: Border.all(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withOpacity(0.5),
+                      width: 2,
+                    ),
+                  )
+                : null,
             child: widget.child,
           ),
         ),
@@ -416,46 +425,19 @@ class ScrollInputEvent extends InputEvent {
 }
 
 /// Key event types
-enum KeyEventType {
-  down,
-  up,
-  repeat,
-}
+enum KeyEventType { down, up, repeat }
 
 /// Mouse event types
-enum MouseEventType {
-  down,
-  up,
-  move,
-  enter,
-  exit,
-}
+enum MouseEventType { down, up, move, enter, exit }
 
 /// Touch event types
-enum TouchEventType {
-  down,
-  up,
-  move,
-  cancel,
-}
+enum TouchEventType { down, up, move, cancel }
 
 /// Mouse buttons
-enum MouseButton {
-  none,
-  left,
-  right,
-  middle,
-  back,
-  forward,
-}
+enum MouseButton { none, left, right, middle, back, forward }
 
 /// Key modifiers
-enum KeyModifier {
-  control,
-  shift,
-  alt,
-  meta,
-}
+enum KeyModifier { control, shift, alt, meta }
 
 /// Input router configuration
 class InputRouterConfig {
@@ -479,7 +461,7 @@ class InputRouterConfig {
 
   factory InputRouterConfig.fromManifest(PluginManifest manifest) {
     final supportedInputMethods = manifest.uiIntegration.supportedInputMethods;
-    
+
     return InputRouterConfig(
       enableKeyboardCapture: supportedInputMethods.contains('keyboard'),
       enableMouseCapture: supportedInputMethods.contains('mouse'),

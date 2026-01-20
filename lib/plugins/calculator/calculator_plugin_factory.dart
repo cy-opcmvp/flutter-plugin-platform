@@ -22,7 +22,9 @@ class CalculatorPluginFactory {
       type: PluginType.tool,
       requiredPermissions: const [Permission.notifications],
       metadata: {
-        'description': l10n?.plugin_calculator_description ?? 'A simple calculator tool for basic arithmetic operations',
+        'description':
+            l10n?.plugin_calculator_description ??
+            'A simple calculator tool for basic arithmetic operations',
         'author': 'Example Developer',
         'category': 'Utility',
         'tags': const ['calculator', 'math', 'arithmetic', 'tool'],

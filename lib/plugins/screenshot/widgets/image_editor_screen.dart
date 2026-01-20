@@ -2,9 +2,8 @@ library;
 
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:image/image.dart' as img;
+import '../../../../l10n/generated/app_localizations.dart';
 import '../models/annotation_models.dart';
-import '../models/screenshot_settings.dart';
 
 /// 图片编辑界面
 ///
@@ -32,7 +31,6 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
   // 工具设置
   Color _selectedColor = Colors.red;
   double _strokeWidth = 3.0;
-  double _mosaicBlockSize = 10.0;
 
   // 撤销/重做栈
   final List<List<Annotation>> _undoStack = [];
@@ -40,9 +38,10 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('编辑截图'),
+        title: Text(l10n.screenshot_editor_title),
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
         elevation: 0,
@@ -50,17 +49,17 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
           IconButton(
             icon: const Icon(Icons.undo),
             onPressed: _canUndo() ? _undo : null,
-            tooltip: '撤销',
+            tooltip: l10n.screenshot_undo_tooltip,
           ),
           IconButton(
             icon: const Icon(Icons.redo),
             onPressed: _canRedo() ? _redo : null,
-            tooltip: '重做',
+            tooltip: l10n.screenshot_redo_tooltip,
           ),
           IconButton(
             icon: const Icon(Icons.save),
             onPressed: () => _saveAndClose(),
-            tooltip: '保存',
+            tooltip: l10n.screenshot_save_tooltip,
           ),
         ],
       ),
@@ -73,9 +72,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
           _buildSettingsBar(),
 
           // 编辑画布
-          Expanded(
-            child: _buildCanvas(),
-          ),
+          Expanded(child: _buildCanvas()),
         ],
       ),
     );
@@ -83,6 +80,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
 
   /// 构建工具栏
   Widget _buildToolbar() {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       height: 60,
       padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -99,37 +97,42 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
         children: [
           _ToolButton(
             icon: Icons.edit,
-            label: '画笔',
+            label: l10n.image_editor_pen,
             selected: _selectedTool == AnnotationType.pen,
             onTap: () => setState(() => _selectedTool = AnnotationType.pen),
           ),
           _ToolButton(
             icon: Icons.crop_square,
-            label: '矩形',
+            label: l10n.image_editor_rectangle,
             selected: _selectedTool == AnnotationType.rectangle,
-            onTap: () => setState(() => _selectedTool = AnnotationType.rectangle),
+            onTap: () =>
+                setState(() => _selectedTool = AnnotationType.rectangle),
           ),
           _ToolButton(
             icon: Icons.arrow_forward,
-            label: '箭头',
+            label: l10n.image_editor_arrow,
             selected: _selectedTool == AnnotationType.arrow,
-            onTap: () => setState(() => _selectedTool == AnnotationType.arrow
-                ? null
-                : _selectedTool = AnnotationType.arrow),
+            onTap: () => setState(
+              () => _selectedTool == AnnotationType.arrow
+                  ? null
+                  : _selectedTool = AnnotationType.arrow,
+            ),
           ),
           _ToolButton(
             icon: Icons.text_fields,
-            label: '文字',
+            label: l10n.image_editor_text,
             selected: _selectedTool == AnnotationType.text,
             onTap: () => setState(() => _selectedTool = AnnotationType.text),
           ),
           _ToolButton(
             icon: Icons.blur_on,
-            label: '马赛克',
+            label: l10n.image_editor_mosaic,
             selected: _selectedTool == AnnotationType.mosaic,
-            onTap: () => setState(() => _selectedTool == AnnotationType.mosaic
-                ? null
-                : _selectedTool = AnnotationType.mosaic),
+            onTap: () => setState(
+              () => _selectedTool == AnnotationType.mosaic
+                  ? null
+                  : _selectedTool = AnnotationType.mosaic,
+            ),
           ),
         ],
       ),
@@ -147,7 +150,11 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
       child: Row(
         children: [
           // 颜色选择器
-          Icon(Icons.palette, size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
+          Icon(
+            Icons.palette,
+            size: 20,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
           const SizedBox(width: 8),
           ...[
             Colors.red,
@@ -187,7 +194,11 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
               _selectedTool == AnnotationType.arrow)
             Row(
               children: [
-                Icon(Icons.line_weight, size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                Icon(
+                  Icons.line_weight,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
                 const SizedBox(width: 8),
                 Slider(
                   value: _strokeWidth,
@@ -196,7 +207,10 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
                   divisions: 9,
                   onChanged: (value) => setState(() => _strokeWidth = value),
                 ),
-                Text('${_strokeWidth.toInt()}', style: Theme.of(context).textTheme.bodySmall),
+                Text(
+                  '${_strokeWidth.toInt()}',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
               ],
             ),
         ],
@@ -220,10 +234,11 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
               children: [
                 Image.memory(widget.imageBytes),
                 // 标注层
-                ..._annotations.map((annotation) => _buildAnnotationWidget(annotation)),
+                ..._annotations.map(
+                  (annotation) => _buildAnnotationWidget(annotation),
+                ),
                 // 当前绘制路径
-                if (_isDrawing && _currentPath.isNotEmpty)
-                  _buildCurrentPath(),
+                if (_isDrawing && _currentPath.isNotEmpty) _buildCurrentPath(),
               ],
             ),
           ),
@@ -399,10 +414,10 @@ class _ToolButton extends StatelessWidget {
             Text(
               label,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: selected
-                        ? Theme.of(context).colorScheme.onPrimaryContainer
-                        : Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: selected
+                    ? Theme.of(context).colorScheme.onPrimaryContainer
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),

@@ -54,7 +54,9 @@ class BasePluginConfigDefaults {
       }
       // 递归处理嵌套对象
       if (entry.value is Map<String, dynamic>) {
-        result[entry.key] = removeHelpFields(entry.value as Map<String, dynamic>);
+        result[entry.key] = removeHelpFields(
+          entry.value as Map<String, dynamic>,
+        );
       } else if (entry.value is List) {
         // 跳过示例列表
         continue;

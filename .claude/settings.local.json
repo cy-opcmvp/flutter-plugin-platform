@@ -41,7 +41,10 @@
       "Bash(ls:*)",
       "Bash(echo:*)",
       "Bash(cat <<'EOF'\n文档命名规范实施总结\n\n## ✅ 已完成工作\n\n### 1. 制定统一命名规范\n- 创建 DOCUMENTATION_NAMING_RULES.md\n- 定义三种命名风格：\n  - kebab-case: 普通文档\n  - UPPERCASE_CASE: 特殊重要文档\n  - snake_case: 配置文档\n\n### 2. 更新开发规则\n- 更新 .claude/rules/README.md\n- 添加命名规范索引\n- 更新版本号到 v1.2.0\n\n### 3. 批量重命名文档（9个）\n✅ AUDIO_QUICK_REFERENCE.md → audio-quick-reference.md\n✅ ICON_GENERATION_GUIDE.md → icon-generation-guide.md\n✅ PLATFORM_SERVICES_USER_GUIDE.md → platform-services-user-guide.md\n✅ DOCS_NAVIGATION.md → docs-navigation.md\n✅ PLATFORM_SUPPORT_ANALYSIS.md → platform-support-analysis.md\n✅ PLATFORM_TODO.md → platform-todo.md\n✅ IMPLEMENTATION.md → implementation.md\n✅ UPDATE_v1.1.md → update-v1.1.md\n✅ PLATFORM_DECOUPLING_DESIGN.md → platform-decoupling-design.md\n\n### 4. 更新文档引用\n- 更新 docs/MASTER_INDEX.md\n- 更新 docs/platform-services/docs-navigation.md\n- 更新 docs/platform-services/quick-start.md\n\n## 📊 命名规范效果\n\n### 命名统一度\n- 清理前: 混用 3 种命名风格\n- 清理后: 统一为 3 种有明确规范的命名风格\n\n### 典型命名示例\n\n**用户指南** \\(kebab-case\\):\n- getting-started.md\n- internal-plugin-development.md\n- platform-services-user-guide.md\n\n**重要文档** \\(UPPERCASE_CASE\\):\n- README.md\n- CHANGELOG.md\n- MASTER_INDEX.md\n- RELEASE_NOTES_v0.4.0.md\n\n**配置文档** \\(snake_case\\):\n- screenshot_config_docs.md\n- world_clock_config_docs.md\n\n## 📝 命名规范要点\n\n### 简化记忆\n1. 普通文档 → kebab-case（小写 + 连字符）\n2. 特殊文档 → UPPERCASE_CASE（大写 + 下划线）\n3. 配置文档 → snake_case（小写 + 下划线）\n4. 禁止 → 空格、特殊字符、大小写混用\n\n### 决策树\n是否为核心文档？→ 是 → UPPERCASE_CASE\n                → 否 → 继续\n是否为配置文档？→ 是 → snake_case\n                → 否 → kebab-case\nEOF)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(dart format:*)",
+      "Bash(dart analyze:*)",
+      "Bash(git mv:*)"
     ]
   }
 }

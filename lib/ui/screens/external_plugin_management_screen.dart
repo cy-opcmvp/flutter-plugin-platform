@@ -9,10 +9,12 @@ class ExternalPluginManagementScreen extends StatefulWidget {
   const ExternalPluginManagementScreen({super.key});
 
   @override
-  State<ExternalPluginManagementScreen> createState() => _ExternalPluginManagementScreenState();
+  State<ExternalPluginManagementScreen> createState() =>
+      _ExternalPluginManagementScreenState();
 }
 
-class _ExternalPluginManagementScreenState extends State<ExternalPluginManagementScreen> {
+class _ExternalPluginManagementScreenState
+    extends State<ExternalPluginManagementScreen> {
   late final ExternalPluginManager _pluginManager;
   List<PluginRuntimeInfo> _pluginRuntimeInfos = [];
   bool _isLoading = true;
@@ -66,13 +68,19 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
 
   List<PluginRuntimeInfo> get _filteredPlugins {
     var filtered = _pluginRuntimeInfos.where((info) {
-      final matchesSearch = _searchQuery.isEmpty ||
-          info.descriptor.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+      final matchesSearch =
+          _searchQuery.isEmpty ||
+          info.descriptor.name.toLowerCase().contains(
+            _searchQuery.toLowerCase(),
+          ) ||
           info.descriptor.id.toLowerCase().contains(_searchQuery.toLowerCase());
-      
-      final matchesType = _filterType == null || info.descriptor.type == _filterType;
-      final matchesState = _filterState == null || info.stateManager.currentState == _filterState;
-      
+
+      final matchesType =
+          _filterType == null || info.descriptor.type == _filterType;
+      final matchesState =
+          _filterState == null ||
+          info.stateManager.currentState == _filterState;
+
       return matchesSearch && matchesType && matchesState;
     }).toList();
 
@@ -104,7 +112,7 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
 
     if (confirmed == true) {
       _setOperationInProgress(pluginId, true);
-      
+
       try {
         // Show progress dialog
         if (mounted) {
@@ -125,10 +133,13 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
         }
 
         // Use the rollback-capable update method
-        await _pluginManager.updatePluginWithRollback(pluginId, '2.0.0'); // Simulate new version
-        
+        await _pluginManager.updatePluginWithRollback(
+          pluginId,
+          '2.0.0',
+        ); // Simulate new version
+
         await _loadPlugins();
-        
+
         if (mounted) {
           Navigator.of(context).pop(); // Close progress dialog
           ScaffoldMessenger.of(context).showSnackBar(
@@ -167,7 +178,7 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
 
     if (confirmed == true) {
       _setOperationInProgress(pluginId, true);
-      
+
       try {
         // Show progress dialog
         if (mounted) {
@@ -189,7 +200,7 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
 
         await _pluginManager.rollbackPlugin(pluginId);
         await _loadPlugins();
-        
+
         if (mounted) {
           Navigator.of(context).pop(); // Close progress dialog
           ScaffoldMessenger.of(context).showSnackBar(
@@ -225,11 +236,11 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
     if (_isOperationInProgress(pluginId)) return;
 
     _setOperationInProgress(pluginId, true);
-    
+
     try {
       await _pluginManager.pauseExternalPlugin(pluginId);
       await _loadPlugins();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -256,11 +267,11 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
     if (_isOperationInProgress(pluginId)) return;
 
     _setOperationInProgress(pluginId, true);
-    
+
     try {
       await _pluginManager.resumeExternalPlugin(pluginId);
       await _loadPlugins();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -296,7 +307,7 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
 
     if (confirmed == true) {
       _setOperationInProgress(pluginId, true);
-      
+
       try {
         // Show progress dialog
         if (mounted) {
@@ -318,7 +329,7 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
 
         await _pluginManager.uninstallExternalPlugin(pluginId);
         await _loadPlugins();
-        
+
         if (mounted) {
           Navigator.of(context).pop(); // Close progress dialog
           ScaffoldMessenger.of(context).showSnackBar(
@@ -388,13 +399,13 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
       }
 
       await _loadPlugins();
-      
+
       if (mounted) {
         Navigator.of(context).pop(); // Close progress dialog
-        
+
         String message;
         Color backgroundColor;
-        
+
         if (failureCount == 0) {
           message = l10n.plugin_allUpdateSuccess(successCount);
           backgroundColor = Colors.green;
@@ -405,12 +416,9 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
           message = l10n.plugin_batchUpdateResult(successCount, failureCount);
           backgroundColor = Colors.orange;
         }
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            backgroundColor: backgroundColor,
-          ),
+          SnackBar(content: Text(message), backgroundColor: backgroundColor),
         );
       }
 
@@ -461,13 +469,13 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
       }
 
       await _loadPlugins();
-      
+
       if (mounted) {
         Navigator.of(context).pop(); // Close progress dialog
-        
+
         String message;
         Color backgroundColor;
-        
+
         if (failureCount == 0) {
           message = l10n.plugin_allRemoveSuccess(successCount);
           backgroundColor = Colors.green;
@@ -478,12 +486,9 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
           message = l10n.plugin_batchRemoveResult(successCount, failureCount);
           backgroundColor = Colors.orange;
         }
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            backgroundColor: backgroundColor,
-          ),
+          SnackBar(content: Text(message), backgroundColor: backgroundColor),
         );
       }
 
@@ -544,7 +549,9 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
 
   void _selectAllPlugins() {
     setState(() {
-      _selectedPlugins = _filteredPlugins.map((info) => info.descriptor.id).toSet();
+      _selectedPlugins = _filteredPlugins
+          .map((info) => info.descriptor.id)
+          .toSet();
     });
   }
 
@@ -563,8 +570,12 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
         onDisable: () => _disablePlugin(runtimeInfo.descriptor.id),
         onEnable: () => _enablePlugin(runtimeInfo.descriptor.id),
         onRemove: () => _removePlugin(runtimeInfo.descriptor.id),
-        onRollback: _hasRollbackAvailable(runtimeInfo.descriptor.id) ? () => _rollbackPlugin(runtimeInfo.descriptor.id) : null,
-        isOperationInProgress: _isOperationInProgress(runtimeInfo.descriptor.id),
+        onRollback: _hasRollbackAvailable(runtimeInfo.descriptor.id)
+            ? () => _rollbackPlugin(runtimeInfo.descriptor.id)
+            : null,
+        isOperationInProgress: _isOperationInProgress(
+          runtimeInfo.descriptor.id,
+        ),
       ),
     );
   }
@@ -574,9 +585,11 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
     final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isMultiSelectMode 
-            ? l10n.plugin_selected(_selectedPlugins.length)
-            : l10n.plugin_externalTitle),
+        title: Text(
+          _isMultiSelectMode
+              ? l10n.plugin_selected(_selectedPlugins.length)
+              : l10n.plugin_externalTitle,
+        ),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         leading: _isMultiSelectMode
             ? IconButton(
@@ -641,7 +654,10 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
                           decoration: InputDecoration(
                             labelText: l10n.plugin_typeAll,
                             border: const OutlineInputBorder(),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
                           ),
                           value: _filterType,
                           onChanged: (value) {
@@ -671,7 +687,10 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
                           decoration: InputDecoration(
                             labelText: l10n.plugin_stateAll,
                             border: const OutlineInputBorder(),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
                           ),
                           value: _filterState,
                           onChanged: (value) {
@@ -710,15 +729,16 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
             ),
           ],
           // Plugin list
-          Expanded(
-            child: _buildPluginList(),
-          ),
+          Expanded(child: _buildPluginList()),
         ],
       ),
       bottomNavigationBar: _isMultiSelectMode && _selectedPlugins.isNotEmpty
           ? BottomAppBar(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     Expanded(
@@ -755,9 +775,7 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
   Widget _buildPluginList() {
     final l10n = context.l10n;
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (_error != null) {
@@ -801,18 +819,24 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
             Icon(
               Icons.extension_off,
               size: 64,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
-              _searchQuery.isNotEmpty || _filterType != null || _filterState != null
+              _searchQuery.isNotEmpty ||
+                      _filterType != null ||
+                      _filterState != null
                   ? l10n.plugin_noMatch
                   : l10n.plugin_noExternalPlugins,
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
             Text(
-              _searchQuery.isNotEmpty || _filterType != null || _filterState != null
+              _searchQuery.isNotEmpty ||
+                      _filterType != null ||
+                      _filterState != null
                   ? l10n.hint_tryAdjustSearch
                   : l10n.plugin_installExternalFirst,
               style: Theme.of(context).textTheme.bodyMedium,
@@ -844,7 +868,9 @@ class _ExternalPluginManagementScreenState extends State<ExternalPluginManagemen
           onDisable: () => _disablePlugin(pluginId),
           onEnable: () => _enablePlugin(pluginId),
           onRemove: () => _removePlugin(pluginId),
-          onRollback: _hasRollbackAvailable(pluginId) ? () => _rollbackPlugin(pluginId) : null,
+          onRollback: _hasRollbackAvailable(pluginId)
+              ? () => _rollbackPlugin(pluginId)
+              : null,
           onToggleSelection: () => _togglePluginSelection(pluginId),
         );
       },
@@ -895,7 +921,9 @@ class _ExternalPluginCard extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
-      color: isSelected ? theme.colorScheme.primaryContainer.withOpacity(0.3) : null,
+      color: isSelected
+          ? theme.colorScheme.primaryContainer.withOpacity(0.3)
+          : null,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
@@ -918,7 +946,9 @@ class _ExternalPluginCard extends StatelessWidget {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: _getPluginTypeColor(descriptor.type).withOpacity(0.1),
+                      color: _getPluginTypeColor(
+                        descriptor.type,
+                      ).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Stack(
@@ -942,7 +972,9 @@ class _ExternalPluginCard extends StatelessWidget {
                               height: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
                               ),
                             ),
                           ),
@@ -996,13 +1028,28 @@ class _ExternalPluginCard extends StatelessWidget {
                 Row(
                   children: [
                     // State-based action button
-                    if (state == PluginState.active || state == PluginState.paused) ...[
+                    if (state == PluginState.active ||
+                        state == PluginState.paused) ...[
                       ElevatedButton.icon(
-                        onPressed: isOperationInProgress ? null : (state == PluginState.active ? onDisable : onEnable),
-                        icon: Icon(state == PluginState.active ? Icons.pause : Icons.play_arrow),
-                        label: Text(state == PluginState.active ? l10n.button_disable : l10n.button_enable),
+                        onPressed: isOperationInProgress
+                            ? null
+                            : (state == PluginState.active
+                                  ? onDisable
+                                  : onEnable),
+                        icon: Icon(
+                          state == PluginState.active
+                              ? Icons.pause
+                              : Icons.play_arrow,
+                        ),
+                        label: Text(
+                          state == PluginState.active
+                              ? l10n.button_disable
+                              : l10n.button_enable,
+                        ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: state == PluginState.active ? Colors.orange : Colors.green,
+                          backgroundColor: state == PluginState.active
+                              ? Colors.orange
+                              : Colors.green,
                           foregroundColor: Colors.white,
                         ),
                       ),
@@ -1101,7 +1148,7 @@ class _ExternalPluginCard extends StatelessWidget {
     final theme = Theme.of(context);
     Color chipColor;
     String statusText;
-    
+
     switch (state) {
       case PluginState.active:
         chipColor = Colors.green;
@@ -1199,7 +1246,10 @@ class _ExternalPluginDetailsDialog extends StatelessWidget {
             _buildInfoRow('Version', descriptor.version),
             _buildInfoRow('Type', descriptor.type.name.toUpperCase()),
             _buildInfoRow('State', state.name.toUpperCase()),
-            _buildInfoRow('Security Level', descriptor.metadata['securityLevel'] ?? 'Unknown'),
+            _buildInfoRow(
+              'Security Level',
+              descriptor.metadata['securityLevel'] ?? 'Unknown',
+            ),
             _buildInfoRow('Entry Point', descriptor.entryPoint),
             if (descriptor.metadata.containsKey('description'))
               _buildInfoRow('Description', descriptor.metadata['description']),
@@ -1209,17 +1259,25 @@ class _ExternalPluginDetailsDialog extends StatelessWidget {
               _buildInfoRow('Category', descriptor.metadata['category']),
             if (descriptor.metadata.containsKey('license'))
               _buildInfoRow('License', descriptor.metadata['license']),
-            _buildInfoRow('Supported Platforms', 
-              (descriptor.metadata['supportedPlatforms'] as List<String>?)?.join(', ') ?? 'Unknown'),
+            _buildInfoRow(
+              'Supported Platforms',
+              (descriptor.metadata['supportedPlatforms'] as List<String>?)
+                      ?.join(', ') ??
+                  'Unknown',
+            ),
             if (descriptor.requiredPermissions.isNotEmpty)
-              _buildInfoRow('Required Permissions', 
-                descriptor.requiredPermissions.map((p) => p.name).join(', ')),
+              _buildInfoRow(
+                'Required Permissions',
+                descriptor.requiredPermissions.map((p) => p.name).join(', '),
+              ),
             const SizedBox(height: 16),
             const Divider(),
             const SizedBox(height: 8),
             Text(
               'Version Management',
-              style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 8),
             _buildVersionInfo(descriptor.id),
@@ -1233,37 +1291,49 @@ class _ExternalPluginDetailsDialog extends StatelessWidget {
         ),
         if (state == PluginState.active || state == PluginState.paused)
           TextButton(
-            onPressed: isOperationInProgress ? null : () {
-              Navigator.of(context).pop();
-              if (state == PluginState.active) {
-                onDisable?.call();
-              } else {
-                onEnable?.call();
-              }
-            },
-            child: Text(state == PluginState.active ? l10n.button_disable : l10n.button_enable),
+            onPressed: isOperationInProgress
+                ? null
+                : () {
+                    Navigator.of(context).pop();
+                    if (state == PluginState.active) {
+                      onDisable?.call();
+                    } else {
+                      onEnable?.call();
+                    }
+                  },
+            child: Text(
+              state == PluginState.active
+                  ? l10n.button_disable
+                  : l10n.button_enable,
+            ),
           ),
         TextButton(
-          onPressed: isOperationInProgress ? null : () {
-            Navigator.of(context).pop();
-            onUpdate?.call();
-          },
+          onPressed: isOperationInProgress
+              ? null
+              : () {
+                  Navigator.of(context).pop();
+                  onUpdate?.call();
+                },
           child: Text(l10n.plugin_update_label),
         ),
         if (onRollback != null)
           TextButton(
-            onPressed: isOperationInProgress ? null : () {
-              Navigator.of(context).pop();
-              onRollback?.call();
-            },
+            onPressed: isOperationInProgress
+                ? null
+                : () {
+                    Navigator.of(context).pop();
+                    onRollback?.call();
+                  },
             style: TextButton.styleFrom(foregroundColor: Colors.orange),
             child: Text(l10n.plugin_rollback_label),
           ),
         TextButton(
-          onPressed: isOperationInProgress ? null : () {
-            Navigator.of(context).pop();
-            onRemove?.call();
-          },
+          onPressed: isOperationInProgress
+              ? null
+              : () {
+                  Navigator.of(context).pop();
+                  onRemove?.call();
+                },
           style: TextButton.styleFrom(foregroundColor: Colors.red),
           child: Text(l10n.plugin_remove_label),
         ),
@@ -1284,9 +1354,7 @@ class _ExternalPluginDetailsDialog extends StatelessWidget {
               style: const TextStyle(fontWeight: FontWeight.w500),
             ),
           ),
-          Expanded(
-            child: Text(value),
-          ),
+          Expanded(child: Text(value)),
         ],
       ),
     );
@@ -1324,10 +1392,7 @@ class _ExternalPluginDetailsDialog extends StatelessWidget {
             children: [
               Icon(Icons.info_outline, size: 16, color: Colors.grey),
               SizedBox(width: 4),
-              Text(
-                'No backup available',
-                style: TextStyle(color: Colors.grey),
-              ),
+              Text('No backup available', style: TextStyle(color: Colors.grey)),
             ],
           ),
         ],

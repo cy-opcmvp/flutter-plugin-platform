@@ -13,16 +13,12 @@ class PluginTestingException implements Exception {
   const PluginTestingException(this.message, {this.pluginId, this.cause});
 
   @override
-  String toString() => 'PluginTestingException: $message${pluginId != null ? ' (Plugin: $pluginId)' : ''}';
+  String toString() =>
+      'PluginTestingException: $message${pluginId != null ? ' (Plugin: $pluginId)' : ''}';
 }
 
 /// Test result status
-enum TestResultStatus {
-  passed,
-  failed,
-  skipped,
-  error
-}
+enum TestResultStatus { passed, failed, skipped, error }
 
 /// Test case for plugin testing
 class PluginTestCase {
@@ -203,8 +199,9 @@ class IntegrationTestResult {
 class PluginTestingFramework {
   final IPluginManager _pluginManager;
   final IPCBridge _ipcBridge;
-  final StreamController<PluginTestResult> _testResultController = StreamController<PluginTestResult>.broadcast();
-  
+  final StreamController<PluginTestResult> _testResultController =
+      StreamController<PluginTestResult>.broadcast();
+
   bool _isInitialized = false;
   final Map<String, PluginTestCase> _testCases = {};
   final Map<String, PluginTestResult> _testResults = {};
@@ -216,16 +213,16 @@ class PluginTestingFramework {
   /// Initialize the testing framework
   Future<void> initialize() async {
     if (_isInitialized) return;
-    
+
     await _pluginManager.initialize();
-    
+
     _isInitialized = true;
   }
 
   /// Shutdown the testing framework
   Future<void> shutdown() async {
     if (!_isInitialized) return;
-    
+
     await _testResultController.close();
     _isInitialized = false;
   }
@@ -254,59 +251,70 @@ class PluginTestingFramework {
   /// Run a specific test case
   Future<PluginTestResult> runTestCase(String testCaseId) async {
     _ensureInitialized();
-    
+
     final testCase = _testCases[testCaseId];
     if (testCase == null) {
       throw PluginTestingException('Test case not found: $testCaseId');
     }
-    
+
     final startTime = DateTime.now();
     final logs = <String>[];
     final metrics = <String, dynamic>{};
-    
+
     try {
       // Load plugin if not already loaded
       final plugin = _pluginManager.getPlugin(testCase.pluginId);
       if (plugin == null) {
-        final pluginInfo = await _pluginManager.getPluginInfo(testCase.pluginId);
+        final pluginInfo = await _pluginManager.getPluginInfo(
+          testCase.pluginId,
+        );
         if (pluginInfo == null) {
-          throw PluginTestingException('Plugin not found: ${testCase.pluginId}');
+          throw PluginTestingException(
+            'Plugin not found: ${testCase.pluginId}',
+          );
         }
         await _pluginManager.loadPlugin(pluginInfo.descriptor);
       }
-      
+
       logs.add('Plugin loaded successfully');
-      
+
       // Execute test case
       final actualResults = await _executeTestCase(testCase, logs, metrics);
-      
+
       // Validate results
-      final validationResult = await _validateTestResults(testCase, actualResults, logs);
-      
+      final validationResult = await _validateTestResults(
+        testCase,
+        actualResults,
+        logs,
+      );
+
       final endTime = DateTime.now();
       final executionTime = endTime.difference(startTime);
-      
+
       final result = PluginTestResult(
         testCaseId: testCaseId,
         pluginId: testCase.pluginId,
-        status: validationResult ? TestResultStatus.passed : TestResultStatus.failed,
-        message: validationResult ? 'Test passed' : 'Test failed - expected behaviors not met',
+        status: validationResult
+            ? TestResultStatus.passed
+            : TestResultStatus.failed,
+        message: validationResult
+            ? 'Test passed'
+            : 'Test failed - expected behaviors not met',
         executionTime: executionTime,
         timestamp: endTime,
         actualResults: actualResults,
         logs: logs,
         metrics: metrics,
       );
-      
+
       _testResults[testCaseId] = result;
       _testResultController.add(result);
-      
+
       return result;
-      
     } catch (e) {
       final endTime = DateTime.now();
       final executionTime = endTime.difference(startTime);
-      
+
       final result = PluginTestResult(
         testCaseId: testCaseId,
         pluginId: testCase.pluginId,
@@ -318,10 +326,10 @@ class PluginTestingFramework {
         logs: logs,
         metrics: metrics,
       );
-      
+
       _testResults[testCaseId] = result;
       _testResultController.add(result);
-      
+
       return result;
     }
   }
@@ -329,15 +337,15 @@ class PluginTestingFramework {
   /// Run all test cases for a plugin
   Future<List<PluginTestResult>> runPluginTests(String pluginId) async {
     _ensureInitialized();
-    
+
     final testCases = getTestCasesForPlugin(pluginId);
     final results = <PluginTestResult>[];
-    
+
     for (final testCase in testCases) {
       final result = await runTestCase(testCase.id);
       results.add(result);
     }
-    
+
     return results;
   }
 
@@ -350,22 +358,22 @@ class PluginTestingFramework {
   /// Run communication validation test
   Future<CommunicationTestResult> runCommunicationTest(String testId) async {
     _ensureInitialized();
-    
+
     final test = _communicationTests[testId];
     if (test == null) {
       throw PluginTestingException('Communication test not found: $testId');
     }
-    
+
     final startTime = DateTime.now();
     final sentMessages = <IPCMessage>[];
     final receivedMessages = <IPCMessage>[];
     final metrics = <String, dynamic>{};
-    
+
     try {
       // Set up message listener
       final messageCompleter = Completer<List<IPCMessage>>();
       final receivedMessagesList = <IPCMessage>[];
-      
+
       // Note: In a real implementation, this would listen to the IPC bridge's message stream
       // For testing purposes, we'll simulate the communication
       Timer(const Duration(milliseconds: 100), () {
@@ -377,27 +385,32 @@ class PluginTestingFramework {
           messageCompleter.complete(receivedMessagesList);
         }
       });
-      
+
       // Send test messages
       for (final message in test.testMessages) {
         await _ipcBridge.sendMessage(test.pluginId, message);
         sentMessages.add(message);
       }
-      
+
       // Wait for responses
       final responses = await messageCompleter.future.timeout(test.timeout);
       receivedMessages.addAll(responses);
-      
+
       // Validate communication
-      final isValid = await _validateCommunication(test, sentMessages, receivedMessages);
-      
+      final isValid = await _validateCommunication(
+        test,
+        sentMessages,
+        receivedMessages,
+      );
+
       final endTime = DateTime.now();
       final totalTime = endTime.difference(startTime);
-      
+
       metrics['messagesSent'] = sentMessages.length;
       metrics['messagesReceived'] = receivedMessages.length;
-      metrics['averageResponseTime'] = totalTime.inMilliseconds / sentMessages.length;
-      
+      metrics['averageResponseTime'] =
+          totalTime.inMilliseconds / sentMessages.length;
+
       return CommunicationTestResult(
         testId: testId,
         pluginId: test.pluginId,
@@ -408,11 +421,10 @@ class PluginTestingFramework {
         metrics: metrics,
         errorMessage: isValid ? null : 'Communication validation failed',
       );
-      
     } catch (e) {
       final endTime = DateTime.now();
       final totalTime = endTime.difference(startTime);
-      
+
       return CommunicationTestResult(
         testId: testId,
         pluginId: test.pluginId,
@@ -435,15 +447,15 @@ class PluginTestingFramework {
   /// Run integration test suite
   Future<IntegrationTestResult> runIntegrationSuite(String suiteId) async {
     _ensureInitialized();
-    
+
     final suite = _integrationSuites[suiteId];
     if (suite == null) {
       throw PluginTestingException('Integration suite not found: $suiteId');
     }
-    
+
     final startTime = DateTime.now();
     final testResults = <PluginTestResult>[];
-    
+
     // Load all required plugins
     for (final pluginId in suite.pluginIds) {
       final plugin = _pluginManager.getPlugin(pluginId);
@@ -454,19 +466,19 @@ class PluginTestingFramework {
         }
       }
     }
-    
+
     // Run all test cases in the suite
     for (final testCase in suite.testCases) {
       final result = await runTestCase(testCase.id);
       testResults.add(result);
     }
-    
+
     final endTime = DateTime.now();
     final totalExecutionTime = endTime.difference(startTime);
-    
+
     // Generate summary
     final summary = _generateTestSummary(testResults);
-    
+
     return IntegrationTestResult(
       suiteId: suiteId,
       pluginIds: suite.pluginIds,
@@ -480,69 +492,77 @@ class PluginTestingFramework {
   /// Create automated test cases for a plugin
   List<PluginTestCase> generateAutomatedTests(String pluginId) {
     _ensureInitialized();
-    
+
     final testCases = <PluginTestCase>[];
-    
+
     // Basic functionality tests
-    testCases.add(PluginTestCase(
-      id: '${pluginId}_basic_load',
-      name: 'Basic Plugin Load Test',
-      description: 'Tests if the plugin can be loaded successfully',
-      pluginId: pluginId,
-      testData: {'action': 'load'},
-      expectedBehaviors: ['plugin_loaded', 'no_errors'],
-    ));
-    
-    testCases.add(PluginTestCase(
-      id: '${pluginId}_basic_unload',
-      name: 'Basic Plugin Unload Test',
-      description: 'Tests if the plugin can be unloaded successfully',
-      pluginId: pluginId,
-      testData: {'action': 'unload'},
-      expectedBehaviors: ['plugin_unloaded', 'resources_cleaned'],
-    ));
-    
+    testCases.add(
+      PluginTestCase(
+        id: '${pluginId}_basic_load',
+        name: 'Basic Plugin Load Test',
+        description: 'Tests if the plugin can be loaded successfully',
+        pluginId: pluginId,
+        testData: {'action': 'load'},
+        expectedBehaviors: ['plugin_loaded', 'no_errors'],
+      ),
+    );
+
+    testCases.add(
+      PluginTestCase(
+        id: '${pluginId}_basic_unload',
+        name: 'Basic Plugin Unload Test',
+        description: 'Tests if the plugin can be unloaded successfully',
+        pluginId: pluginId,
+        testData: {'action': 'unload'},
+        expectedBehaviors: ['plugin_unloaded', 'resources_cleaned'],
+      ),
+    );
+
     // State management tests
-    testCases.add(PluginTestCase(
-      id: '${pluginId}_state_management',
-      name: 'Plugin State Management Test',
-      description: 'Tests plugin state transitions',
-      pluginId: pluginId,
-      testData: {'action': 'state_test'},
-      expectedBehaviors: ['state_transitions_valid', 'state_preserved'],
-    ));
-    
+    testCases.add(
+      PluginTestCase(
+        id: '${pluginId}_state_management',
+        name: 'Plugin State Management Test',
+        description: 'Tests plugin state transitions',
+        pluginId: pluginId,
+        testData: {'action': 'state_test'},
+        expectedBehaviors: ['state_transitions_valid', 'state_preserved'],
+      ),
+    );
+
     // Error handling tests
-    testCases.add(PluginTestCase(
-      id: '${pluginId}_error_handling',
-      name: 'Plugin Error Handling Test',
-      description: 'Tests plugin error handling capabilities',
-      pluginId: pluginId,
-      testData: {'action': 'error_test', 'trigger_error': true},
-      expectedBehaviors: ['errors_handled_gracefully', 'no_crashes'],
-    ));
-    
+    testCases.add(
+      PluginTestCase(
+        id: '${pluginId}_error_handling',
+        name: 'Plugin Error Handling Test',
+        description: 'Tests plugin error handling capabilities',
+        pluginId: pluginId,
+        testData: {'action': 'error_test', 'trigger_error': true},
+        expectedBehaviors: ['errors_handled_gracefully', 'no_crashes'],
+      ),
+    );
+
     return testCases;
   }
 
   /// Get test results for a plugin
   List<PluginTestResult> getTestResults({String? pluginId}) {
     _ensureInitialized();
-    
+
     if (pluginId != null) {
       return _testResults.values.where((r) => r.pluginId == pluginId).toList();
     }
-    
+
     return _testResults.values.toList();
   }
 
   /// Generate test report
   Future<Map<String, dynamic>> generateTestReport({String? pluginId}) async {
     _ensureInitialized();
-    
+
     final results = getTestResults(pluginId: pluginId);
     final summary = _generateTestSummary(results);
-    
+
     return {
       'reportTime': DateTime.now().toIso8601String(),
       'pluginId': pluginId,
@@ -555,7 +575,7 @@ class PluginTestingFramework {
   /// Clear test data
   void clearTestData({String? pluginId}) {
     _ensureInitialized();
-    
+
     if (pluginId != null) {
       _testResults.removeWhere((key, result) => result.pluginId == pluginId);
       _testCases.removeWhere((key, testCase) => testCase.pluginId == pluginId);
@@ -574,7 +594,9 @@ class PluginTestingFramework {
 
   void _ensureInitialized() {
     if (!_isInitialized) {
-      throw StateError('PluginTestingFramework not initialized. Call initialize() first.');
+      throw StateError(
+        'PluginTestingFramework not initialized. Call initialize() first.',
+      );
     }
   }
 
@@ -584,32 +606,32 @@ class PluginTestingFramework {
     Map<String, dynamic> metrics,
   ) async {
     final results = <String, dynamic>{};
-    
+
     // Simulate test execution time
     await Future.delayed(const Duration(milliseconds: 10));
-    
+
     // Simulate test execution based on test data
     final action = testCase.testData['action'] as String?;
-    
+
     switch (action) {
       case 'load':
         results['loaded'] = true;
         results['loadTime'] = DateTime.now().millisecondsSinceEpoch;
         logs.add('Plugin load test executed');
         break;
-        
+
       case 'unload':
         results['unloaded'] = true;
         results['unloadTime'] = DateTime.now().millisecondsSinceEpoch;
         logs.add('Plugin unload test executed');
         break;
-        
+
       case 'state_test':
         results['stateTransitions'] = ['inactive', 'loading', 'active'];
         results['stateValid'] = true;
         logs.add('State management test executed');
         break;
-        
+
       case 'error_test':
         if (testCase.testData['trigger_error'] == true) {
           results['errorTriggered'] = true;
@@ -617,12 +639,12 @@ class PluginTestingFramework {
           logs.add('Error handling test executed');
         }
         break;
-        
+
       default:
         results['executed'] = true;
         logs.add('Generic test executed');
     }
-    
+
     metrics['executionSteps'] = results.length;
     return results;
   }
@@ -638,39 +660,39 @@ class PluginTestingFramework {
         case 'plugin_loaded':
           if (actualResults['loaded'] != true) return false;
           break;
-          
+
         case 'plugin_unloaded':
           if (actualResults['unloaded'] != true) return false;
           break;
-          
+
         case 'no_errors':
           if (actualResults.containsKey('error')) return false;
           break;
-          
+
         case 'state_transitions_valid':
           if (actualResults['stateValid'] != true) return false;
           break;
-          
+
         case 'errors_handled_gracefully':
           if (actualResults['errorHandled'] != true) return false;
           break;
-          
+
         case 'no_crashes':
           if (actualResults.containsKey('crashed')) return false;
           break;
-          
+
         case 'resources_cleaned':
           // Assume resources are cleaned if unload was successful
           if (actualResults['unloaded'] != true) return false;
           break;
-          
+
         case 'state_preserved':
           // Assume state is preserved if state transitions are valid
           if (actualResults['stateValid'] != true) return false;
           break;
       }
     }
-    
+
     logs.add('Test validation completed');
     return true;
   }
@@ -684,41 +706,53 @@ class PluginTestingFramework {
     if (receivedMessages.length != test.expectedResponses.length) {
       return false;
     }
-    
+
     // Validate message types and structure
     for (int i = 0; i < receivedMessages.length; i++) {
       final received = receivedMessages[i];
       final expected = test.expectedResponses[i];
-      
+
       if (received.messageType != expected.messageType) {
         return false;
       }
     }
-    
+
     return true;
   }
 
   Map<String, dynamic> _generateTestSummary(List<PluginTestResult> results) {
     final total = results.length;
-    final passed = results.where((r) => r.status == TestResultStatus.passed).length;
-    final failed = results.where((r) => r.status == TestResultStatus.failed).length;
-    final errors = results.where((r) => r.status == TestResultStatus.error).length;
-    final skipped = results.where((r) => r.status == TestResultStatus.skipped).length;
-    
+    final passed = results
+        .where((r) => r.status == TestResultStatus.passed)
+        .length;
+    final failed = results
+        .where((r) => r.status == TestResultStatus.failed)
+        .length;
+    final errors = results
+        .where((r) => r.status == TestResultStatus.error)
+        .length;
+    final skipped = results
+        .where((r) => r.status == TestResultStatus.skipped)
+        .length;
+
     final totalExecutionTime = results.fold<Duration>(
       Duration.zero,
       (sum, result) => sum + result.executionTime,
     );
-    
+
     return {
       'total': total,
       'passed': passed,
       'failed': failed,
       'errors': errors,
       'skipped': skipped,
-      'passRate': total > 0 ? (passed / total * 100).toStringAsFixed(2) : '0.00',
+      'passRate': total > 0
+          ? (passed / total * 100).toStringAsFixed(2)
+          : '0.00',
       'totalExecutionTime': totalExecutionTime.inMilliseconds,
-      'averageExecutionTime': total > 0 ? (totalExecutionTime.inMilliseconds / total).round() : 0,
+      'averageExecutionTime': total > 0
+          ? (totalExecutionTime.inMilliseconds / total).round()
+          : 0,
     };
   }
 }

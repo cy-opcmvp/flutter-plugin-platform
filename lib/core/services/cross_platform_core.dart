@@ -17,9 +17,9 @@ abstract class ISyncStorage {
 /// Production storage implementation for sync
 class SyncStorage implements ISyncStorage {
   final IStateManager _stateManager;
-  
+
   SyncStorage(this._stateManager);
-  
+
   @override
   Future<String?> getString(String key) async {
     return await _stateManager.loadState<String>(key);
@@ -40,7 +40,7 @@ class SyncStorage implements ISyncStorage {
   Future<void> remove(String key) async {
     await _stateManager.saveState(key, null);
   }
-  
+
   @override
   Set<String> getKeys() {
     // This is a simplified implementation
@@ -68,7 +68,7 @@ class MockSyncStorage implements ISyncStorage {
   Future<void> remove(String key) async {
     _data.remove(key);
   }
-  
+
   @override
   Set<String> getKeys() => _data.keys.toSet();
 }
@@ -79,43 +79,46 @@ class CrossPlatformCore implements ISynchronizationEngine {
   static const String _conflictPrefix = 'sync_conflict_';
   static const String _dirtyKeysKey = 'sync_dirty_keys';
   static const String _lastSyncKey = 'last_sync_time';
-  
+
   final INetworkManager _networkManager;
   late final ISyncStorage _storage;
-  
+
   SyncStatus _status = SyncStatus.idle;
   final List<SyncConflict> _pendingConflicts = [];
   final Set<String> _dirtyKeys = {};
   DateTime? _lastSyncTime;
-  
-  final StreamController<SyncResult> _syncController = StreamController<SyncResult>.broadcast();
+
+  final StreamController<SyncResult> _syncController =
+      StreamController<SyncResult>.broadcast();
   Timer? _recoveryTimer;
   bool _isInitialized = false;
-  
+
   CrossPlatformCore(
     this._networkManager, {
     IStateManager? stateManager,
     ISyncStorage? storage,
   }) {
-    _storage = storage ?? (stateManager != null ? SyncStorage(stateManager) : MockSyncStorage());
+    _storage =
+        storage ??
+        (stateManager != null ? SyncStorage(stateManager) : MockSyncStorage());
   }
 
   @override
   Future<void> initialize() async {
     if (_isInitialized) return;
-    
+
     // Load dirty keys from storage
     await _loadDirtyKeys();
-    
+
     // Load pending conflicts
     await _loadPendingConflicts();
-    
+
     // Load last sync time
     await _loadLastSyncTime();
-    
+
     // Set up network recovery monitoring
     _networkManager.connectivityStream.listen(_onConnectivityChanged);
-    
+
     _isInitialized = true;
   }
 
@@ -124,7 +127,7 @@ class CrossPlatformCore implements ISynchronizationEngine {
     if (!_isInitialized) {
       throw StateError('Synchronization engine not initialized');
     }
-    
+
     if (!_networkManager.isOnline) {
       _status = SyncStatus.offline;
       return SyncResult(
@@ -136,13 +139,13 @@ class CrossPlatformCore implements ISynchronizationEngine {
         error: 'No network connectivity',
       );
     }
-    
+
     _status = SyncStatus.syncing;
-    
+
     final syncedKeys = <String>[];
     final failedKeys = <String>[];
     final conflicts = <SyncConflict>[];
-    
+
     try {
       // Sync all dirty keys
       for (final key in _dirtyKeys.toList()) {
@@ -159,18 +162,18 @@ class CrossPlatformCore implements ISynchronizationEngine {
           failedKeys.add(key);
         }
       }
-      
+
       // Update last sync time if any keys were synced
       if (syncedKeys.isNotEmpty) {
         _lastSyncTime = DateTime.now();
         await _saveLastSyncTime();
       }
-      
+
       // Save updated dirty keys
       await _saveDirtyKeys();
-      
+
       _status = conflicts.isNotEmpty ? SyncStatus.conflict : SyncStatus.idle;
-      
+
       final result = SyncResult(
         success: failedKeys.isEmpty && conflicts.isEmpty,
         conflicts: conflicts,
@@ -178,10 +181,9 @@ class CrossPlatformCore implements ISynchronizationEngine {
         failedKeys: failedKeys,
         timestamp: DateTime.now(),
       );
-      
+
       _syncController.add(result);
       return result;
-      
     } catch (e) {
       _status = SyncStatus.error;
       final result = SyncResult(
@@ -192,7 +194,7 @@ class CrossPlatformCore implements ISynchronizationEngine {
         timestamp: DateTime.now(),
         error: e.toString(),
       );
-      
+
       _syncController.add(result);
       return result;
     }
@@ -210,15 +212,15 @@ class CrossPlatformCore implements ISynchronizationEngine {
         error: 'No network connectivity',
       );
     }
-    
+
     try {
       // Get local data and metadata
       final localData = await _storage.getString(key);
       final localMeta = await _getMetadata(key);
-      
+
       // Get remote data
       final remoteData = await _networkManager.downloadData(key);
-      
+
       if (localData == null && remoteData == null) {
         // No data exists locally or remotely
         return SyncResult(
@@ -229,12 +231,12 @@ class CrossPlatformCore implements ISynchronizationEngine {
           timestamp: DateTime.now(),
         );
       }
-      
+
       if (localData != null && remoteData == null) {
         // Local data exists, upload to remote
         await _networkManager.uploadData(key, jsonDecode(localData));
         await _updateMetadata(key, DateTime.now());
-        
+
         return SyncResult(
           success: true,
           conflicts: [],
@@ -243,12 +245,12 @@ class CrossPlatformCore implements ISynchronizationEngine {
           timestamp: DateTime.now(),
         );
       }
-      
+
       if (localData == null && remoteData != null) {
         // Remote data exists, download to local
         await _storage.setString(key, jsonEncode(remoteData));
         await _updateMetadata(key, DateTime.now());
-        
+
         return SyncResult(
           success: true,
           conflicts: [],
@@ -257,12 +259,18 @@ class CrossPlatformCore implements ISynchronizationEngine {
           timestamp: DateTime.now(),
         );
       }
-      
+
       // Both local and remote data exist, check for conflicts
-      final remoteTimestamp = DateTime.tryParse(remoteData!['_timestamp'] ?? '') ?? DateTime.now();
+      final remoteTimestamp =
+          DateTime.tryParse(remoteData!['_timestamp'] ?? '') ?? DateTime.now();
       final localTimestamp = localMeta?.lastModified ?? DateTime.now();
-      
-      if (_hasConflict(localData!, remoteData, localTimestamp, remoteTimestamp)) {
+
+      if (_hasConflict(
+        localData!,
+        remoteData,
+        localTimestamp,
+        remoteTimestamp,
+      )) {
         // Create conflict for resolution
         final conflict = SyncConflict(
           key: key,
@@ -272,10 +280,10 @@ class CrossPlatformCore implements ISynchronizationEngine {
           localTimestamp: localTimestamp,
           remoteTimestamp: remoteTimestamp,
         );
-        
+
         _pendingConflicts.add(conflict);
         await _saveConflict(conflict);
-        
+
         return SyncResult(
           success: false,
           conflicts: [conflict],
@@ -290,9 +298,9 @@ class CrossPlatformCore implements ISynchronizationEngine {
         } else {
           await _networkManager.uploadData(key, jsonDecode(localData));
         }
-        
+
         await _updateMetadata(key, DateTime.now());
-        
+
         return SyncResult(
           success: true,
           conflicts: [],
@@ -301,7 +309,6 @@ class CrossPlatformCore implements ISynchronizationEngine {
           timestamp: DateTime.now(),
         );
       }
-      
     } catch (e) {
       return SyncResult(
         success: false,
@@ -315,7 +322,10 @@ class CrossPlatformCore implements ISynchronizationEngine {
   }
 
   @override
-  Future<void> resolveConflict(SyncConflict conflict, ConflictResolution resolution) async {
+  Future<void> resolveConflict(
+    SyncConflict conflict,
+    ConflictResolution resolution,
+  ) async {
     switch (resolution) {
       case ConflictResolution.useLocal:
         if (conflict.localData != null) {
@@ -323,14 +333,17 @@ class CrossPlatformCore implements ISynchronizationEngine {
           await _updateMetadata(conflict.key, DateTime.now());
         }
         break;
-        
+
       case ConflictResolution.useRemote:
         if (conflict.remoteData != null) {
-          await _storage.setString(conflict.key, jsonEncode(conflict.remoteData!));
+          await _storage.setString(
+            conflict.key,
+            jsonEncode(conflict.remoteData!),
+          );
           await _updateMetadata(conflict.key, DateTime.now());
         }
         break;
-        
+
       case ConflictResolution.merge:
         // Simple merge strategy - combine non-conflicting fields
         final merged = _mergeData(conflict.localData, conflict.remoteData);
@@ -338,7 +351,7 @@ class CrossPlatformCore implements ISynchronizationEngine {
         await _networkManager.uploadData(conflict.key, merged);
         await _updateMetadata(conflict.key, DateTime.now());
         break;
-        
+
       case ConflictResolution.userChoice:
         // This would typically involve showing UI to user
         // For now, default to using local data
@@ -348,11 +361,11 @@ class CrossPlatformCore implements ISynchronizationEngine {
         }
         break;
     }
-    
+
     // Remove conflict from pending list
     _pendingConflicts.removeWhere((c) => c.key == conflict.key);
     await _removeConflict(conflict.key);
-    
+
     // Remove from dirty keys
     _dirtyKeys.remove(conflict.key);
     await _saveDirtyKeys();
@@ -363,15 +376,15 @@ class CrossPlatformCore implements ISynchronizationEngine {
     if (!_networkManager.isOnline) {
       return;
     }
-    
+
     // Update status immediately when network is available
     if (_status == SyncStatus.offline) {
       _status = SyncStatus.idle;
     }
-    
+
     // Cancel any existing recovery timer
     _recoveryTimer?.cancel();
-    
+
     // Start recovery process after a short delay
     _recoveryTimer = Timer(const Duration(seconds: 2), () async {
       if (_dirtyKeys.isNotEmpty) {
@@ -387,7 +400,8 @@ class CrossPlatformCore implements ISynchronizationEngine {
   Stream<SyncResult> get syncEvents => _syncController.stream;
 
   @override
-  List<SyncConflict> get pendingConflicts => List.unmodifiable(_pendingConflicts);
+  List<SyncConflict> get pendingConflicts =>
+      List.unmodifiable(_pendingConflicts);
 
   @override
   Future<bool> needsSync(String key) async {
@@ -411,27 +425,31 @@ class CrossPlatformCore implements ISynchronizationEngine {
   }
 
   /// Check if there's a conflict between local and remote data
-  bool _hasConflict(String localData, Map<String, dynamic> remoteData, 
-                   DateTime localTimestamp, DateTime remoteTimestamp) {
+  bool _hasConflict(
+    String localData,
+    Map<String, dynamic> remoteData,
+    DateTime localTimestamp,
+    DateTime remoteTimestamp,
+  ) {
     try {
       final localMap = jsonDecode(localData) as Map<String, dynamic>;
-      
+
       // Remove timestamp fields for comparison
       final localCopy = Map<String, dynamic>.from(localMap);
       final remoteCopy = Map<String, dynamic>.from(remoteData);
       localCopy.remove('_timestamp');
       remoteCopy.remove('_timestamp');
-      
+
       // If data is identical, no conflict
       if (_deepEquals(localCopy, remoteCopy)) {
         return false;
       }
-      
+
       // If timestamps are very close (within 1 second), consider it the same update
       if ((localTimestamp.difference(remoteTimestamp).abs().inSeconds) < 1) {
         return false;
       }
-      
+
       return true;
     } catch (e) {
       // If we can't parse, assume conflict
@@ -442,16 +460,18 @@ class CrossPlatformCore implements ISynchronizationEngine {
   /// Deep equality check for maps
   bool _deepEquals(Map<String, dynamic> a, Map<String, dynamic> b) {
     if (a.length != b.length) return false;
-    
+
     for (final key in a.keys) {
       if (!b.containsKey(key)) return false;
-      
+
       final aValue = a[key];
       final bValue = b[key];
-      
+
       if (aValue is Map && bValue is Map) {
-        if (!_deepEquals(Map<String, dynamic>.from(aValue), 
-                        Map<String, dynamic>.from(bValue))) {
+        if (!_deepEquals(
+          Map<String, dynamic>.from(aValue),
+          Map<String, dynamic>.from(bValue),
+        )) {
           return false;
         }
       } else if (aValue is List && bValue is List) {
@@ -463,17 +483,20 @@ class CrossPlatformCore implements ISynchronizationEngine {
         return false;
       }
     }
-    
+
     return true;
   }
 
   /// Merge two data maps
-  Map<String, dynamic> _mergeData(Map<String, dynamic>? local, Map<String, dynamic>? remote) {
+  Map<String, dynamic> _mergeData(
+    Map<String, dynamic>? local,
+    Map<String, dynamic>? remote,
+  ) {
     if (local == null) return remote ?? {};
     if (remote == null) return local;
-    
+
     final merged = Map<String, dynamic>.from(local);
-    
+
     for (final entry in remote.entries) {
       if (!merged.containsKey(entry.key)) {
         merged[entry.key] = entry.value;
@@ -482,7 +505,7 @@ class CrossPlatformCore implements ISynchronizationEngine {
         merged[entry.key] = entry.value;
       }
     }
-    
+
     return merged;
   }
 
@@ -490,7 +513,7 @@ class CrossPlatformCore implements ISynchronizationEngine {
   Future<SyncMetadata?> _getMetadata(String key) async {
     final metaJson = await _storage.getString('$_syncMetadataPrefix$key');
     if (metaJson == null) return null;
-    
+
     try {
       final metaData = jsonDecode(metaJson) as Map<String, dynamic>;
       return SyncMetadata(
@@ -510,11 +533,14 @@ class CrossPlatformCore implements ISynchronizationEngine {
       lastModified: timestamp,
       version: _generateVersion(),
     );
-    
-    await _storage.setString('$_syncMetadataPrefix$key', jsonEncode({
-      'lastModified': metadata.lastModified.toIso8601String(),
-      'version': metadata.version,
-    }));
+
+    await _storage.setString(
+      '$_syncMetadataPrefix$key',
+      jsonEncode({
+        'lastModified': metadata.lastModified.toIso8601String(),
+        'version': metadata.version,
+      }),
+    );
   }
 
   /// Generate a version string
@@ -558,8 +584,11 @@ class CrossPlatformCore implements ISynchronizationEngine {
       'localVersion': conflict.localVersion,
       'remoteVersion': conflict.remoteVersion,
     };
-    
-    await _storage.setString('$_conflictPrefix${conflict.key}', jsonEncode(conflictData));
+
+    await _storage.setString(
+      '$_conflictPrefix${conflict.key}',
+      jsonEncode(conflictData),
+    );
   }
 
   /// Remove a conflict from storage

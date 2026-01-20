@@ -52,18 +52,21 @@ class CalculatorPlugin extends PlatformPluginBase {
     _context = context;
 
     // Load saved settings if available
-    final savedSettings = await _context.dataStorage.retrieve<Map<String, dynamic>>('calculator_settings');
+    final savedSettings = await _context.dataStorage
+        .retrieve<Map<String, dynamic>>('calculator_settings');
     if (savedSettings != null) {
       _settings = CalculatorSettings.fromJson(savedSettings);
     }
 
     // Load saved state if available
-    final savedState = await _context.dataStorage.retrieve<Map<String, dynamic>>('calculator_state');
+    final savedState = await _context.dataStorage
+        .retrieve<Map<String, dynamic>>('calculator_state');
     if (savedState != null) {
       calculatorState.display = savedState['display'] ?? '0';
       calculatorState.previousValue = savedState['previousValue'] ?? '';
       calculatorState.operation = savedState['operation'] ?? '';
-      calculatorState.waitingForOperand = savedState['waitingForOperand'] ?? false;
+      calculatorState.waitingForOperand =
+          savedState['waitingForOperand'] ?? false;
     }
 
     // Note: Notifications skipped as we need BuildContext for localization
@@ -218,11 +221,9 @@ class _CalculatorWidgetState extends State<CalculatorWidget> {
                   // Show operation indicator
                   if (_state.previousValue.isNotEmpty)
                     Text(
-                      _formatNumber(_state.previousValue) + ' ${_state.operation}',
-                      style: TextStyle(
-                        color: Colors.grey[400],
-                        fontSize: 20,
-                      ),
+                      _formatNumber(_state.previousValue) +
+                          ' ${_state.operation}',
+                      style: TextStyle(color: Colors.grey[400], fontSize: 20),
                     ),
                   const SizedBox(height: 8),
                   Text(
@@ -268,10 +269,14 @@ class _CalculatorWidgetState extends State<CalculatorWidget> {
   Widget _buildButton(String text) {
     Color backgroundColor;
     Color textColor = Colors.white;
-    
+
     if (text == 'C' || text == '±' || text == '%') {
       backgroundColor = Colors.grey[600]!;
-    } else if (text == '÷' || text == '×' || text == '-' || text == '+' || text == '=') {
+    } else if (text == '÷' ||
+        text == '×' ||
+        text == '-' ||
+        text == '+' ||
+        text == '=') {
       backgroundColor = Colors.orange;
       // Highlight active operation
       if (_state.operation == text && _state.waitingForOperand) {
@@ -333,7 +338,7 @@ class _CalculatorWidgetState extends State<CalculatorWidget> {
           break;
       }
     });
-    
+
     widget.onStateChanged();
   }
 
@@ -366,7 +371,7 @@ class _CalculatorWidgetState extends State<CalculatorWidget> {
     if (_state.previousValue.isNotEmpty && !_state.waitingForOperand) {
       _calculate();
     }
-    
+
     _state.previousValue = _state.display;
     _state.operation = operation;
     _state.waitingForOperand = true;

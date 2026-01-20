@@ -122,7 +122,10 @@ class ConfigManager {
   }
 
   /// 保存插件配置
-  Future<void> savePluginConfig(String pluginId, Map<String, dynamic> config) async {
+  Future<void> savePluginConfig(
+    String pluginId,
+    Map<String, dynamic> config,
+  ) async {
     _pluginConfigs[pluginId] = config;
     await _service.savePluginConfig(pluginId, config);
     debugPrint('Plugin config saved for $pluginId');

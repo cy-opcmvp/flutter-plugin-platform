@@ -1,7 +1,5 @@
 library;
 
-import 'package:flutter/foundation.dart';
-
 /// 标签颜色主题
 enum TagColor { blue, green, orange, purple, red, teal, indigo, pink }
 

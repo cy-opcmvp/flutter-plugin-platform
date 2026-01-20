@@ -30,13 +30,19 @@ class ScreenshotCaptureService {
       }
 
       if (renderObject is! RenderRepaintBoundary) {
-        debugPrint('Screenshot: Root render object is not a RenderRepaintBoundary');
+        debugPrint(
+          'Screenshot: Root render object is not a RenderRepaintBoundary',
+        );
         return null;
       }
 
       // 捕获截图
-      final ui.Image image = await renderObject.toImage(pixelRatio: ui.window.devicePixelRatio);
-      final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      final ui.Image image = await renderObject.toImage(
+        pixelRatio: ui.window.devicePixelRatio,
+      );
+      final ByteData? byteData = await image.toByteData(
+        format: ui.ImageByteFormat.png,
+      );
 
       if (byteData == null) {
         debugPrint('Screenshot: Failed to convert image to byte data');
@@ -87,17 +93,24 @@ class ScreenshotCaptureService {
   ///
   /// [globalKey] Widget 的 GlobalKey
   /// 返回截图的字节数据（PNG 格式），如果失败则返回 null
-  Future<Uint8List?> captureWidget(GlobalKey<State<StatefulWidget>> globalKey) async {
+  Future<Uint8List?> captureWidget(
+    GlobalKey<State<StatefulWidget>> globalKey,
+  ) async {
     try {
       final RenderRepaintBoundary? boundary =
-          globalKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+          globalKey.currentContext?.findRenderObject()
+              as RenderRepaintBoundary?;
       if (boundary == null) {
         debugPrint('Screenshot: Cannot find RenderRepaintBoundary');
         return null;
       }
 
-      final ui.Image image = await boundary.toImage(pixelRatio: ui.window.devicePixelRatio);
-      final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      final ui.Image image = await boundary.toImage(
+        pixelRatio: ui.window.devicePixelRatio,
+      );
+      final ByteData? byteData = await image.toByteData(
+        format: ui.ImageByteFormat.png,
+      );
 
       if (byteData == null) {
         debugPrint('Screenshot: Failed to convert image to byte data');
@@ -150,21 +163,28 @@ class ScreenshotCapturableWidget extends StatefulWidget {
   });
 
   @override
-  State<ScreenshotCapturableWidget> createState() => _ScreenshotCapturableWidgetState();
+  State<ScreenshotCapturableWidget> createState() =>
+      _ScreenshotCapturableWidgetState();
 }
 
-class _ScreenshotCapturableWidgetState extends State<ScreenshotCapturableWidget> {
+class _ScreenshotCapturableWidgetState
+    extends State<ScreenshotCapturableWidget> {
   final GlobalKey _globalKey = GlobalKey();
 
   /// 捕获此 Widget 的截图
   Future<Uint8List?> capture() async {
     try {
       final RenderRepaintBoundary? boundary =
-          _globalKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+          _globalKey.currentContext?.findRenderObject()
+              as RenderRepaintBoundary?;
       if (boundary == null) return null;
 
-      final ui.Image image = await boundary.toImage(pixelRatio: ui.window.devicePixelRatio);
-      final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      final ui.Image image = await boundary.toImage(
+        pixelRatio: ui.window.devicePixelRatio,
+      );
+      final ByteData? byteData = await image.toByteData(
+        format: ui.ImageByteFormat.png,
+      );
 
       if (byteData == null) return null;
 
@@ -177,9 +197,6 @@ class _ScreenshotCapturableWidgetState extends State<ScreenshotCapturableWidget>
 
   @override
   Widget build(BuildContext context) {
-    return RepaintBoundary(
-      key: _globalKey,
-      child: widget.child,
-    );
+    return RepaintBoundary(key: _globalKey, child: widget.child);
   }
 }

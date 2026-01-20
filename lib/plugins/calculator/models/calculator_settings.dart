@@ -101,7 +101,8 @@ class CalculatorSettings extends BasePluginSettings {
       angleMode: angleMode ?? this.angleMode,
       historySize: historySize ?? this.historySize,
       memorySlots: memorySlots ?? this.memorySlots,
-      showGroupingSeparator: showGroupingSeparator ?? this.showGroupingSeparator,
+      showGroupingSeparator:
+          showGroupingSeparator ?? this.showGroupingSeparator,
       enableVibration: enableVibration ?? this.enableVibration,
       buttonSoundVolume: buttonSoundVolume ?? this.buttonSoundVolume,
     );

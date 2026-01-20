@@ -28,7 +28,8 @@ class ExecutableOutputCapture extends StatefulWidget {
   });
 
   @override
-  State<ExecutableOutputCapture> createState() => _ExecutableOutputCaptureState();
+  State<ExecutableOutputCapture> createState() =>
+      _ExecutableOutputCaptureState();
 }
 
 class _ExecutableOutputCaptureState extends State<ExecutableOutputCapture> {
@@ -66,7 +67,6 @@ class _ExecutableOutputCaptureState extends State<ExecutableOutputCapture> {
       // Register IPC message handler for structured output
       widget.plugin.registerMessageHandler('output', _handleStructuredOutput);
       widget.plugin.registerMessageHandler('ui_update', _handleUIUpdate);
-
     } catch (e) {
       setState(() {
         _isCapturing = false;
@@ -100,50 +100,56 @@ class _ExecutableOutputCaptureState extends State<ExecutableOutputCapture> {
   Future<void> _setupProcessOutputCapture() async {
     // In a real implementation, this would connect to the actual process streams
     // For now, we'll simulate by listening to IPC messages
-    _addOutputLine('Connected to plugin process (PID: ${widget.plugin.processId})', OutputType.info);
-    
+    _addOutputLine(
+      'Connected to plugin process (PID: ${widget.plugin.processId})',
+      OutputType.info,
+    );
+
     // Request initial output from plugin
-    await widget.plugin.sendMessage(IPCMessage(
-      messageId: DateTime.now().millisecondsSinceEpoch.toString(),
-      messageType: 'request_output',
-      sourceId: 'host',
-      targetId: widget.plugin.id,
-      payload: {
-        'captureStdout': widget.captureStdout,
-        'captureStderr': widget.captureStderr,
-      },
-    ));
+    await widget.plugin.sendMessage(
+      IPCMessage(
+        messageId: DateTime.now().millisecondsSinceEpoch.toString(),
+        messageType: 'request_output',
+        sourceId: 'host',
+        targetId: widget.plugin.id,
+        payload: {
+          'captureStdout': widget.captureStdout,
+          'captureStderr': widget.captureStderr,
+        },
+      ),
+    );
   }
 
   /// Set up output capture for script-based plugins
   Future<void> _setupScriptOutputCapture() async {
     _addOutputLine('Script plugin initialized', OutputType.info);
-    
+
     // Request script output
-    await widget.plugin.sendMessage(IPCMessage(
-      messageId: DateTime.now().millisecondsSinceEpoch.toString(),
-      messageType: 'start_script',
-      sourceId: 'host',
-      targetId: widget.plugin.id,
-      payload: {},
-    ));
+    await widget.plugin.sendMessage(
+      IPCMessage(
+        messageId: DateTime.now().millisecondsSinceEpoch.toString(),
+        messageType: 'start_script',
+        sourceId: 'host',
+        targetId: widget.plugin.id,
+        payload: {},
+      ),
+    );
   }
 
   /// Set up output capture for containerized plugins
   Future<void> _setupContainerOutputCapture() async {
     _addOutputLine('Container plugin started', OutputType.info);
-    
+
     // Request container logs
-    await widget.plugin.sendMessage(IPCMessage(
-      messageId: DateTime.now().millisecondsSinceEpoch.toString(),
-      messageType: 'get_logs',
-      sourceId: 'host',
-      targetId: widget.plugin.id,
-      payload: {
-        'follow': true,
-        'timestamps': widget.showTimestamps,
-      },
-    ));
+    await widget.plugin.sendMessage(
+      IPCMessage(
+        messageId: DateTime.now().millisecondsSinceEpoch.toString(),
+        messageType: 'get_logs',
+        sourceId: 'host',
+        targetId: widget.plugin.id,
+        payload: {'follow': true, 'timestamps': widget.showTimestamps},
+      ),
+    );
   }
 
   /// Handle structured output messages from plugin
@@ -153,12 +159,12 @@ class _ExecutableOutputCaptureState extends State<ExecutableOutputCapture> {
       (type) => type.name == payload['type'],
       orElse: () => OutputType.stdout,
     );
-    
+
     final content = payload['content'] as String? ?? '';
-    final timestamp = payload['timestamp'] != null 
+    final timestamp = payload['timestamp'] != null
         ? DateTime.parse(payload['timestamp'] as String)
         : DateTime.now();
-    
+
     _addOutputLine(content, outputType, timestamp);
     widget.onOutput?.call(content);
   }
@@ -167,7 +173,7 @@ class _ExecutableOutputCaptureState extends State<ExecutableOutputCapture> {
   Future<void> _handleUIUpdate(IPCMessage message) async {
     final payload = message.payload;
     final updateType = payload['updateType'] as String?;
-    
+
     switch (updateType) {
       case 'clear':
         _clearOutput();
@@ -189,15 +195,15 @@ class _ExecutableOutputCaptureState extends State<ExecutableOutputCapture> {
         type: type,
         timestamp: timestamp ?? DateTime.now(),
       );
-      
+
       _outputLines.add(line);
-      
+
       // Limit number of lines to prevent memory issues
       if (_outputLines.length > widget.maxLines) {
         _outputLines.removeAt(0);
       }
     });
-    
+
     // Auto-scroll to bottom if enabled
     if (_autoScroll) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -227,19 +233,21 @@ class _ExecutableOutputCaptureState extends State<ExecutableOutputCapture> {
   /// Send input to the plugin
   Future<void> _sendInput(String input) async {
     if (input.trim().isEmpty) return;
-    
+
     // Add input to output display
     _addOutputLine('> $input', OutputType.input);
-    
+
     // Send input to plugin via IPC
-    await widget.plugin.sendMessage(IPCMessage(
-      messageId: DateTime.now().millisecondsSinceEpoch.toString(),
-      messageType: 'input',
-      sourceId: 'host',
-      targetId: widget.plugin.id,
-      payload: {'input': input},
-    ));
-    
+    await widget.plugin.sendMessage(
+      IPCMessage(
+        messageId: DateTime.now().millisecondsSinceEpoch.toString(),
+        messageType: 'input',
+        sourceId: 'host',
+        targetId: widget.plugin.id,
+        payload: {'input': input},
+      ),
+    );
+
     _inputController.clear();
   }
 
@@ -258,15 +266,12 @@ class _ExecutableOutputCaptureState extends State<ExecutableOutputCapture> {
       children: [
         // Toolbar
         _buildToolbar(),
-        
+
         // Output area
-        Expanded(
-          child: _buildOutputArea(),
-        ),
-        
+        Expanded(child: _buildOutputArea()),
+
         // Input area (if enabled)
-        if (widget.allowInput)
-          _buildInputArea(),
+        if (widget.allowInput) _buildInputArea(),
       ],
     );
   }
@@ -287,9 +292,9 @@ class _ExecutableOutputCaptureState extends State<ExecutableOutputCapture> {
         children: [
           Text(
             widget.plugin.name,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
           ),
           Spacer(),
           IconButton(
@@ -307,7 +312,9 @@ class _ExecutableOutputCaptureState extends State<ExecutableOutputCapture> {
               }
             },
             icon: Icon(
-              _autoScroll ? Icons.vertical_align_bottom : Icons.vertical_align_center,
+              _autoScroll
+                  ? Icons.vertical_align_bottom
+                  : Icons.vertical_align_center,
               size: 18,
             ),
             tooltip: _autoScroll ? 'Disable Auto-scroll' : 'Enable Auto-scroll',
@@ -362,7 +369,7 @@ class _ExecutableOutputCaptureState extends State<ExecutableOutputCapture> {
     final theme = Theme.of(context);
     Color textColor;
     IconData? icon;
-    
+
     switch (line.type) {
       case OutputType.stdout:
         textColor = theme.colorScheme.onSurface;
@@ -406,18 +413,14 @@ class _ExecutableOutputCaptureState extends State<ExecutableOutputCapture> {
                 ),
               ),
             ),
-          
+
           // Icon
           if (icon != null)
             Padding(
               padding: EdgeInsets.only(right: 4, top: 2),
-              child: Icon(
-                icon,
-                size: 14,
-                color: textColor.withOpacity(0.7),
-              ),
+              child: Icon(icon, size: 14, color: textColor.withOpacity(0.7)),
             ),
-          
+
           // Content
           Expanded(
             child: SelectableText(
@@ -452,7 +455,10 @@ class _ExecutableOutputCaptureState extends State<ExecutableOutputCapture> {
               decoration: InputDecoration(
                 hintText: 'Enter command...',
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
               ),
               style: TextStyle(fontFamily: 'monospace'),
               onSubmitted: _sendInput,
@@ -471,8 +477,8 @@ class _ExecutableOutputCaptureState extends State<ExecutableOutputCapture> {
 
   String _formatTimestamp(DateTime timestamp) {
     return '${timestamp.hour.toString().padLeft(2, '0')}:'
-           '${timestamp.minute.toString().padLeft(2, '0')}:'
-           '${timestamp.second.toString().padLeft(2, '0')}';
+        '${timestamp.minute.toString().padLeft(2, '0')}:'
+        '${timestamp.second.toString().padLeft(2, '0')}';
   }
 }
 
@@ -490,11 +496,4 @@ class OutputLine {
 }
 
 /// Types of output that can be captured
-enum OutputType {
-  stdout,
-  stderr,
-  info,
-  warning,
-  error,
-  input,
-}
+enum OutputType { stdout, stderr, info, warning, error, input }

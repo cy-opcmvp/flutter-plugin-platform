@@ -2,6 +2,7 @@ library;
 
 import 'dart:typed_data';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:intl/intl.dart';
@@ -29,7 +30,7 @@ class FileManagerService {
       final documentsDir = await getApplicationDocumentsDirectory();
       return path.join(documentsDir.path, 'Screenshots');
     } catch (e) {
-      print('Failed to get default save path: $e');
+      debugPrint('Failed to get default save path: $e');
       // 降级方案
       final currentDir = Directory.current.path;
       return path.join(currentDir, 'screenshots');
@@ -79,7 +80,10 @@ class FileManagerService {
         .replaceAll('{timestamp}', now.millisecondsSinceEpoch.toString())
         .replaceAll('{date}', DateFormat('yyyy-MM-dd').format(now))
         .replaceAll('{time}', DateFormat('HH-mm-ss').format(now))
-        .replaceAll('{datetime}', DateFormat('yyyy-MM-dd_HH-mm-ss').format(now));
+        .replaceAll(
+          '{datetime}',
+          DateFormat('yyyy-MM-dd_HH-mm-ss').format(now),
+        );
 
     // 处理 {index} 占位符 - 基于现有文件数量
     if (filename.contains('{index}')) {
@@ -152,10 +156,10 @@ class FileManagerService {
       final file = File(filePath);
       await file.writeAsBytes(imageBytes);
 
-      print('Screenshot saved to: $filePath');
+      debugPrint('Screenshot saved to: $filePath');
       return filePath;
     } catch (e) {
-      print('Failed to save screenshot: $e');
+      debugPrint('Failed to save screenshot: $e');
       rethrow;
     }
   }
@@ -217,7 +221,7 @@ class FileManagerService {
 
       return records;
     } catch (e) {
-      print('Failed to get screenshot history: $e');
+      debugPrint('Failed to get screenshot history: $e');
       return [];
     }
   }
@@ -228,10 +232,10 @@ class FileManagerService {
       final file = File(filePath);
       if (await file.exists()) {
         await file.delete();
-        print('Screenshot deleted: $filePath');
+        debugPrint('Screenshot deleted: $filePath');
       }
     } catch (e) {
-      print('Failed to delete screenshot: $e');
+      debugPrint('Failed to delete screenshot: $e');
     }
   }
 
@@ -261,10 +265,10 @@ class FileManagerService {
         }
       }
 
-      print('Cleaned up $deletedCount old screenshots');
+      debugPrint('Cleaned up $deletedCount old screenshots');
       return deletedCount;
     } catch (e) {
-      print('Failed to cleanup old screenshots: $e');
+      debugPrint('Failed to cleanup old screenshots: $e');
       return 0;
     }
   }

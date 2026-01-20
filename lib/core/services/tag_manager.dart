@@ -2,7 +2,6 @@ library;
 
 import 'package:flutter/foundation.dart';
 import '../models/tag_model.dart';
-import '../models/plugin_models.dart';
 import 'config_service.dart';
 
 /// 标签管理服务
@@ -121,9 +120,7 @@ class TagManager {
     });
 
     // 计算器 -> 生产力工具
-    await setPluginTags('com.example.calculator', {
-      'tag_productivity',
-    });
+    await setPluginTags('com.example.calculator', {'tag_productivity'});
 
     // 桌面宠物 -> 娱乐休闲 + 常用
     await setPluginTags('com.example.desktop_pet', {
@@ -324,9 +321,11 @@ class TagManager {
 
     final lowerQuery = query.toLowerCase();
     return _tags
-        .where((tag) =>
-            tag.name.toLowerCase().contains(lowerQuery) ||
-            tag.description.toLowerCase().contains(lowerQuery))
+        .where(
+          (tag) =>
+              tag.name.toLowerCase().contains(lowerQuery) ||
+              tag.description.toLowerCase().contains(lowerQuery),
+        )
         .toList();
   }
 

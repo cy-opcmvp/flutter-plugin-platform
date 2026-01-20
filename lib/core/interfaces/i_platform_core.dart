@@ -8,34 +8,34 @@ import 'i_platform_services.dart';
 abstract class IPlatformCore {
   /// Initialize the platform
   Future<void> initialize();
-  
+
   /// Shutdown the platform
   Future<void> shutdown();
-  
+
   /// Switch between operation modes
   Future<void> switchMode(OperationMode mode);
-  
+
   /// Get current operation mode
   OperationMode get currentMode;
-  
+
   /// Get plugin manager instance
   IPluginManager get pluginManager;
-  
+
   /// Get network manager instance
   INetworkManager get networkManager;
-  
+
   /// Get state manager instance
   IStateManager get stateManager;
-  
+
   /// Get platform services instance
   IPlatformServices get platformServices;
-  
+
   /// Check if platform is initialized
   bool get isInitialized;
-  
+
   /// Stream of platform events
   Stream<PlatformEvent> get eventStream;
-  
+
   /// Get platform information
   PlatformInfo get platformInfo;
 }

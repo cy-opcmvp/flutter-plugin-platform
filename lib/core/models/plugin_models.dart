@@ -26,22 +26,22 @@ class PluginDescriptor {
     if (id.isEmpty || !RegExp(r'^[a-z0-9]+(\.[a-z0-9]+)*$').hasMatch(id)) {
       return false;
     }
-    
+
     // Name must be non-empty
     if (name.trim().isEmpty) {
       return false;
     }
-    
+
     // Version must follow semantic versioning pattern
     if (!RegExp(r'^\d+\.\d+\.\d+(-[a-zA-Z0-9]+)?$').hasMatch(version)) {
       return false;
     }
-    
+
     // Entry point must be non-empty
     if (entryPoint.trim().isEmpty) {
       return false;
     }
-    
+
     return true;
   }
 
@@ -83,19 +83,10 @@ class PluginDescriptor {
 }
 
 /// Current state of a plugin
-enum PluginState {
-  inactive,
-  loading,
-  active,
-  paused,
-  error
-}
+enum PluginState { inactive, loading, active, paused, error }
 
 /// Type of plugin
-enum PluginType {
-  tool,
-  game
-}
+enum PluginType { tool, game }
 
 /// Permissions that plugins can request
 enum Permission {
@@ -103,34 +94,34 @@ enum Permission {
   fileSystemRead,
   fileSystemWrite,
   fileSystemExecute,
-  
+
   // Network permissions
   networkAccess,
   networkServer,
   networkClient,
-  
+
   // System permissions
   systemNotifications,
   systemClipboard,
   systemCamera,
   systemMicrophone,
-  
+
   // Platform permissions
   platformServices,
   platformUI,
   platformStorage,
-  
+
   // Inter-plugin permissions
   pluginCommunication,
   pluginDataSharing,
-  
+
   // Legacy permissions for backward compatibility
   fileAccess,
   notifications,
   camera,
   microphone,
   location,
-  storage
+  storage,
 }
 
 /// Plugin state management class that tracks plugin lifecycle and state transitions
@@ -157,7 +148,8 @@ class PluginStateManager {
   Map<String, dynamic> get stateData => Map.unmodifiable(_stateData);
 
   /// State transition history
-  List<PluginStateTransition> get stateHistory => List.unmodifiable(_stateHistory);
+  List<PluginStateTransition> get stateHistory =>
+      List.unmodifiable(_stateHistory);
 
   /// Last time the state was changed
   DateTime get lastStateChange => _lastStateChange;
@@ -168,25 +160,28 @@ class PluginStateManager {
       case PluginState.inactive:
         return newState == PluginState.loading;
       case PluginState.loading:
-        return newState == PluginState.active || 
-               newState == PluginState.error ||
-               newState == PluginState.inactive;
+        return newState == PluginState.active ||
+            newState == PluginState.error ||
+            newState == PluginState.inactive;
       case PluginState.active:
-        return newState == PluginState.paused || 
-               newState == PluginState.inactive ||
-               newState == PluginState.error;
+        return newState == PluginState.paused ||
+            newState == PluginState.inactive ||
+            newState == PluginState.error;
       case PluginState.paused:
-        return newState == PluginState.active || 
-               newState == PluginState.inactive ||
-               newState == PluginState.error;
+        return newState == PluginState.active ||
+            newState == PluginState.inactive ||
+            newState == PluginState.error;
       case PluginState.error:
-        return newState == PluginState.inactive || 
-               newState == PluginState.loading;
+        return newState == PluginState.inactive ||
+            newState == PluginState.loading;
     }
   }
 
   /// Transitions to a new state if the transition is valid
-  bool transitionTo(PluginState newState, {Map<String, dynamic>? newStateData}) {
+  bool transitionTo(
+    PluginState newState, {
+    Map<String, dynamic>? newStateData,
+  }) {
     if (!canTransitionTo(newState)) {
       return false;
     }
@@ -231,15 +226,21 @@ class PluginStateManager {
   factory PluginStateManager.fromJson(Map<String, dynamic> json) {
     final manager = PluginStateManager(
       pluginId: json['pluginId'] as String,
-      initialState: PluginState.values.firstWhere((e) => e.name == json['currentState']),
+      initialState: PluginState.values.firstWhere(
+        (e) => e.name == json['currentState'],
+      ),
       initialStateData: json['stateData'] as Map<String, dynamic>?,
     );
 
-    manager._lastStateChange = DateTime.parse(json['lastStateChange'] as String);
-    
+    manager._lastStateChange = DateTime.parse(
+      json['lastStateChange'] as String,
+    );
+
     final historyList = json['stateHistory'] as List<dynamic>;
     for (final historyJson in historyList) {
-      manager._stateHistory.add(PluginStateTransition.fromJson(historyJson as Map<String, dynamic>));
+      manager._stateHistory.add(
+        PluginStateTransition.fromJson(historyJson as Map<String, dynamic>),
+      );
     }
 
     return manager;
@@ -276,7 +277,9 @@ class PluginStateTransition {
   /// Creates a transition from JSON
   factory PluginStateTransition.fromJson(Map<String, dynamic> json) {
     return PluginStateTransition(
-      fromState: PluginState.values.firstWhere((e) => e.name == json['fromState']),
+      fromState: PluginState.values.firstWhere(
+        (e) => e.name == json['fromState'],
+      ),
       toState: PluginState.values.firstWhere((e) => e.name == json['toState']),
       timestamp: DateTime.parse(json['timestamp'] as String),
       pluginId: json['pluginId'] as String,
@@ -331,8 +334,12 @@ class PluginRuntimeInfo {
   /// Creates runtime info from JSON
   factory PluginRuntimeInfo.fromJson(Map<String, dynamic> json) {
     return PluginRuntimeInfo(
-      descriptor: PluginDescriptor.fromJson(json['descriptor'] as Map<String, dynamic>),
-      stateManager: PluginStateManager.fromJson(json['stateManager'] as Map<String, dynamic>),
+      descriptor: PluginDescriptor.fromJson(
+        json['descriptor'] as Map<String, dynamic>,
+      ),
+      stateManager: PluginStateManager.fromJson(
+        json['stateManager'] as Map<String, dynamic>,
+      ),
       loadTime: DateTime.parse(json['loadTime'] as String),
       runtimeMetadata: json['runtimeMetadata'] as Map<String, dynamic>? ?? {},
     );

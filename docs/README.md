@@ -48,7 +48,7 @@
 
 ### 🔌 插件文档 (plugins/)
 - [世界时钟插件](plugins/world-clock/README.md) - 世界时钟插件完整文档
-  - [实现文档](plugins/world-clock/IMPLEMENTATION.md)
+  - [实现文档](plugins/world-clock/implementation.md)
   - [更新说明 v1.1](plugins/world-clock/UPDATE_v1.1.md)
 
 ### 📦 发布文档 (releases/)

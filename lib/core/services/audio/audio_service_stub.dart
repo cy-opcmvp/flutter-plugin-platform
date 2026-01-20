@@ -21,7 +21,9 @@ class AudioServiceImpl extends IAudioService implements Disposable {
   Future<bool> initialize() async {
     _isInitialized = true;
     if (kDebugMode) {
-      print('AudioService: Initialized (stub mode - no actual audio playback)');
+      debugPrint(
+        'AudioService: Initialized (stub mode - no actual audio playback)',
+      );
     }
     return true;
   }
@@ -33,7 +35,9 @@ class AudioServiceImpl extends IAudioService implements Disposable {
     bool loop = false,
   }) async {
     if (kDebugMode) {
-      print('AudioService: playSound($soundPath) - stub mode, no audio played');
+      debugPrint(
+        'AudioService: playSound($soundPath) - stub mode, no audio played',
+      );
     }
   }
 
@@ -44,7 +48,9 @@ class AudioServiceImpl extends IAudioService implements Disposable {
     bool loop = false,
   }) async {
     if (kDebugMode) {
-      print('AudioService: playMusic($musicPath) - stub mode, no audio played');
+      debugPrint(
+        'AudioService: playMusic($musicPath) - stub mode, no audio played',
+      );
     }
     return 'stub_music_id';
   }
@@ -55,35 +61,36 @@ class AudioServiceImpl extends IAudioService implements Disposable {
     double volume = 1.0,
   }) async {
     if (kDebugMode) {
-      print('AudioService: playSystemSound($soundType) - stub mode, no audio played');
+      debugPrint(
+        'AudioService: playSystemSound($soundType) - stub mode, no audio played',
+      );
     }
   }
 
-  @override
   Future<void> stopSound(String soundId) async {
     if (kDebugMode) {
-      print('AudioService: stopSound($soundId) - stub mode');
+      debugPrint('AudioService: stopSound($soundId) - stub mode');
     }
   }
 
   @override
   Future<void> stopMusic(String musicId) async {
     if (kDebugMode) {
-      print('AudioService: stopMusic($musicId) - stub mode');
+      debugPrint('AudioService: stopMusic($musicId) - stub mode');
     }
   }
 
   @override
   Future<void> pauseMusic(String playerId) async {
     if (kDebugMode) {
-      print('AudioService: pauseMusic($playerId) - stub mode');
+      debugPrint('AudioService: pauseMusic($playerId) - stub mode');
     }
   }
 
   @override
   Future<void> resumeMusic(String playerId) async {
     if (kDebugMode) {
-      print('AudioService: resumeMusic($playerId) - stub mode');
+      debugPrint('AudioService: resumeMusic($playerId) - stub mode');
     }
   }
 
@@ -91,14 +98,14 @@ class AudioServiceImpl extends IAudioService implements Disposable {
   Future<void> setGlobalVolume(double volume) async {
     _globalVolume = volume.clamp(0.0, 1.0);
     if (kDebugMode) {
-      print('AudioService: setGlobalVolume($_globalVolume) - stub mode');
+      debugPrint('AudioService: setGlobalVolume($_globalVolume) - stub mode');
     }
   }
 
   @override
   Future<void> stopAll() async {
     if (kDebugMode) {
-      print('AudioService: stopAll() - stub mode');
+      debugPrint('AudioService: stopAll() - stub mode');
     }
   }
 
@@ -106,7 +113,7 @@ class AudioServiceImpl extends IAudioService implements Disposable {
   Future<void> dispose() async {
     _isInitialized = false;
     if (kDebugMode) {
-      print('AudioService: Disposed (stub mode)');
+      debugPrint('AudioService: Disposed (stub mode)');
     }
   }
 }

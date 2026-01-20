@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/foundation.dart' show kDebugMode;
-
+import 'package:flutter/foundation.dart';
 
 import 'platform_environment.dart';
 
@@ -14,7 +13,8 @@ class DevelopmentModeException implements Exception {
   const DevelopmentModeException(this.message, {this.pluginId, this.cause});
 
   @override
-  String toString() => 'DevelopmentModeException: $message${pluginId != null ? ' (Plugin: $pluginId)' : ''}';
+  String toString() =>
+      'DevelopmentModeException: $message${pluginId != null ? ' (Plugin: $pluginId)' : ''}';
 }
 
 /// Development environment detection result
@@ -138,14 +138,16 @@ class DevelopmentModeEvent {
 
 /// Manager for development mode features and capabilities
 class DevelopmentModeManager {
-  final StreamController<DevelopmentModeEvent> _eventController = StreamController<DevelopmentModeEvent>.broadcast();
-  
+  final StreamController<DevelopmentModeEvent> _eventController =
+      StreamController<DevelopmentModeEvent>.broadcast();
+
   bool _isInitialized = false;
   bool _isDevelopmentModeEnabled = false;
   DevelopmentEnvironment? _currentEnvironment;
   DevelopmentLoggingConfig _loggingConfig = const DevelopmentLoggingConfig();
-  DevelopmentDebuggingFeatures _debuggingFeatures = const DevelopmentDebuggingFeatures();
-  
+  DevelopmentDebuggingFeatures _debuggingFeatures =
+      const DevelopmentDebuggingFeatures();
+
   final Map<String, List<String>> _pluginLogs = {};
   final Map<String, Map<String, dynamic>> _pluginMetrics = {};
   final Map<String, DateTime> _pluginStartTimes = {};
@@ -155,12 +157,12 @@ class DevelopmentModeManager {
   /// Initialize the development mode manager
   Future<void> initialize() async {
     if (_isInitialized) return;
-    
+
     // Detect development environment
     _currentEnvironment = await _detectDevelopmentEnvironment();
-    
+
     _isInitialized = true;
-    
+
     // Enable development mode if in development environment
     if (_currentEnvironment!.isDevelopment) {
       await enableDevelopmentMode();
@@ -170,11 +172,11 @@ class DevelopmentModeManager {
   /// Shutdown the development mode manager
   Future<void> shutdown() async {
     if (!_isInitialized) return;
-    
+
     if (_isDevelopmentModeEnabled) {
       await disableDevelopmentMode();
     }
-    
+
     await _eventController.close();
     _isInitialized = false;
   }
@@ -202,9 +204,9 @@ class DevelopmentModeManager {
     if (!_isInitialized) {
       await initialize();
     }
-    
+
     if (_isDevelopmentModeEnabled) return;
-    
+
     // Update configurations
     if (loggingConfig != null) {
       _loggingConfig = loggingConfig;
@@ -212,151 +214,164 @@ class DevelopmentModeManager {
     if (debuggingFeatures != null) {
       _debuggingFeatures = debuggingFeatures;
     }
-    
+
     // Configure enhanced logging
     await _configureEnhancedLogging();
-    
+
     // Enable debugging features
     await _enableDebuggingFeatures();
-    
+
     _isDevelopmentModeEnabled = true;
-    
+
     // Emit development mode enabled event
-    _eventController.add(DevelopmentModeEvent(
-      type: DevelopmentModeEventType.modeEnabled,
-      timestamp: DateTime.now(),
-      data: {
-        'loggingConfig': _loggingConfig.toJson(),
-        'debuggingFeatures': _debuggingFeatures.toJson(),
-        'environment': _currentEnvironment?.toJson(),
-      },
-    ));
+    _eventController.add(
+      DevelopmentModeEvent(
+        type: DevelopmentModeEventType.modeEnabled,
+        timestamp: DateTime.now(),
+        data: {
+          'loggingConfig': _loggingConfig.toJson(),
+          'debuggingFeatures': _debuggingFeatures.toJson(),
+          'environment': _currentEnvironment?.toJson(),
+        },
+      ),
+    );
   }
 
   /// Disable development mode
   Future<void> disableDevelopmentMode() async {
     _ensureInitialized();
-    
+
     if (!_isDevelopmentModeEnabled) return;
-    
+
     // Disable debugging features
     await _disableDebuggingFeatures();
-    
+
     // Reset logging to production level
     await _resetLoggingToProduction();
-    
+
     _isDevelopmentModeEnabled = false;
-    
+
     // Emit development mode disabled event
-    _eventController.add(DevelopmentModeEvent(
-      type: DevelopmentModeEventType.modeDisabled,
-      timestamp: DateTime.now(),
-    ));
+    _eventController.add(
+      DevelopmentModeEvent(
+        type: DevelopmentModeEventType.modeDisabled,
+        timestamp: DateTime.now(),
+      ),
+    );
   }
 
   /// Detect development environment
   Future<DevelopmentEnvironment> detectEnvironment() async {
     _ensureInitialized();
-    
+
     _currentEnvironment = await _detectDevelopmentEnvironment();
-    
+
     // Emit environment detected event
-    _eventController.add(DevelopmentModeEvent(
-      type: DevelopmentModeEventType.environmentDetected,
-      timestamp: DateTime.now(),
-      data: _currentEnvironment?.toJson(),
-    ));
-    
+    _eventController.add(
+      DevelopmentModeEvent(
+        type: DevelopmentModeEventType.environmentDetected,
+        timestamp: DateTime.now(),
+        data: _currentEnvironment?.toJson(),
+      ),
+    );
+
     return _currentEnvironment!;
   }
 
   /// Configure logging for development mode
   Future<void> configureLogging(DevelopmentLoggingConfig config) async {
     _ensureInitialized();
-    
+
     _loggingConfig = config;
-    
+
     if (_isDevelopmentModeEnabled) {
       await _configureEnhancedLogging();
     }
-    
+
     // Emit logging configured event
-    _eventController.add(DevelopmentModeEvent(
-      type: DevelopmentModeEventType.loggingConfigured,
-      timestamp: DateTime.now(),
-      data: config.toJson(),
-    ));
+    _eventController.add(
+      DevelopmentModeEvent(
+        type: DevelopmentModeEventType.loggingConfigured,
+        timestamp: DateTime.now(),
+        data: config.toJson(),
+      ),
+    );
   }
 
   /// Configure debugging features
   Future<void> configureDebugging(DevelopmentDebuggingFeatures features) async {
     _ensureInitialized();
-    
+
     _debuggingFeatures = features;
-    
+
     if (_isDevelopmentModeEnabled) {
       await _enableDebuggingFeatures();
     }
-    
+
     // Emit debugging enabled event
-    _eventController.add(DevelopmentModeEvent(
-      type: DevelopmentModeEventType.debuggingEnabled,
-      timestamp: DateTime.now(),
-      data: features.toJson(),
-    ));
+    _eventController.add(
+      DevelopmentModeEvent(
+        type: DevelopmentModeEventType.debuggingEnabled,
+        timestamp: DateTime.now(),
+        data: features.toJson(),
+      ),
+    );
   }
 
   /// Start development session for a plugin
   Future<void> startPluginDevelopment(String pluginId) async {
     _ensureInitialized();
-    
+
     if (!_isDevelopmentModeEnabled) {
-      throw DevelopmentModeException('Development mode is not enabled', pluginId: pluginId);
+      throw DevelopmentModeException(
+        'Development mode is not enabled',
+        pluginId: pluginId,
+      );
     }
-    
+
     // Initialize plugin development tracking
     _pluginLogs[pluginId] = [];
     _pluginMetrics[pluginId] = {};
     _pluginStartTimes[pluginId] = DateTime.now();
-    
+
     // Start enhanced monitoring for the plugin
     await _startPluginMonitoring(pluginId);
-    
+
     // Emit plugin development started event
-    _eventController.add(DevelopmentModeEvent(
-      type: DevelopmentModeEventType.pluginDevelopmentStarted,
-      pluginId: pluginId,
-      timestamp: DateTime.now(),
-      data: {
-        'startTime': _pluginStartTimes[pluginId]!.toIso8601String(),
-      },
-    ));
+    _eventController.add(
+      DevelopmentModeEvent(
+        type: DevelopmentModeEventType.pluginDevelopmentStarted,
+        pluginId: pluginId,
+        timestamp: DateTime.now(),
+        data: {'startTime': _pluginStartTimes[pluginId]!.toIso8601String()},
+      ),
+    );
   }
 
   /// Stop development session for a plugin
   Future<void> stopPluginDevelopment(String pluginId) async {
     _ensureInitialized();
-    
+
     // Stop plugin monitoring
     await _stopPluginMonitoring(pluginId);
-    
+
     // Generate development session report
     final report = await _generateDevelopmentReport(pluginId);
-    
+
     // Clean up tracking data
     _pluginLogs.remove(pluginId);
     _pluginMetrics.remove(pluginId);
     _pluginStartTimes.remove(pluginId);
-    
+
     // Emit plugin development stopped event
-    _eventController.add(DevelopmentModeEvent(
-      type: DevelopmentModeEventType.pluginDevelopmentStopped,
-      pluginId: pluginId,
-      timestamp: DateTime.now(),
-      data: {
-        'report': report,
-      },
-    ));
+    _eventController.add(
+      DevelopmentModeEvent(
+        type: DevelopmentModeEventType.pluginDevelopmentStopped,
+        pluginId: pluginId,
+        timestamp: DateTime.now(),
+        data: {'report': report},
+      ),
+    );
   }
 
   /// Get development logs for a plugin
@@ -374,11 +389,11 @@ class DevelopmentModeManager {
   /// Add log entry for a plugin
   void addPluginLog(String pluginId, String logEntry) {
     if (!_isDevelopmentModeEnabled) return;
-    
+
     final logs = _pluginLogs[pluginId] ?? [];
     logs.add('[${DateTime.now().toIso8601String()}] $logEntry');
     _pluginLogs[pluginId] = logs;
-    
+
     // Keep only last 1000 log entries to prevent memory issues
     if (logs.length > 1000) {
       logs.removeRange(0, logs.length - 1000);
@@ -388,7 +403,7 @@ class DevelopmentModeManager {
   /// Update plugin metrics
   void updatePluginMetrics(String pluginId, String metricName, dynamic value) {
     if (!_isDevelopmentModeEnabled) return;
-    
+
     final metrics = _pluginMetrics[pluginId] ?? {};
     metrics[metricName] = value;
     metrics['lastUpdated'] = DateTime.now().toIso8601String();
@@ -404,7 +419,9 @@ class DevelopmentModeManager {
 
   void _ensureInitialized() {
     if (!_isInitialized) {
-      throw StateError('DevelopmentModeManager not initialized. Call initialize() first.');
+      throw StateError(
+        'DevelopmentModeManager not initialized. Call initialize() first.',
+      );
     }
   }
 
@@ -412,15 +429,17 @@ class DevelopmentModeManager {
     final platformEnv = PlatformEnvironment.instance;
     final environmentVariables = platformEnv.getAllVariables();
     final developmentIndicators = <String>[];
-    
+
     // Check for common development environment indicators
     bool isDevelopment = false;
-    
+
     // Log platform detection
     if (kDebugMode) {
-      print('[DevelopmentModeManager] Detecting environment on ${platformEnv.isWeb ? "web" : "native"} platform');
+      debugPrint(
+        '[DevelopmentModeManager] Detecting environment on ${platformEnv.isWeb ? "web" : "native"} platform',
+      );
     }
-    
+
     // Check environment variables (native platforms only)
     if (!platformEnv.isWeb) {
       if (platformEnv.getVariable('FLUTTER_ENV') == 'development' ||
@@ -430,47 +449,54 @@ class DevelopmentModeManager {
         isDevelopment = true;
         developmentIndicators.add('Environment variable indicates development');
         if (kDebugMode) {
-          print('[DevelopmentModeManager] Development mode detected via environment variable');
+          debugPrint(
+            '[DevelopmentModeManager] Development mode detected via environment variable',
+          );
         }
       }
-      
+
       // Check for debug mode
       if (platformEnv.getVariable('FLUTTER_DEBUG') == 'true') {
         isDevelopment = true;
         developmentIndicators.add('Flutter debug mode enabled');
         if (kDebugMode) {
-          print('[DevelopmentModeManager] Flutter debug mode enabled via environment');
+          debugPrint(
+            '[DevelopmentModeManager] Flutter debug mode enabled via environment',
+          );
         }
       }
-      
+
       // Check for development tools
       if (platformEnv.containsKey('FLUTTER_ROOT') ||
           platformEnv.containsKey('DART_SDK')) {
         developmentIndicators.add('Flutter/Dart SDK detected');
         if (kDebugMode) {
-          print('[DevelopmentModeManager] Flutter/Dart SDK detected in environment');
+          debugPrint(
+            '[DevelopmentModeManager] Flutter/Dart SDK detected in environment',
+          );
         }
       }
-      
+
       // Check for IDE indicators
       if (platformEnv.containsKey('VSCODE_PID') ||
           platformEnv.containsKey('INTELLIJ_ENVIRONMENT_READER')) {
         developmentIndicators.add('IDE environment detected');
         if (kDebugMode) {
-          print('[DevelopmentModeManager] IDE environment detected');
+          debugPrint('[DevelopmentModeManager] IDE environment detected');
         }
       }
-      
+
       // Check for debugger
       final dartVmOptions = platformEnv.getVariable('DART_VM_OPTIONS');
-      if (dartVmOptions != null && dartVmOptions.contains('--enable-vm-service')) {
+      if (dartVmOptions != null &&
+          dartVmOptions.contains('--enable-vm-service')) {
         isDevelopment = true;
         developmentIndicators.add('Dart VM service enabled');
         if (kDebugMode) {
-          print('[DevelopmentModeManager] Dart VM service enabled');
+          debugPrint('[DevelopmentModeManager] Dart VM service enabled');
         }
       }
-      
+
       // If no explicit indicators, check for common development patterns
       if (!isDevelopment) {
         // Check if running from source (common in development)
@@ -480,49 +506,61 @@ class DevelopmentModeManager {
             isDevelopment = true;
             developmentIndicators.add('Running from Flutter/Dart executable');
             if (kDebugMode) {
-              print('[DevelopmentModeManager] Running from Flutter/Dart executable');
+              debugPrint(
+                '[DevelopmentModeManager] Running from Flutter/Dart executable',
+              );
             }
           }
         } catch (e) {
           // Platform.resolvedExecutable may not be available on all platforms
           if (kDebugMode) {
-            print('[DevelopmentModeManager] Could not check executable path: $e');
+            debugPrint(
+              '[DevelopmentModeManager] Could not check executable path: $e',
+            );
           }
         }
       }
     }
-    
+
     // Alternative development indicators for web platform
     if (platformEnv.isWeb) {
       developmentIndicators.add('Running on web platform');
-      
+
       // Check Flutter's debug mode constant (works on all platforms)
       if (kDebugMode) {
         isDevelopment = true;
         developmentIndicators.add('Flutter kDebugMode is true');
-        print('[DevelopmentModeManager] Development mode detected via kDebugMode on web');
+        debugPrint(
+          '[DevelopmentModeManager] Development mode detected via kDebugMode on web',
+        );
       }
-      
+
       // Check for localhost/development URLs (web-specific indicator)
       try {
         // In a real web environment, we could check window.location
         // For now, we rely on kDebugMode as the primary indicator
-        developmentIndicators.add('Using kDebugMode for web development detection');
+        developmentIndicators.add(
+          'Using kDebugMode for web development detection',
+        );
       } catch (e) {
         if (kDebugMode) {
-          print('[DevelopmentModeManager] Could not check web-specific indicators: $e');
+          debugPrint(
+            '[DevelopmentModeManager] Could not check web-specific indicators: $e',
+          );
         }
       }
     }
-    
+
     final environment = isDevelopment ? 'development' : 'production';
-    
+
     // Log final detection result
     if (kDebugMode) {
-      print('[DevelopmentModeManager] Environment detected: $environment');
-      print('[DevelopmentModeManager] Development indicators: ${developmentIndicators.join(", ")}');
+      debugPrint('[DevelopmentModeManager] Environment detected: $environment');
+      debugPrint(
+        '[DevelopmentModeManager] Development indicators: ${developmentIndicators.join(", ")}',
+      );
     }
-    
+
     return DevelopmentEnvironment(
       isDevelopment: isDevelopment,
       environment: environment,
@@ -539,17 +577,17 @@ class DevelopmentModeManager {
         await _enableCategoryLogging(category, _loggingConfig.logLevel);
       }
     }
-    
+
     if (_loggingConfig.enablePluginTracing) {
       // Enable plugin execution tracing
       await _enablePluginTracing();
     }
-    
+
     if (_loggingConfig.enablePerformanceMetrics) {
       // Enable performance metrics collection
       await _enablePerformanceMetrics();
     }
-    
+
     if (_loggingConfig.enableMemoryTracking) {
       // Enable memory usage tracking
       await _enableMemoryTracking();
@@ -561,19 +599,19 @@ class DevelopmentModeManager {
     if (_debuggingFeatures.enableBreakpoints) {
       await _enableBreakpoints();
     }
-    
+
     if (_debuggingFeatures.enableStepDebugging) {
       await _enableStepDebugging();
     }
-    
+
     if (_debuggingFeatures.enableVariableInspection) {
       await _enableVariableInspection();
     }
-    
+
     if (_debuggingFeatures.enableCallStackTracing) {
       await _enableCallStackTracing();
     }
-    
+
     if (_debuggingFeatures.enableLiveReload) {
       await _enableLiveReload();
     }
@@ -599,7 +637,11 @@ class DevelopmentModeManager {
   Future<void> _startPluginMonitoring(String pluginId) async {
     // Start enhanced monitoring for plugin development
     addPluginLog(pluginId, 'Started development monitoring');
-    updatePluginMetrics(pluginId, 'monitoringStarted', DateTime.now().toIso8601String());
+    updatePluginMetrics(
+      pluginId,
+      'monitoringStarted',
+      DateTime.now().toIso8601String(),
+    );
   }
 
   Future<void> _stopPluginMonitoring(String pluginId) async {
@@ -607,11 +649,15 @@ class DevelopmentModeManager {
     addPluginLog(pluginId, 'Stopped development monitoring');
   }
 
-  Future<Map<String, dynamic>> _generateDevelopmentReport(String pluginId) async {
+  Future<Map<String, dynamic>> _generateDevelopmentReport(
+    String pluginId,
+  ) async {
     final startTime = _pluginStartTimes[pluginId];
     final endTime = DateTime.now();
-    final duration = startTime != null ? endTime.difference(startTime) : Duration.zero;
-    
+    final duration = startTime != null
+        ? endTime.difference(startTime)
+        : Duration.zero;
+
     return {
       'pluginId': pluginId,
       'sessionDuration': duration.inMilliseconds,

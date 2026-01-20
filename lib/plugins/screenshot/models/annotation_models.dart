@@ -90,9 +90,9 @@ class RectangleAnnotation extends Annotation {
     super.strokeWidth = 2.0,
     DateTime? createdAt,
   }) : super(
-          type: AnnotationType.rectangle,
-          createdAt: createdAt ?? DateTime.now(),
-        );
+         type: AnnotationType.rectangle,
+         createdAt: createdAt ?? DateTime.now(),
+       );
 
   @override
   Map<String, dynamic> toJson() {
@@ -139,9 +139,9 @@ class ArrowAnnotation extends Annotation {
     this.arrowSize = 10.0,
     DateTime? createdAt,
   }) : super(
-          type: AnnotationType.arrow,
-          createdAt: createdAt ?? DateTime.now(),
-        );
+         type: AnnotationType.arrow,
+         createdAt: createdAt ?? DateTime.now(),
+       );
 
   @override
   Map<String, dynamic> toJson() {
@@ -213,10 +213,10 @@ class TextAnnotation extends Annotation {
     this.backgroundColor,
     DateTime? createdAt,
   }) : super(
-          type: AnnotationType.text,
-          createdAt: createdAt ?? DateTime.now(),
-          strokeWidth: 0,
-        );
+         type: AnnotationType.text,
+         createdAt: createdAt ?? DateTime.now(),
+         strokeWidth: 0,
+       );
 
   @override
   Map<String, dynamic> toJson() {
@@ -274,11 +274,11 @@ class MosaicAnnotation extends Annotation {
     this.blockSize = 10.0,
     DateTime? createdAt,
   }) : super(
-          type: AnnotationType.mosaic,
-          createdAt: createdAt ?? DateTime.now(),
-          color: const Color(0x00000000),
-          strokeWidth: 0,
-        );
+         type: AnnotationType.mosaic,
+         createdAt: createdAt ?? DateTime.now(),
+         color: const Color(0x00000000),
+         strokeWidth: 0,
+       );
 
   @override
   Map<String, dynamic> toJson() {
@@ -316,10 +316,7 @@ class PenAnnotation extends Annotation {
     super.strokeWidth = 3.0,
     this.closed = false,
     DateTime? createdAt,
-  }) : super(
-          type: AnnotationType.pen,
-          createdAt: createdAt ?? DateTime.now(),
-        );
+  }) : super(type: AnnotationType.pen, createdAt: createdAt ?? DateTime.now());
 
   @override
   Map<String, dynamic> toJson() {
@@ -330,9 +327,7 @@ class PenAnnotation extends Annotation {
       'color': color.toARGB32(),
       'strokeWidth': strokeWidth,
       'closed': closed,
-      'points': points
-          .map((p) => {'dx': p.dx, 'dy': p.dy})
-          .toList(),
+      'points': points.map((p) => {'dx': p.dx, 'dy': p.dy}).toList(),
     };
   }
 
@@ -341,10 +336,12 @@ class PenAnnotation extends Annotation {
     return PenAnnotation(
       id: json['id'] as String,
       points: pointsData
-          .map((p) => Offset(
-                (p['dx'] as num).toDouble(),
-                (p['dy'] as num).toDouble(),
-              ))
+          .map(
+            (p) => Offset(
+              (p['dx'] as num).toDouble(),
+              (p['dy'] as num).toDouble(),
+            ),
+          )
           .toList(),
       color: Color(json['color'] as int),
       strokeWidth: (json['strokeWidth'] as num?)?.toDouble() ?? 3.0,

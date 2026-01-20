@@ -1,7 +1,6 @@
 library;
 
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../ui/widgets/json_editor_screen.dart';
@@ -14,13 +13,11 @@ import '../screenshot_plugin.dart';
 class ScreenshotSettingsScreen extends StatefulWidget {
   final ScreenshotPlugin plugin;
 
-  const ScreenshotSettingsScreen({
-    super.key,
-    required this.plugin,
-  });
+  const ScreenshotSettingsScreen({super.key, required this.plugin});
 
   @override
-  State<ScreenshotSettingsScreen> createState() => _ScreenshotSettingsScreenState();
+  State<ScreenshotSettingsScreen> createState() =>
+      _ScreenshotSettingsScreenState();
 }
 
 class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
@@ -33,7 +30,9 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
     super.initState();
     _settings = widget.plugin.settings;
     _savePathController = TextEditingController(text: _settings.savePath);
-    _filenameFormatController = TextEditingController(text: _settings.filenameFormat);
+    _filenameFormatController = TextEditingController(
+      text: _settings.filenameFormat,
+    );
   }
 
   @override
@@ -119,9 +118,9 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
       child: Text(
         title,
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-              fontWeight: FontWeight.bold,
-            ),
+          color: Theme.of(context).colorScheme.primary,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
@@ -130,10 +129,7 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
   Widget _buildSavePathTile(AppLocalizations l10n) {
     return ListTile(
       leading: const Icon(Icons.folder),
-      title: Text(
-        l10n.screenshot_savePath,
-        overflow: TextOverflow.ellipsis,
-      ),
+      title: Text(l10n.screenshot_savePath, overflow: TextOverflow.ellipsis),
       subtitle: Text(
         _settings.savePath,
         overflow: TextOverflow.ellipsis,
@@ -168,10 +164,7 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
   Widget _buildImageFormatTile(AppLocalizations l10n) {
     return ListTile(
       leading: const Icon(Icons.image),
-      title: Text(
-        l10n.screenshot_imageFormat,
-        overflow: TextOverflow.ellipsis,
-      ),
+      title: Text(l10n.screenshot_imageFormat, overflow: TextOverflow.ellipsis),
       subtitle: Text(
         _formatImageFormatName(_settings.imageFormat),
         overflow: TextOverflow.ellipsis,
@@ -204,10 +197,7 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
   Widget _buildAutoCopyTile(AppLocalizations l10n) {
     return SwitchListTile(
       secondary: const Icon(Icons.content_copy),
-      title: Text(
-        l10n.screenshot_autoCopy,
-        overflow: TextOverflow.ellipsis,
-      ),
+      title: Text(l10n.screenshot_autoCopy, overflow: TextOverflow.ellipsis),
       subtitle: Text(
         l10n.screenshot_settings_auto_copy_desc,
         overflow: TextOverflow.ellipsis,
@@ -265,10 +255,7 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
   Widget _buildShowPreviewTile(AppLocalizations l10n) {
     return SwitchListTile(
       secondary: const Icon(Icons.preview),
-      title: Text(
-        l10n.screenshot_showPreview,
-        overflow: TextOverflow.ellipsis,
-      ),
+      title: Text(l10n.screenshot_showPreview, overflow: TextOverflow.ellipsis),
       subtitle: Text(
         l10n.screenshot_settings_show_preview_desc,
         overflow: TextOverflow.ellipsis,
@@ -293,10 +280,7 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
   Widget _buildSaveHistoryTile(AppLocalizations l10n) {
     return SwitchListTile(
       secondary: const Icon(Icons.history),
-      title: Text(
-        l10n.screenshot_saveHistory,
-        overflow: TextOverflow.ellipsis,
-      ),
+      title: Text(l10n.screenshot_saveHistory, overflow: TextOverflow.ellipsis),
       subtitle: Text(
         l10n.screenshot_settings_save_history_desc,
         overflow: TextOverflow.ellipsis,
@@ -345,10 +329,7 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
             _getShortcutDisplayName(entry.key, l10n),
             overflow: TextOverflow.ellipsis,
           ),
-          subtitle: Text(
-            entry.value,
-            overflow: TextOverflow.ellipsis,
-          ),
+          subtitle: Text(entry.value, overflow: TextOverflow.ellipsis),
           trailing: const Icon(Icons.chevron_right),
           onTap: () => _editShortcut(entry.key, entry.value),
           contentPadding: EdgeInsets.zero,
@@ -489,7 +470,8 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
   void _adjustImageQuality() async {
     final quality = await showDialog<int>(
       context: context,
-      builder: (context) => _ImageQualityDialog(currentQuality: _settings.imageQuality),
+      builder: (context) =>
+          _ImageQualityDialog(currentQuality: _settings.imageQuality),
     );
 
     if (quality != null) {
@@ -508,7 +490,8 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
   void _adjustMaxHistoryCount() async {
     final count = await showDialog<int>(
       context: context,
-      builder: (context) => _MaxHistoryCountDialog(currentCount: _settings.maxHistoryCount),
+      builder: (context) =>
+          _MaxHistoryCountDialog(currentCount: _settings.maxHistoryCount),
     );
 
     if (count != null) {
@@ -525,9 +508,12 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
 
   /// 编辑快捷键
   void _editShortcut(String action, String currentShortcut) {
+    final l10n = AppLocalizations.of(context)!;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('快捷键编辑功能待实现：$action'),
+        content: Text(
+          l10n.screenshot_shortcut_edit_pending.replaceAll('{action}', action),
+        ),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -537,7 +523,8 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
   void _adjustOpacity() async {
     final opacity = await showDialog<double>(
       context: context,
-      builder: (context) => _OpacityDialog(currentOpacity: _settings.pinSettings.defaultOpacity),
+      builder: (context) =>
+          _OpacityDialog(currentOpacity: _settings.pinSettings.defaultOpacity),
     );
 
     if (opacity != null) {
@@ -599,9 +586,7 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
   Widget _buildJsonEditorSection(BuildContext context, AppLocalizations l10n) {
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -609,17 +594,14 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.code,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+                Icon(Icons.code, color: Theme.of(context).colorScheme.primary),
                 const SizedBox(width: 8),
                 Text(
                   l10n.screenshot_settings_json_editor,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -627,8 +609,8 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
             Text(
               l10n.screenshot_settings_json_editor_desc,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 16),
             // 使用 Wrap 在小屏幕时自动换行
@@ -646,7 +628,10 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                   ),
                 ),
                 OutlinedButton.icon(
@@ -658,7 +643,10 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                   ),
                 ),
               ],
@@ -670,14 +658,21 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
   }
 
   /// 打开 JSON 编辑器
-  Future<void> _openJsonEditor(BuildContext context, bool resetToDefault) async {
+  Future<void> _openJsonEditor(
+    BuildContext context,
+    bool resetToDefault,
+  ) async {
     final l10n = AppLocalizations.of(context)!;
 
     // 获取当前配置
-    final currentJson = const JsonEncoder.withIndent('  ').convert(_settings.toJson());
+    final currentJson = const JsonEncoder.withIndent(
+      '  ',
+    ).convert(_settings.toJson());
 
     // 如果要重置，使用默认配置
-    final initialJson = resetToDefault ? ScreenshotConfigDefaults.defaultConfig : currentJson;
+    final initialJson = resetToDefault
+        ? ScreenshotConfigDefaults.defaultConfig
+        : currentJson;
 
     // 解析 Schema
     final schema = JsonSchema.fromJson(
@@ -748,10 +743,7 @@ class _SavePathDialog extends StatefulWidget {
   final String currentPath;
   final Function(String) onSave;
 
-  const _SavePathDialog({
-    required this.currentPath,
-    required this.onSave,
-  });
+  const _SavePathDialog({required this.currentPath, required this.onSave});
 
   @override
   State<_SavePathDialog> createState() => _SavePathDialogState();
@@ -852,8 +844,14 @@ class _FilenameFormatDialogState extends State<_FilenameFormatDialog> {
             ),
           ),
           const SizedBox(height: 16),
-          _buildExampleItem('screenshot_{datetime}', 'screenshot_2026-01-15_19-30-45'),
-          _buildExampleItem('Screenshot_{date}_{index}', 'Screenshot_2026-01-15_1'),
+          _buildExampleItem(
+            'screenshot_{datetime}',
+            'screenshot_2026-01-15_19-30-45',
+          ),
+          _buildExampleItem(
+            'Screenshot_{date}_{index}',
+            'Screenshot_2026-01-15_1',
+          ),
           _buildExampleItem('{timestamp}', '1736952645000'),
         ],
       ),
@@ -880,12 +878,21 @@ class _FilenameFormatDialogState extends State<_FilenameFormatDialog> {
         children: [
           Expanded(
             flex: 2,
-            child: Text(format, style: const TextStyle(fontFamily: 'monospace')),
+            child: Text(
+              format,
+              style: const TextStyle(fontFamily: 'monospace'),
+            ),
           ),
           const Text(' → ', style: TextStyle(fontWeight: FontWeight.bold)),
           Expanded(
             flex: 3,
-            child: Text(example, style: const TextStyle(fontFamily: 'monospace', color: Colors.grey)),
+            child: Text(
+              example,
+              style: const TextStyle(
+                fontFamily: 'monospace',
+                color: Colors.grey,
+              ),
+            ),
           ),
         ],
       ),
@@ -898,10 +905,7 @@ class _ImageFormatDialog extends StatelessWidget {
   final ImageFormat currentFormat;
   final Function(ImageFormat) onSave;
 
-  const _ImageFormatDialog({
-    required this.currentFormat,
-    required this.onSave,
-  });
+  const _ImageFormatDialog({required this.currentFormat, required this.onSave});
 
   @override
   Widget build(BuildContext context) {

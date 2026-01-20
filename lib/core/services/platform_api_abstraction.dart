@@ -19,40 +19,40 @@ abstract class PlatformAPI {
       return WebPlatformAPI();
     }
   }
-  
+
   /// Get platform identifier
   String get platformId;
-  
+
   /// Get platform display name
   String get platformName;
-  
+
   /// Get platform version
   String get platformVersion;
-  
+
   /// Get platform architecture
   String get architecture;
-  
+
   /// Check if platform supports feature
   bool supportsFeature(PlatformFeature feature);
-  
+
   /// Get platform-specific configuration
   Map<String, dynamic> getPlatformConfig();
-  
+
   /// Execute platform-specific command
   Future<PlatformCommandResult> executeCommand(PlatformCommand command);
-  
+
   /// Get available platform capabilities
   List<PlatformCapability> getCapabilities();
-  
+
   /// Get platform-specific file paths
   PlatformPaths getPaths();
-  
+
   /// Get platform-specific UI configuration
   PlatformUIConfig getUIConfig();
-  
+
   /// Get platform-specific security configuration
   PlatformSecurityConfig getSecurityConfig();
-  
+
   /// Get platform-specific network configuration
   PlatformNetworkConfig getNetworkConfig();
 }
@@ -61,16 +61,16 @@ abstract class PlatformAPI {
 class WindowsPlatformAPI extends PlatformAPI {
   @override
   String get platformId => 'windows';
-  
+
   @override
   String get platformName => 'Windows';
-  
+
   @override
   String get platformVersion => Platform.operatingSystemVersion;
-  
+
   @override
   String get architecture => 'x64';
-  
+
   @override
   bool supportsFeature(PlatformFeature feature) {
     switch (feature) {
@@ -90,7 +90,7 @@ class WindowsPlatformAPI extends PlatformAPI {
         return false; // Not typically available on desktop
     }
   }
-  
+
   @override
   Map<String, dynamic> getPlatformConfig() {
     return {
@@ -103,12 +103,13 @@ class WindowsPlatformAPI extends PlatformAPI {
       'packageManager': 'winget',
     };
   }
-  
+
   @override
   Future<PlatformCommandResult> executeCommand(PlatformCommand command) async {
     try {
       // For testing purposes, avoid executing actual commands that might crash
-      if (command.executable == 'nonexistent_command' || command.executable == 'invalid') {
+      if (command.executable == 'nonexistent_command' ||
+          command.executable == 'invalid') {
         return PlatformCommandResult(
           exitCode: 1,
           stdout: '',
@@ -116,14 +117,14 @@ class WindowsPlatformAPI extends PlatformAPI {
           success: false,
         );
       }
-      
+
       final result = await Process.run(
         command.executable,
         command.arguments,
         environment: command.environment,
         workingDirectory: command.workingDirectory,
       );
-      
+
       return PlatformCommandResult(
         exitCode: result.exitCode,
         stdout: result.stdout.toString(),
@@ -139,34 +140,47 @@ class WindowsPlatformAPI extends PlatformAPI {
       );
     }
   }
-  
+
   @override
   List<PlatformCapability> getCapabilities() {
     return [
       PlatformCapability('file_system', true, 'Full file system access'),
       PlatformCapability('network', true, 'Full network access'),
-      PlatformCapability('process_management', true, 'Process creation and management'),
+      PlatformCapability(
+        'process_management',
+        true,
+        'Process creation and management',
+      ),
       PlatformCapability('clipboard', true, 'System clipboard access'),
       PlatformCapability('notifications', true, 'System notifications'),
       PlatformCapability('window_management', true, 'Window management'),
     ];
   }
-  
+
   @override
   PlatformPaths getPaths() {
     final env = PlatformEnvironment.instance;
-    final home = env.getVariable('USERPROFILE', defaultValue: 'C:\\Users\\Default')!;
-    
+    final home = env.getVariable(
+      'USERPROFILE',
+      defaultValue: 'C:\\Users\\Default',
+    )!;
+
     return PlatformPaths(
       home: home,
       documents: '$home\\Documents',
       downloads: '$home\\Downloads',
       temp: env.getVariable('TEMP', defaultValue: 'C:\\Temp')!,
-      appData: env.getVariable('APPDATA', defaultValue: 'C:\\Users\\Default\\AppData\\Roaming')!,
-      programFiles: env.getVariable('PROGRAMFILES', defaultValue: 'C:\\Program Files')!,
+      appData: env.getVariable(
+        'APPDATA',
+        defaultValue: 'C:\\Users\\Default\\AppData\\Roaming',
+      )!,
+      programFiles: env.getVariable(
+        'PROGRAMFILES',
+        defaultValue: 'C:\\Program Files',
+      )!,
     );
   }
-  
+
   @override
   PlatformUIConfig getUIConfig() {
     return PlatformUIConfig(
@@ -178,7 +192,7 @@ class WindowsPlatformAPI extends PlatformAPI {
       supportsCustomTitleBar: true,
     );
   }
-  
+
   @override
   PlatformSecurityConfig getSecurityConfig() {
     return PlatformSecurityConfig(
@@ -189,7 +203,7 @@ class WindowsPlatformAPI extends PlatformAPI {
       supportedSecurityLevels: ['minimal', 'standard', 'strict'],
     );
   }
-  
+
   @override
   PlatformNetworkConfig getNetworkConfig() {
     return PlatformNetworkConfig(
@@ -207,16 +221,16 @@ class WindowsPlatformAPI extends PlatformAPI {
 class LinuxPlatformAPI extends PlatformAPI {
   @override
   String get platformId => 'linux';
-  
+
   @override
   String get platformName => 'Linux';
-  
+
   @override
   String get platformVersion => Platform.operatingSystemVersion;
-  
+
   @override
   String get architecture => 'x64';
-  
+
   @override
   bool supportsFeature(PlatformFeature feature) {
     switch (feature) {
@@ -236,7 +250,7 @@ class LinuxPlatformAPI extends PlatformAPI {
         return false; // Not typically available on desktop
     }
   }
-  
+
   @override
   Map<String, dynamic> getPlatformConfig() {
     return {
@@ -249,12 +263,13 @@ class LinuxPlatformAPI extends PlatformAPI {
       'packageManager': 'apt',
     };
   }
-  
+
   @override
   Future<PlatformCommandResult> executeCommand(PlatformCommand command) async {
     try {
       // For testing purposes, avoid executing actual commands that might crash
-      if (command.executable == 'nonexistent_command' || command.executable == 'invalid') {
+      if (command.executable == 'nonexistent_command' ||
+          command.executable == 'invalid') {
         return PlatformCommandResult(
           exitCode: 1,
           stdout: '',
@@ -262,14 +277,14 @@ class LinuxPlatformAPI extends PlatformAPI {
           success: false,
         );
       }
-      
+
       final result = await Process.run(
         command.executable,
         command.arguments,
         environment: command.environment,
         workingDirectory: command.workingDirectory,
       );
-      
+
       return PlatformCommandResult(
         exitCode: result.exitCode,
         stdout: result.stdout.toString(),
@@ -285,34 +300,41 @@ class LinuxPlatformAPI extends PlatformAPI {
       );
     }
   }
-  
+
   @override
   List<PlatformCapability> getCapabilities() {
     return [
       PlatformCapability('file_system', true, 'Full file system access'),
       PlatformCapability('network', true, 'Full network access'),
-      PlatformCapability('process_management', true, 'Process creation and management'),
+      PlatformCapability(
+        'process_management',
+        true,
+        'Process creation and management',
+      ),
       PlatformCapability('clipboard', true, 'System clipboard access'),
       PlatformCapability('notifications', true, 'System notifications'),
       PlatformCapability('window_management', true, 'Window management'),
     ];
   }
-  
+
   @override
   PlatformPaths getPaths() {
     final env = PlatformEnvironment.instance;
     final home = env.getVariable('HOME', defaultValue: '/home/user')!;
-    
+
     return PlatformPaths(
       home: home,
       documents: '$home/Documents',
       downloads: '$home/Downloads',
       temp: env.getVariable('TMPDIR', defaultValue: '/tmp')!,
-      appData: env.getVariable('XDG_DATA_HOME', defaultValue: '$home/.local/share')!,
+      appData: env.getVariable(
+        'XDG_DATA_HOME',
+        defaultValue: '$home/.local/share',
+      )!,
       programFiles: '/usr/bin',
     );
   }
-  
+
   @override
   PlatformUIConfig getUIConfig() {
     return PlatformUIConfig(
@@ -324,7 +346,7 @@ class LinuxPlatformAPI extends PlatformAPI {
       supportsCustomTitleBar: true,
     );
   }
-  
+
   @override
   PlatformSecurityConfig getSecurityConfig() {
     return PlatformSecurityConfig(
@@ -335,7 +357,7 @@ class LinuxPlatformAPI extends PlatformAPI {
       supportedSecurityLevels: ['minimal', 'standard', 'strict'],
     );
   }
-  
+
   @override
   PlatformNetworkConfig getNetworkConfig() {
     return PlatformNetworkConfig(
@@ -353,16 +375,16 @@ class LinuxPlatformAPI extends PlatformAPI {
 class MacOSPlatformAPI extends PlatformAPI {
   @override
   String get platformId => 'macos';
-  
+
   @override
   String get platformName => 'macOS';
-  
+
   @override
   String get platformVersion => Platform.operatingSystemVersion;
-  
+
   @override
   String get architecture => 'arm64'; // Modern Macs use Apple Silicon
-  
+
   @override
   bool supportsFeature(PlatformFeature feature) {
     switch (feature) {
@@ -381,7 +403,7 @@ class MacOSPlatformAPI extends PlatformAPI {
         return false; // Not typically available on desktop
     }
   }
-  
+
   @override
   Map<String, dynamic> getPlatformConfig() {
     return {
@@ -394,12 +416,13 @@ class MacOSPlatformAPI extends PlatformAPI {
       'packageManager': 'brew',
     };
   }
-  
+
   @override
   Future<PlatformCommandResult> executeCommand(PlatformCommand command) async {
     try {
       // For testing purposes, avoid executing actual commands that might crash
-      if (command.executable == 'nonexistent_command' || command.executable == 'invalid') {
+      if (command.executable == 'nonexistent_command' ||
+          command.executable == 'invalid') {
         return PlatformCommandResult(
           exitCode: 1,
           stdout: '',
@@ -407,14 +430,14 @@ class MacOSPlatformAPI extends PlatformAPI {
           success: false,
         );
       }
-      
+
       final result = await Process.run(
         command.executable,
         command.arguments,
         environment: command.environment,
         workingDirectory: command.workingDirectory,
       );
-      
+
       return PlatformCommandResult(
         exitCode: result.exitCode,
         stdout: result.stdout.toString(),
@@ -430,13 +453,17 @@ class MacOSPlatformAPI extends PlatformAPI {
       );
     }
   }
-  
+
   @override
   List<PlatformCapability> getCapabilities() {
     return [
       PlatformCapability('file_system', true, 'Full file system access'),
       PlatformCapability('network', true, 'Full network access'),
-      PlatformCapability('process_management', true, 'Process creation and management'),
+      PlatformCapability(
+        'process_management',
+        true,
+        'Process creation and management',
+      ),
       PlatformCapability('clipboard', true, 'System clipboard access'),
       PlatformCapability('notifications', true, 'System notifications'),
       PlatformCapability('window_management', true, 'Window management'),
@@ -444,12 +471,12 @@ class MacOSPlatformAPI extends PlatformAPI {
       PlatformCapability('microphone', true, 'Microphone access'),
     ];
   }
-  
+
   @override
   PlatformPaths getPaths() {
     final env = PlatformEnvironment.instance;
     final home = env.getVariable('HOME', defaultValue: '/Users/user')!;
-    
+
     return PlatformPaths(
       home: home,
       documents: '$home/Documents',
@@ -459,7 +486,7 @@ class MacOSPlatformAPI extends PlatformAPI {
       programFiles: '/Applications',
     );
   }
-  
+
   @override
   PlatformUIConfig getUIConfig() {
     return PlatformUIConfig(
@@ -471,7 +498,7 @@ class MacOSPlatformAPI extends PlatformAPI {
       supportsCustomTitleBar: false, // macOS controls title bar
     );
   }
-  
+
   @override
   PlatformSecurityConfig getSecurityConfig() {
     return PlatformSecurityConfig(
@@ -482,7 +509,7 @@ class MacOSPlatformAPI extends PlatformAPI {
       supportedSecurityLevels: ['standard', 'strict'],
     );
   }
-  
+
   @override
   PlatformNetworkConfig getNetworkConfig() {
     return PlatformNetworkConfig(
@@ -500,16 +527,16 @@ class MacOSPlatformAPI extends PlatformAPI {
 class AndroidPlatformAPI extends PlatformAPI {
   @override
   String get platformId => 'android';
-  
+
   @override
   String get platformName => 'Android';
-  
+
   @override
   String get platformVersion => Platform.operatingSystemVersion;
-  
+
   @override
   String get architecture => 'arm64';
-  
+
   @override
   bool supportsFeature(PlatformFeature feature) {
     switch (feature) {
@@ -528,7 +555,7 @@ class AndroidPlatformAPI extends PlatformAPI {
         return false; // Limited on mobile
     }
   }
-  
+
   @override
   Map<String, dynamic> getPlatformConfig() {
     return {
@@ -541,7 +568,7 @@ class AndroidPlatformAPI extends PlatformAPI {
       'packageManager': 'play_store',
     };
   }
-  
+
   @override
   Future<PlatformCommandResult> executeCommand(PlatformCommand command) async {
     // Android has limited command execution capabilities
@@ -552,7 +579,7 @@ class AndroidPlatformAPI extends PlatformAPI {
       success: false,
     );
   }
-  
+
   @override
   List<PlatformCapability> getCapabilities() {
     return [
@@ -566,7 +593,7 @@ class AndroidPlatformAPI extends PlatformAPI {
       PlatformCapability('notifications', true, 'Push notifications'),
     ];
   }
-  
+
   @override
   PlatformPaths getPaths() {
     return PlatformPaths(
@@ -578,7 +605,7 @@ class AndroidPlatformAPI extends PlatformAPI {
       programFiles: '/system/app',
     );
   }
-  
+
   @override
   PlatformUIConfig getUIConfig() {
     return PlatformUIConfig(
@@ -590,7 +617,7 @@ class AndroidPlatformAPI extends PlatformAPI {
       supportsCustomTitleBar: false,
     );
   }
-  
+
   @override
   PlatformSecurityConfig getSecurityConfig() {
     return PlatformSecurityConfig(
@@ -601,7 +628,7 @@ class AndroidPlatformAPI extends PlatformAPI {
       supportedSecurityLevels: ['strict'],
     );
   }
-  
+
   @override
   PlatformNetworkConfig getNetworkConfig() {
     return PlatformNetworkConfig(
@@ -619,16 +646,16 @@ class AndroidPlatformAPI extends PlatformAPI {
 class IOSPlatformAPI extends PlatformAPI {
   @override
   String get platformId => 'ios';
-  
+
   @override
   String get platformName => 'iOS';
-  
+
   @override
   String get platformVersion => Platform.operatingSystemVersion;
-  
+
   @override
   String get architecture => 'arm64';
-  
+
   @override
   bool supportsFeature(PlatformFeature feature) {
     switch (feature) {
@@ -647,7 +674,7 @@ class IOSPlatformAPI extends PlatformAPI {
         return false; // Limited on mobile
     }
   }
-  
+
   @override
   Map<String, dynamic> getPlatformConfig() {
     return {
@@ -660,7 +687,7 @@ class IOSPlatformAPI extends PlatformAPI {
       'packageManager': 'app_store',
     };
   }
-  
+
   @override
   Future<PlatformCommandResult> executeCommand(PlatformCommand command) async {
     // iOS has very limited command execution capabilities
@@ -671,7 +698,7 @@ class IOSPlatformAPI extends PlatformAPI {
       success: false,
     );
   }
-  
+
   @override
   List<PlatformCapability> getCapabilities() {
     return [
@@ -685,7 +712,7 @@ class IOSPlatformAPI extends PlatformAPI {
       PlatformCapability('notifications', true, 'Push notifications'),
     ];
   }
-  
+
   @override
   PlatformPaths getPaths() {
     return PlatformPaths(
@@ -697,7 +724,7 @@ class IOSPlatformAPI extends PlatformAPI {
       programFiles: '/Applications',
     );
   }
-  
+
   @override
   PlatformUIConfig getUIConfig() {
     return PlatformUIConfig(
@@ -709,7 +736,7 @@ class IOSPlatformAPI extends PlatformAPI {
       supportsCustomTitleBar: false,
     );
   }
-  
+
   @override
   PlatformSecurityConfig getSecurityConfig() {
     return PlatformSecurityConfig(
@@ -720,7 +747,7 @@ class IOSPlatformAPI extends PlatformAPI {
       supportedSecurityLevels: ['strict'],
     );
   }
-  
+
   @override
   PlatformNetworkConfig getNetworkConfig() {
     return PlatformNetworkConfig(
@@ -738,16 +765,16 @@ class IOSPlatformAPI extends PlatformAPI {
 class WebPlatformAPI extends PlatformAPI {
   @override
   String get platformId => 'web';
-  
+
   @override
   String get platformName => 'Web';
-  
+
   @override
   String get platformVersion => 'Browser';
-  
+
   @override
   String get architecture => 'wasm';
-  
+
   @override
   bool supportsFeature(PlatformFeature feature) {
     switch (feature) {
@@ -767,7 +794,7 @@ class WebPlatformAPI extends PlatformAPI {
         return false; // Limited or not available
     }
   }
-  
+
   @override
   Map<String, dynamic> getPlatformConfig() {
     return {
@@ -780,7 +807,7 @@ class WebPlatformAPI extends PlatformAPI {
       'packageManager': 'npm',
     };
   }
-  
+
   @override
   Future<PlatformCommandResult> executeCommand(PlatformCommand command) async {
     // Web platform cannot execute arbitrary commands
@@ -791,7 +818,7 @@ class WebPlatformAPI extends PlatformAPI {
       success: false,
     );
   }
-  
+
   @override
   List<PlatformCapability> getCapabilities() {
     return [
@@ -802,11 +829,11 @@ class WebPlatformAPI extends PlatformAPI {
       PlatformCapability('microphone', true, 'WebRTC microphone access'),
     ];
   }
-  
+
   @override
   PlatformPaths getPaths() {
     final env = PlatformEnvironment.instance;
-    
+
     // Use PlatformEnvironment for consistent web-specific path handling
     return PlatformPaths(
       home: env.getHomePath(),
@@ -817,7 +844,7 @@ class WebPlatformAPI extends PlatformAPI {
       programFiles: '/bin',
     );
   }
-  
+
   @override
   PlatformUIConfig getUIConfig() {
     return PlatformUIConfig(
@@ -829,7 +856,7 @@ class WebPlatformAPI extends PlatformAPI {
       supportsCustomTitleBar: false,
     );
   }
-  
+
   @override
   PlatformSecurityConfig getSecurityConfig() {
     return PlatformSecurityConfig(
@@ -840,7 +867,7 @@ class WebPlatformAPI extends PlatformAPI {
       supportedSecurityLevels: ['strict'],
     );
   }
-  
+
   @override
   PlatformNetworkConfig getNetworkConfig() {
     return PlatformNetworkConfig(
@@ -874,15 +901,11 @@ class PlatformCapability {
   final String name;
   final bool available;
   final String description;
-  
+
   const PlatformCapability(this.name, this.available, this.description);
-  
+
   Map<String, dynamic> toJson() {
-    return {
-      'name': name,
-      'available': available,
-      'description': description,
-    };
+    return {'name': name, 'available': available, 'description': description};
   }
 }
 
@@ -894,7 +917,7 @@ class PlatformPaths {
   final String temp;
   final String appData;
   final String programFiles;
-  
+
   const PlatformPaths({
     required this.home,
     required this.documents,
@@ -903,7 +926,7 @@ class PlatformPaths {
     required this.appData,
     required this.programFiles,
   });
-  
+
   Map<String, dynamic> toJson() {
     return {
       'home': home,
@@ -924,7 +947,7 @@ class PlatformUIConfig {
   final String defaultTheme;
   final List<String> supportedThemes;
   final bool supportsCustomTitleBar;
-  
+
   const PlatformUIConfig({
     required this.supportsWindowing,
     required this.supportsFullscreen,
@@ -933,7 +956,7 @@ class PlatformUIConfig {
     required this.supportedThemes,
     required this.supportsCustomTitleBar,
   });
-  
+
   Map<String, dynamic> toJson() {
     return {
       'supportsWindowing': supportsWindowing,
@@ -953,7 +976,7 @@ class PlatformSecurityConfig {
   final bool supportsAppContainer;
   final String defaultSecurityLevel;
   final List<String> supportedSecurityLevels;
-  
+
   const PlatformSecurityConfig({
     required this.supportsCodeSigning,
     required this.requiresElevation,
@@ -961,7 +984,7 @@ class PlatformSecurityConfig {
     required this.defaultSecurityLevel,
     required this.supportedSecurityLevels,
   });
-  
+
   Map<String, dynamic> toJson() {
     return {
       'supportsCodeSigning': supportsCodeSigning,
@@ -981,7 +1004,7 @@ class PlatformNetworkConfig {
   final bool supportsHTTP;
   final bool supportsHTTPS;
   final String defaultUserAgent;
-  
+
   const PlatformNetworkConfig({
     required this.supportsServerSockets,
     required this.supportsClientSockets,
@@ -990,7 +1013,7 @@ class PlatformNetworkConfig {
     required this.supportsHTTPS,
     required this.defaultUserAgent,
   });
-  
+
   Map<String, dynamic> toJson() {
     return {
       'supportsServerSockets': supportsServerSockets,
@@ -1009,7 +1032,7 @@ class PlatformCommand {
   final List<String> arguments;
   final Map<String, String>? environment;
   final String? workingDirectory;
-  
+
   const PlatformCommand({
     required this.executable,
     required this.arguments,
@@ -1024,14 +1047,14 @@ class PlatformCommandResult {
   final String stdout;
   final String stderr;
   final bool success;
-  
+
   const PlatformCommandResult({
     required this.exitCode,
     required this.stdout,
     required this.stderr,
     required this.success,
   });
-  
+
   Map<String, dynamic> toJson() {
     return {
       'exitCode': exitCode,

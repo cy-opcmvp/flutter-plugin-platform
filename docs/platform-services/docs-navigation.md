@@ -30,7 +30,7 @@ flutter-plugin-platform/
 │   ├── platform-services/           📚 文档中心
 │   │   ├── README.md                #   文档索引
 │   │   ├── PLATFORM_SERVICES_README.md  #   快速开始
-│   │   └── STRUCTURE.md            #   文档结构说明
+│   │   └── structure.md            #   文档结构说明
 │   │
 │   ├── guides/                      📖 使用指南
 │   │   └── platform-services-user-guide.md  #   完整指南
@@ -147,7 +147,7 @@ flutter-plugin-platform/
 
 ### 文档问题
 如果发现文档错误或需要改进，请查看：
-- [文档结构说明](docs/platform-services/STRUCTURE.md)
+- [文档结构说明](docs/platform-services/structure.md)
 
 ### 技术问题
 1. 查看 [用户使用指南](docs/guides/PLATFORM_SERVICES_USER_GUIDE.md)

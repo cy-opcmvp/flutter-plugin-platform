@@ -72,7 +72,8 @@ class _ScreenshotRegionDialog extends StatefulWidget {
   });
 
   @override
-  State<_ScreenshotRegionDialog> createState() => _ScreenshotRegionDialogState();
+  State<_ScreenshotRegionDialog> createState() =>
+      _ScreenshotRegionDialogState();
 }
 
 class _ScreenshotRegionDialogState extends State<_ScreenshotRegionDialog> {
@@ -104,9 +105,7 @@ class _ScreenshotRegionDialogState extends State<_ScreenshotRegionDialog> {
             ),
 
             // 半透明蒙版层（在选择区域外显示）
-            Positioned.fill(
-              child: _buildDimOverlay(),
-            ),
+            Positioned.fill(child: _buildDimOverlay()),
 
             // 手势检测层
             Positioned.fill(
@@ -197,10 +196,7 @@ class _ScreenshotRegionDialogState extends State<_ScreenshotRegionDialog> {
             width: rect.width,
             height: rect.height,
             decoration: BoxDecoration(
-              border: Border.all(
-                color: Colors.red,
-                width: _borderWidth,
-              ),
+              border: Border.all(color: Colors.red, width: _borderWidth),
             ),
           ),
         ),
@@ -276,20 +272,32 @@ class _ScreenshotRegionDialogState extends State<_ScreenshotRegionDialog> {
               TextButton.icon(
                 onPressed: widget.onCancel,
                 icon: const Icon(Icons.close, color: Colors.white, size: 20),
-                label: const Text('取消', style: TextStyle(color: Colors.white, fontSize: 16)),
+                label: const Text(
+                  'Cancel',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
                 style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                 ),
               ),
               const SizedBox(width: 20),
               ElevatedButton.icon(
                 onPressed: _canConfirmSelection() ? _confirmSelection : null,
                 icon: const Icon(Icons.check, color: Colors.white, size: 20),
-                label: const Text('确认截图', style: TextStyle(color: Colors.white, fontSize: 16)),
+                label: const Text(
+                  'Confirm',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
                   disabledBackgroundColor: Colors.grey,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
                 ),
               ),
             ],

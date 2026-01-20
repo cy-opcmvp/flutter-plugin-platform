@@ -13,21 +13,21 @@ late IOSink _outputSink;
 
 void main(List<String> args) async {
   print('[$pluginId] Starting...');
-  
+
   // 设置 IPC 通信
   _inputStream = stdin.transform(utf8.decoder).transform(const LineSplitter());
   _outputSink = stdout;
-  
+
   // 注册消息处理器
   await _setupMessageHandlers();
-  
+
   // 报告就绪状态
   await _sendMessage({
     'type': 'ready',
     'pluginId': pluginId,
     'version': pluginVersion,
   });
-  
+
   // 监听输入消息
   await for (final line in _inputStream) {
     try {
@@ -46,7 +46,7 @@ Future<void> _setupMessageHandlers() async {
 Future<void> _handleMessage(Map<String, dynamic> message) async {
   final messageType = message['type'] as String?;
   final messageId = message['messageId'] as String?;
-  
+
   switch (messageType) {
     case 'ping':
       await _sendMessage({
@@ -55,7 +55,7 @@ Future<void> _handleMessage(Map<String, dynamic> message) async {
         'timestamp': DateTime.now().toIso8601String(),
       });
       break;
-      
+
     case 'execute':
       final command = message['command'] as String?;
       final params = message['params'] as Map<String, dynamic>? ?? {};
@@ -66,20 +66,23 @@ Future<void> _handleMessage(Map<String, dynamic> message) async {
         'result': result,
       });
       break;
-      
+
     case 'shutdown':
-      await _sendMessage({
-        'type': 'shutdown_ack',
-        'messageId': messageId,
-      });
+      await _sendMessage({'type': 'shutdown_ack', 'messageId': messageId});
       exit(0);
-      
+
     default:
-      await _sendError('Unknown message type: $messageType', messageId: messageId);
+      await _sendError(
+        'Unknown message type: $messageType',
+        messageId: messageId,
+      );
   }
 }
 
-Future<Map<String, dynamic>> _executeCommand(String? command, Map<String, dynamic> params) async {
+Future<Map<String, dynamic>> _executeCommand(
+  String? command,
+  Map<String, dynamic> params,
+) async {
   switch (command) {
     case 'getInfo':
       return {
@@ -88,19 +91,14 @@ Future<Map<String, dynamic>> _executeCommand(String? command, Map<String, dynami
         'name': '{{PLUGIN_NAME}}',
         'description': '{{PLUGIN_DESCRIPTION}}',
       };
-      
+
     case 'process':
       // TODO: 实现你的业务逻辑
       final data = params['data'];
-      return {
-        'success': true,
-        'processed': data,
-      };
-      
+      return {'success': true, 'processed': data};
+
     default:
-      return {
-        'error': 'Unknown command: $command',
-      };
+      return {'error': 'Unknown command: $command'};
   }
 }
 
@@ -111,9 +109,5 @@ Future<void> _sendMessage(Map<String, dynamic> message) async {
 }
 
 Future<void> _sendError(String error, {String? messageId}) async {
-  await _sendMessage({
-    'type': 'error',
-    'messageId': messageId,
-    'error': error,
-  });
+  await _sendMessage({'type': 'error', 'messageId': messageId, 'error': error});
 }

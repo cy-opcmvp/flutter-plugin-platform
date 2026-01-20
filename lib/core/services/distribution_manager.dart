@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import '../models/external_plugin_models.dart';
 import 'distribution_channels.dart';
 import 'plugin_registry_service.dart';
@@ -16,7 +17,7 @@ class DistributionManager {
 
     // Initialize default channels
     await _initializeDefaultChannels();
-    
+
     _isInitialized = true;
   }
 
@@ -42,7 +43,7 @@ class DistributionManager {
   /// Add a distribution channel
   void addChannel(DistributionChannel channel) {
     _ensureInitialized();
-    
+
     if (!channel.isValid()) {
       throw ArgumentError('Invalid distribution channel');
     }
@@ -53,7 +54,7 @@ class DistributionManager {
   /// Remove a distribution channel
   void removeChannel(String channelId) {
     _ensureInitialized();
-    
+
     final channel = _channels.remove(channelId);
     if (channel != null) {
       if (channel is DirectDownloadChannel) {
@@ -83,20 +84,24 @@ class DistributionManager {
   }
 
   /// Search for plugins across all enabled channels
-  Future<List<PluginRegistryEntry>> searchPlugins(String query, {
+  Future<List<PluginRegistryEntry>> searchPlugins(
+    String query, {
     String? category,
     List<String>? tags,
     String? author,
     List<String>? channelIds,
   }) async {
     _ensureInitialized();
-    
-    final channels = channelIds != null 
-        ? channelIds.map((id) => _channels[id]).where((c) => c != null).cast<DistributionChannel>()
+
+    final channels = channelIds != null
+        ? channelIds
+              .map((id) => _channels[id])
+              .where((c) => c != null)
+              .cast<DistributionChannel>()
         : getEnabledChannels();
 
     final allResults = <PluginRegistryEntry>[];
-    
+
     for (final channel in channels) {
       try {
         final results = await channel.searchPlugins(
@@ -108,7 +113,7 @@ class DistributionManager {
         allResults.addAll(results);
       } catch (e) {
         // Log error but continue with other channels
-        print('Error searching in channel ${channel.channelId}: $e');
+        debugPrint('Error searching in channel ${channel.channelId}: $e');
       }
     }
 
@@ -116,7 +121,10 @@ class DistributionManager {
     final uniqueResults = <String, PluginRegistryEntry>{};
     for (final result in allResults) {
       if (!uniqueResults.containsKey(result.pluginId) ||
-          _isNewerVersion(result.version, uniqueResults[result.pluginId]!.version)) {
+          _isNewerVersion(
+            result.version,
+            uniqueResults[result.pluginId]!.version,
+          )) {
         uniqueResults[result.pluginId] = result;
       }
     }
@@ -125,17 +133,21 @@ class DistributionManager {
   }
 
   /// Download plugin from the best available channel
-  Future<PluginPackage> downloadPlugin(String pluginId, String version, {
+  Future<PluginPackage> downloadPlugin(
+    String pluginId,
+    String version, {
     String? preferredChannelId,
   }) async {
     _ensureInitialized();
-    
-    final channels = preferredChannelId != null 
-        ? [_channels[preferredChannelId]].where((c) => c != null).cast<DistributionChannel>()
+
+    final channels = preferredChannelId != null
+        ? [
+            _channels[preferredChannelId],
+          ].where((c) => c != null).cast<DistributionChannel>()
         : getEnabledChannels();
 
     Exception? lastException;
-    
+
     for (final channel in channels) {
       try {
         if (await channel.isPluginAvailable(pluginId, version)) {
@@ -147,17 +159,21 @@ class DistributionManager {
       }
     }
 
-    throw lastException ?? Exception('Plugin $pluginId version $version not found in any channel');
+    throw lastException ??
+        Exception('Plugin $pluginId version $version not found in any channel');
   }
 
   /// Get plugin information from all channels
-  Future<PluginRegistryEntry?> getPluginInfo(String pluginId, {
+  Future<PluginRegistryEntry?> getPluginInfo(
+    String pluginId, {
     String? preferredChannelId,
   }) async {
     _ensureInitialized();
-    
-    final channels = preferredChannelId != null 
-        ? [_channels[preferredChannelId]].where((c) => c != null).cast<DistributionChannel>()
+
+    final channels = preferredChannelId != null
+        ? [
+            _channels[preferredChannelId],
+          ].where((c) => c != null).cast<DistributionChannel>()
         : getEnabledChannels();
 
     for (final channel in channels) {
@@ -177,15 +193,17 @@ class DistributionManager {
   /// Get statistics for all channels
   Future<Map<String, ChannelStatistics>> getAllChannelStatistics() async {
     _ensureInitialized();
-    
+
     final statistics = <String, ChannelStatistics>{};
-    
+
     for (final channel in _channels.values) {
       try {
         statistics[channel.channelId] = await channel.getStatistics();
       } catch (e) {
         // Log error but continue
-        print('Error getting statistics for channel ${channel.channelId}: $e');
+        debugPrint(
+          'Error getting statistics for channel ${channel.channelId}: $e',
+        );
       }
     }
 
@@ -195,7 +213,7 @@ class DistributionManager {
   /// Check if plugin is available in any channel
   Future<bool> isPluginAvailable(String pluginId, String version) async {
     _ensureInitialized();
-    
+
     for (final channel in getEnabledChannels()) {
       try {
         if (await channel.isPluginAvailable(pluginId, version)) {
@@ -212,9 +230,9 @@ class DistributionManager {
   /// Get available versions of a plugin across all channels
   Future<List<String>> getAvailableVersions(String pluginId) async {
     _ensureInitialized();
-    
+
     final versions = <String>{};
-    
+
     for (final channel in getEnabledChannels()) {
       try {
         final info = await channel.getPluginInfo(pluginId);
@@ -235,7 +253,9 @@ class DistributionManager {
 
   void _ensureInitialized() {
     if (!_isInitialized) {
-      throw StateError('DistributionManager not initialized. Call initialize() first.');
+      throw StateError(
+        'DistributionManager not initialized. Call initialize() first.',
+      );
     }
   }
 
@@ -287,18 +307,20 @@ class DistributionManager {
   int _compareVersions(String version1, String version2) {
     final v1Parts = version1.split('.').map(int.parse).toList();
     final v2Parts = version2.split('.').map(int.parse).toList();
-    
-    final maxLength = v1Parts.length > v2Parts.length ? v1Parts.length : v2Parts.length;
-    
+
+    final maxLength = v1Parts.length > v2Parts.length
+        ? v1Parts.length
+        : v2Parts.length;
+
     for (int i = 0; i < maxLength; i++) {
       final v1Part = i < v1Parts.length ? v1Parts[i] : 0;
       final v2Part = i < v2Parts.length ? v2Parts[i] : 0;
-      
+
       if (v1Part != v2Part) {
         return v1Part.compareTo(v2Part);
       }
     }
-    
+
     return 0;
   }
 }

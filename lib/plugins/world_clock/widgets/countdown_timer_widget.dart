@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 import '../models/world_clock_models.dart';
 
 /// 倒计时定时器显示组件
@@ -30,34 +31,30 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
   @override
   void initState() {
     super.initState();
-    
+
     // 脉冲动画控制器
     _pulseController = AnimationController(
       duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
-    _pulseAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.1,
-    ).animate(CurvedAnimation(
-      parent: _pulseController,
-      curve: Curves.easeInOut,
-    ));
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
 
     // 每秒更新一次
     _updateTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
         setState(() {});
-        
+
         // 检查是否完成
-        if (widget.countdownTimer.remainingTime == Duration.zero && 
+        if (widget.countdownTimer.remainingTime == Duration.zero &&
             !widget.countdownTimer.isCompleted) {
           widget.countdownTimer.isCompleted = true;
           widget.onComplete?.call();
         }
-        
+
         // 如果即将完成，开始脉冲动画
-        if (widget.countdownTimer.isAlmostComplete && 
+        if (widget.countdownTimer.isAlmostComplete &&
             !widget.countdownTimer.isCompleted &&
             widget.enableAnimations) {
           if (!_pulseController.isAnimating) {
@@ -88,10 +85,11 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
     return AnimatedBuilder(
       animation: _pulseAnimation,
       builder: (context, child) {
-        final scale = (isAlmostComplete && !isCompleted && widget.enableAnimations) 
-            ? _pulseAnimation.value 
+        final scale =
+            (isAlmostComplete && !isCompleted && widget.enableAnimations)
+            ? _pulseAnimation.value
             : 1.0;
-        
+
         return Transform.scale(
           scale: scale,
           child: Container(
@@ -101,7 +99,11 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
               gradient: _getGradient(theme, isCompleted, isAlmostComplete),
               boxShadow: [
                 BoxShadow(
-                  color: _getShadowColor(theme, isCompleted, isAlmostComplete).withOpacity(0.2),
+                  color: _getShadowColor(
+                    theme,
+                    isCompleted,
+                    isAlmostComplete,
+                  ).withOpacity(0.2),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -129,12 +131,20 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
                             gradient: LinearGradient(
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
-                              colors: _getIconGradientColors(theme, isCompleted, isAlmostComplete),
+                              colors: _getIconGradientColors(
+                                theme,
+                                isCompleted,
+                                isAlmostComplete,
+                              ),
                             ),
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: [
                               BoxShadow(
-                                color: _getIconGradientColors(theme, isCompleted, isAlmostComplete)[0].withOpacity(0.3),
+                                color: _getIconGradientColors(
+                                  theme,
+                                  isCompleted,
+                                  isAlmostComplete,
+                                )[0].withOpacity(0.3),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2),
                               ),
@@ -154,7 +164,11 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
                               fontWeight: FontWeight.bold,
                               color: isCompleted
                                   ? theme.colorScheme.onSurface.withOpacity(0.5)
-                                  : _getTimeColor(theme, isCompleted, isAlmostComplete),
+                                  : _getTimeColor(
+                                      theme,
+                                      isCompleted,
+                                      isAlmostComplete,
+                                    ),
                               decoration: isCompleted
                                   ? TextDecoration.lineThrough
                                   : null,
@@ -193,7 +207,7 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  '已完成',
+                                  'Completed',
                                   style: theme.textTheme.labelSmall?.copyWith(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
@@ -213,7 +227,9 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
                               child: Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: theme.colorScheme.error.withOpacity(0.1),
+                                  color: theme.colorScheme.error.withOpacity(
+                                    0.1,
+                                  ),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Icon(
@@ -241,22 +257,37 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
                                 style: theme.textTheme.displaySmall?.copyWith(
                                   fontFamily: 'monospace',
                                   fontWeight: FontWeight.bold,
-                                  color: _getTimeColor(theme, isCompleted, isAlmostComplete),
+                                  color: _getTimeColor(
+                                    theme,
+                                    isCompleted,
+                                    isAlmostComplete,
+                                  ),
                                   fontSize: 42,
                                   letterSpacing: 2,
                                 ),
                               ),
                               const SizedBox(height: 8),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: _getStatusColor(theme, isCompleted, isAlmostComplete).withOpacity(0.1),
+                                  color: _getStatusColor(
+                                    theme,
+                                    isCompleted,
+                                    isAlmostComplete,
+                                  ).withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
                                   _getStatusText(isCompleted, remainingTime),
                                   style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: _getStatusColor(theme, isCompleted, isAlmostComplete),
+                                    color: _getStatusColor(
+                                      theme,
+                                      isCompleted,
+                                      isAlmostComplete,
+                                    ),
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -286,11 +317,17 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
                                 width: 70,
                                 height: 70,
                                 child: CircularProgressIndicator(
-                                  value: isCompleted ? 1.0 : _calculateProgress(),
+                                  value: isCompleted
+                                      ? 1.0
+                                      : _calculateProgress(),
                                   strokeWidth: 6,
                                   backgroundColor: Colors.transparent,
                                   valueColor: AlwaysStoppedAnimation<Color>(
-                                    _getProgressColor(theme, isCompleted, isAlmostComplete),
+                                    _getProgressColor(
+                                      theme,
+                                      isCompleted,
+                                      isAlmostComplete,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -299,7 +336,11 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
                                 child: Icon(
                                   _getCenterIcon(isCompleted, isAlmostComplete),
                                   size: 28,
-                                  color: _getProgressColor(theme, isCompleted, isAlmostComplete),
+                                  color: _getProgressColor(
+                                    theme,
+                                    isCompleted,
+                                    isAlmostComplete,
+                                  ),
                                 ),
                               ),
                             ],
@@ -317,7 +358,11 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
     );
   }
 
-  Color _getTimeColor(ThemeData theme, bool isCompleted, bool isAlmostComplete) {
+  Color _getTimeColor(
+    ThemeData theme,
+    bool isCompleted,
+    bool isAlmostComplete,
+  ) {
     if (isCompleted) {
       return Colors.green;
     } else if (isAlmostComplete) {
@@ -326,7 +371,11 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
     return theme.primaryColor;
   }
 
-  Color _getStatusColor(ThemeData theme, bool isCompleted, bool isAlmostComplete) {
+  Color _getStatusColor(
+    ThemeData theme,
+    bool isCompleted,
+    bool isAlmostComplete,
+  ) {
     if (isCompleted) {
       return Colors.green;
     } else if (isAlmostComplete) {
@@ -335,7 +384,11 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
     return theme.textTheme.bodySmall?.color?.withOpacity(0.7) ?? Colors.grey;
   }
 
-  Color _getProgressColor(ThemeData theme, bool isCompleted, bool isAlmostComplete) {
+  Color _getProgressColor(
+    ThemeData theme,
+    bool isCompleted,
+    bool isAlmostComplete,
+  ) {
     if (isCompleted) {
       return Colors.green;
     } else if (isAlmostComplete) {
@@ -346,32 +399,37 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
 
   String _getStatusText(bool isCompleted, Duration remainingTime) {
     if (isCompleted) {
-      return '倒计时已完成';
+      return 'Completed';
     } else if (remainingTime.inMinutes < 1) {
-      return '即将完成！';
+      return 'Almost complete!';
     } else if (remainingTime.inHours < 1) {
-      return '剩余 ${remainingTime.inMinutes} 分钟';
+      return '${remainingTime.inMinutes} minutes remaining';
     } else if (remainingTime.inDays < 1) {
-      return '剩余 ${remainingTime.inHours} 小时 ${remainingTime.inMinutes % 60} 分钟';
+      return '${remainingTime.inHours} hours ${remainingTime.inMinutes % 60} minutes remaining';
     } else {
-      return '剩余 ${remainingTime.inDays} 天 ${remainingTime.inHours % 24} 小时';
+      return '${remainingTime.inDays} days ${remainingTime.inHours % 24} hours remaining';
     }
   }
 
-  Color? _getCardColor(ThemeData theme, bool isCompleted, bool isAlmostComplete) {
+  Color? _getCardColor(
+    ThemeData theme,
+    bool isCompleted,
+    bool isAlmostComplete,
+  ) {
     // 不再使用，保留以防万一
     return null;
   }
 
-  LinearGradient _getGradient(ThemeData theme, bool isCompleted, bool isAlmostComplete) {
+  LinearGradient _getGradient(
+    ThemeData theme,
+    bool isCompleted,
+    bool isAlmostComplete,
+  ) {
     if (isCompleted) {
       return LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
-        colors: [
-          Colors.green.withOpacity(0.1),
-          Colors.green.withOpacity(0.05),
-        ],
+        colors: [Colors.green.withOpacity(0.1), Colors.green.withOpacity(0.05)],
       );
     } else if (isAlmostComplete) {
       return LinearGradient(
@@ -393,19 +451,31 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
     );
   }
 
-  Color _getShadowColor(ThemeData theme, bool isCompleted, bool isAlmostComplete) {
+  Color _getShadowColor(
+    ThemeData theme,
+    bool isCompleted,
+    bool isAlmostComplete,
+  ) {
     if (isCompleted) return Colors.green;
     if (isAlmostComplete) return Colors.orange;
     return theme.primaryColor;
   }
 
-  Color _getBorderColor(ThemeData theme, bool isCompleted, bool isAlmostComplete) {
+  Color _getBorderColor(
+    ThemeData theme,
+    bool isCompleted,
+    bool isAlmostComplete,
+  ) {
     if (isCompleted) return Colors.green.withOpacity(0.5);
     if (isAlmostComplete) return Colors.orange.withOpacity(0.5);
     return theme.primaryColor.withOpacity(0.3);
   }
 
-  List<Color> _getIconGradientColors(ThemeData theme, bool isCompleted, bool isAlmostComplete) {
+  List<Color> _getIconGradientColors(
+    ThemeData theme,
+    bool isCompleted,
+    bool isAlmostComplete,
+  ) {
     if (isCompleted) {
       return [Colors.green.shade400, Colors.green.shade600];
     } else if (isAlmostComplete) {
@@ -439,15 +509,21 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
   }
 
   void _showDeleteConfirmation(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('确认删除'),
-        content: Text('确定要删除倒计时 "${widget.countdownTimer.title}" 吗？'),
+        title: Text(l10n.world_clock_confirm_delete),
+        content: Text(
+          l10n.world_clock_confirm_delete_countdown_message.replaceAll(
+            '{title}',
+            widget.countdownTimer.title,
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('取消'),
+            child: Text(l10n.common_cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -458,7 +534,7 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            child: const Text('删除'),
+            child: Text(l10n.common_delete),
           ),
         ],
       ),
@@ -518,16 +594,16 @@ class _CompactCountdownWidgetState extends State<CompactCountdownWidget> {
               height: 8,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isCompleted 
-                    ? Colors.green 
-                    : isAlmostComplete 
-                        ? Colors.orange 
-                        : theme.primaryColor,
+                color: isCompleted
+                    ? Colors.green
+                    : isAlmostComplete
+                    ? Colors.orange
+                    : theme.primaryColor,
               ),
             ),
-            
+
             const SizedBox(width: 12),
-            
+
             // 标题和时间
             Expanded(
               child: Column(
@@ -537,7 +613,9 @@ class _CompactCountdownWidgetState extends State<CompactCountdownWidget> {
                     widget.countdownTimer.title,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w500,
-                      decoration: isCompleted ? TextDecoration.lineThrough : null,
+                      decoration: isCompleted
+                          ? TextDecoration.lineThrough
+                          : null,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -546,30 +624,22 @@ class _CompactCountdownWidgetState extends State<CompactCountdownWidget> {
                     widget.countdownTimer.formattedRemainingTime,
                     style: theme.textTheme.bodySmall?.copyWith(
                       fontFamily: 'monospace',
-                      color: isCompleted 
-                          ? Colors.green 
-                          : isAlmostComplete 
-                              ? Colors.orange 
-                              : null,
+                      color: isCompleted
+                          ? Colors.green
+                          : isAlmostComplete
+                          ? Colors.orange
+                          : null,
                     ),
                   ),
                 ],
               ),
             ),
-            
+
             // 完成状态
             if (isCompleted)
-              const Icon(
-                Icons.check_circle,
-                color: Colors.green,
-                size: 20,
-              )
+              const Icon(Icons.check_circle, color: Colors.green, size: 20)
             else if (isAlmostComplete)
-              const Icon(
-                Icons.warning,
-                color: Colors.orange,
-                size: 20,
-              ),
+              const Icon(Icons.warning, color: Colors.orange, size: 20),
           ],
         ),
       ),

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import '../models/external_plugin_models.dart';
 import 'external_plugin_manager.dart';
 import 'plugin_registry_service.dart';
@@ -7,16 +8,17 @@ import 'plugin_registry_service.dart';
 class PluginUpdateManager {
   final ExternalPluginManager _pluginManager;
   final PluginRegistryService _registryService;
-  
+
   Timer? _updateCheckTimer;
   bool _isInitialized = false;
   bool _autoUpdateEnabled = true;
   Duration _updateCheckInterval = const Duration(hours: 24);
-  
+
   final Map<String, PluginUpdateInfo> _availableUpdates = {};
   final Map<String, UpdateProgress> _updateProgress = {};
-  final StreamController<PluginUpdateEvent> _updateEventController = StreamController.broadcast();
-  
+  final StreamController<PluginUpdateEvent> _updateEventController =
+      StreamController.broadcast();
+
   PluginUpdateManager({
     required ExternalPluginManager pluginManager,
     required PluginRegistryService registryService,
@@ -33,10 +35,12 @@ class PluginUpdateManager {
   Duration get updateCheckInterval => _updateCheckInterval;
 
   /// Get all available updates
-  Map<String, PluginUpdateInfo> get availableUpdates => Map.unmodifiable(_availableUpdates);
+  Map<String, PluginUpdateInfo> get availableUpdates =>
+      Map.unmodifiable(_availableUpdates);
 
   /// Get current update progress
-  Map<String, UpdateProgress> get updateProgress => Map.unmodifiable(_updateProgress);
+  Map<String, UpdateProgress> get updateProgress =>
+      Map.unmodifiable(_updateProgress);
 
   /// Initialize the update manager
   Future<void> initialize() async {
@@ -45,12 +49,12 @@ class PluginUpdateManager {
     }
 
     // Initialize dependencies
-    
+
     // Start periodic update checks if auto-update is enabled
     if (_autoUpdateEnabled) {
       _startPeriodicUpdateChecks();
     }
-    
+
     _isInitialized = true;
   }
 
@@ -62,7 +66,7 @@ class PluginUpdateManager {
 
     _stopPeriodicUpdateChecks();
     await _updateEventController.close();
-    
+
     _availableUpdates.clear();
     _updateProgress.clear();
     _isInitialized = false;
@@ -71,7 +75,7 @@ class PluginUpdateManager {
   /// Enable or disable automatic updates
   void setAutoUpdateEnabled(bool enabled) {
     _autoUpdateEnabled = enabled;
-    
+
     if (_isInitialized) {
       if (enabled) {
         _startPeriodicUpdateChecks();
@@ -84,7 +88,7 @@ class PluginUpdateManager {
   /// Set the update check interval
   void setUpdateCheckInterval(Duration interval) {
     _updateCheckInterval = interval;
-    
+
     if (_isInitialized && _autoUpdateEnabled) {
       _stopPeriodicUpdateChecks();
       _startPeriodicUpdateChecks();
@@ -97,57 +101,68 @@ class PluginUpdateManager {
     bool forceCheck = false,
   }) async {
     _ensureInitialized();
-    
+
     final installedPlugins = pluginIds != null
-        ? pluginIds.map((id) => _pluginManager.getInstalledPlugins().firstWhere(
-            (pkg) => pkg.id == id, 
-            orElse: () => throw ArgumentError('Plugin $id not found')
-          )).toList()
+        ? pluginIds
+              .map(
+                (id) => _pluginManager.getInstalledPlugins().firstWhere(
+                  (pkg) => pkg.id == id,
+                  orElse: () => throw ArgumentError('Plugin $id not found'),
+                ),
+              )
+              .toList()
         : _pluginManager.getInstalledPlugins();
 
     final updates = <PluginUpdateInfo>[];
-    
+
     for (final plugin in installedPlugins) {
       try {
         final updateInfo = await _checkPackageForUpdate(plugin, forceCheck);
         if (updateInfo != null) {
           _availableUpdates[plugin.id] = updateInfo;
           updates.add(updateInfo);
-          
-          _updateEventController.add(PluginUpdateEvent(
-            type: UpdateEventType.updateAvailable,
-            pluginId: plugin.id,
-            updateInfo: updateInfo,
-          ));
+
+          _updateEventController.add(
+            PluginUpdateEvent(
+              type: UpdateEventType.updateAvailable,
+              pluginId: plugin.id,
+              updateInfo: updateInfo,
+            ),
+          );
         }
       } catch (e) {
-        _updateEventController.add(PluginUpdateEvent(
-          type: UpdateEventType.checkFailed,
-          pluginId: plugin.id,
-          error: e.toString(),
-        ));
+        _updateEventController.add(
+          PluginUpdateEvent(
+            type: UpdateEventType.checkFailed,
+            pluginId: plugin.id,
+            error: e.toString(),
+          ),
+        );
       }
     }
-    
+
     return updates;
   }
 
   /// Check for update for a specific plugin
-  Future<PluginUpdateInfo?> checkPluginForUpdate(String pluginId, {bool forceCheck = false}) async {
+  Future<PluginUpdateInfo?> checkPluginForUpdate(
+    String pluginId, {
+    bool forceCheck = false,
+  }) async {
     _ensureInitialized();
-    
+
     final plugin = _pluginManager.getInstalledPlugins().firstWhere(
       (pkg) => pkg.id == pluginId,
       orElse: () => throw ArgumentError('Plugin $pluginId not found'),
     );
-    
+
     return await _checkPackageForUpdate(plugin, forceCheck);
   }
 
   /// Update a specific plugin to the latest version
   Future<void> updatePlugin(String pluginId, {String? targetVersion}) async {
     _ensureInitialized();
-    
+
     final plugin = _pluginManager.getInstalledPlugins().firstWhere(
       (pkg) => pkg.id == pluginId,
       orElse: () => throw ArgumentError('Plugin $pluginId not found'),
@@ -159,7 +174,7 @@ class PluginUpdateManager {
     }
 
     final newVersion = targetVersion ?? updateInfo!.latestVersion;
-    
+
     try {
       // Start update process
       _updateProgress[pluginId] = UpdateProgress(
@@ -171,18 +186,20 @@ class PluginUpdateManager {
         startTime: DateTime.now(),
       );
 
-      _updateEventController.add(PluginUpdateEvent(
-        type: UpdateEventType.updateStarted,
-        pluginId: pluginId,
-        progress: _updateProgress[pluginId],
-      ));
+      _updateEventController.add(
+        PluginUpdateEvent(
+          type: UpdateEventType.updateStarted,
+          pluginId: pluginId,
+          progress: _updateProgress[pluginId],
+        ),
+      );
 
       // Download new version
       await _downloadPluginUpdate(pluginId, newVersion);
-      
+
       // Install new version
       await _installPluginUpdate(pluginId, newVersion);
-      
+
       // Update completed successfully
       _updateProgress[pluginId] = _updateProgress[pluginId]!.copyWith(
         status: UpdateStatus.completed,
@@ -192,12 +209,13 @@ class PluginUpdateManager {
 
       _availableUpdates.remove(pluginId);
 
-      _updateEventController.add(PluginUpdateEvent(
-        type: UpdateEventType.updateCompleted,
-        pluginId: pluginId,
-        progress: _updateProgress[pluginId],
-      ));
-
+      _updateEventController.add(
+        PluginUpdateEvent(
+          type: UpdateEventType.updateCompleted,
+          pluginId: pluginId,
+          progress: _updateProgress[pluginId],
+        ),
+      );
     } catch (e) {
       // Update failed
       _updateProgress[pluginId] = _updateProgress[pluginId]!.copyWith(
@@ -206,12 +224,14 @@ class PluginUpdateManager {
         endTime: DateTime.now(),
       );
 
-      _updateEventController.add(PluginUpdateEvent(
-        type: UpdateEventType.updateFailed,
-        pluginId: pluginId,
-        progress: _updateProgress[pluginId],
-        error: e.toString(),
-      ));
+      _updateEventController.add(
+        PluginUpdateEvent(
+          type: UpdateEventType.updateFailed,
+          pluginId: pluginId,
+          progress: _updateProgress[pluginId],
+          error: e.toString(),
+        ),
+      );
 
       rethrow;
     }
@@ -220,20 +240,20 @@ class PluginUpdateManager {
   /// Update all plugins that have available updates
   Future<void> updateAllPlugins({bool confirmEach = false}) async {
     _ensureInitialized();
-    
+
     final pluginsToUpdate = _availableUpdates.keys.toList();
-    
+
     for (final pluginId in pluginsToUpdate) {
       try {
         if (confirmEach) {
           // In a real implementation, this would show a confirmation dialog
           // For now, we'll assume user confirms
         }
-        
+
         await updatePlugin(pluginId);
       } catch (e) {
         // Continue with other plugins even if one fails
-        print('Failed to update plugin $pluginId: $e');
+        debugPrint('Failed to update plugin $pluginId: $e');
       }
     }
   }
@@ -241,7 +261,7 @@ class PluginUpdateManager {
   /// Rollback a plugin to its previous version
   Future<void> rollbackPlugin(String pluginId) async {
     _ensureInitialized();
-    
+
     final plugin = _pluginManager.getInstalledPlugins().firstWhere(
       (pkg) => pkg.id == pluginId,
       orElse: () => throw ArgumentError('Plugin $pluginId not found'),
@@ -264,18 +284,20 @@ class PluginUpdateManager {
         startTime: DateTime.now(),
       );
 
-      _updateEventController.add(PluginUpdateEvent(
-        type: UpdateEventType.rollbackStarted,
-        pluginId: pluginId,
-        progress: _updateProgress[pluginId],
-      ));
+      _updateEventController.add(
+        PluginUpdateEvent(
+          type: UpdateEventType.rollbackStarted,
+          pluginId: pluginId,
+          progress: _updateProgress[pluginId],
+        ),
+      );
 
       // Download previous version
       await _downloadPluginUpdate(pluginId, previousVersion);
-      
+
       // Install previous version
       await _installPluginUpdate(pluginId, previousVersion);
-      
+
       // Rollback completed successfully
       _updateProgress[pluginId] = _updateProgress[pluginId]!.copyWith(
         status: UpdateStatus.completed,
@@ -283,12 +305,13 @@ class PluginUpdateManager {
         endTime: DateTime.now(),
       );
 
-      _updateEventController.add(PluginUpdateEvent(
-        type: UpdateEventType.rollbackCompleted,
-        pluginId: pluginId,
-        progress: _updateProgress[pluginId],
-      ));
-
+      _updateEventController.add(
+        PluginUpdateEvent(
+          type: UpdateEventType.rollbackCompleted,
+          pluginId: pluginId,
+          progress: _updateProgress[pluginId],
+        ),
+      );
     } catch (e) {
       // Rollback failed
       _updateProgress[pluginId] = _updateProgress[pluginId]!.copyWith(
@@ -297,12 +320,14 @@ class PluginUpdateManager {
         endTime: DateTime.now(),
       );
 
-      _updateEventController.add(PluginUpdateEvent(
-        type: UpdateEventType.rollbackFailed,
-        pluginId: pluginId,
-        progress: _updateProgress[pluginId],
-        error: e.toString(),
-      ));
+      _updateEventController.add(
+        PluginUpdateEvent(
+          type: UpdateEventType.rollbackFailed,
+          pluginId: pluginId,
+          progress: _updateProgress[pluginId],
+          error: e.toString(),
+        ),
+      );
 
       rethrow;
     }
@@ -311,7 +336,7 @@ class PluginUpdateManager {
   /// Get update history for a plugin
   Future<List<PluginUpdateRecord>> getUpdateHistory(String pluginId) async {
     _ensureInitialized();
-    
+
     // In a real implementation, this would read from persistent storage
     // For now, return mock data
     return [
@@ -337,20 +362,24 @@ class PluginUpdateManager {
   /// Get available versions for a plugin
   Future<List<String>> getAvailableVersions(String pluginId) async {
     _ensureInitialized();
-    
+
     // In a real implementation, this would query distribution channels
     // For now, return mock versions
     return ['1.0.0', '1.1.0', '1.2.0', '2.0.0'];
   }
 
   /// Schedule an update for later
-  Future<void> scheduleUpdate(String pluginId, DateTime scheduledTime, {String? targetVersion}) async {
+  Future<void> scheduleUpdate(
+    String pluginId,
+    DateTime scheduledTime, {
+    String? targetVersion,
+  }) async {
     _ensureInitialized();
-    
+
     // In a real implementation, this would persist the schedule
     // For now, we'll use a simple timer
     final delay = scheduledTime.difference(DateTime.now());
-    
+
     if (delay.isNegative) {
       throw ArgumentError('Scheduled time must be in the future');
     }
@@ -359,30 +388,36 @@ class PluginUpdateManager {
       try {
         await updatePlugin(pluginId, targetVersion: targetVersion);
       } catch (e) {
-        _updateEventController.add(PluginUpdateEvent(
-          type: UpdateEventType.scheduledUpdateFailed,
-          pluginId: pluginId,
-          error: e.toString(),
-        ));
+        _updateEventController.add(
+          PluginUpdateEvent(
+            type: UpdateEventType.scheduledUpdateFailed,
+            pluginId: pluginId,
+            error: e.toString(),
+          ),
+        );
       }
     });
 
-    _updateEventController.add(PluginUpdateEvent(
-      type: UpdateEventType.updateScheduled,
-      pluginId: pluginId,
-    ));
+    _updateEventController.add(
+      PluginUpdateEvent(
+        type: UpdateEventType.updateScheduled,
+        pluginId: pluginId,
+      ),
+    );
   }
 
   /// Cancel a scheduled update
   Future<void> cancelScheduledUpdate(String pluginId) async {
     _ensureInitialized();
-    
+
     // In a real implementation, this would cancel the persisted schedule
     // For now, we'll just emit an event
-    _updateEventController.add(PluginUpdateEvent(
-      type: UpdateEventType.scheduledUpdateCancelled,
-      pluginId: pluginId,
-    ));
+    _updateEventController.add(
+      PluginUpdateEvent(
+        type: UpdateEventType.scheduledUpdateCancelled,
+        pluginId: pluginId,
+      ),
+    );
   }
 
   /// Get update settings for a plugin
@@ -399,28 +434,32 @@ class PluginUpdateManager {
   /// Update settings for a plugin
   void setPluginUpdateSettings(String pluginId, PluginUpdateSettings settings) {
     // In a real implementation, this would persist the settings
-    _updateEventController.add(PluginUpdateEvent(
-      type: UpdateEventType.settingsChanged,
-      pluginId: pluginId,
-    ));
+    _updateEventController.add(
+      PluginUpdateEvent(
+        type: UpdateEventType.settingsChanged,
+        pluginId: pluginId,
+      ),
+    );
   }
 
   /// Private helper methods
 
   void _ensureInitialized() {
     if (!_isInitialized) {
-      throw StateError('PluginUpdateManager not initialized. Call initialize() first.');
+      throw StateError(
+        'PluginUpdateManager not initialized. Call initialize() first.',
+      );
     }
   }
 
   void _startPeriodicUpdateChecks() {
     _stopPeriodicUpdateChecks();
-    
+
     _updateCheckTimer = Timer.periodic(_updateCheckInterval, (timer) async {
       try {
         await checkForUpdates();
       } catch (e) {
-        print('Periodic update check failed: $e');
+        debugPrint('Periodic update check failed: $e');
       }
     });
   }
@@ -430,7 +469,10 @@ class PluginUpdateManager {
     _updateCheckTimer = null;
   }
 
-  Future<PluginUpdateInfo?> _checkPackageForUpdate(PluginPackage plugin, bool forceCheck) async {
+  Future<PluginUpdateInfo?> _checkPackageForUpdate(
+    PluginPackage plugin,
+    bool forceCheck,
+  ) async {
     try {
       // Get plugin info from registry
       final registryInfo = _registryService.getPluginInfo(plugin.id);
@@ -445,9 +487,14 @@ class PluginUpdateManager {
           currentVersion: plugin.version,
           latestVersion: registryInfo.version,
           updateSize: 0, // Would be calculated from package info
-          releaseNotes: 'Bug fixes and improvements', // Would come from registry
-          updateType: _determineUpdateType(plugin.version, registryInfo.version),
-          isSecurityUpdate: registryInfo.securityStatus.securityWarnings.isEmpty,
+          releaseNotes:
+              'Bug fixes and improvements', // Would come from registry
+          updateType: _determineUpdateType(
+            plugin.version,
+            registryInfo.version,
+          ),
+          isSecurityUpdate:
+              registryInfo.securityStatus.securityWarnings.isEmpty,
           releaseDate: registryInfo.lastUpdated,
           downloadUrl: registryInfo.downloadUrl,
         );
@@ -455,7 +502,9 @@ class PluginUpdateManager {
 
       return null;
     } catch (e) {
-      throw Exception('Failed to check for updates for plugin ${plugin.id}: $e');
+      throw Exception(
+        'Failed to check for updates for plugin ${plugin.id}: $e',
+      );
     }
   }
 
@@ -466,26 +515,32 @@ class PluginUpdateManager {
       progress: 0.1,
     );
 
-    _updateEventController.add(PluginUpdateEvent(
-      type: UpdateEventType.downloadStarted,
-      pluginId: pluginId,
-      progress: _updateProgress[pluginId],
-    ));
+    _updateEventController.add(
+      PluginUpdateEvent(
+        type: UpdateEventType.downloadStarted,
+        pluginId: pluginId,
+        progress: _updateProgress[pluginId],
+      ),
+    );
 
     try {
       // Download plugin package
       // Simulate plugin download
       // In a real implementation, this would use a distribution manager
-      
+
       // Simulate download progress
       for (double progress = 0.2; progress <= 0.8; progress += 0.1) {
-        _updateProgress[pluginId] = _updateProgress[pluginId]!.copyWith(progress: progress);
-        _updateEventController.add(PluginUpdateEvent(
-          type: UpdateEventType.downloadProgress,
-          pluginId: pluginId,
-          progress: _updateProgress[pluginId],
-        ));
-        
+        _updateProgress[pluginId] = _updateProgress[pluginId]!.copyWith(
+          progress: progress,
+        );
+        _updateEventController.add(
+          PluginUpdateEvent(
+            type: UpdateEventType.downloadProgress,
+            pluginId: pluginId,
+            progress: _updateProgress[pluginId],
+          ),
+        );
+
         // Simulate download time
         await Future.delayed(const Duration(milliseconds: 100));
       }
@@ -495,23 +550,26 @@ class PluginUpdateManager {
         progress: 0.8,
       );
 
-      _updateEventController.add(PluginUpdateEvent(
-        type: UpdateEventType.downloadCompleted,
-        pluginId: pluginId,
-        progress: _updateProgress[pluginId],
-      ));
-
+      _updateEventController.add(
+        PluginUpdateEvent(
+          type: UpdateEventType.downloadCompleted,
+          pluginId: pluginId,
+          progress: _updateProgress[pluginId],
+        ),
+      );
     } catch (e) {
       throw Exception('Failed to download plugin update: $e');
     }
   }
 
   Future<void> _installPluginUpdate(String pluginId, String version) async {
-    _updateEventController.add(PluginUpdateEvent(
-      type: UpdateEventType.installStarted,
-      pluginId: pluginId,
-      progress: _updateProgress[pluginId],
-    ));
+    _updateEventController.add(
+      PluginUpdateEvent(
+        type: UpdateEventType.installStarted,
+        pluginId: pluginId,
+        progress: _updateProgress[pluginId],
+      ),
+    );
 
     try {
       // Stop current plugin if running
@@ -521,26 +579,31 @@ class PluginUpdateManager {
 
       // Simulate installation progress
       for (double progress = 0.8; progress <= 0.95; progress += 0.05) {
-        _updateProgress[pluginId] = _updateProgress[pluginId]!.copyWith(progress: progress);
-        _updateEventController.add(PluginUpdateEvent(
-          type: UpdateEventType.installProgress,
-          pluginId: pluginId,
-          progress: _updateProgress[pluginId],
-        ));
-        
+        _updateProgress[pluginId] = _updateProgress[pluginId]!.copyWith(
+          progress: progress,
+        );
+        _updateEventController.add(
+          PluginUpdateEvent(
+            type: UpdateEventType.installProgress,
+            pluginId: pluginId,
+            progress: _updateProgress[pluginId],
+          ),
+        );
+
         // Simulate installation time
         await Future.delayed(const Duration(milliseconds: 200));
       }
 
       // Update plugin version in manager
       // In a real implementation, this would update the plugin files and metadata
-      
-      _updateEventController.add(PluginUpdateEvent(
-        type: UpdateEventType.installCompleted,
-        pluginId: pluginId,
-        progress: _updateProgress[pluginId],
-      ));
 
+      _updateEventController.add(
+        PluginUpdateEvent(
+          type: UpdateEventType.installCompleted,
+          pluginId: pluginId,
+          progress: _updateProgress[pluginId],
+        ),
+      );
     } catch (e) {
       throw Exception('Failed to install plugin update: $e');
     }
@@ -561,28 +624,34 @@ class PluginUpdateManager {
   int _compareVersions(String version1, String version2) {
     final v1Parts = version1.split('.').map(int.parse).toList();
     final v2Parts = version2.split('.').map(int.parse).toList();
-    
-    final maxLength = v1Parts.length > v2Parts.length ? v1Parts.length : v2Parts.length;
-    
+
+    final maxLength = v1Parts.length > v2Parts.length
+        ? v1Parts.length
+        : v2Parts.length;
+
     for (int i = 0; i < maxLength; i++) {
       final v1Part = i < v1Parts.length ? v1Parts[i] : 0;
       final v2Part = i < v2Parts.length ? v2Parts[i] : 0;
-      
+
       if (v1Part != v2Part) {
         return v1Part.compareTo(v2Part);
       }
     }
-    
+
     return 0;
   }
 
   UpdateType _determineUpdateType(String fromVersion, String toVersion) {
     final fromParts = fromVersion.split('.').map(int.parse).toList();
     final toParts = toVersion.split('.').map(int.parse).toList();
-    
-    if (fromParts.isNotEmpty && toParts.isNotEmpty && fromParts[0] != toParts[0]) {
+
+    if (fromParts.isNotEmpty &&
+        toParts.isNotEmpty &&
+        fromParts[0] != toParts[0]) {
       return UpdateType.major;
-    } else if (fromParts.length > 1 && toParts.length > 1 && fromParts[1] != toParts[1]) {
+    } else if (fromParts.length > 1 &&
+        toParts.length > 1 &&
+        fromParts[1] != toParts[1]) {
       return UpdateType.minor;
     } else {
       return UpdateType.patch;
@@ -706,7 +775,9 @@ class UpdateProgress {
       ),
       progress: (json['progress'] as num).toDouble(),
       startTime: DateTime.parse(json['startTime'] as String),
-      endTime: json['endTime'] != null ? DateTime.parse(json['endTime'] as String) : null,
+      endTime: json['endTime'] != null
+          ? DateTime.parse(json['endTime'] as String)
+          : null,
       error: json['error'] as String?,
     );
   }
@@ -749,10 +820,12 @@ class PluginUpdateEvent {
         orElse: () => UpdateEventType.updateAvailable,
       ),
       pluginId: json['pluginId'] as String,
-      updateInfo: json['updateInfo'] != null 
-          ? PluginUpdateInfo.fromJson(json['updateInfo'] as Map<String, dynamic>)
+      updateInfo: json['updateInfo'] != null
+          ? PluginUpdateInfo.fromJson(
+              json['updateInfo'] as Map<String, dynamic>,
+            )
           : null,
-      progress: json['progress'] != null 
+      progress: json['progress'] != null
           ? UpdateProgress.fromJson(json['progress'] as Map<String, dynamic>)
           : null,
       error: json['error'] as String?,
@@ -860,12 +933,7 @@ class PluginUpdateSettings {
 }
 
 /// Types of updates
-enum UpdateType {
-  major,
-  minor,
-  patch,
-  hotfix,
-}
+enum UpdateType { major, minor, patch, hotfix }
 
 /// Update status
 enum UpdateStatus {
@@ -901,9 +969,4 @@ enum UpdateEventType {
 }
 
 /// Update channels
-enum UpdateChannel {
-  stable,
-  beta,
-  alpha,
-  nightly,
-}
+enum UpdateChannel { stable, beta, alpha, nightly }

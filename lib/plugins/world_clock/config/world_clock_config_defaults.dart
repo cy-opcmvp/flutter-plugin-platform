@@ -72,7 +72,9 @@ class WorldClockConfigDefaults {
         continue;
       }
       if (entry.value is Map<String, dynamic>) {
-        result[entry.key] = _removeHelpFields(entry.value as Map<String, dynamic>);
+        result[entry.key] = _removeHelpFields(
+          entry.value as Map<String, dynamic>,
+        );
       } else if (entry.value is List) {
         continue;
       } else {

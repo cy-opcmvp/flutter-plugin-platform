@@ -6,52 +6,52 @@ import 'i_plugin.dart';
 abstract class IExternalPlugin extends IPlugin {
   /// Runtime type of the external plugin
   PluginRuntimeType get pluginRuntimeType;
-  
+
   /// Plugin package information
   PluginPackage get package;
-  
+
   /// Plugin manifest with external plugin specific metadata
   PluginManifest get manifest;
-  
+
   /// Launch the external plugin process
   Future<void> launch();
-  
+
   /// Terminate the external plugin process
   Future<void> terminate();
-  
+
   /// Check if the external plugin process is running
   bool get isRunning;
-  
+
   /// Get the process ID of the external plugin (if applicable)
   int? get processId;
-  
+
   /// Send a message to the external plugin via IPC
   Future<void> sendMessage(IPCMessage message);
-  
+
   /// Register a message handler for IPC communication
   void registerMessageHandler(String messageType, MessageHandler handler);
-  
+
   /// Get the IPC connection status
   bool get isConnected;
-  
+
   /// Establish IPC connection with the external plugin
   Future<void> establishConnection();
-  
+
   /// Close IPC connection with the external plugin
   Future<void> closeConnection();
-  
+
   /// Get security level for this external plugin
   SecurityLevel get securityLevel;
-  
+
   /// Get resource limits for this external plugin
   ResourceLimits get resourceLimits;
-  
+
   /// Get required permissions for this external plugin
   List<Permission> get requiredPermissions;
-  
+
   /// Validate plugin requirements against system capabilities
   Future<bool> validateRequirements();
-  
+
   /// Get platform-specific configuration
   Map<String, dynamic> getPlatformConfig(String platform);
 }
@@ -110,7 +110,7 @@ class IPCMessage {
           'code': errorCode,
           'message': errorMessage,
           'details': errorDetails ?? {},
-        }
+        },
       },
       priority: MessagePriority.high,
     );
@@ -147,9 +147,4 @@ class IPCMessage {
 }
 
 /// Message priority levels for IPC communication
-enum MessagePriority {
-  low,
-  normal,
-  high,
-  critical
-}
+enum MessagePriority { low, normal, high, critical }

@@ -8,7 +8,8 @@ import '../platform/screenshot_platform_interface.dart';
 import 'screenshot_capture_service.dart';
 
 // Export RegionSelectedEvent for convenience
-export '../platform/screenshot_platform_interface.dart' show RegionSelectedEvent;
+export '../platform/screenshot_platform_interface.dart'
+    show RegionSelectedEvent;
 
 /// 截图服务
 ///
@@ -26,7 +27,8 @@ class ScreenshotService {
   }
 
   /// 检查服务是否可用
-  bool get isAvailable => _platformService.isAvailable || _flutterCaptureService != null;
+  bool get isAvailable =>
+      _platformService.isAvailable || _flutterCaptureService != null;
 
   /// 捕获全屏截图
   Future<Uint8List?> captureFullScreen() async {
@@ -69,7 +71,9 @@ class ScreenshotService {
       return await _platformService.captureWindow(windowId);
     }
 
-    throw UnsupportedError('Window capture is not supported in Flutter implementation');
+    throw UnsupportedError(
+      'Window capture is not supported in Flutter implementation',
+    );
   }
 
   /// 获取所有可用窗口列表

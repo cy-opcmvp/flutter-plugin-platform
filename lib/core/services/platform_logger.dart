@@ -1,12 +1,8 @@
 import 'package:flutter/foundation.dart' show kDebugMode;
+import 'package:flutter/foundation.dart';
 
 /// Log levels for platform logging
-enum LogLevel {
-  debug,
-  info,
-  warning,
-  error,
-}
+enum LogLevel { debug, info, warning, error }
 
 /// Logger for platform-specific operations and feature degradation.
 /// Provides different logging strategies for debug vs production mode.
@@ -24,28 +20,16 @@ class PlatformLogger {
     if (kDebugMode) {
       // Detailed logging in debug mode
       if (found && value != null) {
-        _log(
-          LogLevel.debug,
-          'Environment variable accessed: $key = $value',
-        );
+        _log(LogLevel.debug, 'Environment variable accessed: $key = $value');
       } else if (found && value == null) {
-        _log(
-          LogLevel.debug,
-          'Environment variable accessed: $key = null',
-        );
+        _log(LogLevel.debug, 'Environment variable accessed: $key = null');
       } else {
-        _log(
-          LogLevel.debug,
-          'Environment variable not found: $key',
-        );
+        _log(LogLevel.debug, 'Environment variable not found: $key');
       }
     } else {
       // Minimal logging in production mode
       if (!found) {
-        _log(
-          LogLevel.info,
-          'Environment variable not available: $key',
-        );
+        _log(LogLevel.info, 'Environment variable not available: $key');
       }
     }
   }
@@ -55,22 +39,19 @@ class PlatformLogger {
   void logFeatureDegradation(String feature, String reason) {
     if (kDebugMode) {
       // Detailed logging in debug mode
-      _log(
-        LogLevel.warning,
-        'Feature degraded: $feature - Reason: $reason',
-      );
+      _log(LogLevel.warning, 'Feature degraded: $feature - Reason: $reason');
     } else {
       // Minimal logging in production mode
-      _log(
-        LogLevel.warning,
-        'Feature unavailable: $feature',
-      );
+      _log(LogLevel.warning, 'Feature unavailable: $feature');
     }
   }
 
   /// Log platform detection information.
   /// Useful for debugging platform-specific behavior.
-  void logPlatformDetection(String platform, Map<String, dynamic> capabilities) {
+  void logPlatformDetection(
+    String platform,
+    Map<String, dynamic> capabilities,
+  ) {
     if (kDebugMode) {
       final capabilitiesStr = capabilities.entries
           .map((e) => '${e.key}: ${e.value}')
@@ -93,10 +74,7 @@ class PlatformLogger {
       );
     } else {
       // Minimal error logging in production mode
-      _log(
-        LogLevel.error,
-        'Error in $context: ${error.toString()}',
-      );
+      _log(LogLevel.error, 'Error in $context: ${error.toString()}');
     }
   }
 
@@ -130,13 +108,13 @@ class PlatformLogger {
     switch (level) {
       case LogLevel.debug:
       case LogLevel.info:
-        print(logMessage);
+        debugPrint(logMessage);
         break;
       case LogLevel.warning:
-        print('⚠️ $logMessage');
+        debugPrint('⚠️ $logMessage');
         break;
       case LogLevel.error:
-        print('❌ $logMessage');
+        debugPrint('❌ $logMessage');
         break;
     }
   }

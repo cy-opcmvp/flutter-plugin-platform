@@ -122,7 +122,9 @@ class ScreenshotConfigDefaults {
         continue;
       }
       if (entry.value is Map<String, dynamic>) {
-        result[entry.key] = _removeHelpFields(entry.value as Map<String, dynamic>);
+        result[entry.key] = _removeHelpFields(
+          entry.value as Map<String, dynamic>,
+        );
       } else if (entry.value is List) {
         // 跳过示例列表
         continue;
@@ -217,7 +219,8 @@ class ScreenshotConfigDefaults {
 }''';
 
   /// 获取默认配置对象
-  static ScreenshotSettings get defaultSettings => ScreenshotSettings.defaultSettings();
+  static ScreenshotSettings get defaultSettings =>
+      ScreenshotSettings.defaultSettings();
 
   /// 创建带说明的示例 JSON
   static String createAnnotatedExample() {

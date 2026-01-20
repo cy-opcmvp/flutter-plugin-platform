@@ -30,29 +30,29 @@ class ExternalPluginDescriptor extends PluginDescriptor {
     if (!super.isValid()) {
       return false;
     }
-    
+
     // Package URL must be valid
     final uri = Uri.tryParse(packageUrl);
     if (packageUrl.isEmpty || uri == null || !uri.hasAbsolutePath) {
       return false;
     }
-    
+
     // Package hash must be non-empty
     if (packageHash.isEmpty) {
       return false;
     }
-    
+
     // Must have at least one distribution channel
     if (distributionChannels.isEmpty) {
       return false;
     }
-    
+
     return true;
   }
 
   factory ExternalPluginDescriptor.fromJson(Map<String, dynamic> json) {
     final baseDescriptor = PluginDescriptor.fromJson(json);
-    
+
     return ExternalPluginDescriptor(
       id: baseDescriptor.id,
       name: baseDescriptor.name,
@@ -120,22 +120,22 @@ class PluginPackage {
     if (id.isEmpty || name.isEmpty || version.isEmpty) {
       return false;
     }
-    
+
     // Must have at least one platform asset
     if (platformAssets.isEmpty) {
       return false;
     }
-    
+
     // Manifest must be valid
     if (!manifest.isValid()) {
       return false;
     }
-    
+
     // Signature must be valid
     if (!signature.isValid()) {
       return false;
     }
-    
+
     return true;
   }
 
@@ -160,16 +160,21 @@ class PluginPackage {
       name: json['name'] as String,
       version: json['version'] as String,
       type: PluginType.values.firstWhere((e) => e.name == json['type']),
-      platformAssets: (json['platformAssets'] as Map<String, dynamic>)
-          .map((key, value) => MapEntry(
-                key,
-                PlatformAsset.fromJson(value as Map<String, dynamic>),
-              )),
-      manifest: PluginManifest.fromJson(json['manifest'] as Map<String, dynamic>),
+      platformAssets: (json['platformAssets'] as Map<String, dynamic>).map(
+        (key, value) => MapEntry(
+          key,
+          PlatformAsset.fromJson(value as Map<String, dynamic>),
+        ),
+      ),
+      manifest: PluginManifest.fromJson(
+        json['manifest'] as Map<String, dynamic>,
+      ),
       dependencies: (json['dependencies'] as List<dynamic>)
           .map((e) => Dependency.fromJson(e as Map<String, dynamic>))
           .toList(),
-      signature: SecuritySignature.fromJson(json['signature'] as Map<String, dynamic>),
+      signature: SecuritySignature.fromJson(
+        json['signature'] as Map<String, dynamic>,
+      ),
     );
   }
 
@@ -179,7 +184,9 @@ class PluginPackage {
       'name': name,
       'version': version,
       'type': type.name,
-      'platformAssets': platformAssets.map((key, value) => MapEntry(key, value.toJson())),
+      'platformAssets': platformAssets.map(
+        (key, value) => MapEntry(key, value.toJson()),
+      ),
       'manifest': manifest.toJson(),
       'dependencies': dependencies.map((e) => e.toJson()).toList(),
       'signature': signature.toJson(),
@@ -221,17 +228,17 @@ class PluginManifest {
     if (id.isEmpty || name.isEmpty || version.isEmpty) {
       return false;
     }
-    
+
     // Must support at least one platform
     if (supportedPlatforms.isEmpty) {
       return false;
     }
-    
+
     // Security requirements must be valid
     if (!security.isValid()) {
       return false;
     }
-    
+
     return true;
   }
 
@@ -254,7 +261,8 @@ class PluginManifest {
       requiredPermissions: (json['requiredPermissions'] as List<dynamic>)
           .map((e) => Permission.values.firstWhere((p) => p.name == e))
           .toList(),
-      supportedPlatforms: (json['supportedPlatforms'] as List<dynamic>).cast<String>(),
+      supportedPlatforms: (json['supportedPlatforms'] as List<dynamic>)
+          .cast<String>(),
       configuration: json['configuration'] as Map<String, dynamic>,
       providedAPIs: (json['providedAPIs'] as List<dynamic>)
           .map((e) => APIEndpoint.fromJson(e as Map<String, dynamic>))
@@ -262,8 +270,12 @@ class PluginManifest {
       dependencies: (json['dependencies'] as List<dynamic>)
           .map((e) => Dependency.fromJson(e as Map<String, dynamic>))
           .toList(),
-      security: SecurityRequirements.fromJson(json['security'] as Map<String, dynamic>),
-      uiIntegration: UIIntegration.fromJson(json['uiIntegration'] as Map<String, dynamic>),
+      security: SecurityRequirements.fromJson(
+        json['security'] as Map<String, dynamic>,
+      ),
+      uiIntegration: UIIntegration.fromJson(
+        json['uiIntegration'] as Map<String, dynamic>,
+      ),
     );
   }
 
@@ -285,20 +297,14 @@ class PluginManifest {
 }
 
 /// Runtime type for external plugins
-enum PluginRuntimeType {
-  executable,
-  webApp,
-  container,
-  native,
-  script
-}
+enum PluginRuntimeType { executable, webApp, container, native, script }
 
 /// Security level for external plugins
 enum SecurityLevel {
-  minimal,    // Basic sandboxing
-  standard,   // Standard security controls
-  strict,     // Enhanced security with limited access
-  isolated    // Maximum isolation with minimal permissions
+  minimal, // Basic sandboxing
+  standard, // Standard security controls
+  strict, // Enhanced security with limited access
+  isolated, // Maximum isolation with minimal permissions
 }
 
 /// Platform requirements for external plugins
@@ -319,8 +325,10 @@ class PlatformRequirements {
     return PlatformRequirements(
       minVersion: json['minVersion'] as String,
       maxVersion: json['maxVersion'] as String?,
-      requiredFeatures: (json['requiredFeatures'] as List<dynamic>).cast<String>(),
-      systemRequirements: (json['systemRequirements'] as Map<String, dynamic>).cast<String, String>(),
+      requiredFeatures: (json['requiredFeatures'] as List<dynamic>)
+          .cast<String>(),
+      systemRequirements: (json['systemRequirements'] as Map<String, dynamic>)
+          .cast<String, String>(),
     );
   }
 
@@ -391,9 +399,7 @@ class SecuritySignature {
 
   /// Validate signature format
   bool isValid() {
-    return algorithm.isNotEmpty && 
-           signature.isNotEmpty && 
-           publicKey.isNotEmpty;
+    return algorithm.isNotEmpty && signature.isNotEmpty && publicKey.isNotEmpty;
   }
 
   factory SecuritySignature.fromJson(Map<String, dynamic> json) {
@@ -473,7 +479,8 @@ class APIEndpoint {
       name: json['name'] as String,
       method: json['method'] as String,
       path: json['path'] as String,
-      parameters: (json['parameters'] as Map<String, dynamic>).cast<String, String>(),
+      parameters: (json['parameters'] as Map<String, dynamic>)
+          .cast<String, String>(),
       description: json['description'] as String,
     );
   }
@@ -515,7 +522,9 @@ class SecurityRequirements {
       level: SecurityLevel.values.firstWhere((e) => e.name == json['level']),
       allowedDomains: (json['allowedDomains'] as List<dynamic>).cast<String>(),
       blockedDomains: (json['blockedDomains'] as List<dynamic>).cast<String>(),
-      resourceLimits: ResourceLimits.fromJson(json['resourceLimits'] as Map<String, dynamic>),
+      resourceLimits: ResourceLimits.fromJson(
+        json['resourceLimits'] as Map<String, dynamic>,
+      ),
       requiresSignature: json['requiresSignature'] as bool,
     );
   }
@@ -549,11 +558,11 @@ class ResourceLimits {
 
   /// Validate resource limits
   bool isValid() {
-    return maxMemoryMB > 0 && 
-           maxCpuPercent > 0 && 
-           maxNetworkKbps >= 0 && 
-           maxFileHandles > 0 &&
-           maxExecutionTime.inSeconds > 0;
+    return maxMemoryMB > 0 &&
+        maxCpuPercent > 0 &&
+        maxNetworkKbps >= 0 &&
+        maxFileHandles > 0 &&
+        maxExecutionTime.inSeconds > 0;
   }
 
   factory ResourceLimits.fromJson(Map<String, dynamic> json) {
@@ -562,7 +571,9 @@ class ResourceLimits {
       maxCpuPercent: (json['maxCpuPercent'] as num).toDouble(),
       maxNetworkKbps: json['maxNetworkKbps'] as int,
       maxFileHandles: json['maxFileHandles'] as int,
-      maxExecutionTime: Duration(seconds: json['maxExecutionTimeSeconds'] as int),
+      maxExecutionTime: Duration(
+        seconds: json['maxExecutionTimeSeconds'] as int,
+      ),
     );
   }
 
@@ -596,7 +607,8 @@ class UIIntegration {
       containerType: json['containerType'] as String,
       containerConfig: json['containerConfig'] as Map<String, dynamic>,
       supportsTheming: json['supportsTheming'] as bool,
-      supportedInputMethods: (json['supportedInputMethods'] as List<dynamic>).cast<String>(),
+      supportedInputMethods: (json['supportedInputMethods'] as List<dynamic>)
+          .cast<String>(),
     );
   }
 

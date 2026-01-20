@@ -5,37 +5,34 @@ import '../models/platform_models.dart';
 import 'network_manager.dart';
 
 /// Environment types for configuration
-enum Environment {
-  development,
-  staging,
-  production,
-  testing,
-}
+enum Environment { development, staging, production, testing }
 
 /// Backend configuration manager with environment-specific settings
 class BackendConfigManager {
   static const String _configPrefix = 'backend_config_';
   static const String _credentialsPrefix = 'credentials_';
   static const String _currentEnvKey = 'current_environment';
-  
+
   final IStorage _storage;
-  final StreamController<BackendConfig> _configController = StreamController<BackendConfig>.broadcast();
-  
+  final StreamController<BackendConfig> _configController =
+      StreamController<BackendConfig>.broadcast();
+
   Environment _currentEnvironment = Environment.development;
   BackendConfig? _currentConfig;
   final Map<Environment, BackendConfig> _environmentConfigs = {};
-  
-  BackendConfigManager({IStorage? storage}) : _storage = storage ?? SharedPreferencesStorage();
+
+  BackendConfigManager({IStorage? storage})
+    : _storage = storage ?? SharedPreferencesStorage();
 
   /// Get current environment
   Environment get currentEnvironment => _currentEnvironment;
-  
+
   /// Get current configuration
   BackendConfig? get currentConfig => _currentConfig;
-  
+
   /// Stream of configuration changes
   Stream<BackendConfig> get configStream => _configController.stream;
-  
+
   /// Initialize the configuration manager
   Future<void> initialize() async {
     await _loadCurrentEnvironment();
@@ -44,17 +41,20 @@ class BackendConfigManager {
   }
 
   /// Set configuration for a specific environment
-  Future<void> setEnvironmentConfig(Environment environment, BackendConfig config) async {
+  Future<void> setEnvironmentConfig(
+    Environment environment,
+    BackendConfig config,
+  ) async {
     if (!config.isValid()) {
       throw ArgumentError('Invalid backend configuration provided');
     }
-    
+
     _environmentConfigs[environment] = config;
-    
+
     // Persist configuration
     final configKey = '$_configPrefix${environment.name}';
     await _storage.setString(configKey, jsonEncode(config.toJson()));
-    
+
     // If this is the current environment, update current config
     if (environment == _currentEnvironment) {
       _currentConfig = config;
@@ -70,7 +70,7 @@ class BackendConfigManager {
   /// Switch to a different environment
   Future<void> setEnvironment(Environment environment) async {
     await _setEnvironment(environment);
-    
+
     // Persist current environment
     await _storage.setString(_currentEnvKey, environment.name);
   }
@@ -79,14 +79,17 @@ class BackendConfigManager {
   Future<void> _setEnvironment(Environment environment) async {
     _currentEnvironment = environment;
     _currentConfig = _environmentConfigs[environment];
-    
+
     if (_currentConfig != null) {
       _configController.add(_currentConfig!);
     }
   }
 
   /// Store secure credentials for authentication
-  Future<void> storeCredentials(String key, Map<String, String> credentials) async {
+  Future<void> storeCredentials(
+    String key,
+    Map<String, String> credentials,
+  ) async {
     // Encrypt credentials before storing
     final encryptedCredentials = _encryptCredentials(credentials);
     final credentialsKey = '$_credentialsPrefix$key';
@@ -97,13 +100,14 @@ class BackendConfigManager {
   Future<Map<String, String>?> getCredentials(String key) async {
     final credentialsKey = '$_credentialsPrefix$key';
     final credentialsJson = await _storage.getString(credentialsKey);
-    
+
     if (credentialsJson == null) {
       return null;
     }
-    
+
     try {
-      final encryptedCredentials = jsonDecode(credentialsJson) as Map<String, dynamic>;
+      final encryptedCredentials =
+          jsonDecode(credentialsJson) as Map<String, dynamic>;
       return _decryptCredentials(encryptedCredentials.cast<String, String>());
     } catch (e) {
       return null;
@@ -121,10 +125,10 @@ class BackendConfigManager {
     if (!newConfig.isValid()) {
       throw ArgumentError('Invalid backend configuration provided');
     }
-    
+
     // Update current environment configuration
     await setEnvironmentConfig(_currentEnvironment, newConfig);
-    
+
     // The configuration change will be automatically propagated through the stream
   }
 
@@ -168,7 +172,10 @@ class BackendConfigManager {
             'sync': '/sync',
             'health': '/health',
           },
-          auth: const AuthenticationConfig(type: 'bearer', credentials: {'token': 'staging-token'}),
+          auth: const AuthenticationConfig(
+            type: 'bearer',
+            credentials: {'token': 'staging-token'},
+          ),
           timeoutSeconds: 60,
         );
       case Environment.production:
@@ -183,7 +190,10 @@ class BackendConfigManager {
             'sync': '/sync',
             'health': '/health',
           },
-          auth: const AuthenticationConfig(type: 'bearer', credentials: {'token': 'production-token'}),
+          auth: const AuthenticationConfig(
+            type: 'bearer',
+            credentials: {'token': 'production-token'},
+          ),
           timeoutSeconds: 30,
         );
       case Environment.testing:
@@ -224,7 +234,7 @@ class BackendConfigManager {
     for (final environment in Environment.values) {
       final configKey = '$_configPrefix${environment.name}';
       final configJson = await _storage.getString(configKey);
-      
+
       if (configJson != null) {
         try {
           final configData = jsonDecode(configJson) as Map<String, dynamic>;
@@ -244,20 +254,22 @@ class BackendConfigManager {
   /// Simple encryption for credentials (in production, use proper encryption)
   Map<String, String> _encryptCredentials(Map<String, String> credentials) {
     final encrypted = <String, String>{};
-    
+
     for (final entry in credentials.entries) {
       // Simple base64 encoding (in production, use proper encryption like AES)
       final bytes = utf8.encode(entry.value);
       encrypted[entry.key] = base64Encode(bytes);
     }
-    
+
     return encrypted;
   }
 
   /// Simple decryption for credentials
-  Map<String, String> _decryptCredentials(Map<String, String> encryptedCredentials) {
+  Map<String, String> _decryptCredentials(
+    Map<String, String> encryptedCredentials,
+  ) {
     final decrypted = <String, String>{};
-    
+
     for (final entry in encryptedCredentials.entries) {
       try {
         // Simple base64 decoding
@@ -268,21 +280,28 @@ class BackendConfigManager {
         continue;
       }
     }
-    
+
     return decrypted;
   }
 
   /// Validate configuration interface
   bool validateConfigInterface(BackendConfig config) {
     // Check if configuration provides all required interfaces
-    final requiredEndpoints = ['auth', 'users', 'plugins', 'data', 'sync', 'health'];
-    
+    final requiredEndpoints = [
+      'auth',
+      'users',
+      'plugins',
+      'data',
+      'sync',
+      'health',
+    ];
+
     for (final endpoint in requiredEndpoints) {
       if (!config.endpoints.containsKey(endpoint)) {
         return false;
       }
     }
-    
+
     return config.isValid();
   }
 
@@ -292,11 +311,11 @@ class BackendConfigManager {
       'currentEnvironment': _currentEnvironment.name,
       'configurations': <String, dynamic>{},
     };
-    
+
     for (final entry in _environmentConfigs.entries) {
       export['configurations'][entry.key.name] = entry.value.toJson();
     }
-    
+
     return export;
   }
 
@@ -304,18 +323,21 @@ class BackendConfigManager {
   Future<void> importConfiguration(Map<String, dynamic> configData) async {
     try {
       // Import environment configurations
-      final configurations = configData['configurations'] as Map<String, dynamic>;
-      
+      final configurations =
+          configData['configurations'] as Map<String, dynamic>;
+
       for (final entry in configurations.entries) {
         final environment = Environment.values.firstWhere(
           (env) => env.name == entry.key,
           orElse: () => Environment.development,
         );
-        
-        final config = BackendConfig.fromJson(entry.value as Map<String, dynamic>);
+
+        final config = BackendConfig.fromJson(
+          entry.value as Map<String, dynamic>,
+        );
         await setEnvironmentConfig(environment, config);
       }
-      
+
       // Set current environment
       final currentEnvName = configData['currentEnvironment'] as String?;
       if (currentEnvName != null) {

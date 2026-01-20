@@ -10,7 +10,8 @@ import '../models/plugin_models.dart';
 
 /// Concrete implementation of platform services
 class PlatformServices implements IPlatformServices {
-  final StreamController<PlatformEvent> _eventController = StreamController<PlatformEvent>.broadcast();
+  final StreamController<PlatformEvent> _eventController =
+      StreamController<PlatformEvent>.broadcast();
   final Map<Permission, bool> _grantedPermissions = {};
   late final PlatformInfo _platformInfo;
 
@@ -81,14 +82,13 @@ class PlatformServices implements IPlatformServices {
         // In a real implementation, this would use platform-specific notification APIs
         // For now, we'll simulate the notification
         if (kDebugMode) {
-          print('Notification: $message');
+          debugPrint('Notification: $message');
         }
-        
+
         // Emit notification event
-        _eventController.add(NotificationEvent(
-          message: message,
-          timestamp: DateTime.now(),
-        ));
+        _eventController.add(
+          NotificationEvent(message: message, timestamp: DateTime.now()),
+        );
       } else {
         throw PlatformException(
           code: 'NOTIFICATIONS_NOT_SUPPORTED',
@@ -108,7 +108,7 @@ class PlatformServices implements IPlatformServices {
     try {
       // Simulate permission request process
       bool granted = false;
-      
+
       switch (permission) {
         case Permission.notifications:
           granted = _platformInfo.capabilities['notifications'] == true;
@@ -178,11 +178,13 @@ class PlatformServices implements IPlatformServices {
       _grantedPermissions[permission] = granted;
 
       // Emit permission event
-      _eventController.add(PermissionEvent(
-        permission: permission,
-        granted: granted,
-        timestamp: DateTime.now(),
-      ));
+      _eventController.add(
+        PermissionEvent(
+          permission: permission,
+          granted: granted,
+          timestamp: DateTime.now(),
+        ),
+      );
 
       if (!granted) {
         throw PlatformException(
@@ -211,7 +213,8 @@ class PlatformServices implements IPlatformServices {
     try {
       // Validate URL
       final uri = Uri.tryParse(url);
-      if (uri == null || (!uri.hasScheme || (uri.scheme != 'http' && uri.scheme != 'https'))) {
+      if (uri == null ||
+          (!uri.hasScheme || (uri.scheme != 'http' && uri.scheme != 'https'))) {
         throw PlatformException(
           code: 'INVALID_URL',
           message: 'Invalid URL format: $url',
@@ -221,14 +224,11 @@ class PlatformServices implements IPlatformServices {
       // In a real implementation, this would use url_launcher or similar
       // For now, we'll simulate opening the URL
       if (kDebugMode) {
-        print('Opening URL: $url');
+        debugPrint('Opening URL: $url');
       }
 
       // Emit URL opened event
-      _eventController.add(UrlOpenedEvent(
-        url: url,
-        timestamp: DateTime.now(),
-      ));
+      _eventController.add(UrlOpenedEvent(url: url, timestamp: DateTime.now()));
     } catch (e) {
       if (e is PlatformException) {
         rethrow;
@@ -247,19 +247,26 @@ class PlatformServices implements IPlatformServices {
 
   /// Simulate network connectivity change
   void simulateNetworkChange(bool isConnected) {
-    _eventController.add(NetworkConnectivityEvent(
-      isConnected: isConnected,
-      timestamp: DateTime.now(),
-    ));
+    _eventController.add(
+      NetworkConnectivityEvent(
+        isConnected: isConnected,
+        timestamp: DateTime.now(),
+      ),
+    );
   }
 
   /// Simulate operation mode change
-  void simulateOperationModeChange(OperationMode oldMode, OperationMode newMode) {
-    _eventController.add(OperationModeChangedEvent(
-      oldMode: oldMode,
-      newMode: newMode,
-      timestamp: DateTime.now(),
-    ));
+  void simulateOperationModeChange(
+    OperationMode oldMode,
+    OperationMode newMode,
+  ) {
+    _eventController.add(
+      OperationModeChangedEvent(
+        oldMode: oldMode,
+        newMode: newMode,
+        timestamp: DateTime.now(),
+      ),
+    );
   }
 
   /// Grant a permission (for testing purposes)
@@ -290,11 +297,11 @@ class EnhancedPluginContext extends PluginContext {
     required INetworkAccess networkAccess,
     required Map<String, dynamic> configuration,
   }) : super(
-    platformServices: platformServices,
-    dataStorage: dataStorage,
-    networkAccess: networkAccess,
-    configuration: configuration,
-  );
+         platformServices: platformServices,
+         dataStorage: dataStorage,
+         networkAccess: networkAccess,
+         configuration: configuration,
+       );
 
   /// Store plugin-specific data
   void setPluginData(String key, dynamic value) {
@@ -320,7 +327,8 @@ class EnhancedPluginContext extends PluginContext {
 /// Plugin communication service for inter-plugin messaging
 class PluginCommunicationService {
   final Map<String, StreamController<PluginMessage>> _pluginChannels = {};
-  final StreamController<PluginMessage> _broadcastController = StreamController<PluginMessage>.broadcast();
+  final StreamController<PluginMessage> _broadcastController =
+      StreamController<PluginMessage>.broadcast();
 
   /// Register a plugin for communication
   void registerPlugin(String pluginId) {
@@ -336,7 +344,11 @@ class PluginCommunicationService {
   }
 
   /// Send a message to a specific plugin
-  void sendMessage(String fromPluginId, String toPluginId, Map<String, dynamic> data) {
+  void sendMessage(
+    String fromPluginId,
+    String toPluginId,
+    Map<String, dynamic> data,
+  ) {
     final message = PluginMessage(
       fromPluginId: fromPluginId,
       toPluginId: toPluginId,
