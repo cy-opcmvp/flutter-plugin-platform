@@ -5,6 +5,101 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2026-01-20
+
+### Added - 开发规范体系完善
+- 📋 **开发规范系统** - 建立完整的编码规范体系
+  - 新增 CODE_STYLE_RULES.md（代码风格规范）
+    * 基于 Effective Dart 官方指南
+    * 命名、格式化、注释、代码组织规范
+    * UI 代码规范和最佳实践
+  - 新增 TESTING_RULES.md（测试规范）
+    * 测试文件组织和命名规范
+    * AAA 测试模式（Arrange-Act-Assert）
+    * Widget 测试和 Mock 使用规范
+    * 测试覆盖率 ≥80% 要求
+  - 新增 GIT_COMMIT_RULES.md（Git 提交规范）
+    * 约定式提交格式
+    * 10 种提交类型和范围定义
+    * 分支策略和 PR 规范
+  - 新增 ERROR_HANDLING_RULES.md（错误处理规范）
+    * 异常类型使用和自定义异常
+    * 输入验证和异步错误处理
+    * 用户错误提示和日志规范
+  - 新增 DOCUMENTATION_NAMING_RULES.md（文档命名规范）
+    * 定义三级命名标准（kebab-case、UPPERCASE_CASE、snake_case）
+  - 新增 PLUGIN_CONFIG_SPEC.md（插件配置规范）
+    * 强制的配置文件结构
+    * 配置功能检查清单
+  - 新增 PLUGIN_SETTINGS_SCREEN_RULES.md（插件配置页面开发规范）
+    * 统一的架构模式
+    * 实时保存原则和 UI 组件规范
+
+### Added - 文档整理优化
+- 📚 **文档审计和清理**
+  - 删除 5 个过时文档（CHANGELOG_NOTIFICATION_FIX.md、NOTIFICATION_FIX_SUMMARY.md 等）
+  - 归档 9 个历史文档到 docs/archive/
+  - 创建文档审计报告
+- 📝 **文档命名标准化**
+  - 重命名 9 个文档遵循 kebab-case 规范
+  - 统一文档命名风格
+  - 更新所有交叉引用
+- 📖 **文档索引更新**
+  - 更新 MASTER_INDEX.md
+  - 添加 archive 部分
+  - 更新文档统计
+
+### Added - 配置功能增强
+- 🔧 **插件配置系统**
+  - 添加插件配置基类 BasePluginSettings
+  - 实现计算器插件配置系统
+  - 实现世界时钟插件配置系统
+  - 完善截图插件配置文档
+  - 新增配置功能审计报告
+- 💾 **配置持久化**
+  - 优化插件管理器，支持配置持久化
+  - 更新各插件支持配置功能
+  - 配置自动保存和加载
+
+### Changed
+- 🌍 **国际化完善**
+  - 新增配置相关翻译 100+ 条
+  - 完善配置界面翻译
+  - 统一使用国际化文本
+
+### Technical Details
+- 📁 新增文件：
+  - `.claude/rules/CODE_STYLE_RULES.md` - 代码风格规范
+  - `.claude/rules/TESTING_RULES.md` - 测试规范
+  - `.claude/rules/GIT_COMMIT_RULES.md` - Git 提交规范
+  - `.claude/rules/ERROR_HANDLING_RULES.md` - 错误处理规范
+  - `.claude/rules/DOCUMENTATION_NAMING_RULES.md` - 文档命名规范
+  - `.claude/rules/PLUGIN_CONFIG_SPEC.md` - 插件配置规范
+  - `.claude/rules/PLUGIN_SETTINGS_SCREEN_RULES.md` - 插件配置页面开发规范
+  - `lib/core/models/base_plugin_settings.dart` - 配置基类
+  - `lib/plugins/calculator/config/` - 计算器配置文件
+  - `lib/plugins/world_clock/config/` - 世界时钟配置文件
+  - `docs/reports/CONFIG_FEATURE_AUDIT.md` - 配置功能审计
+  - `docs/reports/CONFIG_IMPLEMENTATION_PROGRESS.md` - 配置实施进度
+- 📝 修改文件：
+  - `.claude/rules/README.md` - 规范索引更新
+  - `lib/core/interfaces/i_plugin_manager.dart` - 支持配置持久化
+  - `lib/core/services/plugin_manager.dart` - 配置管理优化
+  - 各插件配置系统实现
+  - 国际化文件更新
+
+### Developer Experience
+- ✨ **规范体系完整**
+  - 从 8 个规范文档扩展到 11 个
+  - 覆盖开发全流程：代码、测试、提交、错误处理
+  - 总计约 5,500+ 行规范文档
+- 📖 **文档优化**
+  - 文档数量从 110+ 优化到 95+
+  - 统一命名标准
+  - 清晰的归档体系
+
+---
+
 ## [0.4.0] - 2026-01-19
 
 ### Added - 配置管理系统与界面优化
