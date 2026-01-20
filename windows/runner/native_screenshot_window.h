@@ -1,4 +1,4 @@
-﻿#ifndef RUNNER_NATIVE_SCREENSHOT_WINDOW_H_
+#ifndef RUNNER_NATIVE_SCREENSHOT_WINDOW_H_
 #define RUNNER_NATIVE_SCREENSHOT_WINDOW_H_
 
 // 定义 NOMINMAX 以避免 Windows 宏与 std::min/max 冲突
@@ -33,9 +33,11 @@ private:
     int screenHeight_;
 
     static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
-    LRESULT HandleMessage(UINT msg, WPARAM wParam, LPARAM lParam);
-    void DrawSelection(HDC hdc);
-    bool CaptureDesktopBackground();
+
+    // Helper methods
+    void CaptureDesktopBackground();
+    void DrawSelectionBox(HDC hdc, int x, int y, int width, int height);
+    void DrawMask(HDC hdc, int x, int y, int width, int height);
 };
 
-#endif
+#endif  // RUNNER_NATIVE_SCREENSHOT_WINDOW_H_
