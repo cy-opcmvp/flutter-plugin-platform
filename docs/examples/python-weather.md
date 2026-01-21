@@ -1,44 +1,44 @@
-# Weather Plugin (Python)
+# 天气插件 (Python)
 
-A weather information plugin demonstrating Plugin SDK usage with Python.
+一个演示使用 Python 的插件 SDK 用法的天气信息插件。
 
-## Features
+## 功能
 
-- Current weather conditions
-- 5-day weather forecast
-- Location-based weather data
-- Weather alerts and notifications
-- Configurable update intervals
-- Multiple location support
+- 当前天气状况
+- 5天天气预报
+- 基于位置的天气数据
+- 天气警报和通知
+- 可配置的更新间隔
+- 多位置支持
 
-## Getting Started
+## 快速开始
 
-### Prerequisites
+### 前提条件
 
 - Python 3.7+
-- Plugin SDK for Python
-- Internet connection for weather data
+- Python 插件 SDK
+- 获取天气数据的互联网连接
 
-### Installation
+### 安装
 
-1. Clone or download this example
-2. Install dependencies:
+1. 克隆或下载此示例
+2. 安装依赖：
    ```bash
    pip install -r requirements.txt
    ```
-3. Configure API key in `config.json`
-4. Build the plugin:
+3. 在 `config.json` 中配置 API 密钥
+4. 构建插件：
    ```bash
    dart tools/plugin_cli.dart build
    ```
-5. Package for distribution:
+5. 打包以分发：
    ```bash
    dart tools/plugin_cli.dart package --output weather.pkg
    ```
 
-### Configuration
+### 配置
 
-Create a `config.json` file with your weather API configuration:
+创建一个包含天气 API 配置的 `config.json` 文件：
 
 ```json
 {
@@ -49,60 +49,60 @@ Create a `config.json` file with your weather API configuration:
 }
 ```
 
-### Testing
+### 测试
 
-Test the plugin locally:
+本地测试插件：
 
 ```bash
 dart tools/plugin_cli.dart test --plugin weather.pkg
 ```
 
-## Code Structure
+## 代码结构
 
 ```
 python_weather/
-├── main.py                   # Main entry point
-├── weather_service.py        # Weather API integration
-├── weather_ui.py            # User interface (if applicable)
-├── config.json              # Configuration file
-├── requirements.txt         # Python dependencies
-├── plugin_manifest.json     # Plugin configuration
-└── README.md               # This file
+├── main.py                   # 主入口点
+├── weather_service.py        # Weather API 集成
+├── weather_ui.py            # 用户界面（如果适用）
+├── config.json              # 配置文件
+├── requirements.txt         # Python 依赖
+├── plugin_manifest.json     # 插件配置
+└── README.md               # 本文件
 ```
 
-## Key SDK Features Demonstrated
+## 演示的关键 SDK 功能
 
-1. **Async Plugin Architecture**: Using asyncio for non-blocking operations
-2. **API Integration**: Fetching data from external weather APIs
-3. **Configuration Management**: Loading and saving plugin settings
-4. **Event Handling**: Responding to location changes and user requests
-5. **Scheduled Tasks**: Periodic weather updates
-6. **Error Handling**: Robust error handling for network issues
-7. **Logging**: Comprehensive logging for debugging
+1. **异步插件架构**: 使用 asyncio 进行非阻塞操作
+2. **API 集成**: 从外部天气 API 获取数据
+3. **配置管理**: 加载和保存插件设置
+4. **事件处理**: 响应位置更改和用户请求
+5. **计划任务**: 定期天气更新
+6. **错误处理**: 对网络问题的强大错误处理
+7. **日志记录**: 用于调试的综合日志记录
 
-## Usage
+## 使用方法
 
-Once installed in the Flutter Plugin Platform:
+安装到 Flutter 插件平台后：
 
-1. Configure your preferred locations
-2. Set update intervals and units
-3. View current weather and forecasts
-4. Receive weather alerts and notifications
+1. 配置您的首选位置
+2. 设置更新间隔和单位
+3. 查看当前天气和预报
+4. 接收天气警报和通知
 
-## API Integration
+## API 集成
 
-The plugin demonstrates integration with:
+插件演示了与以下内容的集成：
 
-- Weather API services (OpenWeatherMap, etc.)
-- Host application APIs for notifications and preferences
-- Location services for automatic location detection
+- 天气 API 服务（OpenWeatherMap 等）
+- 用于通知和首选项的主机应用程序 API
+- 用于自动位置检测的位置服务
 
-## Development Notes
+## 开发说明
 
-This example showcases best practices for Python-based external plugins:
+此示例展示了基于 Python 的外部插件的最佳实践：
 
-- Async/await patterns for non-blocking operations
-- Proper exception handling for network operations
-- Configuration file management
-- Logging and debugging support
-- Clean separation of concerns (API, UI, logic)
+- 用于非阻塞操作的 async/await 模式
+- 网络操作的适当异常处理
+- 配置文件管理
+- 日志记录和调试支持
+- 清晰的关注点分离（API、UI、逻辑）

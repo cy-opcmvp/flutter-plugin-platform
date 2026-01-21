@@ -1,84 +1,84 @@
-# Example Plugins
+# 示例插件
 
-This directory contains example plugins that demonstrate how to implement tools and games for the Plugin Platform.
+本目录包含演示如何为插件平台实现工具和游戏的示例插件。
 
-## Available Example Plugins
+## 可用的示例插件
 
-### 1. Calculator Plugin (`com.example.calculator`)
-- **Type**: Tool
-- **Description**: A simple calculator for basic arithmetic operations
-- **Features**:
-  - Basic arithmetic operations (+, -, ×, ÷)
-  - Percentage calculations
-  - Sign toggle
-  - Clear function
-  - State persistence across sessions
-- **Permissions**: Notifications
-- **Location**: `lib/plugins/calculator/`
+### 1. 计算器插件 (`com.example.calculator`)
+- **类型**: 工具
+- **描述**: 一个用于基本算术运算的简单计算器
+- **功能**:
+  - 基本算术运算 (+, -, ×, ÷)
+  - 百分比计算
+  - 符号切换
+  - 清除功能
+  - 跨会话的状态持久化
+- **权限**: 通知
+- **位置**: `lib/plugins/calculator/`
 
-### 2. Sliding Puzzle Game (`com.example.puzzle_game`)
-- **Type**: Game
-- **Description**: A classic sliding puzzle game with numbered tiles
-- **Features**:
-  - 3x3 sliding puzzle
-  - Move counter
-  - Timer
-  - Game state persistence
-  - Shuffle and new game functions
-  - Win detection and celebration
-- **Permissions**: Notifications, Storage
-- **Location**: `lib/plugins/puzzle_game/`
+### 2. 滑动拼图游戏 (`com.example.puzzle_game`)
+- **类型**: 游戏
+- **描述**: 一个经典的有数字方块滑动拼图游戏
+- **功能**:
+  - 3x3 滑动拼图
+  - 移动计数器
+  - 计时器
+  - 游戏状态持久化
+  - 洗牌和新游戏功能
+  - 胜利检测和庆祝动画
+- **权限**: 通知、存储
+- **位置**: `lib/plugins/puzzle_game/`
 
-## Plugin Structure
+## 插件结构
 
-Each plugin follows this structure:
+每个插件遵循以下结构：
 ```
 plugin_name/
-├── plugin_name_plugin.dart          # Main plugin implementation
-├── plugin_name_plugin_factory.dart  # Factory for creating plugin instances
-└── plugin_descriptor.json           # Plugin metadata and configuration
+├── plugin_name_plugin.dart          # 主插件实现
+├── plugin_name_plugin_factory.dart  # 创建插件实例的工厂
+└── plugin_descriptor.json           # 插件元数据和配置
 ```
 
-## Plugin Implementation Guidelines
+## 插件实现指南
 
-### 1. Plugin Interface Implementation
-All plugins must implement the `IPlugin` interface:
-- `id`: Unique identifier (reverse domain notation)
-- `name`: Display name
-- `version`: Semantic version
-- `type`: Either `PluginType.tool` or `PluginType.game`
-- `initialize()`: Setup plugin with context
-- `dispose()`: Cleanup resources
-- `buildUI()`: Create Flutter widget
-- `onStateChanged()`: Handle state transitions
-- `getState()`: Return current state data
+### 1. 插件接口实现
+所有插件必须实现 `IPlugin` 接口：
+- `id`: 唯一标识符（反向域命名）
+- `name`: 显示名称
+- `version`: 语义版本
+- `type`: `PluginType.tool` 或 `PluginType.game`
+- `initialize()`: 使用上下文设置插件
+- `dispose()`: 清理资源
+- `buildUI()`: 创建 Flutter widget
+- `onStateChanged()`: 处理状态转换
+- `getState()`: 返回当前状态数据
 
-### 2. State Management
-- Use `PluginContext.dataStorage` to persist state
-- Handle state changes in `onStateChanged()`
-- Save critical state before disposal
-- Restore state during initialization
+### 2. 状态管理
+- 使用 `PluginContext.dataStorage` 持久化状态
+- 在 `onStateChanged()` 中处理状态变化
+- 在销毁前保存关键状态
+- 在初始化期间恢复状态
 
-### 3. Platform Services Usage
-- Use `PluginContext.platformServices` for:
-  - Showing notifications
-  - Requesting permissions
-  - Opening external URLs
-  - Listening to platform events
+### 3. 平台服务使用
+- 使用 `PluginContext.platformServices` 进行：
+  - 显示通知
+  - 请求权限
+  - 打开外部 URL
+  - 监听平台事件
 
-### 4. Resource Management
-- Properly dispose of resources in `dispose()`
-- Handle plugin isolation and sandboxing
-- Respect permission boundaries
-- Manage memory and CPU usage efficiently
+### 4. 资源管理
+- 在 `dispose()` 中正确释放资源
+- 处理插件隔离和沙箱
+- 尊重权限边界
+- 高效管理内存和 CPU 使用
 
-### 5. Error Handling
-- Handle errors gracefully without crashing
-- Provide user-friendly error messages
-- Maintain plugin isolation (errors shouldn't affect other plugins)
-- Reset to safe state on error
+### 5. 错误处理
+- 优雅地处理错误而不崩溃
+- 提供用户友好的错误消息
+- 维护插件隔离（错误不应影响其他插件）
+- 出错时重置到安全状态
 
-## Plugin Descriptor Format
+## 插件描述符格式
 
 ```json
 {
@@ -100,44 +100,44 @@ All plugins must implement the `IPlugin` interface:
 }
 ```
 
-## Using Example Plugins
+## 使用示例插件
 
-### In Plugin Manager
+### 在插件管理器中
 ```dart
 import 'package:flutter_app/plugins/plugin_registry.dart';
 
-// Get all example plugin descriptors
+// 获取所有示例插件描述符
 final descriptors = ExamplePluginRegistry.getAllDescriptors();
 
-// Create a specific plugin instance
+// 创建特定插件实例
 final calculator = ExamplePluginRegistry.createPlugin('com.example.calculator');
 
-// Get plugin descriptor
+// 获取插件描述符
 final descriptor = ExamplePluginRegistry.getDescriptor('com.example.calculator');
 ```
 
-### Testing Plugins
-These example plugins can be used to:
-1. Test plugin loading and unloading
-2. Verify plugin isolation and sandboxing
-3. Test state persistence and recovery
-4. Validate permission system
-5. Test UI integration and navigation
-6. Verify error handling and recovery
+### 测试插件
+这些示例插件可用于：
+1. 测试插件加载和卸载
+2. 验证插件隔离和沙箱
+3. 测试状态持久化和恢复
+4. 验证权限系统
+5. 测试 UI 集成和导航
+6. 验证错误处理和恢复
 
-## Development Notes
+## 开发说明
 
-### Calculator Plugin
-- Demonstrates tool plugin implementation
-- Shows state persistence for calculator operations
-- Uses platform services for notifications
-- Implements proper resource cleanup
+### 计算器插件
+- 演示工具插件实现
+- 展示计算器操作的状态持久化
+- 使用平台服务进行通知
+- 实现正确的资源清理
 
-### Puzzle Game Plugin
-- Demonstrates game plugin implementation
-- Shows complex state management (board, moves, timer)
-- Implements game-specific features (shuffle, win detection)
-- Demonstrates proper game state persistence
-- Shows resource management for games
+### 拼图游戏插件
+- 演示游戏插件实现
+- 展示复杂的状态管理（棋盘、移动、计时器）
+- 实现游戏特定功能（洗牌、胜利检测）
+- 演示正确的游戏状态持久化
+- 展示游戏的资源管理
 
-Both plugins serve as reference implementations for developers creating their own plugins for the platform.
+这两个插件都为开发者创建自己的插件提供了参考实现。

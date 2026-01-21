@@ -1,312 +1,312 @@
-# Web Platform Compatibility Guide
+# Web 平台兼容性指南
 
-## Overview
+## 概述
 
-This guide documents the web platform compatibility features implemented in the Flutter plugin platform. The system now supports both web and native platforms through a platform abstraction layer that handles environment variables and desktop-specific features gracefully.
+本指南记录了 Flutter 插件平台中实现的 Web 平台兼容性功能。系统现在通过平台抽象层支持 Web 和原生平台，优雅地处理环境变量和桌面特定功能。
 
-## Platform Feature Matrix
+## 平台功能矩阵
 
-### Core Features
+### 核心功能
 
-| Feature | Web Platform | Native Platforms | Notes |
-|---------|-------------|------------------|-------|
-| Environment Variables | ❌ (Defaults) | ✅ (Full Access) | Web uses safe defaults |
-| File System Access | ❌ (Browser Storage) | ✅ (Full Access) | Web uses localStorage/sessionStorage |
-| Process Execution | ❌ (Disabled) | ✅ (Full Access) | Web cannot execute external processes |
-| Steam Integration | ❌ (Disabled) | ✅ (When Available) | Web skips Steam detection entirely |
-| Development Mode | ✅ (Limited) | ✅ (Full Detection) | Web uses alternative detection methods |
-| Plugin System | ✅ (Core Features) | ✅ (Full Features) | Web supports most plugin functionality |
+| 功能 | Web 平台 | 原生平台 | 说明 |
+|---------|---------|----------|------|
+| 环境变量 | ❌ (使用默认值) | ✅ (完全访问) | Web 使用安全的默认值 |
+| 文件系统访问 | ❌ (浏览器存储) | ✅ (完全访问) | Web 使用 localStorage/sessionStorage |
+| 进程执行 | ❌ (已禁用) | ✅ (完全访问) | Web 无法执行外部进程 |
+| Steam 集成 | ❌ (已禁用) | ✅ (可用时) | Web 完全跳过 Steam 检测 |
+| 开发模式 | ✅ (有限) | ✅ (完全检测) | Web 使用替代检测方法 |
+| 插件系统 | ✅ (核心功能) | ✅ (完整功能) | Web 支持大多数插件功能 |
 
-### Desktop Pet Features
+### Desktop Pet 功能
 
-| Feature | Web Platform | Windows | macOS | Linux | Mobile |
-|---------|-------------|---------|-------|-------|--------|
-| Desktop Pet Widget | ❌ | ✅ | ✅ | ✅ | ❌ |
-| Always On Top | ❌ | ✅ | ✅ | ✅ | ❌ |
-| System Tray | ❌ | ✅ | ✅ | ✅ | ❌ |
-| Window Management | ❌ | ✅ | ✅ | ✅ | ❌ |
-| Desktop Pet UI Controls | Hidden | Visible | Visible | Visible | Hidden |
+| 功能 | Web 平台 | Windows | macOS | Linux | 移动平台 |
+|---------|---------|---------|-------|-------|--------|
+| Desktop Pet 小组件 | ❌ | ✅ | ✅ | ✅ | ❌ |
+| 始终置顶 | ❌ | ✅ | ✅ | ✅ | ❌ |
+| 系统托盘 | ❌ | ✅ | ✅ | ✅ | ❌ |
+| 窗口管理 | ❌ | ✅ | ✅ | ✅ | ❌ |
+| Desktop Pet UI 控件 | 隐藏 | 可见 | 可见 | 可见 | 隐藏 |
 
-### Path Resolution
+### 路径解析
 
-| Path Type | Web Platform | Native Platforms |
-|-----------|-------------|------------------|
-| Home Directory | `/browser-home` | `$HOME` or equivalent |
-| Documents | `/browser-documents` | Platform-specific documents folder |
-| Temporary Files | `/browser-temp` | System temp directory |
-| Application Data | `/browser-appdata` | Platform-specific app data folder |
+| 路径类型 | Web 平台 | 原生平台 |
+|-----------|---------|----------|
+| 主目录 | `/browser-home` | `$HOME` 或等效路径 |
+| 文档目录 | `/browser-documents` | 平台特定的文档文件夹 |
+| 临时文件 | `/browser-temp` | 系统临时目录 |
+| 应用数据 | `/browser-appdata` | 平台特定的应用数据文件夹 |
 
-## Migration Guide
+## 迁移指南
 
-### For Developers Using Platform.environment
+### 对于使用 Platform.environment 的开发者
 
-If your code currently uses `Platform.environment` directly, follow these steps to migrate:
+如果您的代码当前直接使用 `Platform.environment`，请按照以下步骤进行迁移：
 
-#### Before (Problematic on Web)
+#### 之前（在 Web 上有问题）
 ```dart
 import 'dart:io';
 
-// This will throw on web platform
+// 这在 Web 平台上会抛出异常
 String? steamPath = Platform.environment['STEAM_PATH'];
 String home = Platform.environment['HOME'] ?? '/default';
 ```
 
-#### After (Web Compatible)
+#### 之后（Web 兼容）
 ```dart
 import 'package:your_app/core/services/platform_environment.dart';
 
-// This works on all platforms
+// 这在所有平台上都能工作
 String? steamPath = PlatformEnvironment.instance.getVariable('STEAM_PATH');
 String home = PlatformEnvironment.instance.getHomePath();
 ```
 
-### Step-by-Step Migration
+### 逐步迁移
 
-1. **Replace Direct Platform.environment Calls**
+1. **替换直接的 Platform.environment 调用**
    ```dart
-   // Old
+   // 旧方式
    Platform.environment['KEY']
-   
-   // New
+
+   // 新方式
    PlatformEnvironment.instance.getVariable('KEY')
    ```
 
-2. **Add Default Values**
+2. **添加默认值**
    ```dart
-   // Old
+   // 旧方式
    String value = Platform.environment['KEY'] ?? 'default';
-   
-   // New
+
+   // 新方式
    String value = PlatformEnvironment.instance.getVariable('KEY', defaultValue: 'default') ?? 'default';
    ```
 
-3. **Use Path Resolution Methods**
+3. **使用路径解析方法**
    ```dart
-   // Old
+   // 旧方式
    String home = Platform.environment['HOME'] ?? '/';
-   
-   // New
+
+   // 新方式
    String home = PlatformEnvironment.instance.getHomePath();
    ```
 
-4. **Check Platform Capabilities**
+4. **检查平台能力**
    ```dart
-   // Old
-   if (Platform.isWindows) { /* desktop logic */ }
-   
-   // New
+   // 旧方式
+   if (Platform.isWindows) { /* 桌面平台逻辑 */ }
+
+   // 新方式
    if (!PlatformEnvironment.instance.isWeb && Platform.isWindows) {
-     /* desktop logic */
+     /* 桌面平台逻辑 */
    }
    ```
 
-## Environment Variable Defaults
+## 环境变量默认值
 
-### Web Platform Defaults
+### Web 平台默认值
 
-When running on web platform, the following default values are used:
+在 Web 平台上运行时，使用以下默认值：
 
-| Environment Variable | Default Value | Purpose |
-|---------------------|---------------|---------|
-| `HOME` | `/browser-home` | User home directory |
-| `USERPROFILE` | `/browser-home` | Windows user profile |
-| `APPDATA` | `/browser-appdata` | Application data directory |
-| `LOCALAPPDATA` | `/browser-appdata` | Local application data |
-| `TEMP` | `/browser-temp` | Temporary files directory |
-| `TMP` | `/browser-temp` | Temporary files directory |
-| `PATH` | `/usr/bin:/bin` | Executable search path |
-| `STEAM_PATH` | `null` | Steam installation path |
-| `DEVELOPMENT_MODE` | `null` | Development mode indicator |
+| 环境变量 | 默认值 | 用途 |
+|---------|-------|------|
+| `HOME` | `/browser-home` | 用户主目录 |
+| `USERPROFILE` | `/browser-home` | Windows 用户配置文件 |
+| `APPDATA` | `/browser-appdata` | 应用程序数据目录 |
+| `LOCALAPPDATA` | `/browser-appdata` | 本地应用程序数据 |
+| `TEMP` | `/browser-temp` | 临时文件目录 |
+| `TMP` | `/browser-temp` | 临时文件目录 |
+| `PATH` | `/usr/bin:/bin` | 可执行文件搜索路径 |
+| `STEAM_PATH` | `null` | Steam 安装路径 |
+| `DEVELOPMENT_MODE` | `null` | 开发模式指示器 |
 
-### Native Platform Behavior
+### 原生平台行为
 
-On native platforms, actual environment variable values are returned. If a variable doesn't exist, the following fallbacks are used:
+在原生平台上，返回实际的环境变量值。如果变量不存在，使用以下回退值：
 
-| Platform | HOME Fallback | TEMP Fallback | APPDATA Fallback |
-|----------|---------------|---------------|------------------|
+| 平台 | HOME 回退值 | TEMP 回退值 | APPDATA 回退值 |
+|------|-----------|------------|---------------|
 | Windows | `C:\Users\Default` | `C:\Temp` | `C:\Users\Default\AppData` |
 | macOS | `/Users/Shared` | `/tmp` | `/Users/Shared/Library` |
 | Linux | `/home/user` | `/tmp` | `/home/user/.local/share` |
 
-## Desktop Pet Feature Documentation
+## Desktop Pet 功能文档
 
-### Platform Availability
+### 平台可用性
 
-Desktop pet functionality is only available on desktop platforms (Windows, macOS, Linux). The feature is completely disabled on web and mobile platforms.
+Desktop pet 功能仅在桌面平台（Windows、macOS、Linux）上可用。该功能在 Web 和移动平台上完全禁用。
 
-### Web Platform Behavior
+### Web 平台行为
 
-On web platform:
-- Desktop pet UI controls are hidden from the interface
-- Desktop pet manager initialization is skipped
-- All desktop pet API calls return safe fallback values
-- No errors are thrown when desktop pet features are accessed
+在 Web 平台上：
+- Desktop pet UI 控件从界面中隐藏
+- Desktop pet 管理器初始化被跳过
+- 所有 desktop pet API 调用返回安全的回退值
+- 访问 desktop pet 功能时不抛出错误
 
-### Implementation Details
+### 实现细节
 
 ```dart
-// Desktop pet availability check
+// Desktop pet 可用性检查
 bool isDesktopPetSupported() {
   return !kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux);
 }
 
-// Safe desktop pet initialization
+// 安全的 desktop pet 初始化
 class DesktopPetManager {
   static bool isSupported() {
     return !kIsWeb && _isDesktopPlatform();
   }
-  
+
   Future<void> initialize() async {
     if (!isSupported()) {
-      // Graceful no-op on unsupported platforms
+      // 在不支持的平台上优雅地无操作
       return;
     }
-    // Native initialization logic
+    // 原生初始化逻辑
   }
 }
 ```
 
-### UI Behavior by Platform
+### 按平台的 UI 行为
 
-#### Web Platform
-- Desktop pet button: Hidden
-- Desktop pet screen: Shows "Feature not available" message
-- Desktop pet widget: Returns empty container
-- Navigation: Gracefully handles unavailable routes
+#### Web 平台
+- Desktop pet 按钮：隐藏
+- Desktop pet 屏幕：显示"功能不可用"消息
+- Desktop pet 小组件：返回空容器
+- 导航：优雅地处理不可用的路由
 
-#### Desktop Platforms
-- Desktop pet button: Visible and functional
-- Desktop pet screen: Full functionality
-- Desktop pet widget: Complete feature set
-- Navigation: Full desktop pet navigation available
+#### 桌面平台
+- Desktop pet 按钮：可见且功能正常
+- Desktop pet 屏幕：完整功能
+- Desktop pet 小组件：完整功能集
+- 导航：完整的 desktop pet 导航可用
 
-#### Mobile Platforms
-- Desktop pet button: Hidden
-- Desktop pet functionality: Disabled (same as web)
+#### 移动平台
+- Desktop pet 按钮：隐藏
+- Desktop pet 功能：已禁用（与 Web 相同）
 
-## Development and Debugging
+## 开发和调试
 
-### Debug Mode Features
+### 调试模式功能
 
-When running in debug mode, additional logging is available:
+在调试模式下运行时，提供额外的日志记录：
 
 ```dart
-// Enable detailed platform logging
+// 启用详细的平台日志
 PlatformLogger.setLevel(LogLevel.debug);
 
-// Check platform capabilities
+// 检查平台能力
 PlatformCapabilities caps = PlatformEnvironment.instance.capabilities;
-print('Environment variables supported: ${caps.supportsEnvironmentVariables}');
-print('Desktop pet supported: ${caps.supportsDesktopPet}');
+print('支持环境变量: ${caps.supportsEnvironmentVariables}');
+print('支持 Desktop Pet: ${caps.supportsDesktopPet}');
 ```
 
-### Common Issues and Solutions
+### 常见问题和解决方案
 
-#### Issue: Application crashes on web with Platform.environment error
-**Solution**: Replace direct `Platform.environment` usage with `PlatformEnvironment.instance.getVariable()`
+#### 问题：应用程序在 Web 上因 Platform.environment 错误而崩溃
+**解决方案**：将直接的 `Platform.environment` 使用替换为 `PlatformEnvironment.instance.getVariable()`
 
-#### Issue: Desktop pet features not working on web
-**Solution**: This is expected behavior. Desktop pet features are disabled on web platform.
+#### 问题：Desktop pet 功能在 Web 上不工作
+**解决方案**：这是预期行为。Desktop pet 功能在 Web 平台上已禁用。
 
-#### Issue: File paths not working on web
-**Solution**: Use `PlatformEnvironment.instance.getHomePath()` and similar methods instead of environment variables.
+#### 问题：文件路径在 Web 上不工作
+**解决方案**：使用 `PlatformEnvironment.instance.getHomePath()` 和类似方法，而不是环境变量。
 
-#### Issue: Steam integration not detected on web
-**Solution**: Steam integration is intentionally disabled on web platform.
+#### 问题：在 Web 上未检测到 Steam 集成
+**解决方案**：Steam 集成在 Web 平台上故意禁用。
 
-### Testing Platform Compatibility
+### 测试平台兼容性
 
 ```dart
-// Test environment variable access
-test('environment variables work on all platforms', () {
+// 测试环境变量访问
+test('环境变量在所有平台上都能工作', () {
   String? value = PlatformEnvironment.instance.getVariable('HOME');
-  expect(value, isNotNull); // Should never be null due to fallbacks
+  expect(value, isNotNull); // 由于有回退值，永远不应该为 null
 });
 
-// Test desktop pet availability
-test('desktop pet availability matches platform', () {
+// 测试 desktop pet 可用性
+test('desktop pet 可用性与平台匹配', () {
   bool expected = !kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux);
   expect(DesktopPetManager.isSupported(), equals(expected));
 });
 ```
 
-## Best Practices
+## 最佳实践
 
-### 1. Always Use Platform Abstraction
+### 1. 始终使用平台抽象
 ```dart
-// Good
+// 好的做法
 String home = PlatformEnvironment.instance.getHomePath();
 
-// Bad
+// 坏的做法
 String home = Platform.environment['HOME'] ?? '/';
 ```
 
-### 2. Check Platform Capabilities
+### 2. 检查平台能力
 ```dart
-// Good
+// 好的做法
 if (PlatformEnvironment.instance.capabilities.supportsDesktopPet) {
-  // Desktop pet logic
+  // Desktop pet 逻辑
 }
 
-// Bad
+// 坏的做法
 if (Platform.isWindows) {
-  // This doesn't account for web platform
+  // 这不考虑 Web 平台
 }
 ```
 
-### 3. Provide Graceful Fallbacks
+### 3. 提供优雅的回退
 ```dart
-// Good
+// 好的做法
 Widget buildDesktopPetButton() {
   if (!DesktopPetManager.isSupported()) {
-    return SizedBox.shrink(); // Hidden on unsupported platforms
+    return SizedBox.shrink(); // 在不支持的平台上隐藏
   }
-  return ElevatedButton(/* desktop pet button */);
+  return ElevatedButton(/* desktop pet 按钮 */);
 }
 ```
 
-### 4. Use Appropriate Defaults
+### 4. 使用适当的默认值
 ```dart
-// Good
+// 好的做法
 String configPath = PlatformEnvironment.instance.getVariable(
   'CONFIG_PATH',
   defaultValue: '/default/config'
 );
 
-// Bad
-String configPath = Platform.environment['CONFIG_PATH']; // Crashes on web
+// 坏的做法
+String configPath = Platform.environment['CONFIG_PATH']; // 在 Web 上崩溃
 ```
 
-## Performance Considerations
+## 性能考虑
 
-- Environment variable lookups are cached to avoid repeated system calls
-- Platform detection uses compile-time constants where possible (`kIsWeb`)
-- Desktop pet initialization is lazy and only occurs when needed
-- Web platform avoids importing `dart:io` in desktop pet modules
+- 环境变量查找被缓存以避免重复的系统调用
+- 平台检测尽可能使用编译时常量（`kIsWeb`）
+- Desktop pet 初始化是延迟的，仅在需要时发生
+- Web 平台避免在 desktop pet 模块中导入 `dart:io`
 
-## Security Considerations
+## 安全考虑
 
-- Web platform cannot access actual environment variables (browser security)
-- Default values are safe and don't expose sensitive information
-- Desktop pet features require explicit user permission on desktop platforms
-- File system access is sandboxed appropriately for each platform
+- Web 平台无法访问实际的环境变量（浏览器安全）
+- 默认值是安全的，不暴露敏感信息
+- Desktop pet 功能在桌面平台上需要明确的用户权限
+- 文件系统访问在每个平台上都受到适当的沙箱保护
 
-## Future Enhancements
+## 未来增强
 
-Planned improvements for web platform compatibility:
+计划对 Web 平台兼容性的改进：
 
-1. **Enhanced Web Storage**: Better integration with browser storage APIs
-2. **Progressive Web App Features**: Support for PWA-specific capabilities
-3. **Web-Specific Plugins**: Plugins designed specifically for web platform
-4. **Improved Fallbacks**: More sophisticated fallback mechanisms for missing features
+1. **增强的 Web 存储**：更好地与浏览器存储 API 集成
+2. **渐进式 Web 应用功能**：支持 PWA 特定的功能
+3. **Web 特定插件**：专为 Web 平台设计的插件
+4. **改进的回退机制**：为缺失的功能提供更复杂的回退机制
 
-## Support and Troubleshooting
+## 支持和故障排除
 
-For issues related to web platform compatibility:
+有关 Web 平台兼容性的问题：
 
-1. Check the browser console for detailed error messages
-2. Verify that `kIsWeb` detection is working correctly
-3. Ensure no direct `dart:io` imports in web-compiled code
-4. Test platform-specific features on their target platforms
+1. 检查浏览器控制台以获取详细的错误消息
+2. 验证 `kIsWeb` 检测是否正常工作
+3. 确保 Web 编译代码中没有直接的 `dart:io` 导入
+4. 在目标平台上测试平台特定功能
 
-For additional support, refer to the main documentation or file an issue with platform-specific details.
+如需额外支持，请参考主文档或提交包含平台详细信息的问题。

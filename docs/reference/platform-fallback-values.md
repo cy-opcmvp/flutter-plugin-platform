@@ -1,91 +1,91 @@
-# Platform Fallback Values Reference
+# Platform Fallback Values 参考手册
 
-## Overview
+## 概述
 
-This document provides a comprehensive reference of all fallback values used by the `PlatformEnvironment` service when environment variables are unavailable or when running on platforms that don't support environment variable access (such as web browsers).
+本文档提供了 `PlatformEnvironment` 服务在环境变量不可用或在支持环境变量访问的平台（如 Web 浏览器）上运行时使用的所有回退值的综合参考。
 
-## Environment Variable Fallbacks
+## 环境变量回退值
 
-### System Paths
+### 系统路径
 
-#### Home Directory Variables
+#### 主目录变量
 
-| Variable | Web Platform | Windows Fallback | macOS Fallback | Linux Fallback |
-|----------|-------------|------------------|----------------|----------------|
+| 变量 | Web 平台 | Windows 回退值 | macOS 回退值 | Linux 回退值 |
+|------|---------|---------------|--------------|-------------|
 | `HOME` | `/browser-home` | `C:\Users\Default` | `/Users/Shared` | `/home/user` |
 | `USERPROFILE` | `/browser-home` | `C:\Users\Default` | `/Users/Shared` | `/home/user` |
 | `HOMEPATH` | `/browser-home` | `\Users\Default` | `/Users/Shared` | `/home/user` |
 
-#### Application Data Directories
+#### 应用数据目录
 
-| Variable | Web Platform | Windows Fallback | macOS Fallback | Linux Fallback |
-|----------|-------------|------------------|----------------|----------------|
+| 变量 | Web 平台 | Windows 回退值 | macOS 回退值 | Linux 回退值 |
+|------|---------|---------------|--------------|-------------|
 | `APPDATA` | `/browser-appdata` | `C:\Users\Default\AppData\Roaming` | `/Users/Shared/Library` | `/home/user/.local/share` |
 | `LOCALAPPDATA` | `/browser-appdata` | `C:\Users\Default\AppData\Local` | `/Users/Shared/Library` | `/home/user/.local/share` |
 | `XDG_DATA_HOME` | `/browser-appdata` | `C:\Users\Default\AppData\Local` | `/Users/Shared/Library` | `/home/user/.local/share` |
 | `XDG_CONFIG_HOME` | `/browser-config` | `C:\Users\Default\AppData\Roaming` | `/Users/Shared/Library/Preferences` | `/home/user/.config` |
 
-#### Temporary Directories
+#### 临时目录
 
-| Variable | Web Platform | Windows Fallback | macOS Fallback | Linux Fallback |
-|----------|-------------|------------------|----------------|----------------|
+| 变量 | Web 平台 | Windows 回退值 | macOS 回退值 | Linux 回退值 |
+|------|---------|---------------|--------------|-------------|
 | `TEMP` | `/browser-temp` | `C:\Temp` | `/tmp` | `/tmp` |
 | `TMP` | `/browser-temp` | `C:\Temp` | `/tmp` | `/tmp` |
 | `TMPDIR` | `/browser-temp` | `C:\Temp` | `/tmp` | `/tmp` |
 
-### System Configuration
+### 系统配置
 
-#### Path Variables
+#### 路径变量
 
-| Variable | Web Platform | Windows Fallback | macOS Fallback | Linux Fallback |
-|----------|-------------|------------------|----------------|----------------|
+| 变量 | Web 平台 | Windows 回退值 | macOS 回退值 | Linux 回退值 |
+|------|---------|---------------|--------------|-------------|
 | `PATH` | `/usr/bin:/bin` | `C:\Windows\System32;C:\Windows` | `/usr/bin:/bin:/usr/local/bin` | `/usr/bin:/bin:/usr/local/bin` |
 | `PATHEXT` | `.exe;.bat;.cmd` | `.COM;.EXE;.BAT;.CMD;.VBS;.JS` | N/A | N/A |
 
-#### User Information
+#### 用户信息
 
-| Variable | Web Platform | Windows Fallback | macOS Fallback | Linux Fallback |
-|----------|-------------|------------------|----------------|----------------|
+| 变量 | Web 平台 | Windows 回退值 | macOS 回退值 | Linux 回退值 |
+|------|---------|---------------|--------------|-------------|
 | `USER` | `browser-user` | `DefaultUser` | `SharedUser` | `user` |
 | `USERNAME` | `browser-user` | `DefaultUser` | `SharedUser` | `user` |
 | `LOGNAME` | `browser-user` | `DefaultUser` | `SharedUser` | `user` |
 
-### Application-Specific Variables
+### 应用特定变量
 
-#### Steam Integration
+#### Steam 集成
 
-| Variable | Web Platform | All Native Platforms |
-|----------|-------------|---------------------|
-| `STEAM_PATH` | `null` | `null` (detected dynamically) |
-| `STEAMAPPS` | `null` | `null` (detected dynamically) |
-| `STEAM_COMPAT_DATA_PATH` | `null` | `null` (detected dynamically) |
+| 变量 | Web 平台 | 所有原生平台 |
+|------|---------|-------------|
+| `STEAM_PATH` | `null` | `null`（动态检测） |
+| `STEAMAPPS` | `null` | `null`（动态检测） |
+| `STEAM_COMPAT_DATA_PATH` | `null` | `null`（动态检测） |
 
-#### Development Environment
+#### 开发环境
 
-| Variable | Web Platform | All Native Platforms |
-|----------|-------------|---------------------|
-| `DEVELOPMENT_MODE` | `null` | `null` (detected from other indicators) |
-| `DEBUG` | `null` | `null` (detected from other indicators) |
-| `FLUTTER_TEST` | `null` | `null` (detected from test framework) |
-| `NODE_ENV` | `production` | `null` (detected dynamically) |
+| 变量 | Web 平台 | 所有原生平台 |
+|------|---------|-------------|
+| `DEVELOPMENT_MODE` | `null` | `null`（从其他指示器检测） |
+| `DEBUG` | `null` | `null`（从其他指示器检测） |
+| `FLUTTER_TEST` | `null` | `null`（从测试框架检测） |
+| `NODE_ENV` | `production` | `null`（动态检测） |
 
-#### Build and Compilation
+#### 构建和编译
 
-| Variable | Web Platform | All Native Platforms |
-|----------|-------------|---------------------|
-| `FLUTTER_ROOT` | `null` | `null` (detected from SDK) |
-| `DART_SDK` | `null` | `null` (detected from SDK) |
-| `PUB_CACHE` | `null` | Platform-specific default |
+| 变量 | Web 平台 | 所有原生平台 |
+|------|---------|-------------|
+| `FLUTTER_ROOT` | `null` | `null`（从 SDK 检测） |
+| `DART_SDK` | `null` | `null`（从 SDK 检测） |
+| `PUB_CACHE` | `null` | 平台特定默认值 |
 
-## Path Resolution Methods
+## 路径解析方法
 
-### PlatformEnvironment Path Methods
+### PlatformEnvironment 路径方法
 
 #### getHomePath()
 
-**Web Platform**: `/browser-home`
+**Web 平台**: `/browser-home`
 
-**Native Platforms**:
+**原生平台**:
 - Windows: `%USERPROFILE%` → `C:\Users\Default`
 - macOS: `$HOME` → `/Users/Shared`
 - Linux: `$HOME` → `/home/user`
@@ -93,7 +93,7 @@ This document provides a comprehensive reference of all fallback values used by 
 ```dart
 String getHomePath() {
   if (isWeb) return '/browser-home';
-  
+
   if (Platform.isWindows) {
     return getVariable('USERPROFILE') ?? 'C:\\Users\\Default';
   } else {
@@ -104,9 +104,9 @@ String getHomePath() {
 
 #### getDocumentsPath()
 
-**Web Platform**: `/browser-documents`
+**Web 平台**: `/browser-documents`
 
-**Native Platforms**:
+**原生平台**:
 - Windows: `%USERPROFILE%\Documents` → `C:\Users\Default\Documents`
 - macOS: `$HOME/Documents` → `/Users/Shared/Documents`
 - Linux: `$HOME/Documents` → `/home/user/Documents`
@@ -114,7 +114,7 @@ String getHomePath() {
 ```dart
 String getDocumentsPath() {
   if (isWeb) return '/browser-documents';
-  
+
   final home = getHomePath();
   return '$home${Platform.isWindows ? '\\Documents' : '/Documents'}';
 }
@@ -122,9 +122,9 @@ String getDocumentsPath() {
 
 #### getTempPath()
 
-**Web Platform**: `/browser-temp`
+**Web 平台**: `/browser-temp`
 
-**Native Platforms**:
+**原生平台**:
 - Windows: `%TEMP%` → `C:\Temp`
 - macOS: `$TMPDIR` → `/tmp`
 - Linux: `$TMPDIR` → `/tmp`
@@ -132,19 +132,19 @@ String getDocumentsPath() {
 ```dart
 String getTempPath() {
   if (isWeb) return '/browser-temp';
-  
-  return getVariable('TEMP') ?? 
-         getVariable('TMP') ?? 
-         getVariable('TMPDIR') ?? 
+
+  return getVariable('TEMP') ??
+         getVariable('TMP') ??
+         getVariable('TMPDIR') ??
          (Platform.isWindows ? 'C:\\Temp' : '/tmp');
 }
 ```
 
 #### getAppDataPath()
 
-**Web Platform**: `/browser-appdata`
+**Web 平台**: `/browser-appdata`
 
-**Native Platforms**:
+**原生平台**:
 - Windows: `%APPDATA%` → `C:\Users\Default\AppData\Roaming`
 - macOS: `$HOME/Library` → `/Users/Shared/Library`
 - Linux: `$XDG_DATA_HOME` → `/home/user/.local/share`
@@ -152,7 +152,7 @@ String getTempPath() {
 ```dart
 String getAppDataPath() {
   if (isWeb) return '/browser-appdata';
-  
+
   if (Platform.isWindows) {
     return getVariable('APPDATA') ?? 'C:\\Users\\Default\\AppData\\Roaming';
   } else if (Platform.isMacOS) {
@@ -163,42 +163,42 @@ String getAppDataPath() {
 }
 ```
 
-## Web Platform Specific Behavior
+## Web 平台特定行为
 
-### Browser Storage Integration
+### 浏览器存储集成
 
-Instead of file system paths, web platform uses browser storage APIs:
+Web 平台使用浏览器存储 API 代替文件系统路径：
 
-| Path Type | Browser Storage | Fallback Behavior |
-|-----------|----------------|-------------------|
-| Home | localStorage | Persistent across sessions |
-| Documents | localStorage | Persistent across sessions |
-| Temp | sessionStorage | Cleared on tab close |
-| AppData | localStorage | Persistent across sessions |
+| 路径类型 | 浏览器存储 | 回退行为 |
+|---------|-----------|---------|
+| Home | localStorage | 跨会话持久化 |
+| Documents | localStorage | 跨会话持久化 |
+| Temp | sessionStorage | 标签关闭时清除 |
+| AppData | localStorage | 跨会话持久化 |
 
-### URL Parameter Override
+### URL 参数覆盖
 
-Web platform can override defaults using URL parameters:
+Web 平台可以使用 URL 参数覆盖默认值：
 
 ```javascript
 // URL: https://app.example.com/?debug=true&user=testuser
-// Results in:
-// - DEBUG environment variable: 'true'
-// - USER environment variable: 'testuser'
+// 结果：
+// - DEBUG 环境变量: 'true'
+// - USER 环境变量: 'testuser'
 ```
 
-Implementation:
+实现：
 ```dart
 String? _getWebEnvironmentVariable(String key) {
   if (!kIsWeb) return null;
-  
-  // Check URL parameters first
+
+  // 首先检查 URL 参数
   final uri = Uri.base;
   if (uri.queryParameters.containsKey(key.toLowerCase())) {
     return uri.queryParameters[key.toLowerCase()];
   }
-  
-  // Check localStorage
+
+  // 检查 localStorage
   try {
     return html.window.localStorage[key];
   } catch (e) {
@@ -207,9 +207,9 @@ String? _getWebEnvironmentVariable(String key) {
 }
 ```
 
-## Platform Capability Defaults
+## 平台能力默认值
 
-### PlatformCapabilities for Web
+### Web 平台的 PlatformCapabilities
 
 ```dart
 PlatformCapabilities.forWeb() {
@@ -223,15 +223,15 @@ PlatformCapabilities.forWeb() {
     supportsSystemTray: false,
     supportsWindowManagement: false,
     supportsMultipleWindows: false,
-    supportsClipboard: true, // Limited browser clipboard access
-    supportsNotifications: true, // Browser notifications
+    supportsClipboard: true, // 有限的浏览器剪贴板访问
+    supportsNotifications: true, // 浏览器通知
     supportsLocalStorage: true,
     supportsSessionStorage: true,
   );
 }
 ```
 
-### PlatformCapabilities for Native
+### 原生平台的 PlatformCapabilities
 
 ```dart
 PlatformCapabilities.forNative() {
@@ -247,24 +247,24 @@ PlatformCapabilities.forNative() {
     supportsMultipleWindows: _isDesktopPlatform(),
     supportsClipboard: true,
     supportsNotifications: true,
-    supportsLocalStorage: false, // Uses file system instead
+    supportsLocalStorage: false, // 使用文件系统代替
     supportsSessionStorage: false,
   );
 }
 ```
 
-## Configuration Override System
+## 配置覆盖系统
 
-### Environment Variable Priority
+### 环境变量优先级
 
-1. **Actual environment variables** (native platforms only)
-2. **URL parameters** (web platform only)
-3. **localStorage values** (web platform only)
-4. **Configuration file values**
-5. **Platform-specific defaults**
-6. **Universal fallback values**
+1. **实际环境变量**（仅原生平台）
+2. **URL 参数**（仅 Web 平台）
+3. **localStorage 值**（仅 Web 平台）
+4. **配置文件值**
+5. **平台特定默认值**
+6. **通用回退值**
 
-### Configuration File Format
+### 配置文件格式
 
 ```json
 {
@@ -290,65 +290,65 @@ PlatformCapabilities.forNative() {
 }
 ```
 
-### Runtime Override API
+### 运行时覆盖 API
 
 ```dart
 class PlatformEnvironment {
-  // Override specific variable for current session
+  // 为当前会话覆盖特定变量
   void setOverride(String key, String value) {
     _overrides[key] = value;
   }
-  
-  // Clear specific override
+
+  // 清除特定覆盖
   void clearOverride(String key) {
     _overrides.remove(key);
   }
-  
-  // Clear all overrides
+
+  // 清除所有覆盖
   void clearAllOverrides() {
     _overrides.clear();
   }
-  
-  // Get variable with override support
+
+  // 获取支持覆盖的变量
   String? getVariable(String key, {String? defaultValue}) {
-    // Check overrides first
+    // 首先检查覆盖
     if (_overrides.containsKey(key)) {
       return _overrides[key];
     }
-    
-    // Continue with normal resolution...
+
+    // 继续正常解析...
   }
 }
 ```
 
-## Testing Fallback Values
+## 测试回退值
 
-### Unit Test Examples
+### 单元测试示例
 
 ```dart
 group('Fallback Values', () {
   test('should return web defaults on web platform', () {
-    // Mock web platform
+    // 模拟 Web 平台
     when(() => mockPlatformEnvironment.isWeb).thenReturn(true);
-    
+
     expect(mockPlatformEnvironment.getHomePath(), equals('/browser-home'));
     expect(mockPlatformEnvironment.getTempPath(), equals('/browser-temp'));
   });
-  
+
   test('should return platform-specific defaults on native', () {
-    // Mock Windows platform
+    // 模拟 Windows 平台
     when(() => mockPlatformEnvironment.isWeb).thenReturn(false);
     when(() => Platform.isWindows).thenReturn(true);
-    
+
     final home = mockPlatformEnvironment.getHomePath();
     expect(home, contains('Users\\Default'));
   });
-  
+
   test('should handle missing environment variables gracefully', () {
-    // Mock missing environment variable
+    // 模拟缺失的环境变量
     when(() => mockPlatformEnvironment.getVariable('NONEXISTENT'))
         .thenReturn(null);
-    
+
     final result = mockPlatformEnvironment.getVariable(
       'NONEXISTENT',
       defaultValue: 'fallback'
@@ -358,7 +358,7 @@ group('Fallback Values', () {
 });
 ```
 
-### Property-Based Test Examples
+### 基于属性的测试示例
 
 ```dart
 import 'package:test/test.dart';
@@ -367,17 +367,17 @@ void main() {
   group('Platform Fallback Properties', () {
     test('all path methods return non-null values', () {
       final env = PlatformEnvironment.instance;
-      
-      // Property: Path methods never return null
+
+      // 属性: 路径方法从不返回 null
       expect(env.getHomePath(), isNotNull);
       expect(env.getDocumentsPath(), isNotNull);
       expect(env.getTempPath(), isNotNull);
       expect(env.getAppDataPath(), isNotNull);
     });
-    
+
     test('web platform never accesses Platform.environment', () {
-      // This test would fail if web platform tries to access Platform.environment
-      // Property: Web platform uses only fallback values
+      // 如果 Web 平台尝试访问 Platform.environment，此测试将失败
+      // 属性: Web 平台仅使用回退值
       if (kIsWeb) {
         final env = PlatformEnvironment.instance;
         expect(() => env.getVariable('ANY_KEY'), returnsNormally);
@@ -387,22 +387,22 @@ void main() {
 }
 ```
 
-## Performance Considerations
+## 性能考虑
 
-### Caching Strategy
+### 缓存策略
 
 ```dart
 class PlatformEnvironment {
   final Map<String, String?> _cache = {};
   final Map<String, String> _overrides = {};
-  
+
   String? getVariable(String key, {String? defaultValue}) {
-    // Check cache first
+    // 首先检查缓存
     if (_cache.containsKey(key)) {
       return _cache[key] ?? defaultValue;
     }
-    
-    // Resolve and cache
+
+    // 解析并缓存
     final value = _resolveVariable(key, defaultValue);
     _cache[key] = value;
     return value;
@@ -410,66 +410,66 @@ class PlatformEnvironment {
 }
 ```
 
-### Lazy Initialization
+### 延迟初始化
 
 ```dart
 class PlatformEnvironment {
   late final bool _isWeb = kIsWeb;
-  late final PlatformCapabilities _capabilities = _isWeb 
-    ? PlatformCapabilities.forWeb() 
+  late final PlatformCapabilities _capabilities = _isWeb
+    ? PlatformCapabilities.forWeb()
     : PlatformCapabilities.forNative();
-  
-  // Paths are computed once and cached
+
+  // 路径计算一次并缓存
   String? _homePath;
   String getHomePath() => _homePath ??= _computeHomePath();
 }
 ```
 
-## Security Considerations
+## 安全考虑
 
-### Web Platform Security
+### Web 平台安全
 
-- Environment variables are never exposed to web platform
-- URL parameters are sanitized before use
-- localStorage access is wrapped in try-catch blocks
-- No sensitive defaults are used in fallback values
+- 环境变量从不暴露给 Web 平台
+- URL 参数在使用前进行清理
+- localStorage 访问包装在 try-catch 块中
+- 回退值中不使用敏感的默认值
 
-### Native Platform Security
+### 原生平台安全
 
-- Environment variables are read-only through the abstraction
-- Fallback values use safe, non-sensitive defaults
-- Path resolution validates against directory traversal
-- Override system requires explicit permission
+- 环境变量通过抽象层只读
+- 回退值使用安全、非敏感的默认值
+- 路径解析验证防止目录遍历
+- 覆盖系统需要显式权限
 
-## Troubleshooting
+## 故障排除
 
-### Common Issues
+### 常见问题
 
-**Issue**: Unexpected fallback values on native platforms
-**Solution**: Check if environment variables are actually set in the system
+**问题**: 原生平台出现意外的回退值
+**解决方案**: 检查系统中是否实际设置了环境变量
 
-**Issue**: Web platform not using browser storage
-**Solution**: Verify browser supports localStorage and user hasn't disabled it
+**问题**: Web 平台不使用浏览器存储
+**解决方案**: 验证浏览器支持 localStorage 且用户未禁用它
 
-**Issue**: Path resolution returning incorrect values
-**Solution**: Check platform detection and environment variable availability
+**问题**: 路径解析返回不正确的值
+**解决方案**: 检查平台检测和环境变量可用性
 
-### Debug Utilities
+### 调试工具
 
 ```dart
 void debugFallbackValues() {
   final env = PlatformEnvironment.instance;
-  
-  print('Platform: ${env.isWeb ? 'Web' : Platform.operatingSystem}');
-  print('Home: ${env.getHomePath()}');
-  print('Temp: ${env.getTempPath()}');
-  print('AppData: ${env.getAppDataPath()}');
-  
-  // Test common environment variables
+
+  print('平台: ${env.isWeb ? 'Web' : Platform.operatingSystem}');
+  print('主目录: ${env.getHomePath()}');
+  print('临时目录: ${env.getTempPath()}');
+  print('应用数据: ${env.getAppDataPath()}');
+
+  // 测试常见环境变量
   final testVars = ['HOME', 'USER', 'PATH', 'TEMP'];
   for (final variable in testVars) {
     final value = env.getVariable(variable);
-    print('$variable: ${value ?? 'null (using fallback)'}');
+    print('$variable: ${value ?? 'null (使用回退值)'}');
   }
 }
 ```

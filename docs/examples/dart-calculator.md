@@ -1,104 +1,104 @@
-# Calculator Plugin (Dart)
+# 计算器插件 (Dart)
 
-A simple calculator plugin demonstrating basic Plugin SDK usage with Dart/Flutter.
+一个演示使用 Dart/Flutter 的插件 SDK 基本用法的简单计算器插件。
 
-## Features
+## 功能
 
-- Basic arithmetic operations (add, subtract, multiply, divide)
-- Memory functions (store, recall, clear)
-- History tracking
-- Theme adaptation
-- Keyboard shortcuts
+- 基本算术运算（加、减、乘、除）
+- 内存函数（存储、召回、清除）
+- 历史记录跟踪
+- 主题适配
+- 键盘快捷键
 
-## Getting Started
+## 快速开始
 
-### Prerequisites
+### 前提条件
 
 - Flutter SDK 3.0+
-- Plugin SDK
-- Flutter Plugin Platform host
+- 插件 SDK
+- Flutter 插件平台主机
 
-### Installation
+### 安装
 
-1. Clone or download this example
-2. Install dependencies:
+1. 克隆或下载此示例
+2. 安装依赖：
    ```bash
    flutter pub get
    ```
-3. Build the plugin:
+3. 构建插件：
    ```bash
    dart tools/plugin_cli.dart build
    ```
-4. Package for distribution:
+4. 打包以分发：
    ```bash
    dart tools/plugin_cli.dart package --output calculator.pkg
    ```
 
-### Testing
+### 测试
 
-Test the plugin locally:
+本地测试插件：
 
 ```bash
 dart tools/plugin_cli.dart test --plugin calculator.pkg
 ```
 
-## Code Structure
+## 代码结构
 
 ```
 dart_calculator/
 ├── lib/
-│   ├── main.dart              # Main entry point
-│   ├── calculator_engine.dart # Calculation logic
-│   ├── calculator_ui.dart     # User interface
-│   └── calculator_history.dart # History management
-├── plugin_manifest.json      # Plugin configuration
-├── pubspec.yaml              # Dart dependencies
-└── README.md                 # This file
+│   ├── main.dart              # 主入口点
+│   ├── calculator_engine.dart # 计算逻辑
+│   ├── calculator_ui.dart     # 用户界面
+│   └── calculator_history.dart # 历史记录管理
+├── plugin_manifest.json      # 插件配置
+├── pubspec.yaml              # Dart 依赖
+└── README.md                 # 本文件
 ```
 
-## Key SDK Features Demonstrated
+## 演示的关键 SDK 功能
 
-1. **Plugin Initialization**: Setting up the SDK connection
-2. **Event Handling**: Responding to host events (theme changes, etc.)
-3. **API Calls**: Calling host APIs for preferences and notifications
-4. **Configuration**: Managing plugin settings
-5. **Lifecycle Management**: Proper startup and shutdown
-6. **Error Handling**: Graceful error handling and reporting
+1. **插件初始化**: 设置 SDK 连接
+2. **事件处理**: 响应主机事件（主题更改等）
+3. **API 调用**: 调用主机 API 进行首选项和通知
+4. **配置**: 管理插件设置
+5. **生命周期管理**: 正确的启动和关闭
+6. **错误处理**: 优雅的错误处理和报告
 
-## Usage
+## 使用方法
 
-Once installed in the Flutter Plugin Platform:
+安装到 Flutter 插件平台后：
 
-1. Open the calculator plugin from the plugin menu
-2. Perform calculations using the on-screen buttons or keyboard
-3. View calculation history in the history panel
-4. Access settings through the plugin settings menu
+1. 从插件菜单打开计算器插件
+2. 使用屏幕按钮或键盘执行计算
+3. 在历史记录面板中查看计算历史
+4. 通过插件设置菜单访问设置
 
-## Configuration Options
+## 配置选项
 
-The plugin supports the following configuration options:
+插件支持以下配置选项：
 
-- `precision`: Number of decimal places (default: 2)
-- `show_history`: Show/hide history panel (default: true)
-- `keyboard_shortcuts`: Enable keyboard shortcuts (default: true)
-- `theme_mode`: Theme preference (auto, light, dark)
+- `precision`: 小数位数（默认：2）
+- `show_history`: 显示/隐藏历史记录面板（默认：true）
+- `keyboard_shortcuts`: 启用键盘快捷键（默认：true）
+- `theme_mode`: 主题首选项（auto, light, dark）
 
-## API Integration
+## API 集成
 
-The plugin demonstrates integration with host APIs:
+插件演示了与主机 API 的集成：
 
-- `getUserPreference()`: Get user theme and locale preferences
-- `showNotification()`: Display calculation results as notifications
-- `saveUserData()`: Persist calculation history
-- `loadUserData()`: Restore calculation history
+- `getUserPreference()`: 获取用户主题和区域设置首选项
+- `showNotification()`: 将计算结果显示为通知
+- `saveUserData()`: 持久化计算历史
+- `loadUserData()`: 恢复计算历史
 
-## Development Notes
+## 开发说明
 
-This example showcases best practices for Dart-based external plugins:
+此示例展示了基于 Dart 的外部插件的最佳实践：
 
-- Proper SDK initialization and cleanup
-- Responsive UI that adapts to host theme
-- Efficient state management
-- Error handling and logging
-- Configuration management
-- Testing and debugging support
+- 正确的 SDK 初始化和清理
+- 适应主机主题的响应式 UI
+- 高效的状态管理
+- 错误处理和日志记录
+- 配置管理
+- 测试和调试支持
