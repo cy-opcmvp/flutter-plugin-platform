@@ -4,12 +4,161 @@
 
 ## 版本索引
 
+- [v0.4.3](#v043-2026-01-21) - 2026-01-21
+- [v0.4.2](#v042-2026-01-21) - 2026-01-21
 - [v0.4.1](#v041-2026-01-20) - 2026-01-20
 - [v0.4.0](#v040-2026-01-19) - 2026-01-19
 - [v0.3.4](#v034-2026-01-16) - 2026-01-16
 - [v0.3.2](#v032-2026-01-15) - 2026-01-15
 - [v0.3.1](#v031-2025-01-14) - 2025-01-14
 - [v0.3.0](#v030-2025-01-14) - 2025-01-14
+
+---
+
+## v0.4.3 (2026-01-21)
+
+### Tag 信息
+- **版本号**: v0.4.3
+- **提交**: 095f2d8, aa2a757, 9a26bee
+- **创建时间**: 2026-01-21
+- **创建者**: Claude Code
+- **类型**: Patch 版本（文档更新）
+
+### Push 信息
+- **推送时间**: 2026-01-21
+- **推送者**: Claude Code
+- **提交范围**: 212bfd7..095f2d8
+- **Tag**: v0.4.3
+
+### 变更内容
+- **文档全面中文化和重组** - 完成 docs/ 核心目录的全面优化
+  - **文档重组**: guides/ 目录按受众类型分类
+    - 创建 developer/ 目录（7 个开发者指南）
+    - 创建 technical/ 目录（技术文档）
+    - 创建 user/ 目录（2 个用户指南）
+    - 创建 guides/README.md 文档导航索引
+    - 移动音频文档到 troubleshooting/ 目录
+  - **文档中文化**: 8 个英文文档转换为中文（约 2,192 行）
+    - migration/platform-environment-migration.md（431 行）
+    - reference/platform-fallback-values.md（476 行）
+    - web-platform-compatibility.md（312 行）
+    - examples/*.md（3 个文件，355 行）
+    - releases/RELEASE_NOTES_v0.2.1.md 标题修正
+  - **README 优化**: 根目录 README.md 完全重写
+    - 添加项目徽章（Flutter 3.0+, Dart 3.0+, Apache 2.0）
+    - 新增内置插件表格（5 个插件及其状态）
+    - 新增版本信息和最新更新亮点
+    - 更新文档导航（按新结构组织）
+    - 更新项目结构（反映实际目录）
+    - 新增开发规范章节（链接到 11 个规范文档）
+    - 优化贡献指南和获取帮助部分
+  - **新增文档和脚本**: 11 个新文档和脚本
+    - DOCUMENTATION_CHANGE_MANAGEMENT.md
+    - 7 个实施报告（DESKTOP_PET_DOCUMENTATION_ANALYSIS.md 等）
+    - 6 个文档检查脚本（check-doc-coverage 等）
+    - PULL_REQUEST_TEMPLATE.md
+
+### 文档统计
+- **转换文档数**: 8 个
+- **新增文档数**: 11 个
+- **移动文档数**: 7 个
+- **删除文档数**: 5 个
+- **代码变更**: 45 个文件，+7,671 行，-1,641 行
+- **中文化比例**: docs/ 核心目录 100%
+
+### 对话记录
+- **对话时间**: 2026-01-21
+- **对话主题**:
+  1. Desktop Pet 文档价值评估和准确性验证
+  2. guides/ 目录文档重组（developer/technical/user/）
+  3. 英文文档转中文（guides/ → 100% 中文）
+  4. 扩展中文化到整个 docs/ 目录（所有英文文档）
+  5. 根目录 README.md 更新
+
+- **操作内容**:
+  - 分析 4 个 Desktop Pet 文档，确认全部准确且有价值
+  - 创建 DESKTOP_PET_DOCUMENTATION_ANALYSIS.md
+  - 重组 guides/ 目录，创建 3 个子目录和索引
+  - 创建 GUIDES_REORGANIZATION.md
+  - 转换 8 个英文文档为中文
+  - 更新 ENGLISH_TO_CHINESE_CONVERSION.md
+  - 完全重写根目录 README.md
+  - 创建 v0.4.3 tag 和发布说明
+
+### Git 提交
+```
+095f2d8 docs: 添加 v0.4.3 发布说明
+9a26bee docs: 更新 CHANGELOG.md，记录 v0.4.3 版本变更
+aa2a757 docs: 文档全面中文化、重组和优化（v0.4.3）
+212bfd7 docs: 更新 CHANGELOG.md，记录编码规范修复
+856947a fix: 修复所有静态分析错误，代码完全符合编码规则
+```
+
+### Tag 注释
+```
+Release v0.4.3
+
+## 📚 文档全面中文化、重组和优化
+
+### 主要更新
+
+#### 文档重组
+- 将 guides/ 目录按受众类型分为 developer/、technical/、user/
+- 创建 guides/README.md 作为文档导航索引
+- 新增 7 个开发者指南到 developer/ 目录
+- 新增 1 个技术文档到 technical/ 目录
+- 新增 2 个用户指南到 user/ 目录
+- 移动音频文档到 troubleshooting/ 目录
+
+#### 文档中文化（8 个文档，约 2,192 行）
+- migration/platform-environment-migration.md（431 行）
+- reference/platform-fallback-values.md（476 行）
+- web-platform-compatibility.md（312 行）
+- examples/*.md（3 个文件，355 行）
+- releases/RELEASE_NOTES_v0.2.1.md 标题修正
+
+#### README 优化
+- 添加项目徽章（Flutter 3.0+, Dart 3.0+, Apache 2.0）
+- 新增内置插件表格（5 个插件）
+- 新增版本信息（v0.4.3）和最新更新亮点
+- 更新文档导航（按新结构组织）
+- 更新项目结构（反映实际目录）
+- 新增开发规范章节（11 个规范文档）
+- 优化贡献指南和获取帮助部分
+
+#### 新增文档和脚本（11 个）
+- DOCUMENTATION_CHANGE_MANAGEMENT.md
+- DESKTOP_PET_DOCUMENTATION_ANALYSIS.md
+- DOCUMENTATION_AUDIT_2026-01-21.md
+- DOCUMENTATION_CLEANUP_SUMMARY.md
+- DOCUMENTATION_IMPROVEMENTS_IMPLEMENTATION.md
+- ENGLISH_TO_CHINESE_CONVERSION.md
+- GUIDES_REORGANIZATION.md
+- AUDIO_IMPLEMENTATION_STATUS.md
+- check-doc-coverage.ps1/sh
+- check-doc-links.ps1/sh
+- check-docs.ps1/sh
+- PULL_REQUEST_TEMPLATE.md
+
+### 文档统计
+- **转换文档数**: 8 个
+- **新增文档数**: 11 个
+- **移动文档数**: 7 个
+- **代码变更**: 45 个文件，+7,671 行，-1,641 行
+- **文档语言**: docs/ 核心目录 100% 中文化
+
+### 版本信息
+- **类型**: 文档版本（Patch 更新）
+- **向后兼容**: 完全兼容，无破坏性变更
+- **推荐升级**: 所有用户和开发者
+```
+
+### 发布文档
+- `docs/releases/RELEASE_NOTES_v0.4.3.md` - 完整的发布说明
+
+---
+
+## v0.4.2 (2026-01-21)
 
 ---
 
