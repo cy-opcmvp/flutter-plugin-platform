@@ -5,6 +5,68 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.3] - 2026-01-21
+
+### Added - 文档全面中文化和重组
+- 📚 **文档重组** - guides/ 目录按受众类型分类
+  - 创建 developer/ 目录（7 个开发者指南）
+  - 创建 technical/ 目录（技术文档）
+  - 创建 user/ 目录（2 个用户指南）
+  - 新增 guides/README.md 作为文档导航索引
+- 🌏 **文档中文化** - 8 个英文文档转换为中文（约 2,192 行）
+  - migration/platform-environment-migration.md（431 行）
+  - reference/platform-fallback-values.md（476 行）
+  - web-platform-compatibility.md（312 行）
+  - examples/*.md（3 个文件，355 行）
+  - releases/RELEASE_NOTES_v0.2.1.md 标题修正
+- 📝 **README 优化** - 根目录 README 完全重写
+  - 添加项目徽章（Flutter, Dart, License）
+  - 新增内置插件表格
+  - 新增版本信息和最新更新
+  - 更新文档导航（按新结构组织）
+  - 更新项目结构（反映实际目录）
+  - 新增开发规范章节
+  - 优化贡献指南和获取帮助部分
+
+### Added - 新增文档和脚本
+- 📋 **新增规范文档**
+  - DOCUMENTATION_CHANGE_MANAGEMENT.md（文档变更管理）
+- 📊 **新增实施报告**
+  - DESKTOP_PET_DOCUMENTATION_ANALYSIS.md（Desktop Pet 文档分析）
+  - DOCUMENTATION_AUDIT_2026-01-21.md（文档审计报告）
+  - DOCUMENTATION_CLEANUP_SUMMARY.md（文档清理总结）
+  - DOCUMENTATION_IMPROVEMENTS_IMPLEMENTATION.md（文档改进实施）
+  - ENGLISH_TO_CHINESE_CONVERSION.md（英文转中文记录）
+  - GUIDES_REORGANIZATION.md（文档重组记录）
+  - AUDIO_IMPLEMENTATION_STATUS.md（音频实施状态）
+- 🔧 **新增检查脚本**
+  - check-doc-coverage.ps1/sh（文档覆盖率检查）
+  - check-doc-links.ps1/sh（文档链接检查）
+  - check-docs.ps1/sh（文档综合检查）
+- 📋 **新增 GitHub 资源**
+  - PULL_REQUEST_TEMPLATE.md（PR 模板）
+
+### Changed - 文档移动和整理
+- 📂 **文档移动**
+  - 音频文档移动到 troubleshooting/ 目录
+  - guides/ 文档按类型重新组织到 developer/、technical/、user/
+- 🗑️ **删除过时文档**
+  - 删除 assets/audio/README.md
+  - 删除 ios/Runner/Assets.xcassets/LaunchImage.imageset/README.md
+  - 删除过时的音频快速参考文档
+
+### 文档统计
+- **转换文档数**: 8 个
+- **新增文档数**: 11 个
+- **移动文档数**: 7 个
+- **代码变更**: 44 个文件，+7,609 行，-1,641 行
+- **文档语言**: docs/ 核心目录 100% 中文化
+
+### 版本信息
+- **类型**: 文档版本（Patch 更新）
+- **向后兼容**: 完全兼容，无破坏性变更
+- **推荐升级**: 所有用户和开发者
+
 ## [0.4.2] - 2026-01-21
 
 ### Fixed - Windows 编译问题
