@@ -238,7 +238,7 @@ class _DesktopPetScreenState extends State<DesktopPetScreen>
                   left: menuPosition.dx,
                   top: menuPosition.dy,
                   child: Material(
-                    elevation: 8,
+                    elevation: 2,
                     borderRadius: BorderRadius.circular(8),
                     color: Colors.transparent,
                     child: DesktopPetContextMenu(

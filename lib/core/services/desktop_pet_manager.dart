@@ -379,8 +379,9 @@ class DesktopPetManager {
       // 确保窗口管理器已初始化
       await windowManager.ensureInitialized();
 
-      // 先设置窗口为完全透明，避免闪烁
-      await windowManager.setOpacity(0.0);
+      // 关键：使用 setAsFrameless() 移除窗口框架（包括边框和标题栏）
+      // 这会移除 title bar、outline border 等，只保留 Flutter 内容
+      await windowManager.setAsFrameless();
 
       // 设置窗口为小尺寸的桌面宠物窗口
       await windowManager.setSize(petWindowSize);
@@ -391,17 +392,28 @@ class DesktopPetManager {
       await windowManager.setSkipTaskbar(true); // 不在任务栏显示
       await windowManager.setHasShadow(false); // 无阴影
       await windowManager.setBackgroundColor(const Color(0x00000000)); // 透明背景
+      await windowManager.setResizable(false); // 禁用调整大小
+      await windowManager.setMaximizable(false); // 禁用最大化
+      await windowManager.setMinimizable(false); // 禁用最小化
 
-      // 设置窗口标题栏不可见
-      await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
-
-      // 确保窗口可见
-      await windowManager.show();
-      await windowManager.focus();
-
-      // 延迟后恢复透明度，让Flutter有时间渲染透明内容
-      await Future.delayed(const Duration(milliseconds: 50));
-      await windowManager.setOpacity(_petPreferences['opacity'] ?? 1.0);
+      // 使用 waitUntilReadyToShow 确保窗口准备好后才显示
+      // 在显示前设置所有属性，避免闪烁
+      // 注意：不要在 WindowOptions 中设置 titleBarStyle，会与 setAsFrameless() 冲突
+      final targetOpacity = _petPreferences['opacity'] ?? 1.0;
+      await windowManager.waitUntilReadyToShow(
+        WindowOptions(
+          size: petWindowSize,
+          center: false,
+          backgroundColor: const Color(0x00000000),
+        ),
+        () async {
+          // 窗口准备就绪后，先设置位置和透明度，再显示窗口
+          await windowManager.setPosition(Offset(position['x'], position['y']));
+          await windowManager.setOpacity(targetOpacity);
+          await windowManager.show();
+          await windowManager.focus();
+        },
+      );
 
       _isAlwaysOnTop = true;
 

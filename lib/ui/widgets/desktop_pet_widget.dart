@@ -23,7 +23,7 @@ class DesktopPetWidget extends StatefulWidget {
 }
 
 class _DesktopPetWidgetState extends State<DesktopPetWidget>
-    with TickerProviderStateMixin, WindowListener {
+    with TickerProviderStateMixin {
   AnimationController? _breathingController;
   AnimationController? _blinkController;
   Animation<double>? _breathingAnimation;
@@ -49,9 +49,6 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
       // On unsupported platforms (like web), provide fallback behavior
       return;
     }
-
-    // 添加窗口监听器以支持拖拽
-    windowManager.addListener(this);
 
     // 呼吸动画
     _breathingController = AnimationController(
@@ -112,59 +109,97 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
 
     return Opacity(
       opacity: _opacity,
-      child: GestureDetector(
-        onDoubleTap: _isInteractionsEnabled ? widget.onDoubleClick : null,
-        onSecondaryTap: _isInteractionsEnabled ? widget.onRightClick : null,
-        onPanStart: _isInteractionsEnabled
-            ? (details) {
-                setState(() {
-                  _isDragging = true;
-                });
-                // 使用原生窗口拖拽 - 这是最流畅的方式
-                windowManager.startDragging();
-              }
-            : null,
-        onPanEnd: _isInteractionsEnabled
-            ? (_) {
+      child: Listener(
+        onPointerDown: (event) {
+          debugPrint('Listener: onPointerDown - position: ${event.position}, _isDragging: $_isDragging');
+        },
+        onPointerUp: (event) {
+          debugPrint('Listener: onPointerUp - position: ${event.position}, _isDragging: $_isDragging');
+          if (_isDragging) {
+            debugPrint('Listener: Drag state reset to false via onPointerUp');
+            setState(() {
+              _isDragging = false;
+            });
+          }
+        },
+        onPointerMove: (event) {
+          if (_isDragging) {
+            debugPrint('Listener: onPointerMove - position: ${event.position}, delta: ${event.delta}');
+          }
+        },
+        child: GestureDetector(
+          onDoubleTap: _isInteractionsEnabled ? widget.onDoubleClick : null,
+          onSecondaryTap: _isInteractionsEnabled ? widget.onRightClick : null,
+          onPanDown: _isInteractionsEnabled
+              ? (details) {
+                  debugPrint('GestureDetector: onPanDown triggered, _isDragging: $_isDragging → true');
+                  setState(() {
+                    _isDragging = true;
+                    _isHovered = false;
+                  });
+                  debugPrint('GestureDetector: startDragging called');
+                  windowManager.startDragging();
+                }
+              : null,
+          onPanEnd: _isInteractionsEnabled
+              ? (details) {
+                  debugPrint('GestureDetector: onPanEnd triggered (backup), _isDragging: $_isDragging');
+                  if (_isDragging) {
+                    debugPrint('GestureDetector: Drag state reset via onPanEnd');
+                    setState(() {
+                      _isDragging = false;
+                    });
+                  }
+                }
+              : null,
+          child: MouseRegion(
+            cursor: _isDragging
+                ? SystemMouseCursors.grabbing
+                : SystemMouseCursors.grab,
+            onEnter: (_) {
+              debugPrint('MouseRegion: onEnter, _isHovered: $_isHovered, _isDragging: $_isDragging');
+
+              // 如果已经在拖拽状态，且鼠标重新进入窗口（从外面回来），说明拖拽已结束
+              if (_isDragging && !_isHovered) {
+                debugPrint('MouseRegion: Drag ended via onEnter, reset state');
                 setState(() {
                   _isDragging = false;
+                  _isHovered = true;
+                });
+                return;
+              }
+
+              if (_isInteractionsEnabled) {
+                setState(() {
+                  _isHovered = true;
                 });
               }
-            : null,
-        child: MouseRegion(
-          cursor: _isDragging
-              ? SystemMouseCursors.grabbing
-              : SystemMouseCursors.grab,
-          onEnter: (_) {
-            if (_isInteractionsEnabled) {
-              setState(() {
-                _isHovered = true;
-              });
-            }
-          },
-          onExit: (_) {
-            if (_isInteractionsEnabled) {
-              setState(() {
-                _isHovered = false;
-              });
-            }
-          },
-          child: _breathingAnimation != null && _blinkAnimation != null
-              ? AnimatedBuilder(
-                  animation: Listenable.merge([
-                    _breathingAnimation!,
-                    _blinkAnimation!,
-                  ]),
-                  builder: (context, child) {
-                    return Transform.scale(
-                      scale: _isAnimationsEnabled
-                          ? _breathingAnimation!.value
-                          : 1.0,
-                      child: _buildPetContainer(),
-                    );
-                  },
-                )
-              : _buildPetContainer(),
+            },
+            onExit: (_) {
+              debugPrint('MouseRegion: onExit, _isHovered: $_isHovered → false, _isDragging: $_isDragging');
+              if (_isInteractionsEnabled) {
+                setState(() {
+                  _isHovered = false;
+                });
+              }
+            },
+            child: _breathingAnimation != null && _blinkAnimation != null
+                ? AnimatedBuilder(
+                    animation: Listenable.merge([
+                      _breathingAnimation!,
+                      _blinkAnimation!,
+                    ]),
+                    builder: (context, child) {
+                      return Transform.scale(
+                        scale: _isAnimationsEnabled
+                            ? _breathingAnimation!.value
+                            : 1.0,
+                        child: _buildPetContainer(),
+                      );
+                    },
+                  )
+                : _buildPetContainer(),
+          ),
         ),
       ),
     );
@@ -183,13 +218,6 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
             _getSecondaryColor().withValues(alpha: 0.7),
           ],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: _getMainColor().withValues(alpha: 0.4),
-            blurRadius: _isHovered ? 25 : 15,
-            spreadRadius: _isHovered ? 8 : 3,
-          ),
-        ],
       ),
       child: Stack(
         alignment: Alignment.center,
@@ -288,22 +316,28 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
   }
 
   Color _getMainColor() {
-    if (_isDragging) return Colors.orange;
-    if (_isHovered) return Colors.green;
-    return Colors.blue;
+    final color = _isDragging
+        ? Colors.orange
+        : _isHovered
+            ? Colors.green
+            : Colors.blue;
+    debugPrint('_getMainColor: _isDragging=$_isDragging, _isHovered=$_isHovered → ${color.toString()}');
+    return color;
   }
 
   Color _getSecondaryColor() {
-    if (_isDragging) return Colors.deepOrange;
-    if (_isHovered) return Colors.lightGreen;
-    return Colors.purple;
+    final color = _isDragging
+        ? Colors.deepOrange
+        : _isHovered
+            ? Colors.lightGreen
+            : Colors.purple;
+    debugPrint('_getSecondaryColor: _isDragging=$_isDragging, _isHovered=$_isHovered → ${color.toString()}');
+    return color;
   }
 
   @override
   void dispose() {
-    // Only dispose controllers if they were initialized (desktop pet supported)
     if (_platformCapabilities.supportsDesktopPet) {
-      windowManager.removeListener(this);
       _breathingController?.dispose();
       _blinkController?.dispose();
     }
@@ -338,7 +372,7 @@ class DesktopPetContextMenu extends StatelessWidget {
     // If desktop pet is not supported, show simplified menu
     if (!platformCapabilities.supportsDesktopPet) {
       return Card(
-        elevation: 8,
+        elevation: 2,
         child: Container(
           width: 160,
           padding: const EdgeInsets.symmetric(vertical: 4),
@@ -365,7 +399,7 @@ class DesktopPetContextMenu extends StatelessWidget {
     }
 
     return Card(
-      elevation: 8,
+      elevation: 2,
       child: Container(
         width: 160, // 更紧凑的宽度
         padding: const EdgeInsets.symmetric(vertical: 4),
