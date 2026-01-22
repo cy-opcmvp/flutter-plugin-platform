@@ -46,6 +46,9 @@ class _DesktopPetScreenState extends State<DesktopPetScreen>
   // 窗口和宠物位置信息
   Size _windowSize = Size.zero;
   Offset _windowPosition = Offset.zero;
+  
+  // 原始宠物窗口大小（用于恢复）
+  static const Size _petWindowSize = Size(120.0, 120.0);
 
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
@@ -77,16 +80,46 @@ class _DesktopPetScreenState extends State<DesktopPetScreen>
     }
 
     try {
+      PlatformLogger.instance.logInfo('🎨 [UI层] 开始初始化窗口...');
+      
       // 获取窗口信息
       _windowSize = await windowManager.getSize();
       _windowPosition = await windowManager.getPosition();
+      final opacity = await windowManager.getOpacity();
+      final isVisible = await windowManager.isVisible();
+      
+      PlatformLogger.instance.logInfo(
+        '🎨 [UI层] 初始窗口状态:\n'
+        '   尺寸: ${_windowSize.width}x${_windowSize.height}\n'
+        '   位置: (${_windowPosition.dx}, ${_windowPosition.dy})\n'
+        '   透明度: $opacity\n'
+        '   可见性: $isVisible',
+      );
 
-      // 短暂延迟确保窗口透明设置生效
-      await Future.delayed(const Duration(milliseconds: 50));
+      // 【优化】增加延迟时间，确保窗口透明设置完全生效，避免背景闪现
+      // desktop_pet_manager 中已经有多个延迟（100ms + 50ms + 100ms + 50ms = 300ms）
+      // 这里再等待 250ms，总共约 550ms，确保所有设置完全生效
+      PlatformLogger.instance.logInfo('🎨 [UI层] 等待 250ms 确保窗口设置完全生效...');
+      await Future.delayed(const Duration(milliseconds: 250));
+      
+      // 验证延迟后的窗口状态
+      final finalSize = await windowManager.getSize();
+      final finalOpacity = await windowManager.getOpacity();
+      final finalVisible = await windowManager.isVisible();
+      
+      PlatformLogger.instance.logInfo(
+        '🎨 [UI层] 延迟后窗口状态:\n'
+        '   尺寸: ${finalSize.width}x${finalSize.height}\n'
+        '   透明度: $finalOpacity\n'
+        '   可见性: $finalVisible',
+      );
 
       if (mounted) {
+        PlatformLogger.instance.logInfo('🎨 [UI层] 设置 _isReady = true，开始显示内容');
         setState(() => _isReady = true);
         _fadeController.forward();
+        
+        PlatformLogger.instance.logInfo('🎨 [UI层] 淡入动画已启动');
       }
     } catch (e) {
       PlatformLogger.instance.logError('Failed to initialize window', e);
@@ -131,15 +164,11 @@ class _DesktopPetScreenState extends State<DesktopPetScreen>
   }
 
   /// 计算菜单位置 - 根据宠物在屏幕上的位置智能选择
-  Offset _calculateMenuPosition(Size screenSize) {
-    // 如果窗口大小未初始化，使用默认位置
-    if (_windowSize.width < 50 || _windowSize.height < 50) {
-      return const Offset(10.0, 10.0);
-    }
-
+  /// 返回菜单在**屏幕上的绝对位置**
+  Offset _calculateMenuScreenPosition(Size screenSize) {
     // 宠物在窗口中心
-    final petCenterX = _windowSize.width / 2;
-    final petCenterY = _windowSize.height / 2;
+    final petCenterX = _petWindowSize.width / 2;
+    final petCenterY = _petWindowSize.height / 2;
 
     // 宠物在屏幕上的绝对位置
     final petScreenX = _windowPosition.dx + petCenterX;
@@ -149,40 +178,107 @@ class _DesktopPetScreenState extends State<DesktopPetScreen>
     final isLeft = petScreenX < screenSize.width / 2;
     final isTop = petScreenY < screenSize.height / 2;
 
-    // 菜单相对于窗口的位置
-    double menuX, menuY;
+    // 菜单在屏幕上的绝对位置
+    double menuScreenX, menuScreenY;
 
     if (isLeft) {
       // 宠物在左边，菜单显示在右边
-      menuX = petCenterX + kPetSize / 2 + kMenuGap;
+      menuScreenX = petScreenX + kPetSize / 2 + kMenuGap;
     } else {
       // 宠物在右边，菜单显示在左边
-      menuX = petCenterX - kPetSize / 2 - kMenuWidth - kMenuGap;
+      menuScreenX = petScreenX - kPetSize / 2 - kMenuWidth - kMenuGap;
     }
 
     if (isTop) {
       // 宠物在上边，菜单显示在下边
-      menuY = petCenterY + kPetSize / 2 + kMenuGap;
+      menuScreenY = petScreenY + kPetSize / 2 + kMenuGap;
     } else {
       // 宠物在下边，菜单显示在上边
-      menuY = petCenterY - kPetSize / 2 - kMenuGap - 150; // 菜单高度约150
+      menuScreenY = petScreenY - kPetSize / 2 - kMenuGap - 200; // 菜单高度约200
     }
 
-    // 确保菜单位置有效（不使用clamp避免参数问题）
-    if (menuX < 4) menuX = 4;
-    if (menuX > _windowSize.width - kMenuWidth - 4) {
-      menuX = _windowSize.width - kMenuWidth - 4;
+    // 确保菜单不超出屏幕边界
+    if (menuScreenX < 0) menuScreenX = 10;
+    if (menuScreenX > screenSize.width - kMenuWidth) {
+      menuScreenX = screenSize.width - kMenuWidth - 10;
     }
-    if (menuY < 4) menuY = 4;
-    if (menuY > _windowSize.height - 150) {
-      menuY = _windowSize.height - 150;
+    if (menuScreenY < 0) menuScreenY = 10;
+    if (menuScreenY > screenSize.height - 200) {
+      menuScreenY = screenSize.height - 210;
     }
 
-    // 最终安全检查
-    if (menuX < 0) menuX = 4;
-    if (menuY < 0) menuY = 4;
+    return Offset(menuScreenX, menuScreenY);
+  }
 
-    return Offset(menuX, menuY);
+  /// 显示右键菜单（扩大窗口）
+  Future<void> _openContextMenu() async {
+    PlatformLogger.instance.logInfo(
+      '🍔 _openContextMenu 被调用，当前菜单状态: $_showContextMenu',
+    );
+    
+    if (!DesktopPetManager.isSupported()) {
+      PlatformLogger.instance.logInfo('🍔 平台不支持，返回');
+      return;
+    }
+
+    try {
+      // ✅ 简化方案：直接扩大窗口到足够显示菜单的大小
+      // 菜单宽度 160，高度约 200，加上宠物 120x120，再加上边距
+      const expandedWidth = 300.0;  // 足够显示宠物和菜单
+      const expandedHeight = 250.0; // 足够显示宠物和菜单
+      
+      PlatformLogger.instance.logInfo(
+        '🍔 扩大窗口以显示菜单\n'
+        '   当前尺寸: ${_windowSize.width}x${_windowSize.height}\n'
+        '   新尺寸: $expandedWidth x $expandedHeight\n'
+        '   窗口位置: (${_windowPosition.dx}, ${_windowPosition.dy})',
+      );
+      
+      // 扩大窗口
+      await windowManager.setSize(const Size(expandedWidth, expandedHeight));
+      _windowSize = const Size(expandedWidth, expandedHeight);
+      
+      setState(() {
+        _showContextMenu = true;
+      });
+      
+      PlatformLogger.instance.logInfo('🍔 菜单状态已设置为 true');
+    } catch (e) {
+      PlatformLogger.instance.logError('Failed to show context menu', e);
+    }
+  }
+
+  /// 隐藏右键菜单（恢复窗口大小）
+  Future<void> _closeContextMenu() async {
+    PlatformLogger.instance.logInfo(
+      '🍔 _closeContextMenu 被调用，当前菜单状态: $_showContextMenu',
+    );
+    
+    if (!DesktopPetManager.isSupported()) {
+      setState(() {
+        _showContextMenu = false;
+      });
+      return;
+    }
+
+    try {
+      setState(() {
+        _showContextMenu = false;
+      });
+      
+      // 恢复窗口到宠物大小
+      if (_windowSize.width > _petWindowSize.width ||
+          _windowSize.height > _petWindowSize.height) {
+        PlatformLogger.instance.logInfo(
+          '🍔 恢复窗口到宠物大小: ${_petWindowSize.width}x${_petWindowSize.height}',
+        );
+        
+        await windowManager.setSize(_petWindowSize);
+        _windowSize = _petWindowSize;
+      }
+    } catch (e) {
+      PlatformLogger.instance.logError('Failed to hide context menu', e);
+    }
   }
 
   @override
@@ -197,8 +293,11 @@ class _DesktopPetScreenState extends State<DesktopPetScreen>
       return const SizedBox.shrink(); // 完全透明，不显示任何内容
     }
 
-    final screenSize = MediaQuery.of(context).size;
-    final menuPosition = _calculateMenuPosition(screenSize);
+    // ✅ 简化：菜单固定显示在宠物右侧
+    const petLeft = 0.0;     // 宠物固定在左上角
+    const petTop = 0.0;
+    const menuLeft = 130.0;  // 菜单在宠物右侧（宠物120 + 间距10）
+    const menuTop = 10.0;    // 顶部留一点边距
 
     return FadeTransition(
       opacity: _fadeAnimation,
@@ -212,37 +311,42 @@ class _DesktopPetScreenState extends State<DesktopPetScreen>
             ),
           ),
 
-          // 宠物组件 - 居中显示并捕获事件
-          Center(
+          // 宠物组件 - 固定在左上角，不使用 Center
+          Positioned(
+            left: petLeft,
+            top: petTop,
             child: DesktopPetWidget(
               preferences: widget.petManager.petPreferences,
               onDoubleClick: _returnToFullApp,
               onRightClick: () {
-                setState(() {
-                  _showContextMenu = !_showContextMenu;
-                });
+                PlatformLogger.instance.logInfo(
+                  '🍔 右键回调被调用，当前菜单状态: $_showContextMenu',
+                );
+                if (_showContextMenu) {
+                  PlatformLogger.instance.logInfo('🍔 菜单已显示，调用 _closeContextMenu');
+                  _closeContextMenu();
+                } else {
+                  PlatformLogger.instance.logInfo('🍔 菜单未显示，调用 _openContextMenu');
+                  _openContextMenu();
+                }
               },
             ),
           ),
 
-          // 右键菜单 - 智能定位（如果有菜单，显示一个透明背景层来捕获菜单外的点击）
+          // 右键菜单 - 可以超越原始窗口范围显示
           if (_showContextMenu) ...[
             // 透明背景层 - 点击菜单外区域关闭菜单
             Positioned.fill(
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  setState(() {
-                    _showContextMenu = false;
-                  });
-                },
+                onTap: _closeContextMenu,
                 child: Container(color: Colors.transparent),
               ),
             ),
-            // 菜单本身
+            // 菜单本身 - 固定显示在宠物右侧
             Positioned(
-              left: menuPosition.dx,
-              top: menuPosition.dy,
+              left: menuLeft,
+              top: menuTop,
               child: Material(
                 elevation: 2,
                 borderRadius: BorderRadius.circular(8),
@@ -427,9 +531,7 @@ class _DesktopPetScreenState extends State<DesktopPetScreen>
 
   Future<void> _launchPlugin(String pluginName) async {
     // 关闭菜单
-    setState(() {
-      _showContextMenu = false;
-    });
+    await _closeContextMenu();
 
     try {
       // 找到对应的插件

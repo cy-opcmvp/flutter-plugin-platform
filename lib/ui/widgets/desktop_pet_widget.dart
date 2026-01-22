@@ -4,7 +4,7 @@ import 'package:window_manager/window_manager.dart';
 import 'dart:math' as math;
 import 'dart:async';
 import '../../core/services/platform_environment.dart';
-import '../../core/services/desktop_pet_click_through_service.dart';
+import '../../core/services/platform_logger.dart';
 import '../../core/models/platform_models.dart';
 import '../../core/extensions/context_extensions.dart';
 
@@ -56,11 +56,6 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
   // Platform capabilities
   late PlatformCapabilities _platformCapabilities;
 
-  // 点击穿透相关
-  final GlobalKey _petIconKey = GlobalKey();
-  final DesktopPetClickThroughService _clickThroughService =
-      DesktopPetClickThroughService.instance;
-
   @override
   void initState() {
     super.initState();
@@ -79,12 +74,12 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
     // 添加窗口监听器
     windowManager.addListener(this);
 
-    // 呼吸动画
+    // 呼吸动画 - 减小幅度避免溢出（0.95-1.05，容器120x120，最大120x120）
     _breathingController = AnimationController(
       duration: const Duration(seconds: 3),
       vsync: this,
     );
-    _breathingAnimation = Tween<double>(begin: 0.9, end: 1.1).animate(
+    _breathingAnimation = Tween<double>(begin: 0.90, end: 1.00).animate(
       CurvedAnimation(parent: _breathingController!, curve: Curves.easeInOut),
     );
 
@@ -102,11 +97,6 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
       _breathingController!.repeat(reverse: true);
       _startRandomBlinking();
     }
-
-    // 初始化点击穿透 - 在第一帧后更新宠物区域
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _updatePetRegion();
-    });
   }
 
   bool get _isAnimationsEnabled =>
@@ -134,41 +124,6 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
     });
   }
 
-  /// 更新宠物图标区域到原生层（用于 WM_NCHITTEST 判断）
-  void _updatePetRegion() {
-    if (!_platformCapabilities.supportsDesktopPet) {
-      return;
-    }
-
-    try {
-      final RenderBox? renderBox =
-          _petIconKey.currentContext?.findRenderObject() as RenderBox?;
-      if (renderBox == null) {
-        return;
-      }
-
-      // 获取宠物图标的大小
-      final size = renderBox.size;
-
-      // 窗口大小固定为 200x200，宠物图标在中心，大小为 120x120
-      // 计算窗口客户区坐标
-      final left = (200 - size.width) / 2;
-      final top = (200 - size.height) / 2;
-      final right = left + size.width;
-      final bottom = top + size.height;
-
-      // 通过 MethodChannel 传递给原生层
-      _clickThroughService.updatePetRegion(
-        left: left,
-        top: top,
-        right: right,
-        bottom: bottom,
-      );
-    } catch (e) {
-      // 忽略错误
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     // If desktop pet is not supported on this platform, show fallback UI
@@ -176,9 +131,12 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
       return _buildWebFallbackWidget(context);
     }
 
-    return Opacity(
-      opacity: _opacity,
-      child: Listener(
+    return SizedBox(
+      width: 120,  // 完整窗口大小
+      height: 120,
+      child: Opacity(
+        opacity: _opacity,
+        child: Listener(
         onPointerDown: _isInteractionsEnabled ? _handlePointerDown : null,
         onPointerMove: _isInteractionsEnabled ? _handlePointerMove : null,
         onPointerUp: _isInteractionsEnabled ? _handlePointerUp : null,
@@ -226,13 +184,13 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
           },
         ),
       ),
+      ),
     );
   }
 
   /// Builds the main pet container widget
   Widget _buildPetContainer(bool isHovered, bool isDragging) {
     return Container(
-      key: _petIconKey, // 用于获取宠物图标位置
       width: 120,
       height: 120,
       decoration: BoxDecoration(
@@ -358,37 +316,47 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
   void _handlePointerDown(PointerDownEvent event) {
     final now = DateTime.now().millisecondsSinceEpoch;
 
-    // 检测是否是右键（buttons == 2）
-    if (event.kind == PointerDeviceKind.mouse && event.buttons == 2) {
+    // 检测是否是右键（使用 kSecondaryMouseButton）
+    if (event.kind == PointerDeviceKind.mouse && 
+        event.buttons & kSecondaryMouseButton != 0) {
       // 右键点击
+      PlatformLogger.instance.logInfo('🖱️ 右键点击检测到');
       widget.onRightClick?.call();
       return;
     }
 
-    // 只处理左键（buttons == 1）的拖拽和双击
-    if (event.buttons != 1) {
+    // 只处理左键（buttons == 1 或 kPrimaryMouseButton）的拖拽和双击
+    if (event.kind == PointerDeviceKind.mouse &&
+        event.buttons & kPrimaryMouseButton == 0) {
       return;
     }
 
     // 双击检测
     if (_lastTapTime != null && now - _lastTapTime! < _doubleTapInterval) {
-      // 双击成功
-      widget.onDoubleClick?.call();
+      // 双击成功 - 清除所有状态并立即返回
+      PlatformLogger.instance.logInfo('🖱️ 双击检测到');
       _lastTapTime = null;
+      _dragStartPosition = null;
+      _dragTimeoutTimer?.cancel();
+      _isWaitingForDrag.value = false;
+      _isDragging.value = false;
+      widget.onDoubleClick?.call();
       return;
     }
+    
+    // 记录本次点击时间（用于下次双击检测）
     _lastTapTime = now;
 
-    // 拖拽开始：记录起始位置
+    // 拖拽准备：记录起始位置，但不立即开始拖拽
     _dragStartPosition = event.position;
-    _isDragging.value = true;
     _isHovered.value = false;
     _isWaitingForDrag.value = true;
+    // 注意：这里不设置 _isDragging.value = true，等待移动后再设置
 
-    // 启动超时定时器（1000ms后自动取消拖拽）
+    // 启动超时定时器（1000ms后自动取消拖拽等待）
     _dragTimeoutTimer?.cancel();
     _dragTimeoutTimer = Timer(const Duration(milliseconds: 1000), () {
-      if (_isWaitingForDrag.value && _isDragging.value && mounted) {
+      if (_isWaitingForDrag.value && mounted) {
         _isWaitingForDrag.value = false;
         _isDragging.value = false;
         _isHovered.value = true;
@@ -403,8 +371,10 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
       final delta = event.position - _dragStartPosition!;
       if (delta.distance > _dragStartDistance) {
         // 移动距离超过阈值，开始拖拽
+        PlatformLogger.instance.logInfo('🖱️ 检测到拖拽移动，开始拖拽');
         _dragTimeoutTimer?.cancel();
         _isWaitingForDrag.value = false;
+        _isDragging.value = true; // 现在才设置为拖拽状态
         _startDragging();
       }
     }
@@ -414,18 +384,16 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
   void _handlePointerUp(PointerUpEvent event) {
     _dragTimeoutTimer?.cancel();
 
-    _isWaitingForDrag.value = false;
-    _dragStartPosition = null;
-
+    // 如果正在拖拽，结束拖拽
     if (_isDragging.value) {
+      PlatformLogger.instance.logInfo('🖱️ 拖拽结束');
       _isDragging.value = false;
       _isHovered.value = true;
-
-      // 更新宠物区域
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _updatePetRegion();
-      });
     }
+    
+    // 清理拖拽相关状态
+    _isWaitingForDrag.value = false;
+    _dragStartPosition = null;
   }
 
   /// 开始拖拽：调用原生拖拽API
@@ -490,11 +458,6 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
       _isDragging.value = false;
       _isHovered.value = true;
       _isWaitingForDrag.value = false;
-
-      // 更新宠物区域
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _updatePetRegion();
-      });
     }
   }
 
@@ -559,7 +522,7 @@ class DesktopPetContextMenu extends StatelessWidget {
       return Card(
         elevation: 2,
         child: Container(
-          width: 160,
+          width: 120,
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -586,7 +549,7 @@ class DesktopPetContextMenu extends StatelessWidget {
     return Card(
       elevation: 2,
       child: Container(
-        width: 160, // 更紧凑的宽度
+        width: 120, // 更紧凑的宽度
         padding: const EdgeInsets.symmetric(vertical: 4),
         child: Column(
           mainAxisSize: MainAxisSize.min,

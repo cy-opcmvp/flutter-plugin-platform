@@ -10,6 +10,54 @@
 - [技术栈](tech.md) - 技术选型和开发规范
 - [.kiro/specs/](../specs/) - 技术规范目录
 
+## 🪝 Kiro Hooks（钩子）
+
+Kiro 支持创建 Agent Hooks，允许在特定事件发生时自动触发 AI 执行。
+
+### 钩子类型
+
+**触发事件**:
+- 发送消息给 Agent 时
+- Agent 执行完成时
+- 创建新会话时（首次发送消息）
+- 保存代码文件时
+- 更新翻译字符串时
+- 手动点击钩子按钮时
+
+**钩子动作**:
+- 发送新消息给 Agent（提醒或指令）
+- 执行 Shell 命令（可选提供消息作为输入）
+
+### 使用场景示例
+
+```yaml
+# 保存文件时自动运行测试
+on: file_save
+pattern: "**/*.dart"
+action: run_command
+command: "flutter test"
+
+# 更新翻译时确保其他语言同步
+on: file_save
+pattern: "lib/l10n/*.arb"
+action: send_message
+message: "请检查并更新所有语言的翻译文件"
+
+# 手动触发拼写检查
+on: manual
+name: "拼写检查"
+action: send_message
+message: "请检查 README.md 中的语法和拼写错误"
+```
+
+### 管理钩子
+
+**查看和创建钩子**:
+1. 在 Explorer 视图中找到 "Agent Hooks" 部分
+2. 或使用命令面板：`Open Kiro Hook UI`
+
+**钩子配置位置**: `.kiro/hooks/` 目录
+
 ## 📋 核心规则
 
 ### 1. 文件组织规范
@@ -154,13 +202,126 @@ Co-Authored-By: Kiro <noreply@kiro.dev>
 - ✅ 记录所有创建的文件
 - ✅ 记录所有删除的文件
 - ✅ 更新 CHANGELOG.md
+- ✅ 输出完整的对话总结
+
+#### 对话总结模板
+
+```markdown
+## 📊 本次对话总结
+
+### 修改的文件
+- [file-path-1]: {修改原因和内容}
+- [file-path-2]: {修改原因和内容}
+
+### 创建的文件
+- [new-file-path-1]: {文件用途}
+- [new-file-path-2]: {文件用途}
+
+### 删除的文件
+- [deleted-file-path-1]: {删除原因}
+
+### Git 提交信息
+```
+{type}({scope}): {subject}
+
+{body}
+
+Co-Authored-By: Kiro <noreply@kiro.dev>
+```
+
+### 变更日志更新
+已更新 CHANGELOG.md
+```
 
 #### Tag 命名格式
 `v{major}.{minor}.{patch}`
 
-- **Major**: 架构重大变更
-- **Minor**: 新增功能
-- **Patch**: Bug 修复
+- **Major**: 架构重大变更、不兼容的 API 变更
+- **Minor**: 新增功能、重要特性
+- **Patch**: Bug 修复、小改进、文档更新
+
+#### Push 前检查清单
+- [ ] 确认所有变更已提交
+- [ ] 确认提交信息符合规范
+- [ ] 确认 CHANGELOG.md 已更新
+- [ ] 运行 `flutter test` 确保测试通过
+- [ ] 运行 `flutter format .` 格式化代码
+- [ ] 运行 `flutter analyze` 静态分析
+- [ ] 评估是否需要创建 tag
+
+### 8. 测试规范
+
+#### 测试覆盖率要求
+
+| 类型 | 最低覆盖率 | 推荐覆盖率 |
+|------|-----------|-----------|
+| **核心业务逻辑** | 90% | 95% |
+| **工具类/Utils** | 100% | 100% |
+| **数据模型** | 100% | 100% |
+| **服务层** | 85% | 90% |
+| **Widget** | 80% | 85% |
+| **插件代码** | 80% | 85% |
+
+#### 测试文件组织
+
+```
+test/
+├── unit/                      # 单元测试
+│   ├── core/
+│   └── plugins/
+├── widget/                    # Widget 测试
+└── integration/               # 集成测试
+```
+
+#### 测试命名规范
+- 文件名: `{filename}_test.dart`
+- 测试组: `group('{ClassName}', () {`
+- 测试用例: `test('should {expected behavior}', () {`
+
+### 9. 错误处理规范
+
+#### 异常类型使用
+
+| 异常类型 | 使用场景 |
+|---------|---------|
+| **ArgumentError** | 参数验证失败 |
+| **StateError** | 对象状态错误 |
+| **FormatException** | 格式错误 |
+| **自定义异常** | 业务逻辑错误 |
+
+#### 错误处理原则
+1. **用户友好**: 错误信息清晰、有用、可操作
+2. **早期发现**: 尽可能在早期发现和处理错误
+3. **适当处理**: 根据错误类型采取适当策略
+4. **记录完整**: 错误日志包含足够上下文
+
+### 10. 性能优化规范 ⭐ **最高优先级**
+
+#### 核心原则
+**性能优先于复杂度** - 宁可代码复杂一点，也要保证性能最优
+
+#### Widget 性能优化
+- ✅ 使用 `Listener` 替代 `GestureDetector`（原始指针事件）
+- ✅ 高频状态使用 `ValueNotifier` 而非 `setState`
+- ✅ 使用 `const` 构造函数
+- ✅ 使用 `RepaintBoundary` 隔离频繁重绘
+
+#### 状态管理选择
+
+| 方案 | 性能 | 适用场景 |
+|------|------|---------|
+| **setState** | ⭐⭐⭐ | 简单、低频更新 |
+| **ValueNotifier** | ⭐⭐⭐⭐⭐ | 高频更新、独立状态 |
+| **Stream** | ⭐⭐⭐⭐ | 异步事件、跨组件 |
+
+**决策树**:
+```
+状态更新频率 > 10次/秒？
+├─ 是 → 使用 ValueNotifier ✅
+└─ 否 → 需要异步处理？
+    ├─ 是 → 使用 Stream
+    └─ 否 → 使用 setState
+```
 
 ## 🚀 开发指南
 
@@ -173,8 +334,17 @@ flutter run -d windows
 # 运行测试
 flutter test
 
+# 测试覆盖率
+flutter test --coverage
+
 # 构建发布版本
 flutter build windows --release
+
+# 代码格式化
+flutter format .
+
+# 静态分析
+flutter analyze
 
 # 国际化生成
 flutter gen-l10n
@@ -193,13 +363,39 @@ dart tools/plugin_cli.dart create-internal --name "Plugin Name" --type tool
 | `docs/` | 完整文档 |
 | `.kiro/specs/` | 技术规范 |
 
+### 详细规则文档
+
+更多详细规则请参考：
+- **文件组织**: 根目录保持简洁，脚本放 `scripts/`，文档放 `docs/`
+- **代码风格**: 遵循 Effective Dart，使用类型注解，优先 `const`
+- **测试规范**: AAA 模式，最低 80% 覆盖率
+- **错误处理**: 用户友好，早期发现，记录完整
+- **性能优化**: 性能优先原则，ValueNotifier 优化高频状态
+- **Git 提交**: 约定式提交，清晰的提交信息
+
 ## 📚 相关文档
 
 - [文档主索引](../../docs/MASTER_INDEX.md)
 - [插件开发指南](../../docs/guides/internal-plugin-development.md)
 - [平台服务指南](../../docs/guides/PLATFORM_SERVICES_USER_GUIDE.md)
 
+## 🔗 扩展阅读
+
+### 详细规范（.claude/rules/）
+- [文件组织规范](.claude/rules/FILE_ORGANIZATION_RULES.md)
+- [代码风格规范](.claude/rules/CODE_STYLE_RULES.md)
+- [测试规范](.claude/rules/TESTING_RULES.md)
+- [错误处理规范](.claude/rules/ERROR_HANDLING_RULES.md)
+- [性能优化规范](.claude/rules/PERFORMANCE_OPTIMIZATION_RULES.md)
+- [Git 提交规范](.claude/rules/GIT_COMMIT_RULES.md)
+- [版本控制规范](.claude/rules/VERSION_CONTROL_RULES.md)
+
 ---
 
-**版本**: v1.0.0
-**最后更新**: 2026-01-16
+**版本**: v2.0.0
+**最后更新**: 2026-01-23
+**维护者**: Flutter Plugin Platform Team
+
+---
+
+💡 **提示**: 本文档是 Kiro AI 助手的核心规则。详细规范请参考 `.claude/rules/` 目录。
