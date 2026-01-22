@@ -378,36 +378,42 @@ class DesktopPetManager {
     if (kIsWeb || !_isSupported) return;
 
     try {
-      final position =
-          _petPreferences['position'] as Map<String, dynamic>? ??
-          {'x': 100.0, 'y': 100.0};
       // 宠物窗口大小 - 稍大于宠物本身以容纳菜单
       const petWindowSize = Size(200.0, 200.0);
 
       // 确保窗口管理器已初始化
       await windowManager.ensureInitialized();
 
+      // 步骤 1: 获取当前窗口位置并保持不变
+      final currentPosition = await windowManager.getPosition();
+      PlatformLogger.instance.logInfo(
+        'Transitioning to pet mode at current position: ${currentPosition.dx}, ${currentPosition.dy}',
+      );
+
+      // 步骤 2: 设置窗口为透明（先设置透明度）
+      final targetOpacity = _petPreferences['opacity'] ?? 1.0;
+      await windowManager.setOpacity(targetOpacity);
+      await windowManager.setBackgroundColor(const Color(0x00000000)); // 透明背景
+
+      // 步骤 3: 窗口变小（设置为宠物窗口大小）
+      await windowManager.setSize(petWindowSize);
+
       // 关键：使用 setAsFrameless() 移除窗口框架（包括边框和标题栏）
       // 这会移除 title bar、outline border 等，只保留 Flutter 内容
       await windowManager.setAsFrameless();
 
-      // 设置窗口为小尺寸的桌面宠物窗口
-      await windowManager.setSize(petWindowSize);
-      await windowManager.setPosition(Offset(position['x'], position['y']));
+      // 保持窗口位置不变（不移动到固定位置）
 
       // 设置窗口属性 - 无边框透明窗口
       await windowManager.setAlwaysOnTop(true);
       await windowManager.setSkipTaskbar(true); // 不在任务栏显示
       await windowManager.setHasShadow(false); // 无阴影
-      await windowManager.setBackgroundColor(const Color(0x00000000)); // 透明背景
       await windowManager.setResizable(false); // 禁用调整大小
       await windowManager.setMaximizable(false); // 禁用最大化
       await windowManager.setMinimizable(false); // 禁用最小化
 
+      // 步骤 4: 显示宠物图标（通过显示窗口来完成）
       // 使用 waitUntilReadyToShow 确保窗口准备好后才显示
-      // 在显示前设置所有属性，避免闪烁
-      // 注意：不要在 WindowOptions 中设置 titleBarStyle，会与 setAsFrameless() 冲突
-      final targetOpacity = _petPreferences['opacity'] ?? 1.0;
       await windowManager.waitUntilReadyToShow(
         WindowOptions(
           size: petWindowSize,
@@ -415,9 +421,8 @@ class DesktopPetManager {
           backgroundColor: const Color(0x00000000),
         ),
         () async {
-          // 窗口准备就绪后，先设置位置和透明度，再显示窗口
-          await windowManager.setPosition(Offset(position['x'], position['y']));
-          await windowManager.setOpacity(targetOpacity);
+          // 窗口准备就绪后，保持当前位置并显示
+          // 不再设置位置，保持原位置
 
           // 启用点击穿透（非宠物区域穿透到桌面）
           // 只有宠物图标区域可以接收鼠标事件
@@ -425,6 +430,10 @@ class DesktopPetManager {
 
           await windowManager.show();
           await windowManager.focus();
+
+          PlatformLogger.instance.logInfo(
+            'Pet mode transition completed: window at ${currentPosition.dx}, ${currentPosition.dy}',
+          );
         },
       );
 
