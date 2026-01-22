@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:window_manager/window_manager.dart';
 import 'platform_logger.dart';
+import 'desktop_pet_click_through_service.dart';
 
 // Conditional imports for platform detection
 import 'platform_helper_stub.dart'
@@ -17,6 +18,10 @@ class DesktopPetManager {
   bool _isInitialized = false;
   bool _isDesktopPetMode = false;
   bool _isAlwaysOnTop = false;
+
+  // 点击穿透服务
+  final DesktopPetClickThroughService _clickThroughService =
+      DesktopPetClickThroughService();
 
   // Desktop pet preferences
   final Map<String, dynamic> _petPreferences = {
@@ -54,6 +59,9 @@ class DesktopPetManager {
     }
 
     try {
+      // 初始化点击穿透服务
+      await _clickThroughService.initialize();
+
       // 加载用户偏好设置
       await _loadPetPreferences();
 
@@ -410,6 +418,11 @@ class DesktopPetManager {
           // 窗口准备就绪后，先设置位置和透明度，再显示窗口
           await windowManager.setPosition(Offset(position['x'], position['y']));
           await windowManager.setOpacity(targetOpacity);
+
+          // 启用点击穿透（非宠物区域穿透到桌面）
+          // 只有宠物图标区域可以接收鼠标事件
+          await _clickThroughService.setClickThrough(true);
+
           await windowManager.show();
           await windowManager.focus();
         },
@@ -434,6 +447,9 @@ class DesktopPetManager {
     if (kIsWeb || !_isSupported) return;
 
     try {
+      // 禁用点击穿透
+      await _clickThroughService.setClickThrough(false);
+
       // 恢复窗口到正常大小和位置
       await windowManager.setSize(const Size(1200, 800));
       await windowManager.center();

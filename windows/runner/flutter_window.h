@@ -61,6 +61,14 @@ class FlutterWindow : public Win32Window {
 
   // Hotkey callback function
   void OnHotkeyPressed(const std::string& actionId);
+
+  // Handle desktop pet method calls from Flutter
+  void HandleDesktopPetMethodCall(
+      const flutter::MethodCall<flutter::EncodableValue>& call,
+      std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
+
+  // Register desktop pet method channel
+  void RegisterDesktopPetMethodChannel();
 };
 
 #endif  // RUNNER_FLUTTER_WINDOW_H_

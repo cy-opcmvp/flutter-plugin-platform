@@ -6,6 +6,7 @@
 #include <flutter/method_channel.h>
 #include <flutter/standard_method_codec.h>
 #include <fstream>
+#include <windowsx.h>  // 用于 GET_X_LPARAM 和 GET_Y_LPARAM
 
 #include "flutter/generated_plugin_registrant.h"
 #include "screenshot_plugin.h"
@@ -18,6 +19,15 @@ static struct {
   bool cancelled = false;
   int x = 0, y = 0, width = 0, height = 0;
 } g_regionSelectionResult;
+
+// 桌宠点击穿透 - 宠物图标区域（用于 WM_NCHITTEST 判断）
+static struct {
+  bool valid = false;
+  int left = 0;
+  int top = 0;
+  int right = 0;
+  int bottom = 0;
+} g_petRegion;
 
 // 文件日志函数
 static void LogToFile(const char* message) {
@@ -101,6 +111,17 @@ bool FlutterWindow::OnCreate() {
   hotkey_channel->SetMethodCallHandler(
       [this](const auto& call, auto result) {
         HandleHotkeyMethodCall(call, std::move(result));
+      });
+
+  // Register desktop pet method channel
+  auto desktop_pet_channel =
+      std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
+          flutter_controller_->engine()->messenger(), "desktop_pet",
+          &flutter::StandardMethodCodec::GetInstance());
+
+  desktop_pet_channel->SetMethodCallHandler(
+      [this](const auto& call, auto result) {
+        HandleDesktopPetMethodCall(call, std::move(result));
       });
 
   // Initialize hotkey manager
@@ -517,5 +538,141 @@ void FlutterWindow::OnHotkeyPressed(const std::string& actionId) {
 
   } else {
     LOG_FLUTTER_FMT("Unknown hotkey action: %s", actionId.c_str());
+  }
+}
+
+void FlutterWindow::RegisterDesktopPetMethodChannel() {
+  // Desktop pet method channel is already registered in OnCreate
+  LOG_FLUTTER("Desktop pet method channel registered");
+}
+
+void FlutterWindow::HandleDesktopPetMethodCall(
+    const flutter::MethodCall<flutter::EncodableValue>& call,
+    std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+  LOG_FLUTTER_FMT("Desktop pet method called: %s", call.method_name().c_str());
+
+  const auto* arguments = std::get_if<flutter::EncodableMap>(call.arguments());
+
+  if (call.method_name() == "updatePetRegion") {
+    // 更新宠物图标区域（用于 WM_NCHITTEST 判断）
+    if (!arguments) {
+      result->Error("INVALID_ARGUMENTS", "No arguments provided");
+      return;
+    }
+
+    auto leftIt = arguments->find(flutter::EncodableValue("left"));
+    auto topIt = arguments->find(flutter::EncodableValue("top"));
+    auto rightIt = arguments->find(flutter::EncodableValue("right"));
+    auto bottomIt = arguments->find(flutter::EncodableValue("bottom"));
+
+    if (leftIt == arguments->end() || topIt == arguments->end() ||
+        rightIt == arguments->end() || bottomIt == arguments->end()) {
+      result->Error("INVALID_ARGUMENTS", "Missing region coordinates");
+      return;
+    }
+
+    const auto* leftInt = std::get_if<int>(&leftIt->second);
+    const auto* topInt = std::get_if<int>(&topIt->second);
+    const auto* rightInt = std::get_if<int>(&rightIt->second);
+    const auto* bottomInt = std::get_if<int>(&bottomIt->second);
+
+    if (!leftInt || !topInt || !rightInt || !bottomInt) {
+      result->Error("INVALID_ARGUMENTS", "Invalid coordinate type, expected int");
+      return;
+    }
+
+    // 更新全局宠物区域
+    g_petRegion.valid = true;
+    g_petRegion.left = *leftInt;
+    g_petRegion.top = *topInt;
+    g_petRegion.right = *rightInt;
+    g_petRegion.bottom = *bottomInt;
+
+    LOG_FLUTTER_FMT("Pet region updated: (%d,%d) to (%d,%d)",
+                     g_petRegion.left, g_petRegion.top,
+                     g_petRegion.right, g_petRegion.bottom);
+
+    result->Success(flutter::EncodableValue(true));
+
+  } else if (call.method_name() == "setClickThrough") {
+    if (!arguments) {
+      result->Error("INVALID_ARGUMENTS", "No arguments provided");
+      return;
+    }
+
+    auto enabledIt = arguments->find(flutter::EncodableValue("enabled"));
+    if (enabledIt == arguments->end()) {
+      result->Error("INVALID_ARGUMENTS", "Missing 'enabled' parameter");
+      return;
+    }
+
+    const auto* enabledBool = std::get_if<bool>(&enabledIt->second);
+    if (!enabledBool) {
+      result->Error("INVALID_ARGUMENTS", "Invalid 'enabled' type, expected bool");
+      return;
+    }
+
+    bool enabled = *enabledBool;
+    HWND hwnd = GetHandle();
+
+    if (enabled) {
+      // 启用点击穿透 - 设置整个窗口为可点击区域
+      // 实际的点击穿透由 Flutter 层的 IgnorePointer 处理
+      LOG_FLUTTER("Click-through mode enabled (handled by Flutter layer)");
+
+      // 确保窗口区域设置为整个窗口（不做裁剪）
+      SetWindowRgn(hwnd, NULL, TRUE);
+    } else {
+      // 禁用点击穿透 - 同样设置为整个窗口
+      LOG_FLUTTER("Click-through disabled");
+      SetWindowRgn(hwnd, NULL, TRUE);
+    }
+
+    result->Success(flutter::EncodableValue(true));
+
+  } else if (call.method_name() == "setIgnoreMouseEvents") {
+    // macOS 兼容方法 - 在 Windows 上等同于 setClickThrough
+    if (!arguments) {
+      result->Error("INVALID_ARGUMENTS", "No arguments provided");
+      return;
+    }
+
+    auto ignoreIt = arguments->find(flutter::EncodableValue("ignore"));
+    if (ignoreIt == arguments->end()) {
+      result->Error("INVALID_ARGUMENTS", "Missing 'ignore' parameter");
+      return;
+    }
+
+    const auto* ignoreBool = std::get_if<bool>(&ignoreIt->second);
+    if (!ignoreBool) {
+      result->Error("INVALID_ARGUMENTS", "Invalid 'ignore' type, expected bool");
+      return;
+    }
+
+    bool ignore = *ignoreBool;
+    HWND hwnd = GetHandle();
+
+    if (ignore) {
+      LOG_FLUTTER("Ignoring mouse events (click-through)");
+      LONG_PTR exStyle = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
+      exStyle |= WS_EX_TRANSPARENT | WS_EX_LAYERED;
+      SetWindowLongPtr(hwnd, GWL_EXSTYLE, exStyle);
+      SetLayeredWindowAttributes(hwnd, 0, 255, LWA_ALPHA);
+      SetWindowPos(hwnd, nullptr, 0, 0, 0, 0,
+                   SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+    } else {
+      LOG_FLUTTER("Accepting mouse events");
+      LONG_PTR exStyle = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
+      exStyle &= ~WS_EX_TRANSPARENT;
+      SetWindowLongPtr(hwnd, GWL_EXSTYLE, exStyle);
+      SetWindowPos(hwnd, nullptr, 0, 0, 0, 0,
+                   SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+    }
+
+    result->Success(flutter::EncodableValue(true));
+
+  } else {
+    LOG_FLUTTER_FMT("Unknown desktop pet method: %s", call.method_name().c_str());
+    result->NotImplemented();
   }
 }

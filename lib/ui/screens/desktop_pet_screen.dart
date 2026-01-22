@@ -202,59 +202,64 @@ class _DesktopPetScreenState extends State<DesktopPetScreen>
 
     return FadeTransition(
       opacity: _fadeAnimation,
-      child: GestureDetector(
-        onTap: () {
-          // 点击空白区域隐藏菜单
-          setState(() {
-            _showContextMenu = false;
-          });
-        },
-        onSecondaryTapDown: (details) {
-          // 右键点击显示菜单
-          setState(() {
-            _showContextMenu = true;
-          });
-        },
-        child: Container(
-          color: Colors.transparent,
-          child: Stack(
-            children: [
-              // 宠物组件 - 居中显示
-              Center(
-                child: DesktopPetWidget(
-                  preferences: widget.petManager.petPreferences,
-                  onDoubleClick: _returnToFullApp,
-                  onRightClick: () {
-                    setState(() {
-                      _showContextMenu = !_showContextMenu;
-                    });
-                  },
+      child: Stack(
+        children: [
+          // 背景层 - 完全不接收鼠标事件，让其穿透到桌面
+          // 使用 IgnorePointer 让所有鼠标事件穿透
+          Positioned.fill(
+            child: IgnorePointer(
+              child: Container(color: Colors.transparent),
+            ),
+          ),
+
+          // 宠物组件 - 居中显示并捕获事件
+          Center(
+            child: DesktopPetWidget(
+              preferences: widget.petManager.petPreferences,
+              onDoubleClick: _returnToFullApp,
+              onRightClick: () {
+                setState(() {
+                  _showContextMenu = !_showContextMenu;
+                });
+              },
+            ),
+          ),
+
+          // 右键菜单 - 智能定位（如果有菜单，显示一个透明背景层来捕获菜单外的点击）
+          if (_showContextMenu) ...[
+            // 透明背景层 - 点击菜单外区域关闭菜单
+            Positioned.fill(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  setState(() {
+                    _showContextMenu = false;
+                  });
+                },
+                child: Container(color: Colors.transparent),
+              ),
+            ),
+            // 菜单本身
+            Positioned(
+              left: menuPosition.dx,
+              top: menuPosition.dy,
+              child: Material(
+                elevation: 2,
+                borderRadius: BorderRadius.circular(8),
+                color: Colors.transparent,
+                child: DesktopPetContextMenu(
+                  quickActions: _availablePlugins
+                      .map((p) => p.name)
+                      .toList(),
+                  onActionSelected: _launchPlugin,
+                  onOpenFullApp: _returnToFullApp,
+                  onSettings: _toggleSettings,
+                  onExitPetMode: _exitPetMode,
                 ),
               ),
-
-              // 右键菜单 - 智能定位
-              if (_showContextMenu)
-                Positioned(
-                  left: menuPosition.dx,
-                  top: menuPosition.dy,
-                  child: Material(
-                    elevation: 2,
-                    borderRadius: BorderRadius.circular(8),
-                    color: Colors.transparent,
-                    child: DesktopPetContextMenu(
-                      quickActions: _availablePlugins
-                          .map((p) => p.name)
-                          .toList(),
-                      onActionSelected: _launchPlugin,
-                      onOpenFullApp: _returnToFullApp,
-                      onSettings: _toggleSettings,
-                      onExitPetMode: _exitPetMode,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
+            ),
+          ],
+        ],
       ),
     );
   }

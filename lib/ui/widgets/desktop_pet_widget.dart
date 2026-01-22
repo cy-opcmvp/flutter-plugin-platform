@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 import 'dart:math' as math;
+import 'dart:async';
 import '../../core/services/platform_environment.dart';
+import '../../core/services/desktop_pet_click_through_service.dart';
 import '../../core/models/platform_models.dart';
 import '../../core/extensions/context_extensions.dart';
 
@@ -31,9 +33,16 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
 
   bool _isHovered = false;
   bool _isDragging = false;
+  Timer? _dragTimeoutTimer;
+  bool _isWaitingForDrag = false;
 
   // Platform capabilities
   late PlatformCapabilities _platformCapabilities;
+
+  // 点击穿透相关
+  final GlobalKey _petIconKey = GlobalKey();
+  final DesktopPetClickThroughService _clickThroughService =
+      DesktopPetClickThroughService.instance;
 
   @override
   void initState() {
@@ -73,6 +82,11 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
       _breathingController!.repeat(reverse: true);
       _startRandomBlinking();
     }
+
+    // 初始化点击穿透 - 在第一帧后更新宠物区域
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updatePetRegion();
+    });
   }
 
   bool get _isAnimationsEnabled =>
@@ -100,6 +114,41 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
     });
   }
 
+  /// 更新宠物图标区域到原生层（用于 WM_NCHITTEST 判断）
+  void _updatePetRegion() {
+    if (!_platformCapabilities.supportsDesktopPet) {
+      return;
+    }
+
+    try {
+      final RenderBox? renderBox =
+          _petIconKey.currentContext?.findRenderObject() as RenderBox?;
+      if (renderBox == null) {
+        return;
+      }
+
+      // 获取宠物图标的大小
+      final size = renderBox.size;
+
+      // 窗口大小固定为 200x200，宠物图标在中心，大小为 120x120
+      // 计算窗口客户区坐标
+      final left = (200 - size.width) / 2;
+      final top = (200 - size.height) / 2;
+      final right = left + size.width;
+      final bottom = top + size.height;
+
+      // 通过 MethodChannel 传递给原生层
+      _clickThroughService.updatePetRegion(
+        left: left,
+        top: top,
+        right: right,
+        bottom: bottom,
+      );
+    } catch (e) {
+      // 忽略错误
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // If desktop pet is not supported on this platform, show fallback UI
@@ -110,44 +159,109 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
     return Opacity(
       opacity: _opacity,
       child: Listener(
-        onPointerDown: (event) {
-          debugPrint('Listener: onPointerDown - position: ${event.position}, _isDragging: $_isDragging');
-        },
+        onPointerDown: (event) {},
         onPointerUp: (event) {
-          debugPrint('Listener: onPointerUp - position: ${event.position}, _isDragging: $_isDragging');
+          _dragTimeoutTimer?.cancel();
+
+          final wasWaiting = _isWaitingForDrag;
+          _isWaitingForDrag = false;
+
           if (_isDragging) {
-            debugPrint('Listener: Drag state reset to false via onPointerUp');
             setState(() {
               _isDragging = false;
+              _isHovered = true;
             });
           }
         },
-        onPointerMove: (event) {
-          if (_isDragging) {
-            debugPrint('Listener: onPointerMove - position: ${event.position}, delta: ${event.delta}');
-          }
-        },
+        onPointerMove: (event) {},
+        onPointerSignal: (event) {},
         child: GestureDetector(
-          onDoubleTap: _isInteractionsEnabled ? widget.onDoubleClick : null,
-          onSecondaryTap: _isInteractionsEnabled ? widget.onRightClick : null,
+          // 配置手势行为
+          behavior: HitTestBehavior.opaque,
+
+          // ===== 双击事件 =====
+          onDoubleTap: _isInteractionsEnabled
+              ? () {
+                  widget.onDoubleClick?.call();
+                }
+              : null,
+
+          // ===== 右键事件 =====
+          onSecondaryTap: _isInteractionsEnabled
+              ? () {
+                  widget.onRightClick?.call();
+                }
+              : null,
+
+          // ===== 拖拽事件 =====
+          // 拖拽按下：立即变橙色，启动1000ms超时定时器
           onPanDown: _isInteractionsEnabled
               ? (details) {
-                  debugPrint('GestureDetector: onPanDown triggered, _isDragging: $_isDragging → true');
                   setState(() {
                     _isDragging = true;
                     _isHovered = false;
+                    _isWaitingForDrag = true;
                   });
-                  debugPrint('GestureDetector: startDragging called');
-                  windowManager.startDragging();
+
+                  _dragTimeoutTimer?.cancel();
+                  _dragTimeoutTimer = Timer(const Duration(milliseconds: 1000), () {
+                    if (_isWaitingForDrag && _isDragging && mounted) {
+                      _isWaitingForDrag = false;
+                      setState(() {
+                        _isDragging = false;
+                        _isHovered = true;
+                      });
+                    }
+                  });
                 }
               : null,
+
+          // 拖拽更新：如果有任何移动，立即启动原生拖拽（仅在等待期内）
+          onPanUpdate: _isInteractionsEnabled
+              ? (details) {
+                  if (_isWaitingForDrag) {
+                    _dragTimeoutTimer?.cancel();
+                    _isWaitingForDrag = false;
+                    setState(() {});
+                    _startDragging();
+                  }
+                }
+              : null,
+
+          // ===== 拖拽结束 =====
           onPanEnd: _isInteractionsEnabled
               ? (details) {
-                  debugPrint('GestureDetector: onPanEnd triggered (backup), _isDragging: $_isDragging');
+                  _dragTimeoutTimer?.cancel();
+
+                  if (_isWaitingForDrag) {
+                    _isWaitingForDrag = false;
+                  }
+
                   if (_isDragging) {
-                    debugPrint('GestureDetector: Drag state reset via onPanEnd');
                     setState(() {
                       _isDragging = false;
+                      _isHovered = true;
+                    });
+                  }
+
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    _updatePetRegion();
+                  });
+                }
+              : null,
+
+          // ===== 拖拽取消 =====
+          onPanCancel: _isInteractionsEnabled
+              ? () {
+                  _dragTimeoutTimer?.cancel();
+
+                  final wasWaiting = _isWaitingForDrag;
+                  _isWaitingForDrag = false;
+
+                  if (wasWaiting && _isDragging) {
+                    setState(() {
+                      _isDragging = false;
+                      _isHovered = true;
                     });
                   }
                 }
@@ -157,18 +271,6 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
                 ? SystemMouseCursors.grabbing
                 : SystemMouseCursors.grab,
             onEnter: (_) {
-              debugPrint('MouseRegion: onEnter, _isHovered: $_isHovered, _isDragging: $_isDragging');
-
-              // 如果已经在拖拽状态，且鼠标重新进入窗口（从外面回来），说明拖拽已结束
-              if (_isDragging && !_isHovered) {
-                debugPrint('MouseRegion: Drag ended via onEnter, reset state');
-                setState(() {
-                  _isDragging = false;
-                  _isHovered = true;
-                });
-                return;
-              }
-
               if (_isInteractionsEnabled) {
                 setState(() {
                   _isHovered = true;
@@ -176,7 +278,6 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
               }
             },
             onExit: (_) {
-              debugPrint('MouseRegion: onExit, _isHovered: $_isHovered → false, _isDragging: $_isDragging');
               if (_isInteractionsEnabled) {
                 setState(() {
                   _isHovered = false;
@@ -208,6 +309,7 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
   /// Builds the main pet container widget
   Widget _buildPetContainer() {
     return Container(
+      key: _petIconKey, // 用于获取宠物图标位置
       width: 120,
       height: 120,
       decoration: BoxDecoration(
@@ -321,7 +423,6 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
         : _isHovered
             ? Colors.green
             : Colors.blue;
-    debugPrint('_getMainColor: _isDragging=$_isDragging, _isHovered=$_isHovered → ${color.toString()}');
     return color;
   }
 
@@ -331,12 +432,24 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
         : _isHovered
             ? Colors.lightGreen
             : Colors.purple;
-    debugPrint('_getSecondaryColor: _isDragging=$_isDragging, _isHovered=$_isHovered → ${color.toString()}');
     return color;
+  }
+
+  // ===== 宠物事件处理方法 =====
+
+  /// 开始拖拽：调用原生拖拽API
+  void _startDragging() {
+    try {
+      windowManager.startDragging();
+    } catch (e) {
+      // 静默处理错误
+    }
   }
 
   @override
   void dispose() {
+    _dragTimeoutTimer?.cancel();
+
     if (_platformCapabilities.supportsDesktopPet) {
       _breathingController?.dispose();
       _blinkController?.dispose();
