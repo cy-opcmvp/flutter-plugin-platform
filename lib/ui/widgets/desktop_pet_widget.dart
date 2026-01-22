@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:window_manager/window_manager.dart';
 import 'dart:math' as math;
 import 'dart:async';
@@ -25,7 +26,7 @@ class DesktopPetWidget extends StatefulWidget {
 }
 
 class _DesktopPetWidgetState extends State<DesktopPetWidget>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WindowListener {
   AnimationController? _breathingController;
   AnimationController? _blinkController;
   Animation<double>? _breathingAnimation;
@@ -34,7 +35,21 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
   bool _isHovered = false;
   bool _isDragging = false;
   Timer? _dragTimeoutTimer;
+  Timer? _dragEndCheckTimer;
   bool _isWaitingForDrag = false;
+
+  // 双击检测
+  int? _lastTapTime;
+  static const int _doubleTapInterval = 300; // 毫秒
+
+  // 拖拽检测
+  Offset? _dragStartPosition;
+  static const double _dragStartDistance = 0.0; // 像素
+
+  // 拖拽结束检测
+  Offset? _lastWindowPosition;
+  static const Duration _dragEndCheckDelay = Duration(milliseconds: 500);
+  static const double _dragEndPositionThreshold = 2.0; // 像素
 
   // Platform capabilities
   late PlatformCapabilities _platformCapabilities;
@@ -58,6 +73,9 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
       // On unsupported platforms (like web), provide fallback behavior
       return;
     }
+
+    // 添加窗口监听器
+    windowManager.addListener(this);
 
     // 呼吸动画
     _breathingController = AnimationController(
@@ -159,148 +177,45 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
     return Opacity(
       opacity: _opacity,
       child: Listener(
-        onPointerDown: (event) {},
-        onPointerUp: (event) {
-          _dragTimeoutTimer?.cancel();
-
-          final wasWaiting = _isWaitingForDrag;
-          _isWaitingForDrag = false;
-
-          if (_isDragging) {
-            setState(() {
-              _isDragging = false;
-              _isHovered = true;
-            });
-          }
-        },
-        onPointerMove: (event) {},
+        onPointerDown: _isInteractionsEnabled ? _handlePointerDown : null,
+        onPointerMove: _isInteractionsEnabled ? _handlePointerMove : null,
+        onPointerUp: _isInteractionsEnabled ? _handlePointerUp : null,
         onPointerSignal: (event) {},
-        child: GestureDetector(
-          // 配置手势行为
-          behavior: HitTestBehavior.opaque,
-
-          // ===== 双击事件 =====
-          onDoubleTap: _isInteractionsEnabled
-              ? () {
-                  widget.onDoubleClick?.call();
-                }
-              : null,
-
-          // ===== 右键事件 =====
-          onSecondaryTap: _isInteractionsEnabled
-              ? () {
-                  widget.onRightClick?.call();
-                }
-              : null,
-
-          // ===== 拖拽事件 =====
-          // 拖拽按下：立即变橙色，启动1000ms超时定时器
-          onPanDown: _isInteractionsEnabled
-              ? (details) {
-                  setState(() {
-                    _isDragging = true;
-                    _isHovered = false;
-                    _isWaitingForDrag = true;
-                  });
-
-                  _dragTimeoutTimer?.cancel();
-                  _dragTimeoutTimer = Timer(const Duration(milliseconds: 1000), () {
-                    if (_isWaitingForDrag && _isDragging && mounted) {
-                      _isWaitingForDrag = false;
-                      setState(() {
-                        _isDragging = false;
-                        _isHovered = true;
-                      });
-                    }
-                  });
-                }
-              : null,
-
-          // 拖拽更新：如果有任何移动，立即启动原生拖拽（仅在等待期内）
-          onPanUpdate: _isInteractionsEnabled
-              ? (details) {
-                  if (_isWaitingForDrag) {
-                    _dragTimeoutTimer?.cancel();
-                    _isWaitingForDrag = false;
-                    setState(() {});
-                    _startDragging();
-                  }
-                }
-              : null,
-
-          // ===== 拖拽结束 =====
-          onPanEnd: _isInteractionsEnabled
-              ? (details) {
-                  _dragTimeoutTimer?.cancel();
-
-                  if (_isWaitingForDrag) {
-                    _isWaitingForDrag = false;
-                  }
-
-                  if (_isDragging) {
-                    setState(() {
-                      _isDragging = false;
-                      _isHovered = true;
-                    });
-                  }
-
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    _updatePetRegion();
-                  });
-                }
-              : null,
-
-          // ===== 拖拽取消 =====
-          onPanCancel: _isInteractionsEnabled
-              ? () {
-                  _dragTimeoutTimer?.cancel();
-
-                  final wasWaiting = _isWaitingForDrag;
-                  _isWaitingForDrag = false;
-
-                  if (wasWaiting && _isDragging) {
-                    setState(() {
-                      _isDragging = false;
-                      _isHovered = true;
-                    });
-                  }
-                }
-              : null,
-          child: MouseRegion(
-            cursor: _isDragging
-                ? SystemMouseCursors.grabbing
-                : SystemMouseCursors.grab,
-            onEnter: (_) {
-              if (_isInteractionsEnabled) {
-                setState(() {
-                  _isHovered = true;
-                });
-              }
-            },
-            onExit: (_) {
-              if (_isInteractionsEnabled) {
-                setState(() {
-                  _isHovered = false;
-                });
-              }
-            },
-            child: _breathingAnimation != null && _blinkAnimation != null
-                ? AnimatedBuilder(
-                    animation: Listenable.merge([
-                      _breathingAnimation!,
-                      _blinkAnimation!,
-                    ]),
-                    builder: (context, child) {
-                      return Transform.scale(
-                        scale: _isAnimationsEnabled
-                            ? _breathingAnimation!.value
-                            : 1.0,
-                        child: _buildPetContainer(),
-                      );
-                    },
-                  )
-                : _buildPetContainer(),
-          ),
+        behavior: HitTestBehavior.opaque,
+        child: MouseRegion(
+          cursor: _isDragging
+              ? SystemMouseCursors.grabbing
+              : SystemMouseCursors.grab,
+          onEnter: (_) {
+            if (_isInteractionsEnabled) {
+              setState(() {
+                _isHovered = true;
+              });
+            }
+          },
+          onExit: (_) {
+            if (_isInteractionsEnabled) {
+              setState(() {
+                _isHovered = false;
+              });
+            }
+          },
+          child: _breathingAnimation != null && _blinkAnimation != null
+              ? AnimatedBuilder(
+                  animation: Listenable.merge([
+                    _breathingAnimation!,
+                    _blinkAnimation!,
+                  ]),
+                  builder: (context, child) {
+                    return Transform.scale(
+                      scale: _isAnimationsEnabled
+                          ? _breathingAnimation!.value
+                          : 1.0,
+                      child: _buildPetContainer(),
+                    );
+                  },
+                )
+              : _buildPetContainer(),
         ),
       ),
     );
@@ -421,8 +336,8 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
     final color = _isDragging
         ? Colors.orange
         : _isHovered
-            ? Colors.green
-            : Colors.blue;
+        ? Colors.green
+        : Colors.blue;
     return color;
   }
 
@@ -430,27 +345,185 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
     final color = _isDragging
         ? Colors.deepOrange
         : _isHovered
-            ? Colors.lightGreen
-            : Colors.purple;
+        ? Colors.lightGreen
+        : Colors.purple;
     return color;
   }
 
   // ===== 宠物事件处理方法 =====
 
+  /// 处理指针按下事件
+  void _handlePointerDown(PointerDownEvent event) {
+    final now = DateTime.now().millisecondsSinceEpoch;
+
+    // 检测是否是右键（buttons == 2）
+    if (event.kind == PointerDeviceKind.mouse && event.buttons == 2) {
+      // 右键点击
+      widget.onRightClick?.call();
+      return;
+    }
+
+    // 只处理左键（buttons == 1）的拖拽和双击
+    if (event.buttons != 1) {
+      return;
+    }
+
+    // 双击检测
+    if (_lastTapTime != null && now - _lastTapTime! < _doubleTapInterval) {
+      // 双击成功
+      widget.onDoubleClick?.call();
+      _lastTapTime = null;
+      return;
+    }
+    _lastTapTime = now;
+
+    // 拖拽开始：记录起始位置
+    _dragStartPosition = event.position;
+    setState(() {
+      _isDragging = true;
+      _isHovered = false;
+      _isWaitingForDrag = true;
+    });
+
+    // 启动超时定时器（1000ms后自动取消拖拽）
+    _dragTimeoutTimer?.cancel();
+    _dragTimeoutTimer = Timer(const Duration(milliseconds: 1000), () {
+      if (_isWaitingForDrag && _isDragging && mounted) {
+        _isWaitingForDrag = false;
+        setState(() {
+          _isDragging = false;
+          _isHovered = true;
+        });
+      }
+    });
+  }
+
+  /// 处理指针移动事件
+  void _handlePointerMove(PointerMoveEvent event) {
+    // 如果在等待拖拽期间，检测移动距离
+    if (_isWaitingForDrag && _dragStartPosition != null) {
+      final delta = event.position - _dragStartPosition!;
+      if (delta.distance > _dragStartDistance) {
+        // 移动距离超过阈值，开始拖拽
+        _dragTimeoutTimer?.cancel();
+        _isWaitingForDrag = false;
+        setState(() {});
+        _startDragging();
+      }
+    }
+  }
+
+  /// 处理指针抬起事件
+  void _handlePointerUp(PointerUpEvent event) {
+    _dragTimeoutTimer?.cancel();
+
+    _isWaitingForDrag = false;
+    _dragStartPosition = null;
+
+    if (_isDragging) {
+      setState(() {
+        _isDragging = false;
+        _isHovered = true;
+      });
+
+      // 更新宠物区域
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _updatePetRegion();
+      });
+    }
+  }
+
   /// 开始拖拽：调用原生拖拽API
-  void _startDragging() {
+  void _startDragging() async {
     try {
+      // 获取当前窗口位置作为初始位置
+      _lastWindowPosition = await windowManager.getPosition();
+
+      // 启动原生拖拽
       windowManager.startDragging();
+
+      // 启动拖拽结束检测定时器
+      _startDragEndCheck();
     } catch (e) {
       // 静默处理错误
+    }
+  }
+
+  /// 启动拖拽结束检测
+  void _startDragEndCheck() {
+    _dragEndCheckTimer?.cancel();
+    _dragEndCheckTimer = Timer(_dragEndCheckDelay, () {
+      if (mounted && _isDragging) {
+        _checkDragEnd();
+      }
+    });
+  }
+
+  /// 检查拖拽是否结束
+  Future<void> _checkDragEnd() async {
+    try {
+      final currentPosition = await windowManager.getPosition();
+
+      // 如果位置与上次位置相比变化小于阈值，认为拖拽结束
+      if (_lastWindowPosition != null) {
+        final deltaX = (currentPosition.dx - _lastWindowPosition!.dx).abs();
+        final deltaY = (currentPosition.dy - _lastWindowPosition!.dy).abs();
+
+        if (deltaX < _dragEndPositionThreshold &&
+            deltaY < _dragEndPositionThreshold) {
+          // 位置不再变化，拖拽结束
+          _endDragging();
+          return;
+        }
+      }
+
+      // 更新位置并继续检测
+      _lastWindowPosition = currentPosition;
+      _startDragEndCheck();
+    } catch (e) {
+      // 出错时也结束拖拽
+      _endDragging();
+    }
+  }
+
+  /// 结束拖拽
+  void _endDragging() {
+    _dragEndCheckTimer?.cancel();
+    _dragTimeoutTimer?.cancel();
+
+    if (_isDragging) {
+      setState(() {
+        _isDragging = false;
+        _isHovered = true;
+        _isWaitingForDrag = false;
+      });
+
+      // 更新宠物区域
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _updatePetRegion();
+      });
+    }
+  }
+
+  // ===== WindowListener 回调 =====
+
+  @override
+  void onWindowMove() {
+    // 窗口移动时更新位置记录
+    if (_isDragging) {
+      windowManager.getPosition().then((position) {
+        _lastWindowPosition = position;
+      });
     }
   }
 
   @override
   void dispose() {
     _dragTimeoutTimer?.cancel();
+    _dragEndCheckTimer?.cancel();
 
     if (_platformCapabilities.supportsDesktopPet) {
+      windowManager.removeListener(this);
       _breathingController?.dispose();
       _blinkController?.dispose();
     }
