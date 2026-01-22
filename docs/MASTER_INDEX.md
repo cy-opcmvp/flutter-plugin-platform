@@ -75,6 +75,9 @@ docs/
 └── reference/                        # 📋 参考文档
     └── platform-fallback-values.md  # 平台回退值
 
+├── knowledge/                        # 💡 知识库
+    └── desktop-pet-performance-optimization.md  # Desktop Pet 性能优化案例
+
 .kiro/specs/                          # 📐 技术规范
 ├── platform-services/                # 平台服务规范
 │   ├── design.md                    # 架构设计

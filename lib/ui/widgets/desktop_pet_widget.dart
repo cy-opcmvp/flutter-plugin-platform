@@ -32,11 +32,13 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
   Animation<double>? _breathingAnimation;
   Animation<double>? _blinkAnimation;
 
-  bool _isHovered = false;
-  bool _isDragging = false;
+  // 使用 ValueNotifier 管理高频状态，提升性能
+  final ValueNotifier<bool> _isHovered = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> _isDragging = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> _isWaitingForDrag = ValueNotifier<bool>(false);
+
   Timer? _dragTimeoutTimer;
   Timer? _dragEndCheckTimer;
-  bool _isWaitingForDrag = false;
 
   // 双击检测
   int? _lastTapTime;
@@ -182,47 +184,53 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
         onPointerUp: _isInteractionsEnabled ? _handlePointerUp : null,
         onPointerSignal: (event) {},
         behavior: HitTestBehavior.opaque,
-        child: MouseRegion(
-          cursor: _isDragging
-              ? SystemMouseCursors.grabbing
-              : SystemMouseCursors.grab,
-          onEnter: (_) {
-            if (_isInteractionsEnabled) {
-              setState(() {
-                _isHovered = true;
-              });
-            }
+        child: ValueListenableBuilder<bool>(
+          valueListenable: _isDragging,
+          builder: (context, isDragging, _) {
+            return MouseRegion(
+              cursor: isDragging
+                  ? SystemMouseCursors.grabbing
+                  : SystemMouseCursors.grab,
+              onEnter: (_) {
+                if (_isInteractionsEnabled) {
+                  _isHovered.value = true;
+                }
+              },
+              onExit: (_) {
+                if (_isInteractionsEnabled) {
+                  _isHovered.value = false;
+                }
+              },
+              child: ValueListenableBuilder<bool>(
+                valueListenable: _isHovered,
+                builder: (context, isHovered, _) {
+                  return _breathingAnimation != null && _blinkAnimation != null
+                      ? AnimatedBuilder(
+                          animation: Listenable.merge([
+                            _breathingAnimation!,
+                            _blinkAnimation!,
+                          ]),
+                          builder: (context, child) {
+                            return Transform.scale(
+                              scale: _isAnimationsEnabled
+                                  ? _breathingAnimation!.value
+                                  : 1.0,
+                              child: _buildPetContainer(isHovered, isDragging),
+                            );
+                          },
+                        )
+                      : _buildPetContainer(isHovered, isDragging);
+                },
+              ),
+            );
           },
-          onExit: (_) {
-            if (_isInteractionsEnabled) {
-              setState(() {
-                _isHovered = false;
-              });
-            }
-          },
-          child: _breathingAnimation != null && _blinkAnimation != null
-              ? AnimatedBuilder(
-                  animation: Listenable.merge([
-                    _breathingAnimation!,
-                    _blinkAnimation!,
-                  ]),
-                  builder: (context, child) {
-                    return Transform.scale(
-                      scale: _isAnimationsEnabled
-                          ? _breathingAnimation!.value
-                          : 1.0,
-                      child: _buildPetContainer(),
-                    );
-                  },
-                )
-              : _buildPetContainer(),
         ),
       ),
     );
   }
 
   /// Builds the main pet container widget
-  Widget _buildPetContainer() {
+  Widget _buildPetContainer(bool isHovered, bool isDragging) {
     return Container(
       key: _petIconKey, // 用于获取宠物图标位置
       width: 120,
@@ -231,8 +239,8 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
         shape: BoxShape.circle,
         gradient: RadialGradient(
           colors: [
-            _getMainColor().withValues(alpha: 0.9),
-            _getSecondaryColor().withValues(alpha: 0.7),
+            _getMainColor(isHovered, isDragging).withValues(alpha: 0.9),
+            _getSecondaryColor(isHovered, isDragging).withValues(alpha: 0.7),
           ],
         ),
       ),
@@ -240,7 +248,7 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
         alignment: Alignment.center,
         children: [
           // 主体图标
-          Icon(Icons.pets, color: Colors.white, size: _isDragging ? 35 : 40),
+          Icon(Icons.pets, color: Colors.white, size: isDragging ? 35 : 40),
 
           // 眼睛
           if (_isAnimationsEnabled && _blinkAnimation != null)
@@ -253,7 +261,7 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
             ),
 
           // 状态指示器
-          if (_isDragging)
+          if (isDragging)
             Positioned(
               bottom: 10,
               child: Container(
@@ -332,22 +340,16 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
     );
   }
 
-  Color _getMainColor() {
-    final color = _isDragging
-        ? Colors.orange
-        : _isHovered
-        ? Colors.green
-        : Colors.blue;
-    return color;
+  Color _getMainColor(bool isHovered, bool isDragging) {
+    if (isDragging) return Colors.orange;
+    if (isHovered) return Colors.green;
+    return Colors.blue;
   }
 
-  Color _getSecondaryColor() {
-    final color = _isDragging
-        ? Colors.deepOrange
-        : _isHovered
-        ? Colors.lightGreen
-        : Colors.purple;
-    return color;
+  Color _getSecondaryColor(bool isHovered, bool isDragging) {
+    if (isDragging) return Colors.deepOrange;
+    if (isHovered) return Colors.lightGreen;
+    return Colors.purple;
   }
 
   // ===== 宠物事件处理方法 =====
@@ -379,21 +381,17 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
 
     // 拖拽开始：记录起始位置
     _dragStartPosition = event.position;
-    setState(() {
-      _isDragging = true;
-      _isHovered = false;
-      _isWaitingForDrag = true;
-    });
+    _isDragging.value = true;
+    _isHovered.value = false;
+    _isWaitingForDrag.value = true;
 
     // 启动超时定时器（1000ms后自动取消拖拽）
     _dragTimeoutTimer?.cancel();
     _dragTimeoutTimer = Timer(const Duration(milliseconds: 1000), () {
-      if (_isWaitingForDrag && _isDragging && mounted) {
-        _isWaitingForDrag = false;
-        setState(() {
-          _isDragging = false;
-          _isHovered = true;
-        });
+      if (_isWaitingForDrag.value && _isDragging.value && mounted) {
+        _isWaitingForDrag.value = false;
+        _isDragging.value = false;
+        _isHovered.value = true;
       }
     });
   }
@@ -401,13 +399,12 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
   /// 处理指针移动事件
   void _handlePointerMove(PointerMoveEvent event) {
     // 如果在等待拖拽期间，检测移动距离
-    if (_isWaitingForDrag && _dragStartPosition != null) {
+    if (_isWaitingForDrag.value && _dragStartPosition != null) {
       final delta = event.position - _dragStartPosition!;
       if (delta.distance > _dragStartDistance) {
         // 移动距离超过阈值，开始拖拽
         _dragTimeoutTimer?.cancel();
-        _isWaitingForDrag = false;
-        setState(() {});
+        _isWaitingForDrag.value = false;
         _startDragging();
       }
     }
@@ -417,14 +414,12 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
   void _handlePointerUp(PointerUpEvent event) {
     _dragTimeoutTimer?.cancel();
 
-    _isWaitingForDrag = false;
+    _isWaitingForDrag.value = false;
     _dragStartPosition = null;
 
-    if (_isDragging) {
-      setState(() {
-        _isDragging = false;
-        _isHovered = true;
-      });
+    if (_isDragging.value) {
+      _isDragging.value = false;
+      _isHovered.value = true;
 
       // 更新宠物区域
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -453,7 +448,7 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
   void _startDragEndCheck() {
     _dragEndCheckTimer?.cancel();
     _dragEndCheckTimer = Timer(_dragEndCheckDelay, () {
-      if (mounted && _isDragging) {
+      if (mounted && _isDragging.value) {
         _checkDragEnd();
       }
     });
@@ -491,12 +486,10 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
     _dragEndCheckTimer?.cancel();
     _dragTimeoutTimer?.cancel();
 
-    if (_isDragging) {
-      setState(() {
-        _isDragging = false;
-        _isHovered = true;
-        _isWaitingForDrag = false;
-      });
+    if (_isDragging.value) {
+      _isDragging.value = false;
+      _isHovered.value = true;
+      _isWaitingForDrag.value = false;
 
       // 更新宠物区域
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -510,7 +503,7 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
   @override
   void onWindowMove() {
     // 窗口移动时更新位置记录
-    if (_isDragging) {
+    if (_isDragging.value) {
       windowManager.getPosition().then((position) {
         _lastWindowPosition = position;
       });
@@ -519,6 +512,12 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
 
   @override
   void dispose() {
+    // 释放 ValueNotifier
+    _isHovered.dispose();
+    _isDragging.dispose();
+    _isWaitingForDrag.dispose();
+
+    // 取消定时器
     _dragTimeoutTimer?.cancel();
     _dragEndCheckTimer?.cancel();
 
@@ -704,23 +703,23 @@ class DesktopPetSettingsPanel extends StatefulWidget {
 }
 
 class _DesktopPetSettingsPanelState extends State<DesktopPetSettingsPanel> {
-  late Map<String, dynamic> _preferences;
+  late final ValueNotifier<Map<String, dynamic>> _preferences;
   late PlatformCapabilities _platformCapabilities;
 
   @override
   void initState() {
     super.initState();
-    _preferences = Map.from(widget.preferences);
+    _preferences = ValueNotifier<Map<String, dynamic>>(
+      Map.from(widget.preferences),
+    );
     _platformCapabilities = PlatformEnvironment.instance.isWeb
         ? PlatformCapabilities.forWeb()
         : PlatformCapabilities.forNative();
   }
 
   void _updatePreference(String key, dynamic value) {
-    setState(() {
-      _preferences[key] = value;
-    });
-    widget.onPreferencesChanged(_preferences);
+    _preferences.value = {..._preferences.value, key: value};
+    widget.onPreferencesChanged(_preferences.value);
   }
 
   @override
@@ -793,126 +792,129 @@ class _DesktopPetSettingsPanelState extends State<DesktopPetSettingsPanel> {
       );
     }
 
-    return Card(
-      elevation: 12,
-      child: Container(
-        width: 300,
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 标题栏
-            Row(
+    return ValueListenableBuilder<Map<String, dynamic>>(
+      valueListenable: _preferences,
+      builder: (context, preferences, _) {
+        return Card(
+          elevation: 12,
+          child: Container(
+            width: 300,
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.pets),
-                const SizedBox(width: 8),
-                Text(
-                  context.l10n.pet_settingsTitle,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                // 标题栏
+                Row(
+                  children: [
+                    const Icon(Icons.pets),
+                    const SizedBox(width: 8),
+                    Text(
+                      context.l10n.pet_settingsTitle,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: widget.onClose,
+                      iconSize: 20,
+                    ),
+                  ],
                 ),
-                const Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: widget.onClose,
-                  iconSize: 20,
+
+                const SizedBox(height: 16),
+
+                // 透明度设置
+                Row(
+                  children: [
+                    const Icon(Icons.opacity, size: 20),
+                    const SizedBox(width: 8),
+                    Text(context.l10n.pet_opacity),
+                    const Spacer(),
+                    Text('${((preferences['opacity'] ?? 1.0) * 100).round()}%'),
+                  ],
+                ),
+                Slider(
+                  value: preferences['opacity'] ?? 1.0,
+                  min: 0.3,
+                  max: 1.0,
+                  divisions: 7,
+                  onChanged: (value) => _updatePreference('opacity', value),
+                ),
+
+                const SizedBox(height: 8),
+
+                // 动画开关
+                CheckboxListTile(
+                  secondary: const Icon(Icons.animation, size: 20),
+                  title: Text(context.l10n.pet_enableAnimations),
+                  subtitle: Text(context.l10n.pet_animationsSubtitle),
+                  value: preferences['animations_enabled'] ?? true,
+                  onChanged: (value) =>
+                      _updatePreference('animations_enabled', value ?? false),
+                  dense: true,
+                ),
+
+                // 交互开关
+                CheckboxListTile(
+                  secondary: const Icon(Icons.touch_app, size: 20),
+                  title: Text(context.l10n.pet_enableInteractions),
+                  subtitle: Text(context.l10n.pet_interactionsSubtitle),
+                  value: preferences['interactions_enabled'] ?? true,
+                  onChanged: (value) =>
+                      _updatePreference('interactions_enabled', value ?? false),
+                  dense: true,
+                ),
+
+                // 自动隐藏
+                CheckboxListTile(
+                  secondary: const Icon(Icons.visibility_off, size: 20),
+                  title: Text(context.l10n.pet_autoHide),
+                  subtitle: Text(context.l10n.pet_autoHideSubtitle),
+                  value: preferences['auto_hide'] ?? false,
+                  onChanged: (value) =>
+                      _updatePreference('auto_hide', value ?? false),
+                  dense: true,
+                ),
+
+                const SizedBox(height: 16),
+
+                // 操作按钮
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          // 重置为默认设置
+                          final defaultPrefs = {
+                            'opacity': 1.0,
+                            'animations_enabled': true,
+                            'interactions_enabled': true,
+                            'auto_hide': false,
+                          };
+                          _preferences.value = defaultPrefs;
+                          widget.onPreferencesChanged(defaultPrefs);
+                        },
+                        child: Text(context.l10n.pet_reset),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: widget.onClose,
+                        child: Text(context.l10n.pet_done),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-
-            const SizedBox(height: 16),
-
-            // 透明度设置
-            Row(
-              children: [
-                const Icon(Icons.opacity, size: 20),
-                const SizedBox(width: 8),
-                Text(context.l10n.pet_opacity),
-                const Spacer(),
-                Text('${((_preferences['opacity'] ?? 1.0) * 100).round()}%'),
-              ],
-            ),
-            Slider(
-              value: _preferences['opacity'] ?? 1.0,
-              min: 0.3,
-              max: 1.0,
-              divisions: 7,
-              onChanged: (value) => _updatePreference('opacity', value),
-            ),
-
-            const SizedBox(height: 8),
-
-            // 动画开关
-            CheckboxListTile(
-              secondary: const Icon(Icons.animation, size: 20),
-              title: Text(context.l10n.pet_enableAnimations),
-              subtitle: Text(context.l10n.pet_animationsSubtitle),
-              value: _preferences['animations_enabled'] ?? true,
-              onChanged: (value) =>
-                  _updatePreference('animations_enabled', value ?? false),
-              dense: true,
-            ),
-
-            // 交互开关
-            CheckboxListTile(
-              secondary: const Icon(Icons.touch_app, size: 20),
-              title: Text(context.l10n.pet_enableInteractions),
-              subtitle: Text(context.l10n.pet_interactionsSubtitle),
-              value: _preferences['interactions_enabled'] ?? true,
-              onChanged: (value) =>
-                  _updatePreference('interactions_enabled', value ?? false),
-              dense: true,
-            ),
-
-            // 自动隐藏
-            CheckboxListTile(
-              secondary: const Icon(Icons.visibility_off, size: 20),
-              title: Text(context.l10n.pet_autoHide),
-              subtitle: Text(context.l10n.pet_autoHideSubtitle),
-              value: _preferences['auto_hide'] ?? false,
-              onChanged: (value) =>
-                  _updatePreference('auto_hide', value ?? false),
-              dense: true,
-            ),
-
-            const SizedBox(height: 16),
-
-            // 操作按钮
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () {
-                      // 重置为默认设置
-                      final defaultPrefs = {
-                        'opacity': 1.0,
-                        'animations_enabled': true,
-                        'interactions_enabled': true,
-                        'auto_hide': false,
-                      };
-                      setState(() {
-                        _preferences = defaultPrefs;
-                      });
-                      widget.onPreferencesChanged(defaultPrefs);
-                    },
-                    child: Text(context.l10n.pet_reset),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: widget.onClose,
-                    child: Text(context.l10n.pet_done),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
