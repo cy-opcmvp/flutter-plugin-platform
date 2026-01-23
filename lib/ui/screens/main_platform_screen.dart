@@ -433,6 +433,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
                         petManager: _desktopPetManager,
                         platformCore: _platformCore,
                         onLaunchPlugin: _launchPlugin, // 传入插件启动回调
+                        onOpenSettings: _openSettings, // 传入打开设置回调
                       ),
                   transitionsBuilder:
                       (context, animation, secondaryAnimation, child) {
@@ -589,6 +590,17 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
         ],
       ),
     );
+  }
+
+  /// Open settings screen
+  void _openSettings() {
+    if (mounted) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => const SettingsScreen(),
+        ),
+      );
+    }
   }
 
   /// Launch a plugin within the application context

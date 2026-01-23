@@ -26,11 +26,15 @@ class DesktopPetScreen extends StatefulWidget {
   /// 插件启动回调 - 返回要启动的插件描述符
   final void Function(PluginDescriptor plugin)? onLaunchPlugin;
 
+  /// 打开设置页面回调
+  final VoidCallback? onOpenSettings;
+
   const DesktopPetScreen({
     super.key,
     required this.petManager,
     required this.platformCore,
     this.onLaunchPlugin,
+    this.onOpenSettings,
   });
 
   @override
@@ -497,7 +501,8 @@ class _DesktopPetScreenState extends State<DesktopPetScreen>
       await widget.petManager.transitionToFullApplication();
       if (mounted) {
         Navigator.of(context).pop();
-        // 可以在这里触发打开设置的事件
+        // 触发打开设置页面的回调
+        widget.onOpenSettings?.call();
       }
     } catch (e) {
       PlatformLogger.instance.logError(
