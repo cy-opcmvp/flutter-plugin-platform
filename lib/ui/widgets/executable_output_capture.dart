@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:plugin_platform/l10n/generated/app_localizations.dart';
 import 'dart:async';
 import '../../core/interfaces/i_external_plugin.dart';
 import '../../core/models/external_plugin_models.dart';
@@ -277,6 +278,8 @@ class _ExecutableOutputCaptureState extends State<ExecutableOutputCapture> {
   }
 
   Widget _buildToolbar() {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       height: 40,
       padding: EdgeInsets.symmetric(horizontal: 8),
@@ -296,11 +299,11 @@ class _ExecutableOutputCaptureState extends State<ExecutableOutputCapture> {
               context,
             ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
           ),
-          Spacer(),
+          const Spacer(),
           IconButton(
             onPressed: _clearOutput,
-            icon: Icon(Icons.clear_all, size: 18),
-            tooltip: 'Clear Output',
+            icon: const Icon(Icons.clear_all, size: 18),
+            tooltip: l10n.executable_clearOutput,
           ),
           IconButton(
             onPressed: () {
@@ -317,12 +320,12 @@ class _ExecutableOutputCaptureState extends State<ExecutableOutputCapture> {
                   : Icons.vertical_align_center,
               size: 18,
             ),
-            tooltip: _autoScroll ? 'Disable Auto-scroll' : 'Enable Auto-scroll',
+            tooltip: _autoScroll ? l10n.executable_disableAutoScroll : l10n.executable_enableAutoScroll,
           ),
           IconButton(
             onPressed: _scrollToBottom,
-            icon: Icon(Icons.keyboard_arrow_down, size: 18),
-            tooltip: 'Scroll to Bottom',
+            icon: const Icon(Icons.keyboard_arrow_down, size: 18),
+            tooltip: l10n.executable_scrollToBottom,
           ),
         ],
       ),
@@ -437,8 +440,10 @@ class _ExecutableOutputCaptureState extends State<ExecutableOutputCapture> {
   }
 
   Widget _buildInputArea() {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
-      padding: EdgeInsets.all(8),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
         border: Border(
@@ -453,22 +458,22 @@ class _ExecutableOutputCaptureState extends State<ExecutableOutputCapture> {
             child: TextField(
               controller: _inputController,
               decoration: InputDecoration(
-                hintText: 'Enter command...',
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(
+                hintText: l10n.executable_enterCommand,
+                border: const OutlineInputBorder(),
+                contentPadding: const EdgeInsets.symmetric(
                   horizontal: 12,
                   vertical: 8,
                 ),
               ),
-              style: TextStyle(fontFamily: 'monospace'),
+              style: const TextStyle(fontFamily: 'monospace'),
               onSubmitted: _sendInput,
             ),
           ),
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
           IconButton(
             onPressed: () => _sendInput(_inputController.text),
-            icon: Icon(Icons.send),
-            tooltip: 'Send',
+            icon: const Icon(Icons.send),
+            tooltip: l10n.executable_send,
           ),
         ],
       ),

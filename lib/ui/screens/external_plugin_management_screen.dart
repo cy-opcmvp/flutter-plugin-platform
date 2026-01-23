@@ -1096,13 +1096,13 @@ class _ExternalPluginCard extends StatelessWidget {
                         IconButton(
                           onPressed: isOperationInProgress ? null : onTap,
                           icon: const Icon(Icons.info_outline),
-                          tooltip: 'Plugin Details',
+                          tooltip: l10n.externalPlugin_details,
                           iconSize: 20,
                         ),
                         IconButton(
                           onPressed: isOperationInProgress ? null : onRemove,
                           icon: const Icon(Icons.delete_outline),
-                          tooltip: 'Remove',
+                          tooltip: l10n.externalPlugin_remove,
                           iconSize: 20,
                           color: theme.colorScheme.error,
                         ),

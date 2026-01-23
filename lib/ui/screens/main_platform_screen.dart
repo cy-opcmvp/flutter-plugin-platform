@@ -18,6 +18,7 @@ import '../widgets/tag_filter_bar.dart';
 import '../../core/interfaces/i_plugin.dart';
 import '../../core/interfaces/i_platform_services.dart';
 import 'desktop_pet_screen.dart';
+import 'desktop_pet_settings_screen.dart';
 import 'service_test_screen.dart';
 import 'settings_screen.dart';
 import 'tag_management_screen.dart';
@@ -64,7 +65,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
     _platformCore = PlatformCore();
     _desktopPetManager = DesktopPetManager();
     _tagManager = TagManager.instance;
@@ -597,7 +598,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
     if (mounted) {
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => const SettingsScreen(),
+          builder: (context) => const DesktopPetSettingsScreen(),
         ),
       );
     }
@@ -800,19 +801,6 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
         actions: [
           // View mode selector
           _buildViewModeSelector(),
-          // Tag management button
-          IconButton(
-            icon: const Icon(Icons.label),
-            tooltip: l10n.tag_title,
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const TagManagementScreen(),
-                ),
-              );
-            },
-          ),
           // Settings button
           IconButton(
             icon: const Icon(Icons.settings),
@@ -821,19 +809,6 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const SettingsScreen()),
-              );
-            },
-          ),
-          // Service Test button - for testing platform services
-          IconButton(
-            icon: const Icon(Icons.science),
-            tooltip: 'Service Test',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ServiceTestScreen(),
-                ),
               );
             },
           ),
@@ -863,14 +838,12 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
               children: [
                 _buildPluginGrid(),
                 _buildActivePluginsView(),
-                _buildPlatformInfoView(),
               ],
             ),
           ),
         ],
       ),
       bottomNavigationBar: _buildBottomNavigation(),
-      floatingActionButton: _buildModeSwitchFab(),
     );
   }
 
@@ -881,34 +854,46 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
     final l10n = context.l10n;
     final isOnline = _currentMode == OperationMode.online;
     final modeName = isOnline ? l10n.mode_online : l10n.mode_local;
+    final targetMode = isOnline ? l10n.mode_local : l10n.mode_online;
 
-    return Container(
-      margin: const EdgeInsets.only(right: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: (isOnline ? Colors.green : Colors.blue).withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: (isOnline ? Colors.green : Colors.blue).withValues(alpha: 0.3),
+    return InkWell(
+      onTap: () =>
+          _switchMode(isOnline ? OperationMode.local : OperationMode.online),
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        margin: const EdgeInsets.only(right: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: (isOnline ? Colors.green : Colors.blue).withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: (isOnline ? Colors.green : Colors.blue).withValues(alpha: 0.3),
+          ),
         ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            isOnline ? Icons.cloud : Icons.offline_bolt,
-            size: 16,
-            color: isOnline ? Colors.green : Colors.blue,
-          ),
-          const SizedBox(width: 4),
-          Text(
-            modeName,
-            style: theme.textTheme.bodySmall?.copyWith(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isOnline ? Icons.cloud : Icons.offline_bolt,
+              size: 16,
               color: isOnline ? Colors.green : Colors.blue,
-              fontWeight: FontWeight.w600,
             ),
-          ),
-        ],
+            const SizedBox(width: 4),
+            Text(
+              modeName,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: isOnline ? Colors.green : Colors.blue,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(
+              Icons.sync_alt,
+              size: 14,
+              color: (isOnline ? Colors.green : Colors.blue).withValues(alpha: 0.6),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1650,183 +1635,6 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
     );
   }
 
-  /// Build platform information view
-  Widget _buildPlatformInfoView() {
-    final theme = Theme.of(context);
-    final l10n = context.l10n;
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Platform Information Card
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.platform_platformInfo,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildInfoRow(
-                    context.l10n.info_platformType,
-                    _getLocalizedPlatformType(),
-                  ),
-                  _buildInfoRow(
-                    context.l10n.info_version,
-                    _platformInfo?.version ?? context.l10n.info_unknown,
-                  ),
-                  _buildModeInfoRow(),
-                  const SizedBox(height: 16),
-                  Text(
-                    context.l10n.info_capabilities,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  if (_platformInfo != null)
-                    ..._platformInfo!.capabilities.entries.map(
-                      (entry) => _buildCapabilityRow(entry.key, entry.value),
-                    ),
-                  // 添加Desktop Pet支持信息 - Requirements 7.1: Display platform capabilities
-                  _buildCapabilityRow(
-                    context.l10n.capability_desktopPetSupport,
-                    DesktopPetManager.isSupported(),
-                  ),
-                  _buildCapabilityRow(
-                    context.l10n.capability_alwaysOnTop,
-                    DesktopPetManager.isSupported(),
-                  ),
-                  _buildCapabilityRow(
-                    context.l10n.capability_systemTray,
-                    DesktopPetManager.isSupported(),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          // Statistics Card
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.l10n.info_statistics,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildInfoRow(
-                    context.l10n.info_availablePlugins,
-                    '${_availablePlugins.length}',
-                  ),
-                  _buildInfoRow(
-                    context.l10n.info_activePlugins,
-                    '${_activePlugins.length}',
-                  ),
-                  _buildInfoRow(
-                    context.l10n.info_availableFeatures,
-                    '${_availableFeatures.length}',
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Build information row for platform details
-  Widget _buildInfoRow(String label, String value) {
-    final theme = Theme.of(context);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 2,
-            child: Text(
-              label,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: Text(
-              value,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Build capability row showing platform capabilities with description
-  Widget _buildCapabilityRow(String capabilityKey, dynamic value) {
-    final theme = Theme.of(context);
-    final l10n = context.l10n;
-
-    // Get localized name and description
-    final displayName = _getLocalizedCapabilityName(capabilityKey);
-    final description = _getLocalizedCapabilityDescription(capabilityKey);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                flex: 3,
-                child: Text(
-                  displayName,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                  ),
-                ),
-              ),
-              Icon(
-                value == true ? Icons.check_circle : Icons.cancel,
-                size: 16,
-                color: value == true ? Colors.green : Colors.red,
-              ),
-            ],
-          ),
-          if (description.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(left: 4, top: 2),
-              child: Text(
-                description,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                  fontSize: 10,
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
   /// Build bottom navigation for cross-platform consistency
   /// Requirement 1.5: Consistent navigation and user experience
   Widget _buildBottomNavigation() {
@@ -1836,23 +1644,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
       tabs: [
         Tab(icon: const Icon(Icons.apps), text: l10n.nav_plugins),
         Tab(icon: const Icon(Icons.play_circle), text: l10n.nav_active),
-        Tab(icon: const Icon(Icons.info), text: l10n.nav_info),
       ],
-    );
-  }
-
-  /// Build floating action button for mode switching
-  Widget _buildModeSwitchFab() {
-    final l10n = context.l10n;
-    final isOnline = _currentMode == OperationMode.online;
-    final targetMode = isOnline ? l10n.mode_local : l10n.mode_online;
-
-    return FloatingActionButton.extended(
-      onPressed: () =>
-          _switchMode(isOnline ? OperationMode.local : OperationMode.online),
-      icon: Icon(isOnline ? Icons.offline_bolt : Icons.cloud),
-      label: Text(l10n.mode_switchSuccess(targetMode)),
-      backgroundColor: isOnline ? Colors.blue : Colors.green,
     );
   }
 
@@ -1892,75 +1684,6 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
       context: context,
     );
     return descriptor?.metadata['description'] as String? ?? '';
-  }
-
-  /// Get localized platform type name
-  String _getLocalizedPlatformType() {
-    final l10n = context.l10n;
-    final type = _platformInfo?.type.name.toLowerCase();
-
-    switch (type) {
-      case 'windows':
-      case 'macos':
-      case 'linux':
-        return l10n.capability_desktop;
-      case 'android':
-      case 'ios':
-        return 'Mobile'; // 如果需要可以添加本地化键
-      default:
-        return type?.toUpperCase() ?? l10n.info_unknown;
-    }
-  }
-
-  /// Build mode information row with description
-  Widget _buildModeInfoRow() {
-    final theme = Theme.of(context);
-    final l10n = context.l10n;
-    final isOnline = _currentMode == OperationMode.online;
-    final modeName = isOnline ? l10n.mode_online : l10n.mode_local;
-    final modeDesc = isOnline ? l10n.mode_online_desc : l10n.mode_local_desc;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                flex: 2,
-                child: Text(
-                  l10n.info_currentMode,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                  ),
-                ),
-              ),
-              Expanded(
-                flex: 3,
-                child: Text(
-                  modeName,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                    color: isOnline ? Colors.blue : Colors.green,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 4, top: 2),
-            child: Text(
-              modeDesc,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                fontSize: 11,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   /// Get localized capability name

@@ -99,6 +99,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tag_no_tags => '暂无标签';
 
   @override
+  String get tag_total => '个标签';
+
+  @override
+  String get tag_and_more => '还有';
+
+  @override
+  String get tag_items => '个';
+
+  @override
+  String get tag_manage => '管理标签';
+
+  @override
   String get tag_create_hint => '创建自定义标签';
 
   @override
@@ -633,6 +645,44 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_theme => '主题设置';
 
   @override
+  String get settings_app => '应用设置';
+
+  @override
+  String get settings_general => '常规设置';
+
+  @override
+  String get settings_appName => '应用名称';
+
+  @override
+  String get settings_appVersion => '应用版本';
+
+  @override
+  String get appInfo_title => '应用信息';
+
+  @override
+  String get appInfo_viewDetails => '查看应用信息、配置功能和管理标签';
+
+  @override
+  String get appInfo_section_app => '应用';
+
+  @override
+  String get appInfo_section_features => '功能状态';
+
+  @override
+  String get appInfo_section_developerTools => '开发者工具';
+
+  @override
+  String get appInfo_serviceTest_desc => '测试和调试平台服务';
+
+  @override
+  String get settings_changeTheme => '更改主题';
+
+  @override
+  String settings_themeChanged(String theme) {
+    return '主题已更改为 $theme';
+  }
+
+  @override
   String get settings_languageChinese => '中文';
 
   @override
@@ -651,9 +701,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_global => '全局配置';
-
-  @override
-  String get settings_app => '应用设置';
 
   @override
   String get settings_features => '功能设置';
@@ -741,12 +788,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_plugins => '插件配置';
-
-  @override
-  String get settings_appName => '应用名称';
-
-  @override
-  String get settings_appVersion => '应用版本';
 
   @override
   String get settings_autoStart => '开机自启';
@@ -1123,6 +1164,108 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pet_moving => '移动中...';
 
   @override
+  String get desktopPet_settings_title => '桌面宠物设置';
+
+  @override
+  String get desktopPet_section_appearance => '外观';
+
+  @override
+  String get desktopPet_section_behavior => '行为';
+
+  @override
+  String get desktopPet_opacity => '透明度';
+
+  @override
+  String get desktopPet_colorTheme => '颜色主题';
+
+  @override
+  String get desktopPet_enableAnimations => '启用动画';
+
+  @override
+  String get desktopPet_animationsSubtitle => '呼吸和眨眼效果';
+
+  @override
+  String get desktopPet_enableInteractions => '启用交互';
+
+  @override
+  String get desktopPet_interactionsSubtitle => '点击和拖拽交互';
+
+  @override
+  String get desktopPet_autoHide => '自动隐藏';
+
+  @override
+  String get desktopPet_autoHideSubtitle => '不使用时隐藏';
+
+  @override
+  String get desktopPet_enabledSubtitle => '在桌面显示宠物角色';
+
+  @override
+  String get desktopPet_openSettings => '点击查看详细设置';
+
+  @override
+  String get desktopPet_settingsSaved => '桌面宠物设置已保存';
+
+  @override
+  String get desktopPet_reset => '重置为默认设置';
+
+  @override
+  String get desktopPet_resetConfirm => '确定要重置桌面宠物设置吗？';
+
+  @override
+  String get common_enabled => '已启用';
+
+  @override
+  String get common_disabled => '已禁用';
+
+  @override
+  String get settings_pluginManagement => '插件标签关联';
+
+  @override
+  String get settings_pluginManagement_desc => '配置插件与标签的关联关系';
+
+  @override
+  String get executable_clearOutput => '清空输出';
+
+  @override
+  String get executable_disableAutoScroll => '禁用自动滚动';
+
+  @override
+  String get executable_enableAutoScroll => '启用自动滚动';
+
+  @override
+  String get executable_scrollToBottom => '滚动到底部';
+
+  @override
+  String get executable_enterCommand => '输入命令...';
+
+  @override
+  String get executable_send => '发送';
+
+  @override
+  String get pluginManagement_installSample => '安装示例插件';
+
+  @override
+  String get externalPlugin_details => '插件详情';
+
+  @override
+  String get externalPlugin_remove => '移除';
+
+  @override
+  String get desktopPet_themeDefault => '默认蓝色';
+
+  @override
+  String get desktopPet_themeBlue => '天空蓝';
+
+  @override
+  String get desktopPet_themeGreen => '自然绿';
+
+  @override
+  String get desktopPet_themeOrange => '活力橙';
+
+  @override
+  String get desktopPet_themePurple => '神秘紫';
+
+  @override
   String get tooltip_switchPlugin => '切换插件';
 
   @override
@@ -1211,6 +1354,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get capability_desktop_desc => '运行在桌面操作系统上（Windows、macOS、Linux）';
+
+  @override
+  String get feature_autoStart => '开机启动';
+
+  @override
+  String get feature_minimizeToTray => '最小化到托盘';
+
+  @override
+  String get feature_enableNotifications => '通知功能';
 
   @override
   String get feature_plugin_management => '插件管理';
@@ -1719,9 +1871,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String screenshot_daysAgo(int days) {
     return '$days 天前';
   }
-
-  @override
-  String get settings_general => '常规设置';
 
   @override
   String get settings_behavior => '行为';

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:plugin_platform/l10n/generated/app_localizations.dart';
 import '../../core/interfaces/i_external_plugin.dart';
 import '../../core/models/external_plugin_models.dart';
 import 'plugin_theme_manager.dart';
@@ -332,17 +333,17 @@ class _WebViewContainerState extends State<WebViewContainer> {
         children: [
           IconButton(
             onPressed: goBack,
-            icon: Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back),
             tooltip: 'Back',
           ),
           IconButton(
             onPressed: goForward,
-            icon: Icon(Icons.arrow_forward),
+            icon: const Icon(Icons.arrow_forward),
             tooltip: 'Forward',
           ),
           IconButton(
             onPressed: reload,
-            icon: Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh),
             tooltip: 'Reload',
           ),
           Expanded(

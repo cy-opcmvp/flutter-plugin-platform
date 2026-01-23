@@ -100,6 +100,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tag_no_tags => 'No tags yet';
 
   @override
+  String get tag_total => 'tags';
+
+  @override
+  String get tag_and_more => 'and';
+
+  @override
+  String get tag_items => 'more';
+
+  @override
+  String get tag_manage => 'Manage Tags';
+
+  @override
   String get tag_create_hint => 'Create custom tag';
 
   @override
@@ -645,6 +657,45 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_theme => 'Theme';
 
   @override
+  String get settings_app => 'App Info';
+
+  @override
+  String get settings_general => 'General Settings';
+
+  @override
+  String get settings_appName => 'App Name';
+
+  @override
+  String get settings_appVersion => 'App Version';
+
+  @override
+  String get appInfo_title => 'Application Information';
+
+  @override
+  String get appInfo_viewDetails =>
+      'View app info, configure features and manage tags';
+
+  @override
+  String get appInfo_section_app => 'Application';
+
+  @override
+  String get appInfo_section_features => 'Feature Status';
+
+  @override
+  String get appInfo_section_developerTools => 'Developer Tools';
+
+  @override
+  String get appInfo_serviceTest_desc => 'Test and debug platform services';
+
+  @override
+  String get settings_changeTheme => 'Change Theme';
+
+  @override
+  String settings_themeChanged(String theme) {
+    return 'Theme changed to $theme';
+  }
+
+  @override
   String get settings_languageChinese => '中文';
 
   @override
@@ -663,9 +714,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_global => 'Global Config';
-
-  @override
-  String get settings_app => 'App Settings';
 
   @override
   String get settings_features => 'Features';
@@ -754,12 +802,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_plugins => 'Plugin Config';
-
-  @override
-  String get settings_appName => 'App Name';
-
-  @override
-  String get settings_appVersion => 'App Version';
 
   @override
   String get settings_autoStart => 'Auto Start';
@@ -1141,6 +1183,110 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pet_moving => 'Moving...';
 
   @override
+  String get desktopPet_settings_title => 'Desktop Pet Settings';
+
+  @override
+  String get desktopPet_section_appearance => 'Appearance';
+
+  @override
+  String get desktopPet_section_behavior => 'Behavior';
+
+  @override
+  String get desktopPet_opacity => 'Opacity';
+
+  @override
+  String get desktopPet_colorTheme => 'Color Theme';
+
+  @override
+  String get desktopPet_enableAnimations => 'Enable Animations';
+
+  @override
+  String get desktopPet_animationsSubtitle => 'Breathing and blinking effects';
+
+  @override
+  String get desktopPet_enableInteractions => 'Enable Interactions';
+
+  @override
+  String get desktopPet_interactionsSubtitle => 'Click and drag interactions';
+
+  @override
+  String get desktopPet_autoHide => 'Auto Hide';
+
+  @override
+  String get desktopPet_autoHideSubtitle => 'Hide when not in use';
+
+  @override
+  String get desktopPet_enabledSubtitle => 'Show pet character on desktop';
+
+  @override
+  String get desktopPet_openSettings => 'Tap to view detailed settings';
+
+  @override
+  String get desktopPet_settingsSaved => 'Desktop pet settings saved';
+
+  @override
+  String get desktopPet_reset => 'Reset to Defaults';
+
+  @override
+  String get desktopPet_resetConfirm =>
+      'Are you sure you want to reset desktop pet settings?';
+
+  @override
+  String get common_enabled => 'Enabled';
+
+  @override
+  String get common_disabled => 'Disabled';
+
+  @override
+  String get settings_pluginManagement => 'Plugin Tag Association';
+
+  @override
+  String get settings_pluginManagement_desc =>
+      'Configure plugin and tag associations';
+
+  @override
+  String get executable_clearOutput => 'Clear Output';
+
+  @override
+  String get executable_disableAutoScroll => 'Disable Auto-scroll';
+
+  @override
+  String get executable_enableAutoScroll => 'Enable Auto-scroll';
+
+  @override
+  String get executable_scrollToBottom => 'Scroll to Bottom';
+
+  @override
+  String get executable_enterCommand => 'Enter command...';
+
+  @override
+  String get executable_send => 'Send';
+
+  @override
+  String get pluginManagement_installSample => 'Install Sample Plugin';
+
+  @override
+  String get externalPlugin_details => 'Plugin Details';
+
+  @override
+  String get externalPlugin_remove => 'Remove';
+
+  @override
+  String get desktopPet_themeDefault => 'Default Blue';
+
+  @override
+  String get desktopPet_themeBlue => 'Sky Blue';
+
+  @override
+  String get desktopPet_themeGreen => 'Natural Green';
+
+  @override
+  String get desktopPet_themeOrange => 'Vibrant Orange';
+
+  @override
+  String get desktopPet_themePurple => 'Mysterious Purple';
+
+  @override
   String get tooltip_switchPlugin => 'Switch Plugin';
 
   @override
@@ -1237,6 +1383,15 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get capability_desktop_desc =>
       'Running on desktop operating system (Windows, macOS, Linux)';
+
+  @override
+  String get feature_autoStart => 'Auto Start';
+
+  @override
+  String get feature_minimizeToTray => 'Minimize to Tray';
+
+  @override
+  String get feature_enableNotifications => 'Notifications';
 
   @override
   String get feature_plugin_management => 'Plugin Management';
@@ -1771,9 +1926,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String screenshot_daysAgo(int days) {
     return '$days days ago';
   }
-
-  @override
-  String get settings_general => 'General Settings';
 
   @override
   String get settings_behavior => 'Behavior';

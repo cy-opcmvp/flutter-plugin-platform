@@ -266,6 +266,30 @@ abstract class AppLocalizations {
   /// **'暂无标签'**
   String get tag_no_tags;
 
+  /// No description provided for @tag_total.
+  ///
+  /// In zh, this message translates to:
+  /// **'个标签'**
+  String get tag_total;
+
+  /// No description provided for @tag_and_more.
+  ///
+  /// In zh, this message translates to:
+  /// **'还有'**
+  String get tag_and_more;
+
+  /// No description provided for @tag_items.
+  ///
+  /// In zh, this message translates to:
+  /// **'个'**
+  String get tag_items;
+
+  /// No description provided for @tag_manage.
+  ///
+  /// In zh, this message translates to:
+  /// **'管理标签'**
+  String get tag_manage;
+
   /// No description provided for @tag_create_hint.
   ///
   /// In zh, this message translates to:
@@ -1202,6 +1226,78 @@ abstract class AppLocalizations {
   /// **'主题设置'**
   String get settings_theme;
 
+  /// No description provided for @settings_app.
+  ///
+  /// In zh, this message translates to:
+  /// **'应用设置'**
+  String get settings_app;
+
+  /// No description provided for @settings_general.
+  ///
+  /// In zh, this message translates to:
+  /// **'常规设置'**
+  String get settings_general;
+
+  /// No description provided for @settings_appName.
+  ///
+  /// In zh, this message translates to:
+  /// **'应用名称'**
+  String get settings_appName;
+
+  /// No description provided for @settings_appVersion.
+  ///
+  /// In zh, this message translates to:
+  /// **'应用版本'**
+  String get settings_appVersion;
+
+  /// No description provided for @appInfo_title.
+  ///
+  /// In zh, this message translates to:
+  /// **'应用信息'**
+  String get appInfo_title;
+
+  /// No description provided for @appInfo_viewDetails.
+  ///
+  /// In zh, this message translates to:
+  /// **'查看应用信息、配置功能和管理标签'**
+  String get appInfo_viewDetails;
+
+  /// No description provided for @appInfo_section_app.
+  ///
+  /// In zh, this message translates to:
+  /// **'应用'**
+  String get appInfo_section_app;
+
+  /// No description provided for @appInfo_section_features.
+  ///
+  /// In zh, this message translates to:
+  /// **'功能状态'**
+  String get appInfo_section_features;
+
+  /// No description provided for @appInfo_section_developerTools.
+  ///
+  /// In zh, this message translates to:
+  /// **'开发者工具'**
+  String get appInfo_section_developerTools;
+
+  /// No description provided for @appInfo_serviceTest_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'测试和调试平台服务'**
+  String get appInfo_serviceTest_desc;
+
+  /// No description provided for @settings_changeTheme.
+  ///
+  /// In zh, this message translates to:
+  /// **'更改主题'**
+  String get settings_changeTheme;
+
+  /// No description provided for @settings_themeChanged.
+  ///
+  /// In zh, this message translates to:
+  /// **'主题已更改为 {theme}'**
+  String settings_themeChanged(String theme);
+
   /// No description provided for @settings_languageChinese.
   ///
   /// In zh, this message translates to:
@@ -1237,12 +1333,6 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'全局配置'**
   String get settings_global;
-
-  /// No description provided for @settings_app.
-  ///
-  /// In zh, this message translates to:
-  /// **'应用设置'**
-  String get settings_app;
 
   /// No description provided for @settings_features.
   ///
@@ -1417,18 +1507,6 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'插件配置'**
   String get settings_plugins;
-
-  /// No description provided for @settings_appName.
-  ///
-  /// In zh, this message translates to:
-  /// **'应用名称'**
-  String get settings_appName;
-
-  /// No description provided for @settings_appVersion.
-  ///
-  /// In zh, this message translates to:
-  /// **'应用版本'**
-  String get settings_appVersion;
 
   /// No description provided for @settings_autoStart.
   ///
@@ -2126,6 +2204,210 @@ abstract class AppLocalizations {
   /// **'移动中...'**
   String get pet_moving;
 
+  /// No description provided for @desktopPet_settings_title.
+  ///
+  /// In zh, this message translates to:
+  /// **'桌面宠物设置'**
+  String get desktopPet_settings_title;
+
+  /// No description provided for @desktopPet_section_appearance.
+  ///
+  /// In zh, this message translates to:
+  /// **'外观'**
+  String get desktopPet_section_appearance;
+
+  /// No description provided for @desktopPet_section_behavior.
+  ///
+  /// In zh, this message translates to:
+  /// **'行为'**
+  String get desktopPet_section_behavior;
+
+  /// No description provided for @desktopPet_opacity.
+  ///
+  /// In zh, this message translates to:
+  /// **'透明度'**
+  String get desktopPet_opacity;
+
+  /// No description provided for @desktopPet_colorTheme.
+  ///
+  /// In zh, this message translates to:
+  /// **'颜色主题'**
+  String get desktopPet_colorTheme;
+
+  /// No description provided for @desktopPet_enableAnimations.
+  ///
+  /// In zh, this message translates to:
+  /// **'启用动画'**
+  String get desktopPet_enableAnimations;
+
+  /// No description provided for @desktopPet_animationsSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'呼吸和眨眼效果'**
+  String get desktopPet_animationsSubtitle;
+
+  /// No description provided for @desktopPet_enableInteractions.
+  ///
+  /// In zh, this message translates to:
+  /// **'启用交互'**
+  String get desktopPet_enableInteractions;
+
+  /// No description provided for @desktopPet_interactionsSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'点击和拖拽交互'**
+  String get desktopPet_interactionsSubtitle;
+
+  /// No description provided for @desktopPet_autoHide.
+  ///
+  /// In zh, this message translates to:
+  /// **'自动隐藏'**
+  String get desktopPet_autoHide;
+
+  /// No description provided for @desktopPet_autoHideSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'不使用时隐藏'**
+  String get desktopPet_autoHideSubtitle;
+
+  /// No description provided for @desktopPet_enabledSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'在桌面显示宠物角色'**
+  String get desktopPet_enabledSubtitle;
+
+  /// No description provided for @desktopPet_openSettings.
+  ///
+  /// In zh, this message translates to:
+  /// **'点击查看详细设置'**
+  String get desktopPet_openSettings;
+
+  /// No description provided for @desktopPet_settingsSaved.
+  ///
+  /// In zh, this message translates to:
+  /// **'桌面宠物设置已保存'**
+  String get desktopPet_settingsSaved;
+
+  /// No description provided for @desktopPet_reset.
+  ///
+  /// In zh, this message translates to:
+  /// **'重置为默认设置'**
+  String get desktopPet_reset;
+
+  /// No description provided for @desktopPet_resetConfirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'确定要重置桌面宠物设置吗？'**
+  String get desktopPet_resetConfirm;
+
+  /// No description provided for @common_enabled.
+  ///
+  /// In zh, this message translates to:
+  /// **'已启用'**
+  String get common_enabled;
+
+  /// No description provided for @common_disabled.
+  ///
+  /// In zh, this message translates to:
+  /// **'已禁用'**
+  String get common_disabled;
+
+  /// No description provided for @settings_pluginManagement.
+  ///
+  /// In zh, this message translates to:
+  /// **'插件标签关联'**
+  String get settings_pluginManagement;
+
+  /// No description provided for @settings_pluginManagement_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'配置插件与标签的关联关系'**
+  String get settings_pluginManagement_desc;
+
+  /// No description provided for @executable_clearOutput.
+  ///
+  /// In zh, this message translates to:
+  /// **'清空输出'**
+  String get executable_clearOutput;
+
+  /// No description provided for @executable_disableAutoScroll.
+  ///
+  /// In zh, this message translates to:
+  /// **'禁用自动滚动'**
+  String get executable_disableAutoScroll;
+
+  /// No description provided for @executable_enableAutoScroll.
+  ///
+  /// In zh, this message translates to:
+  /// **'启用自动滚动'**
+  String get executable_enableAutoScroll;
+
+  /// No description provided for @executable_scrollToBottom.
+  ///
+  /// In zh, this message translates to:
+  /// **'滚动到底部'**
+  String get executable_scrollToBottom;
+
+  /// No description provided for @executable_enterCommand.
+  ///
+  /// In zh, this message translates to:
+  /// **'输入命令...'**
+  String get executable_enterCommand;
+
+  /// No description provided for @executable_send.
+  ///
+  /// In zh, this message translates to:
+  /// **'发送'**
+  String get executable_send;
+
+  /// No description provided for @pluginManagement_installSample.
+  ///
+  /// In zh, this message translates to:
+  /// **'安装示例插件'**
+  String get pluginManagement_installSample;
+
+  /// No description provided for @externalPlugin_details.
+  ///
+  /// In zh, this message translates to:
+  /// **'插件详情'**
+  String get externalPlugin_details;
+
+  /// No description provided for @externalPlugin_remove.
+  ///
+  /// In zh, this message translates to:
+  /// **'移除'**
+  String get externalPlugin_remove;
+
+  /// No description provided for @desktopPet_themeDefault.
+  ///
+  /// In zh, this message translates to:
+  /// **'默认蓝色'**
+  String get desktopPet_themeDefault;
+
+  /// No description provided for @desktopPet_themeBlue.
+  ///
+  /// In zh, this message translates to:
+  /// **'天空蓝'**
+  String get desktopPet_themeBlue;
+
+  /// No description provided for @desktopPet_themeGreen.
+  ///
+  /// In zh, this message translates to:
+  /// **'自然绿'**
+  String get desktopPet_themeGreen;
+
+  /// No description provided for @desktopPet_themeOrange.
+  ///
+  /// In zh, this message translates to:
+  /// **'活力橙'**
+  String get desktopPet_themeOrange;
+
+  /// No description provided for @desktopPet_themePurple.
+  ///
+  /// In zh, this message translates to:
+  /// **'神秘紫'**
+  String get desktopPet_themePurple;
+
   /// No description provided for @tooltip_switchPlugin.
   ///
   /// In zh, this message translates to:
@@ -2305,6 +2587,24 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'运行在桌面操作系统上（Windows、macOS、Linux）'**
   String get capability_desktop_desc;
+
+  /// No description provided for @feature_autoStart.
+  ///
+  /// In zh, this message translates to:
+  /// **'开机启动'**
+  String get feature_autoStart;
+
+  /// No description provided for @feature_minimizeToTray.
+  ///
+  /// In zh, this message translates to:
+  /// **'最小化到托盘'**
+  String get feature_minimizeToTray;
+
+  /// No description provided for @feature_enableNotifications.
+  ///
+  /// In zh, this message translates to:
+  /// **'通知功能'**
+  String get feature_enableNotifications;
 
   /// No description provided for @feature_plugin_management.
   ///
@@ -3283,12 +3583,6 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'{days} 天前'**
   String screenshot_daysAgo(int days);
-
-  /// No description provided for @settings_general.
-  ///
-  /// In zh, this message translates to:
-  /// **'常规设置'**
-  String get settings_general;
 
   /// No description provided for @settings_behavior.
   ///

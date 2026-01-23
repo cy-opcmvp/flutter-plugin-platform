@@ -5,6 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:window_manager/window_manager.dart';
 import './l10n/generated/app_localizations.dart';
 import './core/services/locale_provider.dart';
+import './core/services/theme_provider.dart';
 import './core/services/platform_service_manager.dart';
 import './core/services/config_manager.dart';
 import './ui/screens/main_platform_screen.dart';
@@ -47,13 +48,25 @@ void main() async {
   final localeProvider = LocaleProvider();
   await localeProvider.loadSavedLocale();
 
-  runApp(PluginPlatformApp(localeProvider: localeProvider));
+  // 初始化主题设置
+  final themeProvider = ThemeProvider();
+  await themeProvider.loadSavedThemeMode();
+
+  runApp(PluginPlatformApp(
+    localeProvider: localeProvider,
+    themeProvider: themeProvider,
+  ));
 }
 
 class PluginPlatformApp extends StatefulWidget {
   final LocaleProvider localeProvider;
+  final ThemeProvider themeProvider;
 
-  const PluginPlatformApp({super.key, required this.localeProvider});
+  const PluginPlatformApp({
+    super.key,
+    required this.localeProvider,
+    required this.themeProvider,
+  });
 
   @override
   State<PluginPlatformApp> createState() => _PluginPlatformAppState();
@@ -62,6 +75,12 @@ class PluginPlatformApp extends StatefulWidget {
   static LocaleProvider of(BuildContext context) {
     final state = context.findAncestorStateOfType<_PluginPlatformAppState>();
     return state!.widget.localeProvider;
+  }
+
+  /// 获取 ThemeProvider 实例
+  static ThemeProvider themeOf(BuildContext context) {
+    final state = context.findAncestorStateOfType<_PluginPlatformAppState>();
+    return state!.widget.themeProvider;
   }
 }
 
@@ -72,7 +91,8 @@ class _PluginPlatformAppState extends State<PluginPlatformApp>
   @override
   void initState() {
     super.initState();
-    widget.localeProvider.addListener(_onLocaleChanged);
+    widget.localeProvider.addListener(_onSettingsChanged);
+    widget.themeProvider.addListener(_onSettingsChanged);
     if (!kIsWeb) {
       windowManager.addListener(this);
     }
@@ -80,14 +100,15 @@ class _PluginPlatformAppState extends State<PluginPlatformApp>
 
   @override
   void dispose() {
-    widget.localeProvider.removeListener(_onLocaleChanged);
+    widget.localeProvider.removeListener(_onSettingsChanged);
+    widget.themeProvider.removeListener(_onSettingsChanged);
     if (!kIsWeb) {
       windowManager.removeListener(this);
     }
     super.dispose();
   }
 
-  void _onLocaleChanged() {
+  void _onSettingsChanged() {
     setState(() {});
   }
 
@@ -114,9 +135,39 @@ class _PluginPlatformAppState extends State<PluginPlatformApp>
       navigatorKey: _navigatorKey,
       title: 'Plugin Platform',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.deepPurple,
+          brightness: Brightness.light,
+        ),
         useMaterial3: true,
       ),
+      darkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.deepPurple,
+          brightness: Brightness.dark,
+        ).copyWith(
+          // 调整黑暗模式的背景色，使用更深的颜色
+          surface: Color(0xFF121212),
+          onSurface: Color(0xFFE1E1E1),
+          surfaceContainer: Color(0xFF1E1E1E),
+          surfaceContainerHigh: Color(0xFF2A2A2A),
+          surfaceContainerHighest: Color(0xFF333333),
+        ),
+        scaffoldBackgroundColor: Color(0xFF121212),
+        useMaterial3: true,
+        // 自定义深色模式下的填充按钮样式，使用更柔和的紫色
+        filledButtonTheme: FilledButtonThemeData(
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all<Color>(
+              Color(0xFFBB86FC).withValues(alpha: 0.7), // 更柔和、更暗的紫色
+            ),
+            foregroundColor: MaterialStateProperty.all<Color>(
+              Color(0xFFFFFFFF),
+            ),
+          ),
+        ),
+      ),
+      themeMode: widget.themeProvider.themeMode,
       // 国际化配置
       localizationsDelegates: const [
         AppLocalizations.delegate,

@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:window_manager/window_manager.dart';
 import 'platform_logger.dart';
 import 'desktop_pet_click_through_service.dart';
+import 'config_manager.dart';
+import '../models/global_config.dart';
 
 // Conditional imports for platform detection
 import 'platform_helper_stub.dart'
@@ -700,10 +702,17 @@ class DesktopPetManager with WindowListener {
 
   Future<void> _loadPetPreferences() async {
     try {
-      // 这里可以从本地存储加载偏好设置
-      // 暂时使用默认值
+      // 从 GlobalConfig 加载桌面宠物配置
+      final globalConfig = ConfigManager.instance.globalConfig;
+      final petConfig = globalConfig.features.desktopPet;
+
+      // 更新内部偏好设置
+      _petPreferences['opacity'] = petConfig.opacity;
+      _petPreferences['animations_enabled'] = petConfig.animationsEnabled;
+      _petPreferences['interactions_enabled'] = petConfig.interactionsEnabled;
+
       PlatformLogger.instance.logDebug(
-        'Loaded pet preferences: $_petPreferences',
+        'Loaded pet preferences from GlobalConfig: $_petPreferences',
       );
     } catch (e) {
       PlatformLogger.instance.logWarning('Failed to load pet preferences: $e');

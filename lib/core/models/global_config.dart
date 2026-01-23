@@ -167,12 +167,14 @@ class FeatureConfig {
   final bool minimizeToTray;
   final bool showDesktopPet;
   final bool enableNotifications;
+  final DesktopPetConfig desktopPet;
 
   const FeatureConfig({
     required this.autoStart,
     required this.minimizeToTray,
     required this.showDesktopPet,
     required this.enableNotifications,
+    required this.desktopPet,
   });
 
   factory FeatureConfig.fromJson(Map<String, dynamic> json) {
@@ -181,6 +183,9 @@ class FeatureConfig {
       minimizeToTray: json['minimizeToTray'] as bool? ?? true,
       showDesktopPet: json['showDesktopPet'] as bool? ?? true,
       enableNotifications: json['enableNotifications'] as bool? ?? true,
+      desktopPet: DesktopPetConfig.fromJson(
+        json['desktopPet'] as Map<String, dynamic>? ?? {},
+      ),
     );
   }
 
@@ -190,6 +195,7 @@ class FeatureConfig {
       'minimizeToTray': minimizeToTray,
       'showDesktopPet': showDesktopPet,
       'enableNotifications': enableNotifications,
+      'desktopPet': desktopPet.toJson(),
     };
   }
 
@@ -199,12 +205,14 @@ class FeatureConfig {
     bool? minimizeToTray,
     bool? showDesktopPet,
     bool? enableNotifications,
+    DesktopPetConfig? desktopPet,
   }) {
     return FeatureConfig(
       autoStart: autoStart ?? this.autoStart,
       minimizeToTray: minimizeToTray ?? this.minimizeToTray,
       showDesktopPet: showDesktopPet ?? this.showDesktopPet,
       enableNotifications: enableNotifications ?? this.enableNotifications,
+      desktopPet: desktopPet ?? this.desktopPet,
     );
   }
 
@@ -213,7 +221,75 @@ class FeatureConfig {
     minimizeToTray: true,
     showDesktopPet: true,
     enableNotifications: true,
+    desktopPet: DesktopPetConfig.defaultConfig,
   );
+}
+
+/// 桌面宠物配置
+class DesktopPetConfig {
+  /// 透明度 (0.3-1.0)
+  final double opacity;
+
+  /// 启用动画（呼吸和眨眼效果）
+  final bool animationsEnabled;
+
+  /// 启用交互（点击和拖拽）
+  final bool interactionsEnabled;
+
+  const DesktopPetConfig({
+    required this.opacity,
+    required this.animationsEnabled,
+    required this.interactionsEnabled,
+  });
+
+  factory DesktopPetConfig.fromJson(Map<String, dynamic> json) {
+    return DesktopPetConfig(
+      opacity: (json['opacity'] as num?)?.toDouble() ?? 1.0,
+      animationsEnabled: json['animations_enabled'] as bool? ?? true,
+      interactionsEnabled: json['interactions_enabled'] as bool? ?? true,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'opacity': opacity,
+      'animations_enabled': animationsEnabled,
+      'interactions_enabled': interactionsEnabled,
+    };
+  }
+
+  /// 复制并修改部分配置
+  DesktopPetConfig copyWith({
+    double? opacity,
+    bool? animationsEnabled,
+    bool? interactionsEnabled,
+  }) {
+    return DesktopPetConfig(
+      opacity: opacity ?? this.opacity,
+      animationsEnabled: animationsEnabled ?? this.animationsEnabled,
+      interactionsEnabled: interactionsEnabled ?? this.interactionsEnabled,
+    );
+  }
+
+  /// 转换为 preferences Map（用于 DesktopPetWidget）
+  Map<String, dynamic> toPreferencesMap() {
+    return {
+      'opacity': opacity,
+      'animations_enabled': animationsEnabled,
+      'interactions_enabled': interactionsEnabled,
+    };
+  }
+
+  static const defaultConfig = DesktopPetConfig(
+    opacity: 1.0,
+    animationsEnabled: true,
+    interactionsEnabled: true,
+  );
+
+  /// 验证配置是否有效
+  bool isValid() {
+    return opacity >= 0.3 && opacity <= 1.0;
+  }
 }
 
 /// 服务配置

@@ -4,15 +4,17 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:plugin_platform/l10n/generated/app_localizations.dart';
 import 'package:plugin_platform/main.dart' show PluginPlatformApp;
 import 'package:plugin_platform/core/services/locale_provider.dart';
+import 'package:plugin_platform/core/services/theme_provider.dart';
 import 'package:plugin_platform/core/services/config_manager.dart';
 import 'package:plugin_platform/core/services/platform_core.dart';
 import 'package:plugin_platform/core/models/global_config.dart';
 import 'package:plugin_platform/plugins/plugin_registry.dart';
 import 'tag_management_screen.dart';
+import 'desktop_pet_settings_screen.dart';
+import 'app_info_screen.dart';
 
 /// Settings Screen
 ///
@@ -20,7 +22,7 @@ import 'tag_management_screen.dart';
 /// - Global configuration (app, features, services, advanced)
 /// - Plugin-specific configuration
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({Key? key}) : super(key: key);
+  const SettingsScreen({super.key});
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -64,6 +66,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final localeProvider = PluginPlatformApp.of(context);
+    final themeProvider = PluginPlatformApp.themeOf(context);
 
     if (_isLoading) {
       return Scaffold(
@@ -104,88 +107,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           // Global Configuration Sections
           if (_globalConfig != null) ...[
-            // App Settings
+            // App Information
             _buildSection(
               context,
               title: l10n.settings_app,
               children: [
                 ListTile(
-                  leading: const Icon(Icons.app_settings_alt),
-                  title: Text(l10n.settings_appName),
-                  subtitle: Text(_globalConfig!.app.name),
-                ),
-                ListTile(
                   leading: const Icon(Icons.info),
-                  title: Text(l10n.settings_appVersion),
-                  subtitle: Text(_globalConfig!.app.version),
-                ),
-              ],
-            ),
-
-            // Feature Settings
-            _buildSection(
-              context,
-              title: l10n.settings_features,
-              children: [
-                SwitchListTile(
-                  secondary: const Icon(Icons.start),
-                  title: Text(l10n.settings_autoStart),
-                  value: _globalConfig!.features.autoStart,
-                  onChanged: (value) => _updateFeature('autoStart', value),
-                ),
-                SwitchListTile(
-                  secondary: const Icon(Icons.web_asset),
-                  title: Text(l10n.settings_minimizeToTray),
-                  value: _globalConfig!.features.minimizeToTray,
-                  onChanged: (value) => _updateFeature('minimizeToTray', value),
-                ),
-                SwitchListTile(
-                  secondary: const Icon(Icons.pets),
-                  title: Text(l10n.settings_showDesktopPet),
-                  value: _globalConfig!.features.showDesktopPet,
-                  onChanged: (value) => _updateFeature('showDesktopPet', value),
-                ),
-                SwitchListTile(
-                  secondary: const Icon(Icons.notifications),
-                  title: Text(l10n.settings_enableNotifications),
-                  value: _globalConfig!.features.enableNotifications,
-                  onChanged: (value) =>
-                      _updateFeature('enableNotifications', value),
-                ),
-              ],
-            ),
-
-            // Advanced Settings
-            _buildSection(
-              context,
-              title: l10n.settings_advanced,
-              children: [
-                SwitchListTile(
-                  secondary: const Icon(Icons.bug_report),
-                  title: Text(l10n.settings_debugMode),
-                  value: _globalConfig!.advanced.debugMode,
-                  onChanged: (value) => _updateAdvanced('debugMode', value),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.list),
-                  title: Text(l10n.settings_logLevel),
-                  subtitle: Text(_globalConfig!.advanced.logLevel),
+                  title: Text(l10n.appInfo_title),
+                  subtitle: Text(l10n.appInfo_viewDetails),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () => _showLogLevelDialog(context),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AppInfoScreen(),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
           ],
 
-          // Plugin Configuration Section
+          // Plugin Management Section
           _buildSection(
             context,
             title: l10n.settings_plugins,
             children: [
               ListTile(
-                leading: const Icon(Icons.label),
-                title: Text(l10n.tag_title),
-                subtitle: Text(l10n.tag_description),
+                leading: const Icon(Icons.extension),
+                title: Text(l10n.settings_pluginManagement),
+                subtitle: Text(l10n.settings_pluginManagement_desc),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {
                   Navigator.push(
@@ -220,7 +173,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ],
           ),
 
-          // Theme Settings Section (placeholder for future implementation)
+          // Theme Settings Section
           _buildSection(
             context,
             title: l10n.settings_theme,
@@ -229,109 +182,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 leading: const Icon(Icons.palette),
                 title: Text(l10n.settings_theme),
                 subtitle: Text(
-                  localeProvider.isChinese ? '跟随系统' : 'Follow System',
+                  themeProvider.getThemeModeDisplayName(
+                    themeProvider.themeMode,
+                    isChinese: localeProvider.isChinese,
+                  ),
                 ),
-                enabled: false, // Disable for now, will be implemented later
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => _showThemeModeDialog(context, themeProvider, localeProvider.isChinese),
               ),
             ],
           ),
+
+          // 底部留白
+          const SizedBox(height: 32),
         ],
       ),
     );
-  }
-
-  /// Update feature configuration
-  Future<void> _updateFeature(String key, bool value) async {
-    if (_globalConfig == null) return;
-
-    final newFeatures = _globalConfig!.features.copyWith(
-      autoStart: key == 'autoStart' ? value : null,
-      minimizeToTray: key == 'minimizeToTray' ? value : null,
-      showDesktopPet: key == 'showDesktopPet' ? value : null,
-      enableNotifications: key == 'enableNotifications' ? value : null,
-    );
-
-    final newConfig = _globalConfig!.copyWith(features: newFeatures);
-
-    try {
-      await ConfigManager.instance.updateGlobalConfig(newConfig);
-      setState(() => _globalConfig = newConfig);
-      _showSuccessMessage();
-    } catch (e) {
-      _showErrorMessage();
-    }
-  }
-
-  /// Update advanced configuration
-  Future<void> _updateAdvanced(String key, bool value) async {
-    if (_globalConfig == null) return;
-
-    final newAdvanced = _globalConfig!.advanced.copyWith(
-      debugMode: key == 'debugMode' ? value : null,
-    );
-
-    final newConfig = _globalConfig!.copyWith(advanced: newAdvanced);
-
-    try {
-      await ConfigManager.instance.updateGlobalConfig(newConfig);
-      setState(() => _globalConfig = newConfig);
-      _showSuccessMessage();
-    } catch (e) {
-      _showErrorMessage();
-    }
-  }
-
-  /// Show log level selection dialog
-  void _showLogLevelDialog(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final levels = ['debug', 'info', 'warning', 'error'];
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.settings_logLevel),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: levels.map((level) {
-            final isSelected = _globalConfig!.advanced.logLevel == level;
-            return ListTile(
-              title: Text(level.toUpperCase()),
-              trailing: isSelected
-                  ? Icon(
-                      Icons.check,
-                      color: Theme.of(context).colorScheme.primary,
-                    )
-                  : null,
-              onTap: () async {
-                Navigator.of(context).pop();
-                await _updateLogLevel(level);
-              },
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
-
-  /// Update log level
-  Future<void> _updateLogLevel(String level) async {
-    if (_globalConfig == null) return;
-
-    final newAdvanced = AdvancedConfig(
-      debugMode: _globalConfig!.advanced.debugMode,
-      logLevel: level,
-      maxLogFileSize: _globalConfig!.advanced.maxLogFileSize,
-    );
-
-    final newConfig = _globalConfig!.copyWith(advanced: newAdvanced);
-
-    try {
-      await ConfigManager.instance.updateGlobalConfig(newConfig);
-      setState(() => _globalConfig = newConfig);
-      _showSuccessMessage();
-    } catch (e) {
-      _showErrorMessage();
-    }
   }
 
   /// Open plugin settings screen
@@ -538,15 +404,77 @@ class _SettingsScreenState extends State<SettingsScreen> {
         await localeProvider.setLocale(locale);
 
         // Show success message
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.settings_languageChanged(name)),
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        }
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.settings_languageChanged(name)),
+            duration: const Duration(seconds: 2),
+          ),
+        );
       },
+    );
+  }
+
+  /// Show theme mode selection dialog
+  void _showThemeModeDialog(
+    BuildContext context,
+    ThemeProvider themeProvider,
+    bool isChinese,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    final modes = [
+      ThemeMode.system,
+      ThemeMode.light,
+      ThemeMode.dark,
+    ];
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.settings_changeTheme),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: modes.map((mode) {
+            final isSelected = themeProvider.themeMode == mode;
+            return ListTile(
+              title: Text(
+                themeProvider.getThemeModeDisplayName(
+                  mode,
+                  isChinese: isChinese,
+                ),
+              ),
+              trailing: isSelected
+                  ? Icon(
+                      Icons.check,
+                      color: Theme.of(context).colorScheme.primary,
+                    )
+                  : null,
+              onTap: () async {
+                Navigator.of(context).pop();
+                await themeProvider.setThemeMode(mode);
+
+                // Show success message
+                if (!mounted) return;
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      l10n.settings_themeChanged(
+                        themeProvider.getThemeModeDisplayName(
+                          mode,
+                          isChinese: isChinese,
+                        ),
+                      ),
+                    ),
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              },
+            );
+          }).toList(),
+        ),
+      ),
     );
   }
 }

@@ -269,7 +269,7 @@ class _PluginManagementScreenState extends State<PluginManagementScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _installSamplePlugin,
-        tooltip: 'Install Sample Plugin',
+        tooltip: context.l10n.pluginManagement_installSample,
         child: const Icon(Icons.add),
       ),
     );
