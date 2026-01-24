@@ -23,6 +23,9 @@ class TagManager {
   /// 所有标签
   List<Tag> _tags = [];
 
+  /// 标签变化通知器
+  final ValueNotifier<List<Tag>> tagsNotifier = ValueNotifier<List<Tag>>([]);
+
   /// 插件与标签的映射关系 pluginId -> tagIds
   final Map<String, Set<String>> _pluginTagMap = {};
 
@@ -137,6 +140,8 @@ class TagManager {
     await _configService.saveCustomConfig('tags', {
       'tags': _tags.map((tag) => tag.toJson()).toList(),
     });
+    // 通知标签变化
+    tagsNotifier.value = List.unmodifiable(_tags);
   }
 
   /// 保存插件标签映射
@@ -199,11 +204,6 @@ class TagManager {
       throw StateError('Tag not found: ${updatedTag.id}');
     }
 
-    final existingTag = _tags[index];
-    if (existingTag.isSystem) {
-      throw StateError('Cannot modify system tag: ${updatedTag.id}');
-    }
-
     if (!updatedTag.isValid()) {
       throw ArgumentError('Invalid tag data');
     }
@@ -219,10 +219,6 @@ class TagManager {
     final tag = getTagById(tagId);
     if (tag == null) {
       throw StateError('Tag not found: $tagId');
-    }
-
-    if (tag.isSystem) {
-      throw StateError('Cannot delete system tag: $tagId');
     }
 
     _tags.removeWhere((t) => t.id == tagId);

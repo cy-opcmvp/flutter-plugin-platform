@@ -11,12 +11,19 @@ import 'package:plugin_platform/core/interfaces/services/i_task_scheduler_servic
 import 'package:plugin_platform/core/services/notification/notification_service.dart';
 import 'package:plugin_platform/core/services/audio/audio_service.dart';
 import 'package:plugin_platform/core/services/task_scheduler/task_scheduler_service.dart';
+import 'package:plugin_platform/core/services/auto_start_service.dart';
 
 /// Platform Service Manager
 ///
 /// Provides a centralized way to initialize and access all platform services.
 class PlatformServiceManager {
   static const String _tag = 'PlatformServiceManager';
+
+  /// Auto start service instance
+  static final AutoStartService _autoStartService = AutoStartService();
+
+  /// Get the auto start service
+  static AutoStartService get autoStart => _autoStartService;
 
   /// Initialize all platform services
   ///
@@ -97,6 +104,12 @@ class PlatformServiceManager {
       debugPrint(
         '$_tag: Task scheduler service initialized: $taskSchedulerInitialized',
       );
+    }
+
+    // Initialize auto start service
+    final autoStartInitialized = await _autoStartService.initialize();
+    if (kDebugMode) {
+      debugPrint('$_tag: Auto start service initialized: $autoStartInitialized');
     }
   }
 

@@ -22,21 +22,23 @@ class PluginCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.all(4),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
+              // 顶部：图标 + 名称 + 状态
               Row(
                 children: [
-                  // Plugin icon based on type
+                  // Plugin icon
                   Container(
-                    width: 48,
-                    height: 48,
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(
                       color: _getPluginTypeColor(
                         descriptor.type,
@@ -46,129 +48,83 @@ class PluginCard extends StatelessWidget {
                     child: Icon(
                       _getPluginTypeIcon(descriptor.type),
                       color: _getPluginTypeColor(descriptor.type),
-                      size: 24,
+                      size: 20,
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  // Plugin info
+                  const SizedBox(width: 8),
+                  // Plugin name and status
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                descriptor.name,
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            _buildStatusChip(context),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
                         Text(
-                          'v${descriptor.version} • ${descriptor.type.name.toUpperCase()}',
+                          descriptor.name,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'v${descriptor.version}',
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onSurface.withValues(
                               alpha: 0.6,
                             ),
+                            fontSize: 11,
                           ),
                         ),
-                        if (descriptor.metadata.containsKey('description')) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            descriptor.metadata['description'] as String,
-                            style: theme.textTheme.bodySmall,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
                       ],
                     ),
                   ),
+                  _buildStatusChip(context),
                 ],
               ),
-              const SizedBox(height: 12),
-              // Plugin actions
+              const SizedBox(height: 8),
+              // 描述（如果有）
+              if (descriptor.metadata.containsKey('description')) ...[
+                Expanded(
+                  child: Text(
+                    descriptor.metadata['description'] as String,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontSize: 11,
+                      color: theme.colorScheme.onSurface.withValues(
+                        alpha: 0.7,
+                      ),
+                    ),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
+              // 底部操作按钮
               Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  // Action buttons
                   IconButton(
                     onPressed: onTap,
                     icon: const Icon(Icons.info_outline),
                     tooltip: context.l10n.plugin_detailsTitle,
-                    iconSize: 20,
+                    iconSize: 18,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
                   ),
                   const SizedBox(width: 8),
                   IconButton(
                     onPressed: onUninstall,
                     icon: const Icon(Icons.delete_outline),
                     tooltip: context.l10n.button_uninstall,
-                    iconSize: 20,
+                    iconSize: 18,
                     color: theme.colorScheme.error,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
                   ),
                 ],
               ),
-              // Additional info row
-              if (pluginInfo.lastUsed != null ||
-                  descriptor.requiredPermissions.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                const Divider(height: 1),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    if (pluginInfo.lastUsed != null) ...[
-                      Icon(
-                        Icons.access_time,
-                        size: 16,
-                        color: theme.colorScheme.onSurface.withValues(
-                          alpha: 0.6,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        context.l10n.plugin_lastUsed(
-                          _formatDate(context, pluginInfo.lastUsed!),
-                        ),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withValues(
-                            alpha: 0.6,
-                          ),
-                        ),
-                      ),
-                    ],
-                    if (pluginInfo.lastUsed != null &&
-                        descriptor.requiredPermissions.isNotEmpty)
-                      const SizedBox(width: 16),
-                    if (descriptor.requiredPermissions.isNotEmpty) ...[
-                      Icon(
-                        Icons.security,
-                        size: 16,
-                        color: theme.colorScheme.onSurface.withValues(
-                          alpha: 0.6,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        descriptor.requiredPermissions.length == 1
-                            ? context.l10n.plugin_permissionCountSingle
-                            : context.l10n.plugin_permissionCount(
-                                descriptor.requiredPermissions.length,
-                              ),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withValues(
-                            alpha: 0.6,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ],
             ],
           ),
         ),
@@ -236,21 +192,6 @@ class PluginCard extends StatelessWidget {
         return Colors.blue;
       case PluginType.game:
         return Colors.purple;
-    }
-  }
-
-  String _formatDate(BuildContext context, DateTime date) {
-    final now = DateTime.now();
-    final difference = now.difference(date);
-
-    if (difference.inDays > 0) {
-      return context.l10n.time_daysAgo(difference.inDays);
-    } else if (difference.inHours > 0) {
-      return context.l10n.time_hoursAgo(difference.inHours);
-    } else if (difference.inMinutes > 0) {
-      return context.l10n.time_minutesAgo(difference.inMinutes);
-    } else {
-      return context.l10n.time_justNow;
     }
   }
 }

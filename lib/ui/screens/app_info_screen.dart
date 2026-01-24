@@ -3,15 +3,15 @@
 /// 应用信息页面
 library;
 
+import 'dart:io' as io;
 import 'package:flutter/material.dart';
 import 'package:plugin_platform/l10n/generated/app_localizations.dart';
 import 'package:plugin_platform/core/services/config_manager.dart';
 import 'package:plugin_platform/core/services/desktop_pet_manager.dart';
 import 'package:plugin_platform/core/services/tag_manager.dart';
 import 'package:plugin_platform/core/models/global_config.dart';
-import 'package:plugin_platform/core/models/platform_models.dart';
 import 'package:plugin_platform/core/models/tag_model.dart';
-import 'package:plugin_platform/main.dart' show PluginPlatformApp;
+import 'package:plugin_platform/core/services/platform_service_manager.dart';
 import 'desktop_pet_settings_screen.dart';
 import 'service_test_screen.dart';
 import 'tag_management_screen.dart';
@@ -36,12 +36,16 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
   /// 标签管理器
   final TagManager _tagManager = TagManager.instance;
 
+  /// 桌面宠物管理器
+  late DesktopPetManager _desktopPetManager;
+
   /// 标签列表
   List<Tag> _tags = [];
 
   @override
   void initState() {
     super.initState();
+    _desktopPetManager = DesktopPetManager();
     _loadConfig();
   }
 
@@ -251,7 +255,7 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const Spacer(),
-                Text(_globalConfig!.features.showDesktopPet ? l10n.mode_online : l10n.mode_local),
+                Text(_getCurrentModeText(l10n)),
                 const SizedBox(width: 8),
               ],
             ),
@@ -263,8 +267,29 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
 
   /// 获取平台类型显示文本
   String _getPlatformType() {
-    // 简化版本，实际可以从PlatformInfo获取
-    return 'Windows';
+    // 从实际运行的操作系统获取平台类型
+    if (io.Platform.isWindows) {
+      return 'Windows';
+    } else if (io.Platform.isMacOS) {
+      return 'macOS';
+    } else if (io.Platform.isLinux) {
+      return 'Linux';
+    } else if (io.Platform.isAndroid) {
+      return 'Android';
+    } else if (io.Platform.isIOS) {
+      return 'iOS';
+    } else {
+      return io.Platform.operatingSystem; // Web 或其他平台
+    }
+  }
+
+  /// 获取当前运行模式显示文本
+  String _getCurrentModeText(AppLocalizations l10n) {
+    // 检查桌面宠物的实际运行状态，而不是配置中的开关
+    final isPetMode = _desktopPetManager.isDesktopPetMode;
+
+    // 如果桌面宠物正在运行，显示"在线模式"，否则显示"本地模式"
+    return isPetMode ? l10n.mode_online : l10n.mode_local;
   }
 
   /// 标签配置卡片
@@ -367,24 +392,24 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
     return Card(
       child: Column(
         children: [
+          // 开机自启
           SwitchListTile(
             secondary: const Icon(Icons.start),
             title: Text(l10n.settings_autoStart),
-            value: _globalConfig!.features.autoStart,
-            onChanged: (value) => _updateFeature('autoStart', value),
+            subtitle: Text(
+              '当前状态: ${PlatformServiceManager.autoStart.isEnabled ? "已启用" : "已禁用"}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            value: PlatformServiceManager.autoStart.isEnabled,
+            onChanged: (value) => _showAutoStartConfirmDialog(value),
           ),
-          SwitchListTile(
-            secondary: const Icon(Icons.web_asset),
-            title: Text(l10n.settings_minimizeToTray),
-            value: _globalConfig!.features.minimizeToTray,
-            onChanged: (value) => _updateFeature('minimizeToTray', value),
-          ),
-          SwitchListTile(
-            secondary: const Icon(Icons.notifications),
-            title: Text(l10n.settings_enableNotifications),
-            value: _globalConfig!.features.enableNotifications,
-            onChanged: (value) => _updateFeature('enableNotifications', value),
-          ),
+          // TODO: 实现最小化到托盘功能
+          // SwitchListTile(
+          //   secondary: const Icon(Icons.web_asset),
+          //   title: Text(l10n.settings_minimizeToTray),
+          //   value: _globalConfig!.features.minimizeToTray,
+          //   onChanged: (value) => _updateFeature('minimizeToTray', value),
+          // ),
           // 通知模式选择
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -576,6 +601,132 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
       }
     } catch (e) {
       debugPrint('Failed to update log level: $e');
+      _showErrorMessage();
+    }
+  }
+
+  /// 显示开机自启确认对话框
+  void _showAutoStartConfirmDialog(bool enabled) {
+    final l10n = AppLocalizations.of(context)!;
+
+    // 检查是否为开发模式
+    final isDebugMode = _isRunningInDebugMode();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(enabled ? '启用开机自启' : '禁用开机自启'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(enabled
+                ? '将允许 Plugin Platform 在 Windows 启动时自动运行。'
+                : '将禁止 Plugin Platform 在 Windows 启动时自动运行。'),
+            const SizedBox(height: 12),
+            if (enabled && isDebugMode) ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.shade200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.warning, color: Colors.red.shade700, size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          '⚠️ 开发模式警告',
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            color: Colors.red.shade700,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '当前运行的是开发版本，重启后无法正常启动！\n\n'
+                      '原因：开发版本依赖 Flutter 开发服务器，重启后服务器已关闭。\n\n'
+                      '正确测试方法：\n'
+                      '1. 运行：flutter build windows --release\n'
+                      '2. 直接运行：build\\windows\\x64\\runner\\Release\\plugin_platform.exe\n'
+                      '3. 在发布版本中启用开机自启',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.red.shade900,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ] else if (enabled) ...[
+              Text(
+                '注意：每次重新编译后需要重新设置，因为可执行文件路径会变化。',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.orange,
+                ),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.common_cancel),
+          ),
+          FilledButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              await _setAutoStart(enabled);
+            },
+            style: isDebugMode && enabled
+                ? FilledButton.styleFrom(backgroundColor: Colors.orange)
+                : null,
+            child: Text(l10n.common_confirm),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 检查是否运行在开发模式
+  bool _isRunningInDebugMode() {
+    try {
+      // 检查可执行文件路径
+      final exePath = io.Platform.resolvedExecutable;
+      // Debug 版本通常在 Debug 目录
+      return exePath.contains('Debug') || exePath.contains('debug');
+    } catch (e) {
+      // 如果检测失败，假设是开发模式（更安全）
+      return true;
+    }
+  }
+
+  /// 设置开机自启
+  Future<void> _setAutoStart(bool enabled) async {
+    try {
+      final success = await PlatformServiceManager.autoStart.setEnabled(enabled);
+      if (success) {
+        // 更新配置中的 autoStart 状态
+        final newFeatures = _globalConfig!.features.copyWith(
+          autoStart: enabled,
+        );
+        final newConfig = _globalConfig!.copyWith(features: newFeatures);
+        await ConfigManager.instance.updateGlobalConfig(newConfig);
+
+        if (mounted) {
+          setState(() => _globalConfig = newConfig);
+          _showSuccessMessage();
+        }
+      } else {
+        _showErrorMessage();
+      }
+    } catch (e) {
+      debugPrint('Failed to set auto start: $e');
       _showErrorMessage();
     }
   }

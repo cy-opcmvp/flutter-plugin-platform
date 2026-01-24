@@ -346,8 +346,14 @@ class _PluginManagementScreenState extends State<PluginManagementScreen> {
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+    return GridView.builder(
+      padding: const EdgeInsets.all(16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        mainAxisSpacing: 8,
+        crossAxisSpacing: 8,
+        childAspectRatio: 0.75, // 4:3 比例
+      ),
       itemCount: filteredPlugins.length,
       itemBuilder: (context, index) {
         final pluginInfo = filteredPlugins[index];

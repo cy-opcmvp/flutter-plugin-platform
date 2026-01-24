@@ -4,6 +4,7 @@ import 'package:window_manager/window_manager.dart';
 import '../../core/services/desktop_pet_manager.dart';
 import '../../core/services/platform_core.dart';
 import '../../core/services/platform_logger.dart';
+import '../../core/services/config_manager.dart';
 import '../../core/models/plugin_models.dart';
 import '../../core/models/platform_models.dart';
 import '../../core/extensions/context_extensions.dart';
@@ -49,6 +50,12 @@ class _DesktopPetScreenState extends State<DesktopPetScreen>
 
   // 监听宠物偏好设置变化
   Map<String, dynamic> _currentPetPreferences = {};
+
+  /// 是否启用调试模式
+  bool get _isDebugMode => ConfigManager.instance.globalConfig.advanced.debugMode;
+
+  /// 是否应该输出日志
+  bool get _shouldLog => _isDebugMode;
 
   // 窗口和宠物位置信息
   Size _windowSize = Size.zero;
@@ -100,46 +107,58 @@ class _DesktopPetScreenState extends State<DesktopPetScreen>
     }
 
     try {
-      PlatformLogger.instance.logInfo('🎨 [UI层] 开始初始化窗口...');
-      
+      if (_shouldLog) {
+        PlatformLogger.instance.logInfo('🎨 [UI层] 开始初始化窗口...');
+      }
+
       // 获取窗口信息
       _windowSize = await windowManager.getSize();
       _windowPosition = await windowManager.getPosition();
       final opacity = await windowManager.getOpacity();
       final isVisible = await windowManager.isVisible();
-      
-      PlatformLogger.instance.logInfo(
-        '🎨 [UI层] 初始窗口状态:\n'
-        '   尺寸: ${_windowSize.width}x${_windowSize.height}\n'
-        '   位置: (${_windowPosition.dx}, ${_windowPosition.dy})\n'
-        '   透明度: $opacity\n'
-        '   可见性: $isVisible',
-      );
+
+      if (_shouldLog) {
+        PlatformLogger.instance.logInfo(
+          '🎨 [UI层] 初始窗口状态:\n'
+          '   尺寸: ${_windowSize.width}x${_windowSize.height}\n'
+          '   位置: (${_windowPosition.dx}, ${_windowPosition.dy})\n'
+          '   透明度: $opacity\n'
+          '   可见性: $isVisible',
+        );
+      }
 
       // 【优化】增加延迟时间，确保窗口透明设置完全生效，避免背景闪现
       // desktop_pet_manager 中已经有多个延迟（100ms + 50ms + 100ms + 50ms = 300ms）
       // 这里再等待 250ms，总共约 550ms，确保所有设置完全生效
-      PlatformLogger.instance.logInfo('🎨 [UI层] 等待 250ms 确保窗口设置完全生效...');
+      if (_shouldLog) {
+        PlatformLogger.instance.logInfo('🎨 [UI层] 等待 250ms 确保窗口设置完全生效...');
+      }
       await Future.delayed(const Duration(milliseconds: 250));
-      
+
       // 验证延迟后的窗口状态
       final finalSize = await windowManager.getSize();
       final finalOpacity = await windowManager.getOpacity();
       final finalVisible = await windowManager.isVisible();
-      
-      PlatformLogger.instance.logInfo(
-        '🎨 [UI层] 延迟后窗口状态:\n'
-        '   尺寸: ${finalSize.width}x${finalSize.height}\n'
-        '   透明度: $finalOpacity\n'
-        '   可见性: $finalVisible',
-      );
+
+      if (_shouldLog) {
+        PlatformLogger.instance.logInfo(
+          '🎨 [UI层] 延迟后窗口状态:\n'
+          '   尺寸: ${finalSize.width}x${finalSize.height}\n'
+          '   透明度: $finalOpacity\n'
+          '   可见性: $finalVisible',
+        );
+      }
 
       if (mounted) {
-        PlatformLogger.instance.logInfo('🎨 [UI层] 设置 _isReady = true，开始显示内容');
+        if (_shouldLog) {
+          PlatformLogger.instance.logInfo('🎨 [UI层] 设置 _isReady = true，开始显示内容');
+        }
         setState(() => _isReady = true);
         _fadeController.forward();
-        
-        PlatformLogger.instance.logInfo('🎨 [UI层] 淡入动画已启动');
+
+        if (_shouldLog) {
+          PlatformLogger.instance.logInfo('🎨 [UI层] 淡入动画已启动');
+        }
       }
     } catch (e) {
       PlatformLogger.instance.logError('Failed to initialize window', e);
@@ -233,12 +252,16 @@ class _DesktopPetScreenState extends State<DesktopPetScreen>
 
   /// 显示右键菜单（扩大窗口）
   Future<void> _openContextMenu() async {
-    PlatformLogger.instance.logInfo(
-      '🍔 _openContextMenu 被调用，当前菜单状态: $_showContextMenu',
-    );
-    
+    if (_shouldLog) {
+      PlatformLogger.instance.logInfo(
+        '🍔 _openContextMenu 被调用，当前菜单状态: $_showContextMenu',
+      );
+    }
+
     if (!DesktopPetManager.isSupported()) {
-      PlatformLogger.instance.logInfo('🍔 平台不支持，返回');
+      if (_shouldLog) {
+        PlatformLogger.instance.logInfo('🍔 平台不支持，返回');
+      }
       return;
     }
 
@@ -247,23 +270,27 @@ class _DesktopPetScreenState extends State<DesktopPetScreen>
       // 菜单宽度 160，高度约 200，加上宠物 120x120，再加上边距
       const expandedWidth = 300.0;  // 足够显示宠物和菜单
       const expandedHeight = 250.0; // 足够显示宠物和菜单
-      
-      PlatformLogger.instance.logInfo(
-        '🍔 扩大窗口以显示菜单\n'
-        '   当前尺寸: ${_windowSize.width}x${_windowSize.height}\n'
-        '   新尺寸: $expandedWidth x $expandedHeight\n'
-        '   窗口位置: (${_windowPosition.dx}, ${_windowPosition.dy})',
-      );
-      
+
+      if (_shouldLog) {
+        PlatformLogger.instance.logInfo(
+          '🍔 扩大窗口以显示菜单\n'
+          '   当前尺寸: ${_windowSize.width}x${_windowSize.height}\n'
+          '   新尺寸: $expandedWidth x $expandedHeight\n'
+          '   窗口位置: (${_windowPosition.dx}, ${_windowPosition.dy})',
+        );
+      }
+
       // 扩大窗口
       await windowManager.setSize(const Size(expandedWidth, expandedHeight));
       _windowSize = const Size(expandedWidth, expandedHeight);
-      
+
       setState(() {
         _showContextMenu = true;
       });
-      
-      PlatformLogger.instance.logInfo('🍔 菜单状态已设置为 true');
+
+      if (_shouldLog) {
+        PlatformLogger.instance.logInfo('🍔 菜单状态已设置为 true');
+      }
     } catch (e) {
       PlatformLogger.instance.logError('Failed to show context menu', e);
     }
@@ -271,10 +298,12 @@ class _DesktopPetScreenState extends State<DesktopPetScreen>
 
   /// 隐藏右键菜单（恢复窗口大小）
   Future<void> _closeContextMenu() async {
-    PlatformLogger.instance.logInfo(
-      '🍔 _closeContextMenu 被调用，当前菜单状态: $_showContextMenu',
-    );
-    
+    if (_shouldLog) {
+      PlatformLogger.instance.logInfo(
+        '🍔 _closeContextMenu 被调用，当前菜单状态: $_showContextMenu',
+      );
+    }
+
     if (!DesktopPetManager.isSupported()) {
       setState(() {
         _showContextMenu = false;
@@ -286,14 +315,16 @@ class _DesktopPetScreenState extends State<DesktopPetScreen>
       setState(() {
         _showContextMenu = false;
       });
-      
+
       // 恢复窗口到宠物大小
       if (_windowSize.width > _petWindowSize.width ||
           _windowSize.height > _petWindowSize.height) {
-        PlatformLogger.instance.logInfo(
-          '🍔 恢复窗口到宠物大小: ${_petWindowSize.width}x${_petWindowSize.height}',
-        );
-        
+        if (_shouldLog) {
+          PlatformLogger.instance.logInfo(
+            '🍔 恢复窗口到宠物大小: ${_petWindowSize.width}x${_petWindowSize.height}',
+          );
+        }
+
         await windowManager.setSize(_petWindowSize);
         _windowSize = _petWindowSize;
       }
@@ -340,14 +371,20 @@ class _DesktopPetScreenState extends State<DesktopPetScreen>
               preferences: _currentPetPreferences,
               onDoubleClick: _returnToFullApp,
               onRightClick: () {
-                PlatformLogger.instance.logInfo(
-                  '🍔 右键回调被调用，当前菜单状态: $_showContextMenu',
-                );
+                if (_shouldLog) {
+                  PlatformLogger.instance.logInfo(
+                    '🍔 右键回调被调用，当前菜单状态: $_showContextMenu',
+                  );
+                }
                 if (_showContextMenu) {
-                  PlatformLogger.instance.logInfo('🍔 菜单已显示，调用 _closeContextMenu');
+                  if (_shouldLog) {
+                    PlatformLogger.instance.logInfo('🍔 菜单已显示，调用 _closeContextMenu');
+                  }
                   _closeContextMenu();
                 } else {
-                  PlatformLogger.instance.logInfo('🍔 菜单未显示，调用 _openContextMenu');
+                  if (_shouldLog) {
+                    PlatformLogger.instance.logInfo('🍔 菜单未显示，调用 _openContextMenu');
+                  }
                   _openContextMenu();
                 }
               },

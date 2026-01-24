@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart' show kDebugMode;
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' show kDebugMode, debugPrint;
+import 'config_manager.dart';
 
 /// Log levels for platform logging
 enum LogLevel { debug, info, warning, error }
@@ -13,6 +13,44 @@ class PlatformLogger {
   // Private constructor for singleton
   PlatformLogger._();
 
+  /// Parse log level from string configuration
+  LogLevel _parseLogLevel(String level) {
+    switch (level.toLowerCase()) {
+      case 'debug':
+        return LogLevel.debug;
+      case 'info':
+        return LogLevel.info;
+      case 'warning':
+        return LogLevel.warning;
+      case 'error':
+        return LogLevel.error;
+      default:
+        return LogLevel.info; // 默认级别
+    }
+  }
+
+  /// Check if a message should be logged based on configured level
+  bool _shouldLog(LogLevel messageLevel) {
+    // 在 Release 模式下，只输出 warning 和 error
+    if (!kDebugMode) {
+      return messageLevel == LogLevel.warning || messageLevel == LogLevel.error;
+    }
+
+    // 在 Debug 模式下，读取配置的日志级别
+    try {
+      final config = ConfigManager.instance.globalConfig;
+      final configLevelStr = config.advanced.logLevel;
+      final configLevel = _parseLogLevel(configLevelStr);
+
+      // 只有当消息级别 >= 配置级别时才输出
+      // LogLevel.debug (0) < LogLevel.info (1) < LogLevel.warning (2) < LogLevel.error (3)
+      return messageLevel.index >= configLevel.index;
+    } catch (e) {
+      // 如果读取配置失败，默认输出所有日志（开发模式）
+      return true;
+    }
+  }
+
   /// Log environment variable access.
   /// In debug mode, logs detailed information about the access.
   /// In production mode, logs minimal information.
@@ -20,15 +58,21 @@ class PlatformLogger {
     if (kDebugMode) {
       // Detailed logging in debug mode
       if (found && value != null) {
-        _log(LogLevel.debug, 'Environment variable accessed: $key = $value');
+        if (_shouldLog(LogLevel.debug)) {
+          _log(LogLevel.debug, 'Environment variable accessed: $key = $value');
+        }
       } else if (found && value == null) {
-        _log(LogLevel.debug, 'Environment variable accessed: $key = null');
+        if (_shouldLog(LogLevel.debug)) {
+          _log(LogLevel.debug, 'Environment variable accessed: $key = null');
+        }
       } else {
-        _log(LogLevel.debug, 'Environment variable not found: $key');
+        if (_shouldLog(LogLevel.debug)) {
+          _log(LogLevel.debug, 'Environment variable not found: $key');
+        }
       }
     } else {
       // Minimal logging in production mode
-      if (!found) {
+      if (!found && _shouldLog(LogLevel.info)) {
         _log(LogLevel.info, 'Environment variable not available: $key');
       }
     }
@@ -39,10 +83,14 @@ class PlatformLogger {
   void logFeatureDegradation(String feature, String reason) {
     if (kDebugMode) {
       // Detailed logging in debug mode
-      _log(LogLevel.warning, 'Feature degraded: $feature - Reason: $reason');
+      if (_shouldLog(LogLevel.warning)) {
+        _log(LogLevel.warning, 'Feature degraded: $feature - Reason: $reason');
+      }
     } else {
       // Minimal logging in production mode
-      _log(LogLevel.warning, 'Feature unavailable: $feature');
+      if (_shouldLog(LogLevel.warning)) {
+        _log(LogLevel.warning, 'Feature unavailable: $feature');
+      }
     }
   }
 
@@ -52,7 +100,7 @@ class PlatformLogger {
     String platform,
     Map<String, dynamic> capabilities,
   ) {
-    if (kDebugMode) {
+    if (_shouldLog(LogLevel.info)) {
       final capabilitiesStr = capabilities.entries
           .map((e) => '${e.key}: ${e.value}')
           .join(', ');
@@ -64,35 +112,41 @@ class PlatformLogger {
   }
 
   /// Log error with context.
-  /// Always logs errors regardless of mode.
+  /// Always logs errors regardless of mode (unless level is set higher than error).
   void logError(String context, dynamic error, [StackTrace? stackTrace]) {
-    if (kDebugMode) {
-      // Detailed error logging in debug mode
-      _log(
-        LogLevel.error,
-        'Error in $context: $error${stackTrace != null ? '\nStack trace: $stackTrace' : ''}',
-      );
-    } else {
-      // Minimal error logging in production mode
-      _log(LogLevel.error, 'Error in $context: ${error.toString()}');
+    if (_shouldLog(LogLevel.error)) {
+      if (kDebugMode) {
+        // Detailed error logging in debug mode
+        _log(
+          LogLevel.error,
+          'Error in $context: $error${stackTrace != null ? '\nStack trace: $stackTrace' : ''}',
+        );
+      } else {
+        // Minimal error logging in production mode
+        _log(LogLevel.error, 'Error in $context: ${error.toString()}');
+      }
     }
   }
 
   /// Log warning message.
   void logWarning(String message) {
-    _log(LogLevel.warning, message);
+    if (_shouldLog(LogLevel.warning)) {
+      _log(LogLevel.warning, message);
+    }
   }
 
-  /// Log info message (only in debug mode).
+  /// Log info message.
+  /// Respects the configured log level.
   void logInfo(String message) {
-    if (kDebugMode) {
+    if (_shouldLog(LogLevel.info)) {
       _log(LogLevel.info, message);
     }
   }
 
-  /// Log debug message (only in debug mode).
+  /// Log debug message.
+  /// Respects the configured log level.
   void logDebug(String message) {
-    if (kDebugMode) {
+    if (_shouldLog(LogLevel.debug)) {
       _log(LogLevel.debug, message);
     }
   }

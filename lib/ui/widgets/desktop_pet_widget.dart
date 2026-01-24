@@ -5,6 +5,7 @@ import 'dart:math' as math;
 import 'dart:async';
 import '../../core/services/platform_environment.dart';
 import '../../core/services/platform_logger.dart';
+import '../../core/services/config_manager.dart';
 import '../../core/models/platform_models.dart';
 import '../../core/extensions/context_extensions.dart';
 
@@ -37,8 +38,15 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
   final ValueNotifier<bool> _isDragging = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _isWaitingForDrag = ValueNotifier<bool>(false);
 
+  /// 是否启用调试模式
+  bool get _isDebugMode => ConfigManager.instance.globalConfig.advanced.debugMode;
+
+  /// 是否应该输出日志
+  bool get _shouldLog => _isDebugMode;
+
   Timer? _dragTimeoutTimer;
   Timer? _dragEndCheckTimer;
+  Timer? _clickCooldownTimer;
 
   // 双击检测
   int? _lastTapTime;
@@ -102,9 +110,6 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
   bool get _isAnimationsEnabled =>
       widget.preferences['animations_enabled'] ?? true;
 
-  // 交互功能始终启用
-  bool get _isInteractionsEnabled => true;
-
   double get _opacity => widget.preferences['opacity'] ?? 1.0;
 
   void _startRandomBlinking() {
@@ -137,55 +142,74 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
       child: Opacity(
         opacity: _opacity,
         child: Listener(
-        onPointerDown: _handlePointerDown,
-        onPointerMove: _handlePointerMove,
-        onPointerUp: _handlePointerUp,
-        onPointerSignal: (event) {},
-        behavior: HitTestBehavior.opaque,
-        child: ValueListenableBuilder<bool>(
-          valueListenable: _isDragging,
-          builder: (context, isDragging, _) {
-            return MouseRegion(
-              cursor: isDragging
-                  ? SystemMouseCursors.grabbing
-                  : SystemMouseCursors.grab,
-              onEnter: (_) {
-                _isHovered.value = true;
-              },
-              onExit: (_) {
-                _isHovered.value = false;
-              },
-              child: ValueListenableBuilder<bool>(
-                valueListenable: _isHovered,
-                builder: (context, isHovered, _) {
-                  return _breathingAnimation != null && _blinkAnimation != null
-                      ? AnimatedBuilder(
-                          animation: Listenable.merge([
-                            _breathingAnimation!,
-                            _blinkAnimation!,
-                          ]),
-                          builder: (context, child) {
-                            return Transform.scale(
-                              scale: _isAnimationsEnabled
-                                  ? _breathingAnimation!.value
-                                  : 1.0,
-                              child: _buildPetContainer(isHovered, isDragging),
-                            );
-                          },
-                        )
-                      : _buildPetContainer(isHovered, isDragging);
+          onPointerDown: _handlePointerDown,
+          onPointerMove: _handlePointerMove,
+          onPointerUp: _handlePointerUp,
+          onPointerSignal: (event) {},
+          behavior: HitTestBehavior.opaque,
+          child: ValueListenableBuilder<bool>(
+            valueListenable: _isDragging,
+            builder: (context, isDragging, _) {
+              return ValueListenableBuilder<bool>(
+                valueListenable: _isWaitingForDrag,
+                builder: (context, isWaiting, _) {
+                  return MouseRegion(
+                    cursor: isDragging
+                        ? SystemMouseCursors.grabbing
+                        : SystemMouseCursors.grab,
+                    onEnter: (_) {
+                      _clickCooldownTimer?.cancel();
+                      _isHovered.value = true;
+                    },
+                    onExit: (_) {
+                      // 在点击冷却期间忽略 exit 事件
+                      if (_clickCooldownTimer == null ||
+                          !_clickCooldownTimer!.isActive) {
+                        _isHovered.value = false;
+                      }
+                    },
+                    child: ValueListenableBuilder<bool>(
+                      valueListenable: _isHovered,
+                      builder: (context, isHovered, _) {
+                        return _breathingAnimation != null &&
+                                _blinkAnimation != null
+                            ? AnimatedBuilder(
+                                animation: Listenable.merge([
+                                  _breathingAnimation!,
+                                  _blinkAnimation!,
+                                ]),
+                                builder: (context, child) {
+                                  return Transform.scale(
+                                    scale: _isAnimationsEnabled
+                                        ? _breathingAnimation!.value
+                                        : 1.0,
+                                    child: _buildPetContainer(
+                                        isHovered,
+                                        isDragging,
+                                        isWaiting,
+                                    ),
+                                  );
+                                },
+                              )
+                            : _buildPetContainer(
+                                isHovered,
+                                isDragging,
+                                isWaiting,
+                              );
+                      },
+                    ),
+                  );
                 },
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
-      ),
       ),
     );
   }
 
   /// Builds the main pet container widget
-  Widget _buildPetContainer(bool isHovered, bool isDragging) {
+  Widget _buildPetContainer(bool isHovered, bool isDragging, bool isWaiting) {
     return Container(
       width: 120,
       height: 120,
@@ -193,8 +217,8 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
         shape: BoxShape.circle,
         gradient: RadialGradient(
           colors: [
-            _getMainColor(isHovered, isDragging).withValues(alpha: 0.9),
-            _getSecondaryColor(isHovered, isDragging).withValues(alpha: 0.7),
+            _getMainColor(isHovered, isDragging, isWaiting).withValues(alpha: 0.9),
+            _getSecondaryColor(isHovered, isDragging, isWaiting).withValues(alpha: 0.7),
           ],
         ),
       ),
@@ -294,14 +318,14 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
     );
   }
 
-  Color _getMainColor(bool isHovered, bool isDragging) {
-    if (isDragging) return Colors.orange;
+  Color _getMainColor(bool isHovered, bool isDragging, bool isWaiting) {
+    if (isDragging || isWaiting) return Colors.orange;
     if (isHovered) return Colors.green;
     return Colors.blue;
   }
 
-  Color _getSecondaryColor(bool isHovered, bool isDragging) {
-    if (isDragging) return Colors.deepOrange;
+  Color _getSecondaryColor(bool isHovered, bool isDragging, bool isWaiting) {
+    if (isDragging || isWaiting) return Colors.deepOrange;
     if (isHovered) return Colors.lightGreen;
     return Colors.purple;
   }
@@ -313,10 +337,12 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
     final now = DateTime.now().millisecondsSinceEpoch;
 
     // 检测是否是右键（使用 kSecondaryMouseButton）
-    if (event.kind == PointerDeviceKind.mouse && 
+    if (event.kind == PointerDeviceKind.mouse &&
         event.buttons & kSecondaryMouseButton != 0) {
       // 右键点击
-      PlatformLogger.instance.logInfo('🖱️ 右键点击检测到');
+      if (_shouldLog) {
+        PlatformLogger.instance.logInfo('🖱️ 检测到右键点击，调用 onRightClick 回调');
+      }
       widget.onRightClick?.call();
       return;
     }
@@ -327,10 +353,16 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
       return;
     }
 
+    if (_shouldLog) {
+      PlatformLogger.instance.logInfo('🖱️ 检测到左键按下，位置: ${event.position}');
+    }
+
     // 双击检测
     if (_lastTapTime != null && now - _lastTapTime! < _doubleTapInterval) {
       // 双击成功 - 清除所有状态并立即返回
-      PlatformLogger.instance.logInfo('🖱️ 双击检测到');
+      if (_shouldLog) {
+        PlatformLogger.instance.logInfo('🖱️ 检测到双击，调用 onDoubleClick 回调');
+      }
       _lastTapTime = null;
       _dragStartPosition = null;
       _dragTimeoutTimer?.cancel();
@@ -339,9 +371,13 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
       widget.onDoubleClick?.call();
       return;
     }
-    
+
     // 记录本次点击时间（用于下次双击检测）
     _lastTapTime = now;
+
+    if (_shouldLog) {
+      PlatformLogger.instance.logInfo('🖱️ 记录点击时间，准备拖拽检测');
+    }
 
     // 拖拽准备：记录起始位置，但不立即开始拖拽
     _dragStartPosition = event.position;
@@ -349,10 +385,17 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
     _isWaitingForDrag.value = true;
     // 注意：这里不设置 _isDragging.value = true，等待移动后再设置
 
+    if (_shouldLog) {
+      PlatformLogger.instance.logInfo('🖱️ 进入等待拖拽状态（isWaitingForDrag=true）');
+    }
+
     // 启动超时定时器（1000ms后自动取消拖拽等待）
     _dragTimeoutTimer?.cancel();
     _dragTimeoutTimer = Timer(const Duration(milliseconds: 1000), () {
       if (_isWaitingForDrag.value && mounted) {
+        if (_shouldLog) {
+          PlatformLogger.instance.logInfo('🖱️ 拖拽超时（1000ms），取消等待状态');
+        }
         _isWaitingForDrag.value = false;
         _isDragging.value = false;
         _isHovered.value = true;
@@ -367,7 +410,11 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
       final delta = event.position - _dragStartPosition!;
       if (delta.distance > _dragStartDistance) {
         // 移动距离超过阈值，开始拖拽
-        PlatformLogger.instance.logInfo('🖱️ 检测到拖拽移动，开始拖拽');
+        if (_shouldLog) {
+          PlatformLogger.instance.logInfo(
+            '🖱️ 移动距离超过阈值 (${delta.distance.toStringAsFixed(2)} > $_dragStartDistance)，开始拖拽',
+          );
+        }
         _dragTimeoutTimer?.cancel();
         _isWaitingForDrag.value = false;
         _isDragging.value = true; // 现在才设置为拖拽状态
@@ -380,13 +427,32 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
   void _handlePointerUp(PointerUpEvent event) {
     _dragTimeoutTimer?.cancel();
 
+    if (_shouldLog) {
+      PlatformLogger.instance.logInfo('🖱️ 指针抬起，当前拖拽状态: ${_isDragging.value}');
+    }
+
     // 如果正在拖拽，结束拖拽
     if (_isDragging.value) {
-      PlatformLogger.instance.logInfo('🖱️ 拖拽结束');
+      if (_shouldLog) {
+        PlatformLogger.instance.logInfo('🖱️ 结束拖拽状态（isDragging=false）');
+      }
       _isDragging.value = false;
-      _isHovered.value = true;
     }
-    
+
+    // 恢复 hover 状态（点击后显示绿色）
+    _isHovered.value = true;
+
+    if (_shouldLog) {
+      PlatformLogger.instance.logInfo('🖱️ 恢复 hover 状态，启动点击冷却（100ms）');
+    }
+
+    // 启动冷却定时器，防止 onExit 立即改变状态
+    _clickCooldownTimer?.cancel();
+    _clickCooldownTimer = Timer(const Duration(milliseconds: 100), () {
+      // 冷却结束后，让 MouseRegion 自然处理 hover 状态
+      _clickCooldownTimer = null;
+    });
+
     // 清理拖拽相关状态
     _isWaitingForDrag.value = false;
     _dragStartPosition = null;
@@ -394,17 +460,28 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
 
   /// 开始拖拽：调用原生拖拽API
   void _startDragging() async {
+    if (_shouldLog) {
+      PlatformLogger.instance.logInfo('🖱️ 调用原生拖拽 API');
+    }
     try {
       // 获取当前窗口位置作为初始位置
       _lastWindowPosition = await windowManager.getPosition();
 
+      if (_shouldLog) {
+        PlatformLogger.instance.logInfo('🖱️ 初始窗口位置: $_lastWindowPosition');
+      }
+
       // 启动原生拖拽
       windowManager.startDragging();
+
+      if (_shouldLog) {
+        PlatformLogger.instance.logInfo('🖱️ 原生拖拽已启动，启动拖拽结束检测');
+      }
 
       // 启动拖拽结束检测定时器
       _startDragEndCheck();
     } catch (e) {
-      // 静默处理错误
+      PlatformLogger.instance.logError('启动拖拽失败', e);
     }
   }
 
@@ -428,9 +505,18 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
         final deltaX = (currentPosition.dx - _lastWindowPosition!.dx).abs();
         final deltaY = (currentPosition.dy - _lastWindowPosition!.dy).abs();
 
+        if (_shouldLog) {
+          PlatformLogger.instance.logInfo(
+            '🖱️ 检查拖拽结束: delta=($deltaX, $deltaY), threshold=$_dragEndPositionThreshold',
+          );
+        }
+
         if (deltaX < _dragEndPositionThreshold &&
             deltaY < _dragEndPositionThreshold) {
           // 位置不再变化，拖拽结束
+          if (_shouldLog) {
+            PlatformLogger.instance.logInfo('🖱️ 位置不再变化，拖拽结束');
+          }
           _endDragging();
           return;
         }
@@ -441,6 +527,9 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
       _startDragEndCheck();
     } catch (e) {
       // 出错时也结束拖拽
+      if (_shouldLog) {
+        PlatformLogger.instance.logInfo('🖱️ 检查拖拽结束出错，结束拖拽');
+      }
       _endDragging();
     }
   }
@@ -449,6 +538,10 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
   void _endDragging() {
     _dragEndCheckTimer?.cancel();
     _dragTimeoutTimer?.cancel();
+
+    if (_shouldLog) {
+      PlatformLogger.instance.logInfo('🖱️ 拖拽结束，恢复所有状态');
+    }
 
     if (_isDragging.value) {
       _isDragging.value = false;
@@ -461,7 +554,7 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
 
   @override
   void onWindowMove() {
-    // 窗口移动时更新位置记录
+    // 窗口移动时更新位置记录（静默处理，不输出日志）
     if (_isDragging.value) {
       windowManager.getPosition().then((position) {
         _lastWindowPosition = position;
@@ -507,6 +600,7 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
     // 取消定时器
     _dragTimeoutTimer?.cancel();
     _dragEndCheckTimer?.cancel();
+    _clickCooldownTimer?.cancel();
 
     if (_platformCapabilities.supportsDesktopPet) {
       windowManager.removeListener(this);

@@ -5,7 +5,6 @@ import 'package:window_manager/window_manager.dart';
 import 'platform_logger.dart';
 import 'desktop_pet_click_through_service.dart';
 import 'config_manager.dart';
-import '../models/global_config.dart';
 
 // Conditional imports for platform detection
 import 'platform_helper_stub.dart'
@@ -21,6 +20,12 @@ class DesktopPetManager with WindowListener {
   bool _isDesktopPetMode = false;
   bool _isAlwaysOnTop = false;
   bool _isMonitoringWindow = false;
+
+  /// 是否启用调试模式
+  bool get _isDebugMode => ConfigManager.instance.globalConfig.advanced.debugMode;
+
+  /// 是否应该输出日志
+  bool get _shouldLog => _isDebugMode;
 
   // 点击穿透服务
   final DesktopPetClickThroughService _clickThroughService =
@@ -426,55 +431,75 @@ class DesktopPetManager with WindowListener {
       final currentPosition = await windowManager.getPosition();
       final targetOpacity = _petPreferences['opacity'] ?? 1.0;
 
-      PlatformLogger.instance.logInfo(
-        '🎯 Step 1: 准备创建桌面宠物窗口\n'
-        '   当前位置: (${currentPosition.dx}, ${currentPosition.dy})\n'
-        '   目标透明度: $targetOpacity',
-      );
+      if (_shouldLog) {
+        PlatformLogger.instance.logInfo(
+          '🎯 Step 1: 准备创建桌面宠物窗口\n'
+          '   当前位置: (${currentPosition.dx}, ${currentPosition.dy})\n'
+          '   目标透明度: $targetOpacity',
+        );
+      }
 
       // 步骤 2: 先设置透明度为0（关键：在窗口可见前就设置为透明）
-      PlatformLogger.instance.logInfo('🎯 Step 2: 设置初始透明度为 0.0（完全透明）...');
+      if (_shouldLog) {
+        PlatformLogger.instance.logInfo('🎯 Step 2: 设置初始透明度为 0.0（完全透明）...');
+      }
       await windowManager.setOpacity(0.0);
-      
+
       final initialOpacity = await windowManager.getOpacity();
-      PlatformLogger.instance.logInfo(
-        '   验证: 初始透明度 = $initialOpacity (应为 0.0)',
-      );
+      if (_shouldLog) {
+        PlatformLogger.instance.logInfo(
+          '   验证: 初始透明度 = $initialOpacity (应为 0.0)',
+        );
+      }
 
       // 【关键】等待透明度设置生效
       await Future.delayed(const Duration(milliseconds: 50));
 
       // 步骤 3: 设置所有窗口属性（此时窗口是透明的，即使可见也看不到）
-      PlatformLogger.instance.logInfo('🎯 Step 3: 配置窗口属性（透明状态下）...');
+      if (_shouldLog) {
+        PlatformLogger.instance.logInfo('🎯 Step 3: 配置窗口属性（透明状态下）...');
+      }
 
       // 取消最小尺寸限制
-      PlatformLogger.instance.logInfo('   - 设置最小尺寸为 0x0');
+      if (_shouldLog) {
+        PlatformLogger.instance.logInfo('   - 设置最小尺寸为 0x0');
+      }
       await windowManager.setMinimumSize(const Size(0, 0));
 
       // 设置透明背景色
-      PlatformLogger.instance.logInfo('   - 设置背景色为透明 (0x00000000)');
+      if (_shouldLog) {
+        PlatformLogger.instance.logInfo('   - 设置背景色为透明 (0x00000000)');
+      }
       await windowManager.setBackgroundColor(const Color(0x00000000));
 
       // 等待背景色设置生效
       await Future.delayed(const Duration(milliseconds: 50));
 
       // 设置窗口为无边框
-      PlatformLogger.instance.logInfo('   - 设置为无边框窗口');
+      if (_shouldLog) {
+        PlatformLogger.instance.logInfo('   - 设置为无边框窗口');
+      }
       await windowManager.setAsFrameless();
 
       // 调整窗口大小
-      PlatformLogger.instance.logInfo('   - 设置窗口大小为 ${petWindowSize.width}x${petWindowSize.height}');
+      if (_shouldLog) {
+        PlatformLogger.instance.logInfo('   - 设置窗口大小为 ${petWindowSize.width}x${petWindowSize.height}');
+      }
       await windowManager.setSize(petWindowSize);
 
       // 验证窗口大小
       final actualSize = await windowManager.getSize();
-      PlatformLogger.instance.logInfo(
-        '   - 验证尺寸: 请求 ${petWindowSize.width}x${petWindowSize.height}, '
-        '实际 ${actualSize.width}x${actualSize.height}',
-      );
+      if (_shouldLog) {
+        PlatformLogger.instance.logInfo(
+          '   - 验证尺寸: 请求 ${petWindowSize.width}x${petWindowSize.height}, '
+          '实际 ${actualSize.width}x${actualSize.height}',
+        );
+      }
 
       // 设置窗口属性
-      PlatformLogger.instance.logInfo('   - 设置窗口属性（置顶、无阴影等）');
+      if (_shouldLog) {
+        PlatformLogger.instance.logInfo('   - 设置窗口属性（置顶、无阴影等）');
+      }
       await windowManager.setAlwaysOnTop(true);
       await windowManager.setSkipTaskbar(true);
       await windowManager.setHasShadow(false);
@@ -489,18 +514,22 @@ class DesktopPetManager with WindowListener {
       final isVisibleAfterConfig = await windowManager.isVisible();
       final isAlwaysOnTopValue = await windowManager.isAlwaysOnTop();
       final opacityAfterConfig = await windowManager.getOpacity();
-      
-      PlatformLogger.instance.logInfo(
-        '🎯 Step 3 验证:\n'
-        '   尺寸: ${actualSize.width}x${actualSize.height}\n'
-        '   可见性: $isVisibleAfterConfig\n'
-        '   透明度: $opacityAfterConfig (应为 0.0)\n'
-        '   置顶: $isAlwaysOnTopValue',
-      );
+
+      if (_shouldLog) {
+        PlatformLogger.instance.logInfo(
+          '🎯 Step 3 验证:\n'
+          '   尺寸: ${actualSize.width}x${actualSize.height}\n'
+          '   可见性: $isVisibleAfterConfig\n'
+          '   透明度: $opacityAfterConfig (应为 0.0)\n'
+          '   置顶: $isAlwaysOnTopValue',
+        );
+      }
 
       // 步骤 4: 确保窗口可见（如果还没显示的话）
-      PlatformLogger.instance.logInfo('🎯 Step 4: 确保窗口可见（透明状态）...');
-      
+      if (_shouldLog) {
+        PlatformLogger.instance.logInfo('🎯 Step 4: 确保窗口可见（透明状态）...');
+      }
+
       if (!isVisibleAfterConfig) {
         await windowManager.show();
         await Future.delayed(const Duration(milliseconds: 50));
@@ -515,27 +544,33 @@ class DesktopPetManager with WindowListener {
       // 验证窗口显示状态
       final isVisibleNow = await windowManager.isVisible();
       final opacityNow = await windowManager.getOpacity();
-      
-      PlatformLogger.instance.logInfo(
-        '   验证: 可见性 = $isVisibleNow, 透明度 = $opacityNow',
-      );
+
+      if (_shouldLog) {
+        PlatformLogger.instance.logInfo(
+          '   验证: 可见性 = $isVisibleNow, 透明度 = $opacityNow',
+        );
+      }
 
       // 步骤 5: 逐渐恢复透明度（从0到目标值）
-      PlatformLogger.instance.logInfo('🎯 Step 5: 恢复透明度到 $targetOpacity...');
-      
+      if (_shouldLog) {
+        PlatformLogger.instance.logInfo('🎯 Step 5: 恢复透明度到 $targetOpacity...');
+      }
+
       await windowManager.setOpacity(targetOpacity);
       await windowManager.focus();
 
       // 最终验证
       final finalOpacity = await windowManager.getOpacity();
       final finalSize = await windowManager.getSize();
-      
-      PlatformLogger.instance.logInfo(
-        '🎯 完成！桌面宠物窗口创建成功\n'
-        '   最终尺寸: ${finalSize.width}x${finalSize.height}\n'
-        '   最终透明度: $finalOpacity\n'
-        '   位置: (${currentPosition.dx}, ${currentPosition.dy})',
-      );
+
+      if (_shouldLog) {
+        PlatformLogger.instance.logInfo(
+          '🎯 完成！桌面宠物窗口创建成功\n'
+          '   最终尺寸: ${finalSize.width}x${finalSize.height}\n'
+          '   最终透明度: $finalOpacity\n'
+          '   位置: (${currentPosition.dx}, ${currentPosition.dy})',
+        );
+      }
 
       _isAlwaysOnTop = true;
     } catch (e) {
@@ -551,8 +586,10 @@ class DesktopPetManager with WindowListener {
   /// 开始监听窗口事件
   void _startWindowMonitoring() {
     if (_isMonitoringWindow) return;
-    
-    PlatformLogger.instance.logInfo('🔍 开始监听窗口事件...');
+
+    if (_shouldLog) {
+      PlatformLogger.instance.logInfo('🔍 开始监听窗口事件...');
+    }
     windowManager.addListener(this);
     _isMonitoringWindow = true;
   }
@@ -560,111 +597,86 @@ class DesktopPetManager with WindowListener {
   /// 停止监听窗口事件
   void _stopWindowMonitoring() {
     if (!_isMonitoringWindow) return;
-    
-    PlatformLogger.instance.logInfo('🔍 停止监听窗口事件');
+
+    if (_shouldLog) {
+      PlatformLogger.instance.logInfo('🔍 停止监听窗口事件');
+    }
     windowManager.removeListener(this);
     _isMonitoringWindow = false;
   }
 
   @override
   void onWindowEvent(String eventName) async {
-    final size = await windowManager.getSize();
-    final position = await windowManager.getPosition();
-    final opacity = await windowManager.getOpacity();
-    final isVisible = await windowManager.isVisible();
-    
-    PlatformLogger.instance.logInfo(
-      '📊 [窗口事件] $eventName\n'
-      '   尺寸: ${size.width}x${size.height}\n'
-      '   位置: (${position.dx}, ${position.dy})\n'
-      '   透明度: $opacity\n'
-      '   可见性: $isVisible',
-    );
+    // 窗口通用事件 - 无操作
   }
 
   @override
   void onWindowClose() {
-    PlatformLogger.instance.logInfo('📊 [窗口事件] 窗口关闭');
-  }
-
-  @override
-  void onWindowFocus() async {
-    final size = await windowManager.getSize();
-    final opacity = await windowManager.getOpacity();
-    
-    PlatformLogger.instance.logInfo(
-      '📊 [窗口事件] 窗口获得焦点\n'
-      '   尺寸: ${size.width}x${size.height}\n'
-      '   透明度: $opacity',
-    );
-  }
-
-  @override
-  void onWindowBlur() {
-    PlatformLogger.instance.logInfo('📊 [窗口事件] 窗口失去焦点');
+    if (_shouldLog) {
+      PlatformLogger.instance.logInfo('🪟 窗口关闭');
+    }
   }
 
   @override
   void onWindowMaximize() {
-    PlatformLogger.instance.logInfo('📊 [窗口事件] 窗口最大化');
+    if (_shouldLog) {
+      PlatformLogger.instance.logInfo('🪟 窗口最大化');
+    }
   }
 
   @override
   void onWindowUnmaximize() {
-    PlatformLogger.instance.logInfo('📊 [窗口事件] 窗口取消最大化');
+    if (_shouldLog) {
+      PlatformLogger.instance.logInfo('🪟 窗口取消最大化');
+    }
+  }
+
+  @override
+  void onWindowFocus() {
+    // 窗口获得焦点 - 静默处理，不输出日志
+  }
+
+  @override
+  void onWindowBlur() {
+    // 窗口失去焦点 - 静默处理，不输出日志
   }
 
   @override
   void onWindowMinimize() {
-    PlatformLogger.instance.logInfo('📊 [窗口事件] 窗口最小化');
+    if (_shouldLog) {
+      PlatformLogger.instance.logInfo('🪟 窗口最小化');
+    }
   }
 
   @override
   void onWindowRestore() async {
-    final size = await windowManager.getSize();
-    final opacity = await windowManager.getOpacity();
-    
-    PlatformLogger.instance.logInfo(
-      '📊 [窗口事件] 窗口恢复\n'
-      '   尺寸: ${size.width}x${size.height}\n'
-      '   透明度: $opacity',
-    );
+    if (_shouldLog) {
+      PlatformLogger.instance.logInfo('🪟 窗口恢复');
+    }
   }
 
   @override
   void onWindowResize() async {
-    final size = await windowManager.getSize();
-    final opacity = await windowManager.getOpacity();
-    final isVisible = await windowManager.isVisible();
-    
-    PlatformLogger.instance.logInfo(
-      '📊 [窗口事件] 窗口大小变化\n'
-      '   新尺寸: ${size.width}x${size.height}\n'
-      '   透明度: $opacity\n'
-      '   可见性: $isVisible',
-    );
+    // 窗口大小变化 - 静默处理，不输出日志
   }
 
   @override
   void onWindowMove() async {
-    final position = await windowManager.getPosition();
-    final size = await windowManager.getSize();
-    
-    PlatformLogger.instance.logInfo(
-      '📊 [窗口事件] 窗口位置变化\n'
-      '   新位置: (${position.dx}, ${position.dy})\n'
-      '   尺寸: ${size.width}x${size.height}',
-    );
+    // 窗口位置变化 - 静默处理，不输出日志
   }
 
   @override
   void onWindowEnterFullScreen() {
-    PlatformLogger.instance.logInfo('📊 [窗口事件] 窗口进入全屏');
+    if (_shouldLog) {
+      PlatformLogger.instance.logInfo('🪟 窗口进入全屏');
+    }
   }
 
   @override
   void onWindowLeaveFullScreen() {
-    PlatformLogger.instance.logInfo('📊 [窗口事件] 窗口退出全屏');
+    if (_shouldLog) {
+      PlatformLogger.instance.logInfo('🪟 窗口退出全屏');
+    }
   }
 
   /// 恢复主窗口

@@ -7,7 +7,7 @@ import '../../core/services/tag_manager.dart';
 
 /// 标签管理界面
 ///
-/// 提供标签的增删改查功能
+/// 提供标签的增删改查功能，采用卡片式网格布局
 class TagManagementScreen extends StatefulWidget {
   const TagManagementScreen({super.key});
 
@@ -108,16 +108,6 @@ class _TagManagementScreenState extends State<TagManagementScreen> {
   }
 
   Future<void> _editTag(Tag tag) async {
-    if (tag.isSystem) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.tag_system_protected),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
-
     final result = await showDialog<Tag>(
       context: context,
       builder: (context) => _TagEditDialog(tag: tag),
@@ -149,16 +139,6 @@ class _TagManagementScreenState extends State<TagManagementScreen> {
   }
 
   Future<void> _deleteTag(Tag tag) async {
-    if (tag.isSystem) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.tag_system_protected),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
-
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -250,56 +230,25 @@ class _TagManagementScreenState extends State<TagManagementScreen> {
                   ),
                 ),
 
-                // 标签列表
+                // 标签网格
                 Expanded(
                   child: _filteredTags.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.tag,
-                                size: 64,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurface.withValues(alpha: 0.3),
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                _searchQuery.isNotEmpty
-                                    ? l10n.hint_noResults
-                                    : l10n.tag_no_tags,
-                                style: Theme.of(context).textTheme.bodyLarge
-                                    ?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurface
-                                          .withValues(alpha: 0.6),
-                                    ),
-                              ),
-                              if (_searchQuery.isEmpty) ...[
-                                const SizedBox(height: 8),
-                                Text(
-                                  l10n.tag_create_hint,
-                                  style: Theme.of(context).textTheme.bodyMedium
-                                      ?.copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSurface
-                                            .withValues(alpha: 0.5),
-                                      ),
-                                ),
-                              ],
-                            ],
+                      ? _buildEmptyState()
+                      : Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: GridView.builder(
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 5,
+                              mainAxisSpacing: 8,
+                              crossAxisSpacing: 8,
+                              childAspectRatio: 4 / 3,
+                            ),
+                            itemCount: _filteredTags.length,
+                            itemBuilder: (context, index) {
+                              final tag = _filteredTags[index];
+                              return _buildTagCard(tag);
+                            },
                           ),
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          itemCount: _filteredTags.length,
-                          itemBuilder: (context, index) {
-                            final tag = _filteredTags[index];
-                            return _buildTagTile(tag);
-                          },
                         ),
                 ),
               ],
@@ -307,100 +256,149 @@ class _TagManagementScreenState extends State<TagManagementScreen> {
     );
   }
 
-  Widget _buildTagTile(Tag tag) {
+  Widget _buildEmptyState() {
+    final l10n = context.l10n;
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.tag,
+            size: 64,
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            _searchQuery.isNotEmpty
+                ? l10n.hint_noResults
+                : l10n.tag_no_tags,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+          ),
+          if (_searchQuery.isEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              l10n.tag_create_hint,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                  ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTagCard(Tag tag) {
     final color = _getTagColor(tag.color);
     final pluginCount = _tagManager.getPluginsByTag(tag.id).length;
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: color.withValues(alpha: 0.2),
-          child: Text(tag.icon ?? '🏷️', style: const TextStyle(fontSize: 20)),
-        ),
-        title: Row(
-          children: [
-            Text(tag.name, style: const TextStyle(fontWeight: FontWeight.w600)),
-            if (tag.isSystem) ...[
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: Colors.blue.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
-                ),
-                child: Text(
-                  '系统',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.blue,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (tag.description.isNotEmpty) ...[
-              const SizedBox(height: 4),
-              Text(tag.description),
-            ],
-            const SizedBox(height: 4),
-            Text(
-              '$pluginCount 个插件使用',
-              style: TextStyle(
-                fontSize: 12,
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurface.withValues(alpha: 0.6),
-              ),
-            ),
-          ],
-        ),
-        trailing: tag.isSystem
-            ? null
-            : PopupMenuButton<String>(
-                onSelected: (value) {
-                  switch (value) {
-                    case 'edit':
-                      _editTag(tag);
-                      break;
-                    case 'delete':
-                      _deleteTag(tag);
-                      break;
-                  }
-                },
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: 'edit',
-                    child: Row(
-                      children: [
-                        const Icon(Icons.edit, size: 20),
-                        const SizedBox(width: 8),
-                        Text(context.l10n.tag_edit),
-                      ],
+      elevation: 2,
+      child: InkWell(
+        onTap: () => _editTag(tag),
+        onLongPress: () => _deleteTag(tag),
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 标签头部：图标 + 名称
+              Row(
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Center(
+                      child: Text(
+                        tag.icon ?? '🏷️',
+                        style: const TextStyle(fontSize: 16),
+                      ),
                     ),
                   ),
-                  PopupMenuItem(
-                    value: 'delete',
-                    child: Row(
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.delete, size: 20, color: Colors.red),
-                        const SizedBox(width: 8),
-                        Text(
-                          context.l10n.tag_delete,
-                          style: const TextStyle(color: Colors.red),
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                tag.name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
+                        if (tag.description.isNotEmpty) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            tag.description,
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ],
                     ),
                   ),
                 ],
               ),
-        onTap: () => _editTag(tag),
+              const Spacer(),
+              // 操作按钮
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit, size: 16),
+                    tooltip: '编辑',
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    onPressed: () => _editTag(tag),
+                  ),
+                  const SizedBox(width: 4),
+                  IconButton(
+                    icon: const Icon(Icons.delete, size: 16, color: Colors.red),
+                    tooltip: '删除',
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    onPressed: () => _deleteTag(tag),
+                  ),
+                ],
+              ),
+              // 底部信息：插件数量
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  '$pluginCount 个插件',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: color,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -449,9 +447,7 @@ class _TagEditDialogState extends State<_TagEditDialog> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.tag?.name ?? '');
-    _descriptionController = TextEditingController(
-      text: widget.tag?.description ?? '',
-    );
+    _descriptionController = TextEditingController(text: widget.tag?.description ?? '');
     _iconController = TextEditingController(text: widget.tag?.icon ?? '');
     _selectedColor = widget.tag?.color ?? TagColor.blue;
   }
@@ -471,92 +467,126 @@ class _TagEditDialogState extends State<_TagEditDialog> {
 
     return AlertDialog(
       title: Text(isEditing ? l10n.tag_edit : l10n.tag_add),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // 标签名称
-            TextFormField(
-              controller: _nameController,
-              decoration: InputDecoration(
-                labelText: l10n.tag_name,
-                border: const OutlineInputBorder(),
-              ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return l10n.hint_inputRequired;
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // 标签描述
-            TextFormField(
-              controller: _descriptionController,
-              decoration: InputDecoration(
-                labelText: l10n.tag_description,
-                border: const OutlineInputBorder(),
-              ),
-              maxLines: 2,
-            ),
-            const SizedBox(height: 16),
-
-            // 标签图标
-            TextFormField(
-              controller: _iconController,
-              decoration: InputDecoration(
-                labelText: l10n.tag_icon,
-                border: const OutlineInputBorder(),
-                hintText: '🏷️',
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // 颜色选择
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.tag_color,
-                  style: Theme.of(context).textTheme.bodyMedium,
+      content: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 标签名称
+              TextFormField(
+                controller: _nameController,
+                decoration: InputDecoration(
+                  labelText: l10n.tag_name,
+                  border: const OutlineInputBorder(),
                 ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  children: TagColor.values.map((color) {
-                    final isSelected = _selectedColor == color;
-                    return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _selectedColor = color;
-                        });
-                      },
-                      child: Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: _getTagColor(color),
-                          shape: BoxShape.circle,
-                          border: isSelected
-                              ? Border.all(color: Colors.black, width: 2)
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return l10n.hint_inputRequired;
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // 标签描述
+              TextFormField(
+                controller: _descriptionController,
+                decoration: InputDecoration(
+                  labelText: l10n.tag_description,
+                  border: const OutlineInputBorder(),
+                ),
+                maxLines: 2,
+              ),
+              const SizedBox(height: 16),
+
+              // 标签图标
+              TextFormField(
+                controller: _iconController,
+                decoration: InputDecoration(
+                  labelText: l10n.tag_icon,
+                  border: const OutlineInputBorder(),
+                  hintText: '🏷️',
+                  suffixIcon: const Icon(Icons.emoji_emotions),
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              // 预设图标选择
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '或选择预设图标',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _getPresetIcons(),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // 颜色选择
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.tag_color,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: TagColor.values.map((color) {
+                      final isSelected = _selectedColor == color;
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _selectedColor = color;
+                          });
+                        },
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: _getTagColor(color),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: isSelected ? Colors.black : Colors.white,
+                              width: isSelected ? 2 : 1,
+                            ),
+                            boxShadow: isSelected
+                                ? [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(alpha: 0.3),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ]
+                                : null,
+                          ),
+                          child: isSelected
+                              ? const Icon(
+                                  Icons.check,
+                                  color: Colors.white,
+                                  size: 20,
+                                )
                               : null,
                         ),
-                        child: isSelected
-                            ? const Icon(
-                                Icons.check,
-                                color: Colors.white,
-                                size: 16,
-                              )
-                            : null,
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ],
-            ),
-          ],
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
       actions: [
@@ -572,9 +602,7 @@ class _TagEditDialogState extends State<_TagEditDialog> {
                 name: _nameController.text.trim(),
                 description: _descriptionController.text.trim(),
                 color: _selectedColor,
-                icon: _iconController.text.trim().isEmpty
-                    ? null
-                    : _iconController.text.trim(),
+                icon: _iconController.text.trim().isEmpty ? null : _iconController.text.trim(),
                 createdAt: widget.tag?.createdAt,
                 isSystem: widget.tag?.isSystem ?? false,
                 sortOrder: widget.tag?.sortOrder ?? 0,
@@ -607,5 +635,62 @@ class _TagEditDialogState extends State<_TagEditDialog> {
       case TagColor.pink:
         return Colors.pink;
     }
+  }
+
+  /// 获取预设图标列表
+  List<Widget> _getPresetIcons() {
+    final presetIcons = [
+      '🏷️', // 标签
+      '⭐', // 星星
+      '❤️', // 爱心
+      '🔥', // 火焰
+      '💡', // 灯泡
+      '🎯', // 目标
+      '📌', // 图钉
+      '🚀', // 火箭
+      '💎', // 钻石
+      '🎨', // 调色板
+      '🔧', // 扳手
+      '📱', // 手机
+      '💻', // 电脑
+      '🎮', // 游戏
+      '🎬', // 电影
+      '📚', // 书本
+      '🏠', // 房子
+      '🌟', // 闪亮
+      '✅', // 勾选
+      '📊', // 图表
+      '🔔', // 铃铛
+      '🎁', // 礼物
+      '📷', // 相机
+      '🎵', // 音乐
+    ];
+
+    return presetIcons.map((icon) {
+      return GestureDetector(
+        onTap: () {
+          setState(() {
+            _iconController.text = icon;
+          });
+        },
+        child: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outline,
+              width: 1,
+            ),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Center(
+            child: Text(
+              icon,
+              style: const TextStyle(fontSize: 20),
+            ),
+          ),
+        ),
+      );
+    }).toList();
   }
 }

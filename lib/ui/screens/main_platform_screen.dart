@@ -69,7 +69,23 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
     _platformCore = PlatformCore();
     _desktopPetManager = DesktopPetManager();
     _tagManager = TagManager.instance;
+    // 监听标签变化
+    _tagManager.tagsNotifier.addListener(_onTagsChanged);
     _initializePlatform();
+  }
+
+  /// 标签变化时的回调
+  void _onTagsChanged() {
+    if (mounted) {
+      setState(() {
+        _tags = _tagManager.tags;
+        // 清除无效的选中标签
+        _selectedTagIds = _selectedTagIds
+            .where((id) => _tags.any((tag) => tag.id == id))
+            .toSet();
+        _applyTagFilter();
+      });
+    }
   }
 
   /// Initialize the platform core and load initial data

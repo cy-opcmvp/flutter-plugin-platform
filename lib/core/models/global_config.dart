@@ -1,5 +1,7 @@
 library;
 
+import '../constants/app_version.dart' show AppVersion;
+
 /// 全局应用配置
 ///
 /// 包含应用的所有全局设置，从配置文件读取
@@ -143,8 +145,8 @@ class AppConfig {
   }
 
   static const defaultConfig = AppConfig(
-    name: 'Flutter Plugin Platform',
-    version: '0.3.4',
+    name: AppVersion.appName,
+    version: AppVersion.version,
     language: 'zh_CN',
     theme: 'system',
     pluginViewMode: PluginViewMode.mediumIcon,
