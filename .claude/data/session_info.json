@@ -1,9 +1,9 @@
 {
-  "current_id": 2,
+  "current_id": 3,
   "min_id": 1,
   "session_start": "2026-01-25",
   "last_conversation": "2026-01-25",
-  "total_conversations": 1,
-  "total_tokens": 2500,
-  "total_duration_seconds": 15
+  "total_conversations": 2,
+  "total_tokens": 2650,
+  "total_duration_seconds": 18
 }
