@@ -4,6 +4,7 @@
 
 ## 版本索引
 
+- [v0.4.4](#v044-2026-01-25) - 2026-01-25
 - [v0.4.3](#v043-2026-01-21) - 2026-01-21
 - [v0.4.2](#v042-2026-01-21) - 2026-01-21
 - [v0.4.1](#v041-2026-01-20) - 2026-01-20
@@ -12,6 +13,101 @@
 - [v0.3.2](#v032-2026-01-15) - 2026-01-15
 - [v0.3.1](#v031-2025-01-14) - 2025-01-14
 - [v0.3.0](#v030-2025-01-14) - 2025-01-14
+
+---
+
+## v0.4.4 (2026-01-25)
+
+### Tag 信息
+- **版本号**: v0.4.4
+- **提交**: 44afdf0, a9bbf64
+- **创建时间**: 2026-01-25
+- **创建者**: Claude Code
+- **类型**: Minor 版本（功能更新）
+
+### Push 信息
+- **状态**: 待推送
+- **提交范围**: 1e12358..a9bbf64
+- **Tag**: v0.4.4
+
+### 变更内容
+- **外部插件国际化支持** - 完整的国际化接口系统
+  - **IPluginI18n 接口**: 定义外部插件国际化标准
+    - 提供翻译、占位符替换、语言回退等功能
+    - 支持多语言翻译注册和管理
+    - 自动语言回退机制（zh_CN → zh → key）
+  - **PluginI18nHelper 实现**: 完整的国际化辅助类
+    - 管理插件翻译资源
+    - 支持占位符替换（{key} 和 $key 格式）
+    - 提供翻译统计和检查功能
+  - **系统集成**: 集成到 PluginContext
+    - 更新 PluginContext，添加 i18n 字段
+    - 更新 PluginManager，初始化 i18n 服务
+    - 更新 EnhancedPluginContext，支持 i18n 参数
+  - **文档完善**: 完整的国际化开发指南
+    - 更新 .claude/CLAUDE.md，添加外部插件国际化支持章节
+    - 更新 external-plugin-development.md，添加完整实现指南（380+ 行）
+    - 包含翻译文件组织、占位符使用、最佳实践等
+
+- **配置管理系统** - 配置文件和管理优化
+  - **CONFIG_MANAGEMENT.md**: 新增配置管理指南
+    - 配置文件格式和结构说明
+    - 全局配置和插件配置管理
+    - 配置验证和错误处理
+  - **global_config.example.json**: 配置示例文件
+    - 完整的配置结构示例
+    - 包含桌面宠物、插件配置等
+    - 提供配置验证规则
+
+- **桌面宠物优化** - 设置和配置改进
+  - 优化宠物设置界面布局
+  - 改进配置管理的实时保存机制
+  - 增强用户体验和响应性
+
+- **插件配置优化** - 各插件配置界面改进
+  - 计算器插件：优化配置界面布局
+  - 世界时钟插件：改进配置界面
+  - 截图插件：修复配置相关问题
+
+- **国际化问题修复** - 编译错误和翻译补充
+  - 修复 7 个国际化相关编译错误
+  - 修复 screenshot_main_widget.dart 中的 replaceAll 错误
+  - 修复 _ScreenshotListItem context 访问问题
+  - 修复函数调用占位符错误（使用函数而非字符串）
+  - 添加缺失的 common_add 翻译键
+
+### 技术实现
+- **新增文件**（4个）:
+  - `lib/core/interfaces/i_plugin_i18n.dart` - 国际化接口定义（76 行）
+  - `lib/core/services/plugin_i18n_helper.dart` - 国际化辅助实现（129 行）
+  - `assets/config/global_config.example.json` - 配置示例
+  - `docs/guides/CONFIG_MANAGEMENT.md` - 配置管理指南
+
+- **修改文件**（23个）:
+  - 核心系统：`i_plugin.dart`, `plugin_manager.dart`, `platform_services.dart`, 等
+  - UI 界面：`settings_screen.dart`, `desktop_pet_settings_screen.dart`, 等
+  - 插件配置：3 个插件的 settings_screen.dart
+  - 国际化：app_zh.arb, app_en.arb, generated/*.dart
+  - 文档：`.claude/CLAUDE.md`, `external-plugin-development.md`
+
+- **代码统计**: 27 个文件，+2781/-469 行
+
+### Git 提交
+```
+44afdf0 feat: 宠物和设置功能优化，外部插件国际化支持
+a9bbf64 docs: 更新 CHANGELOG.md，记录 v0.4.4 版本变更
+```
+
+### 已知问题
+- 🐾 **宠物窗口缩小时有背景闪烁** - 预留问题，下版本修复
+
+### 下版本计划
+- 验证和修复各插件的配置功能
+- 优化部分插件功能
+- 修复宠物窗口缩小时的背景闪烁问题
+
+### 发布文档
+- `docs/releases/RELEASE_NOTES_v0.4.4.md`（待创建）
 
 ---
 
