@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import '../models/plugin_models.dart';
 import 'i_platform_services.dart';
+import 'i_plugin_i18n.dart';
 
 /// Base interface that all plugins must implement
 abstract class IPlugin {
@@ -37,12 +38,14 @@ class PluginContext {
   final IPlatformServices platformServices;
   final IDataStorage dataStorage;
   final INetworkAccess networkAccess;
+  final IPluginI18n i18n;
   final Map<String, dynamic> configuration;
 
   const PluginContext({
     required this.platformServices,
     required this.dataStorage,
     required this.networkAccess,
+    required this.i18n,
     required this.configuration,
   });
 }

@@ -3,11 +3,14 @@
 /// 桌面宠物设置页面
 library;
 
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:plugin_platform/l10n/generated/app_localizations.dart';
 import 'package:plugin_platform/core/services/config_manager.dart';
 import 'package:plugin_platform/core/services/desktop_pet_manager.dart';
 import 'package:plugin_platform/core/models/global_config.dart';
+import 'package:plugin_platform/ui/widgets/json_editor_screen.dart';
+import 'package:plugin_platform/core/services/json_validator.dart';
 
 /// Desktop Pet Settings Screen
 ///
@@ -70,6 +73,13 @@ class _DesktopPetSettingsScreenState extends State<DesktopPetSettingsScreen> {
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.restore),
+            onPressed: () => _showResetDialog(),
+            tooltip: l10n.settings_resetToDefaults,
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
@@ -89,8 +99,8 @@ class _DesktopPetSettingsScreenState extends State<DesktopPetSettingsScreen> {
 
           const SizedBox(height: 24),
 
-          // 重置按钮
-          _buildResetButton(petConfig, l10n),
+          // JSON 编辑器
+          _buildJsonEditorSection(l10n),
         ],
       ),
     );
@@ -176,40 +186,34 @@ class _DesktopPetSettingsScreenState extends State<DesktopPetSettingsScreen> {
     );
   }
 
-  /// 重置按钮
-  Widget _buildResetButton(DesktopPetConfig petConfig, AppLocalizations l10n) {
+  /// JSON 编辑器入口
+  Widget _buildJsonEditorSection(AppLocalizations l10n) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: FilledButton.icon(
-          onPressed: () => _showResetDialog(petConfig, l10n),
-          icon: const Icon(Icons.restore),
-          label: Text(l10n.desktopPet_reset),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.code, color: Theme.of(context).colorScheme.primary),
+                const SizedBox(width: 8),
+                Text(
+                  l10n.json_editor_edit_json,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(l10n.desktopPet_config_description),
+            const SizedBox(height: 16),
+            FilledButton.icon(
+              onPressed: () => _openJsonEditor(),
+              icon: const Icon(Icons.edit),
+              label: Text(l10n.json_editor_edit_json),
+            ),
+          ],
         ),
-      ),
-    );
-  }
-
-  /// 显示重置确认对话框
-  void _showResetDialog(DesktopPetConfig petConfig, AppLocalizations l10n) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.desktopPet_reset),
-        content: Text(l10n.desktopPet_resetConfirm),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(l10n.common_cancel),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await _resetToDefaults();
-            },
-            child: Text(l10n.common_confirm),
-          ),
-        ],
       ),
     );
   }
@@ -308,5 +312,97 @@ class _DesktopPetSettingsScreenState extends State<DesktopPetSettingsScreen> {
         duration: const Duration(seconds: 2),
       ),
     );
+  }
+
+  /// 显示重置确认对话框
+  Future<void> _showResetDialog() async {
+    final l10n = AppLocalizations.of(context)!;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.settings_resetToDefaults),
+        content: Text(l10n.settings_resetConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.common_cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.orange,
+            ),
+            child: Text(l10n.common_confirm),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await _resetToDefaults();
+    }
+  }
+
+  /// 打开 JSON 编辑器
+  Future<void> _openJsonEditor() async {
+    if (_globalConfig == null) return;
+
+    final l10n = AppLocalizations.of(context)!;
+    final currentJson = jsonEncode(_globalConfig!.features.desktopPet.toJson());
+
+    final result = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (context) => JsonEditorScreen(
+          configName: l10n.desktopPet_config_name,
+          configDescription: l10n.desktopPet_config_description,
+          currentJson: currentJson,
+          schema: null,
+          defaultJson: jsonEncode(DesktopPetConfig.defaultConfig.toJson()),
+          exampleJson: jsonEncode(DesktopPetConfig.defaultConfig.toJson()),
+          onSave: _saveJsonConfig,
+        ),
+      ),
+    );
+
+    if (result == true && mounted) {
+      await _loadConfig();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.desktopPet_settingsSaved),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
+
+  /// 保存 JSON 配置
+  Future<bool> _saveJsonConfig(String jsonString) async {
+    try {
+      // 1. JSON 语法校验
+      final validationResult = JsonValidator.validateJsonString(jsonString);
+      if (!validationResult.isValid) {
+        throw Exception(validationResult.errorMessage);
+      }
+
+      // 2. 解析 JSON
+      final data = jsonDecode(jsonString) as Map<String, dynamic>;
+      final petConfig = DesktopPetConfig.fromJson(data);
+
+      // 3. 验证配置
+      if (!petConfig.isValid()) {
+        throw Exception('Invalid configuration values');
+      }
+
+      // 4. 保存配置
+      await _updatePetConfig(petConfig);
+      return true;
+    } catch (e) {
+      debugPrint('Failed to save config: $e');
+      return false;
+    }
   }
 }

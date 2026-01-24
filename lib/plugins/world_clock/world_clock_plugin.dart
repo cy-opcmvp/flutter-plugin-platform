@@ -370,6 +370,7 @@ class _WorldClockPluginWidgetState extends State<_WorldClockPluginWidget> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -382,12 +383,12 @@ class _WorldClockPluginWidgetState extends State<_WorldClockPluginWidget> {
           IconButton(
             icon: const Icon(Icons.add_alarm),
             onPressed: () => _showAddCountdownDialog(context),
-            tooltip: 'Add Countdown',
+            tooltip: l10n.worldclock_main_add_countdown,
           ),
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () => _showAddClockDialog(context),
-            tooltip: 'Add Clock',
+            tooltip: l10n.worldclock_main_add_clock,
           ),
           IconButton(
             icon: const Icon(Icons.settings),
@@ -399,7 +400,7 @@ class _WorldClockPluginWidgetState extends State<_WorldClockPluginWidget> {
                 ),
               );
             },
-            tooltip: 'Settings',
+            tooltip: l10n.worldclock_main_settings,
           ),
         ],
       ),
@@ -426,7 +427,7 @@ class _WorldClockPluginWidgetState extends State<_WorldClockPluginWidget> {
                           Icon(Icons.public, color: theme.colorScheme.primary),
                           const SizedBox(width: 8),
                           Text(
-                            'World Clocks',
+                            l10n.worldclock_main_world_clocks,
                             style: theme.textTheme.titleLarge?.copyWith(
                               color: theme.colorScheme.primary,
                               fontWeight: FontWeight.bold,
@@ -448,14 +449,14 @@ class _WorldClockPluginWidgetState extends State<_WorldClockPluginWidget> {
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
-                                  'No Clocks',
+                                  l10n.worldclock_main_no_clocks,
                                   style: theme.textTheme.titleMedium?.copyWith(
                                     color: theme.colorScheme.outline,
                                   ),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  'Click + in top right to add clock',
+                                  l10n.worldclock_main_add_clock_hint,
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     color: theme.colorScheme.outline,
                                   ),
@@ -503,7 +504,7 @@ class _WorldClockPluginWidgetState extends State<_WorldClockPluginWidget> {
                           Icon(Icons.timer, color: theme.colorScheme.secondary),
                           const SizedBox(width: 8),
                           Text(
-                            'Countdown Timers',
+                            l10n.worldclock_main_countdown_timers,
                             style: theme.textTheme.titleLarge?.copyWith(
                               color: theme.colorScheme.secondary,
                               fontWeight: FontWeight.bold,
@@ -525,14 +526,14 @@ class _WorldClockPluginWidgetState extends State<_WorldClockPluginWidget> {
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
-                                  'No Countdowns',
+                                  l10n.worldclock_main_no_countdowns,
                                   style: theme.textTheme.titleMedium?.copyWith(
                                     color: theme.colorScheme.outline,
                                   ),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  'Click alarm icon to add countdown',
+                                  l10n.worldclock_main_add_countdown_hint,
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     color: theme.colorScheme.outline,
                                   ),
@@ -674,7 +675,7 @@ class _AddClockDialogState extends State<_AddClockDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: Text(l10n.common_cancel),
         ),
         FilledButton(
           onPressed: _cityController.text.isEmpty
@@ -683,7 +684,7 @@ class _AddClockDialogState extends State<_AddClockDialog> {
                   widget.onAdd(_cityController.text, _selectedTimeZone);
                   Navigator.of(context).pop();
                 },
-          child: const Text('添加'),
+          child: Text(l10n.common_add),
         ),
       ],
     );
@@ -783,7 +784,7 @@ class _AddCountdownDialogState extends State<_AddCountdownDialog> {
                   Navigator.of(context).pop();
                 }
               : null,
-          child: const Text('添加'),
+          child: Text(l10n.common_add),
         ),
       ],
     );

@@ -35,12 +35,12 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
           IconButton(
             icon: const Icon(Icons.history),
             onPressed: () => _showHistory(context),
-            tooltip: '历史记录',
+            tooltip: l10n.screenshot_main_history,
           ),
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () => _showSettings(context),
-            tooltip: '设置',
+            tooltip: l10n.screenshot_main_settings,
           ),
         ],
       ),
@@ -75,6 +75,7 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
 
   /// 构建平台不支持警告
   Widget _buildUnsupportedWarning(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Card(
@@ -93,7 +94,7 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '平台功能受限',
+                      l10n.screenshot_main_platform_limited,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onErrorContainer,
                         fontWeight: FontWeight.bold,
@@ -101,7 +102,7 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '此平台暂不完全支持截图功能。支持的平台：Windows、macOS、Linux',
+                      l10n.screenshot_main_platform_limited_desc,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onErrorContainer,
                       ),
@@ -118,6 +119,7 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
 
   /// 构建快速操作区
   Widget _buildQuickActions(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -134,7 +136,7 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  '快速操作',
+                  l10n.screenshot_main_quick_actions,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: Theme.of(context).colorScheme.primary,
                     fontWeight: FontWeight.bold,
@@ -152,19 +154,19 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
               children: [
                 _QuickActionTile(
                   icon: Icons.crop_square,
-                  title: '区域截图',
+                  title: l10n.screenshot_main_region_capture,
                   subtitle: 'Ctrl+Shift+A',
                   onTap: widget.plugin.isAvailable ? _startRegionCapture : null,
                 ),
                 _QuickActionTile(
                   icon: Icons.fullscreen,
-                  title: '全屏截图',
+                  title: l10n.screenshot_main_fullscreen_capture,
                   subtitle: 'Ctrl+Shift+F',
                   onTap: widget.plugin.isAvailable ? _captureFullScreen : null,
                 ),
                 _QuickActionTile(
                   icon: Icons.window,
-                  title: '窗口截图',
+                  title: l10n.screenshot_main_window_capture,
                   subtitle: 'Ctrl+Shift+W',
                   onTap: widget.plugin.isAvailable ? _showWindowList : null,
                 ),
@@ -179,6 +181,7 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
   /// 构建最近截图区
   Widget _buildRecentScreenshots(BuildContext context) {
     final screenshots = widget.plugin.screenshots;
+    final l10n = AppLocalizations.of(context)!;
 
     return Card(
       elevation: 2,
@@ -196,7 +199,7 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  '最近截图',
+                  l10n.screenshot_main_recent_screenshots,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: Theme.of(context).colorScheme.secondary,
                     fontWeight: FontWeight.bold,
@@ -218,7 +221,7 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        '暂无截图记录',
+                        l10n.screenshot_main_no_records,
                         style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(
                               color: Theme.of(context).colorScheme.outline,
@@ -226,7 +229,7 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '点击上方按钮开始截图',
+                        l10n.screenshot_main_no_records_hint,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.outline,
                         ),
@@ -259,6 +262,7 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
   /// 构建统计信息区
   Widget _buildStatistics(BuildContext context) {
     final screenshots = widget.plugin.screenshots;
+    final l10n = AppLocalizations.of(context)!;
     final totalSize = screenshots.fold<int>(
       0,
       (sum, record) => sum + record.fileSize,
@@ -285,7 +289,7 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  '统计信息',
+                  l10n.screenshot_main_statistics,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: Theme.of(context).colorScheme.tertiary,
                     fontWeight: FontWeight.bold,
@@ -298,17 +302,17 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _StatisticItem(
-                  label: '总截图数',
+                  label: l10n.screenshot_main_total_count,
                   value: screenshots.length.toString(),
                   icon: Icons.photo_library,
                 ),
                 _StatisticItem(
-                  label: '今日截图',
+                  label: l10n.screenshot_main_today_count,
                   value: todayCount.toString(),
                   icon: Icons.today,
                 ),
                 _StatisticItem(
-                  label: '占用空间',
+                  label: l10n.screenshot_main_total_size,
                   value: _formatFileSize(totalSize),
                   icon: Icons.storage,
                 ),
@@ -617,50 +621,51 @@ class _ScreenshotListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ListTile(
       leading: const Icon(Icons.image),
       title: Text(
-        _formatDate(record.createdAt),
+        _formatDate(record.createdAt, l10n),
         style: Theme.of(context).textTheme.bodyMedium,
       ),
       subtitle: Text(
-        '${record.formattedFileSize} • ${_getTypeName(record.type)}',
+        '${record.formattedFileSize} • ${_getTypeName(record.type, l10n)}',
         style: Theme.of(context).textTheme.bodySmall,
       ),
       trailing: IconButton(
         icon: const Icon(Icons.delete_outline),
         onPressed: onDelete,
-        tooltip: '删除',
+        tooltip: l10n.screenshot_main_delete,
       ),
       onTap: onTap,
     );
   }
 
-  String _formatDate(DateTime date) {
+  String _formatDate(DateTime date, AppLocalizations l10n) {
     final now = DateTime.now();
     final diff = now.difference(date);
 
     if (diff.inMinutes < 1) {
-      return '刚刚';
+      return l10n.screenshot_main_just_now;
     } else if (diff.inHours < 1) {
-      return '${diff.inMinutes} 分钟前';
+      return l10n.screenshot_minutes_ago(diff.inMinutes);
     } else if (diff.inDays < 1) {
-      return '${diff.inHours} 小时前';
+      return l10n.screenshot_hours_ago(diff.inHours);
     } else if (diff.inDays < 7) {
-      return '${diff.inDays} 天前';
+      return l10n.screenshot_days_ago(diff.inDays);
     } else {
-      return '${date.month}月${date.day}日 ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+      return '${l10n.screenshot_date_format(date.day, date.month)} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
     }
   }
 
-  String _getTypeName(ScreenshotType type) {
+  String _getTypeName(ScreenshotType type, AppLocalizations l10n) {
     switch (type) {
       case ScreenshotType.fullScreen:
-        return '全屏';
+        return l10n.screenshot_type_fullscreen;
       case ScreenshotType.region:
-        return '区域';
+        return l10n.screenshot_type_region;
       case ScreenshotType.window:
-        return '窗口';
+        return l10n.screenshot_type_window;
     }
   }
 }
@@ -838,13 +843,13 @@ class _ScreenshotPreviewScreenState extends State<_ScreenshotPreviewScreen> {
             IconButton(
               icon: const Icon(Icons.copy),
               onPressed: _copyToClipboard,
-              tooltip: '复制到剪贴板',
+              tooltip: l10n.screenshot_main_copy_to_clipboard,
             ),
           if (_imageBytes != null)
             IconButton(
               icon: const Icon(Icons.share),
               onPressed: _shareImage,
-              tooltip: '分享',
+              tooltip: l10n.screenshot_main_share,
             ),
           IconButton(
             icon: const Icon(Icons.delete),
@@ -888,27 +893,28 @@ class _ScreenshotPreviewScreenState extends State<_ScreenshotPreviewScreen> {
   }
 
   Widget _buildBody() {
+    final l10n = AppLocalizations.of(context)!;
     if (_isLoading) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(color: Colors.white),
-            SizedBox(height: 16),
-            Text('加载中...', style: TextStyle(color: Colors.white, fontSize: 16)),
+            const CircularProgressIndicator(color: Colors.white),
+            const SizedBox(height: 16),
+            Text(l10n.screenshot_main_loading, style: const TextStyle(color: Colors.white, fontSize: 16)),
           ],
         ),
       );
     }
 
     if (_imageBytes == null) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.broken_image, size: 80, color: Colors.grey),
-            SizedBox(height: 16),
-            Text('无法加载图片', style: TextStyle(color: Colors.grey, fontSize: 18)),
+            const Icon(Icons.broken_image, size: 80, color: Colors.grey),
+            const SizedBox(height: 16),
+            Text(l10n.screenshot_main_load_failed, style: const TextStyle(color: Colors.grey, fontSize: 18)),
           ],
         ),
       );
@@ -922,14 +928,14 @@ class _ScreenshotPreviewScreenState extends State<_ScreenshotPreviewScreen> {
           _imageBytes!,
           fit: BoxFit.contain,
           errorBuilder: (context, error, stackTrace) {
-            return const Column(
+            return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.broken_image, size: 80, color: Colors.grey),
-                SizedBox(height: 16),
+                const Icon(Icons.broken_image, size: 80, color: Colors.grey),
+                const SizedBox(height: 16),
                 Text(
-                  '无法加载图片',
-                  style: TextStyle(color: Colors.grey, fontSize: 18),
+                  l10n.screenshot_main_load_failed,
+                  style: const TextStyle(color: Colors.grey, fontSize: 18),
                 ),
               ],
             );

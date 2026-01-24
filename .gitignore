@@ -43,3 +43,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# User configuration (personal settings should not be committed)
+/config/global_config.json
+/config/plugin_*.json

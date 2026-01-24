@@ -7,10 +7,13 @@ import '../interfaces/i_plugin_manager.dart';
 import '../interfaces/i_plugin.dart';
 import '../interfaces/i_platform_services.dart';
 import '../interfaces/i_hot_reload_manager.dart';
+import '../interfaces/i_plugin_i18n.dart';
 import '../models/plugin_models.dart';
 import '../models/platform_models.dart';
 import 'plugin_sandbox.dart';
+import 'plugin_i18n_helper.dart';
 import 'hot_reload_manager.dart';
+import 'locale_provider.dart';
 import '../../plugins/plugin_registry.dart';
 
 /// Exception thrown when plugin operations fail
@@ -86,6 +89,7 @@ class PluginManager implements IPluginManager {
   final Map<String, PluginRegistryEntry> _pluginRegistry = {};
   final Map<String, PluginSandbox> _pluginSandboxes = {};
   final IPlatformServices _platformServices;
+  late final IPluginI18n _pluginI18n;
   final PermissionManager _permissionManager = PermissionManager();
   final StreamController<PluginEvent> _eventController =
       StreamController<PluginEvent>.broadcast();
@@ -100,6 +104,11 @@ class PluginManager implements IPluginManager {
   /// Initialize the plugin manager
   Future<void> initialize() async {
     if (_isInitialized) return;
+
+    // Initialize i18n helper
+    final localeProvider = LocaleProvider();
+    await localeProvider.loadSavedLocale();
+    _pluginI18n = PluginI18nHelper(localeProvider);
 
     await _loadPluginRegistry();
     await _hotReloadManager.initialize();
@@ -202,6 +211,7 @@ class PluginManager implements IPluginManager {
         platformServices: _platformServices,
         dataStorage: _createDataStorage(descriptor.id),
         networkAccess: _createNetworkAccess(descriptor.id),
+        i18n: _pluginI18n,
         configuration: descriptor.metadata,
       );
 

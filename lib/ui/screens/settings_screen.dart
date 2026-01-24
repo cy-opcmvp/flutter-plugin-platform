@@ -3,6 +3,7 @@
 /// Provides comprehensive application and plugin configuration management.
 library;
 
+import 'dart:io' as io;
 import 'package:flutter/material.dart';
 import 'package:plugin_platform/l10n/generated/app_localizations.dart';
 import 'package:plugin_platform/main.dart' show PluginPlatformApp;
@@ -10,9 +11,11 @@ import 'package:plugin_platform/core/services/locale_provider.dart';
 import 'package:plugin_platform/core/services/theme_provider.dart';
 import 'package:plugin_platform/core/services/config_manager.dart';
 import 'package:plugin_platform/core/services/platform_core.dart';
+import 'package:plugin_platform/core/services/platform_service_manager.dart';
 import 'package:plugin_platform/core/models/global_config.dart';
 import 'package:plugin_platform/plugins/plugin_registry.dart';
 import 'app_info_screen.dart';
+import 'desktop_pet_settings_screen.dart';
 
 /// Settings Screen
 ///
@@ -36,11 +39,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
   /// Loading state
   bool _isLoading = true;
 
+  /// Theme provider reference
+  ThemeProvider? _themeProvider;
+
   @override
   void initState() {
     super.initState();
     _platformCore = PlatformCore();
     _loadConfigs();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 监听 ThemeProvider 变化
+    final newThemeProvider = PluginPlatformApp.themeOf(context);
+
+    // 如果是不同的 provider，移除旧的监听器并添加新的
+    if (_themeProvider != newThemeProvider) {
+      _themeProvider?.removeListener(_onThemeChanged);
+      _themeProvider = newThemeProvider;
+      _themeProvider!.addListener(_onThemeChanged);
+    }
+  }
+
+  @override
+  void dispose() {
+    _themeProvider?.removeListener(_onThemeChanged);
+    super.dispose();
+  }
+
+  void _onThemeChanged() {
+    // 主题变化时重建页面
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   /// Load all configurations
@@ -86,26 +119,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       body: ListView(
         children: [
-          // Language Settings Section
-          _buildSection(
-            context,
-            title: l10n.settings_language,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.language),
-                title: Text(l10n.settings_currentLanguage),
-                subtitle: Text(
-                  localeProvider.getLocaleDisplayName(localeProvider.locale),
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => _showLanguageDialog(context, localeProvider),
-              ),
-            ],
-          ),
-
-          // Global Configuration Sections
+          // 应用设置
           if (_globalConfig != null) ...[
-            // App Information
             _buildSection(
               context,
               title: l10n.settings_app,
@@ -124,11 +139,120 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     );
                   },
                 ),
+                ListTile(
+                  leading: Icon(
+                    Icons.pets,
+                    color: _globalConfig!.features.showDesktopPet
+                        ? Colors.green
+                        : Colors.black87,
+                  ),
+                  title: Text(l10n.desktopPet_settings_title),
+                  subtitle: _globalConfig!.features.showDesktopPet
+                      ? Text(l10n.common_enabled)
+                      : null,
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const DesktopPetSettingsScreen(),
+                      ),
+                    );
+                  },
+                ),
+                SwitchListTile(
+                  secondary: const Icon(Icons.start),
+                  title: Text(l10n.settings_autoStart),
+                  subtitle: Text(l10n.settings_autoStart_description),
+                  value: PlatformServiceManager.autoStart.isEnabled,
+                  onChanged: (value) => _showAutoStartConfirmDialog(context, value),
+                ),
               ],
             ),
           ],
 
-          // Plugin Management Section
+          // 通用设置
+          _buildSection(
+            context,
+            title: l10n.settings_general,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.language),
+                title: Text(l10n.settings_currentLanguage),
+                subtitle: Text(
+                  localeProvider.getLocaleDisplayName(localeProvider.locale),
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => _showLanguageDialog(context, localeProvider),
+              ),
+              ListTile(
+                leading: const Icon(Icons.palette),
+                title: Text(l10n.settings_theme),
+                subtitle: Text(
+                  themeProvider.getThemeModeDisplayName(
+                    themeProvider.themeMode,
+                    isChinese: localeProvider.isChinese,
+                  ),
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => _showThemeModeDialog(
+                  context,
+                  themeProvider,
+                  localeProvider.isChinese,
+                ),
+              ),
+              if (_globalConfig != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 8.0,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.notifications_active, size: 20),
+                          const SizedBox(width: 16),
+                          Text(
+                            l10n.settings_notificationMode,
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      SegmentedButton<NotificationMode>(
+                        segments: [
+                          ButtonSegment(
+                            value: NotificationMode.app,
+                            label: Text(l10n.settings_notificationMode_app),
+                          ),
+                          ButtonSegment(
+                            value: NotificationMode.system,
+                            label: Text(l10n.settings_notificationMode_system),
+                          ),
+                        ],
+                        selected: {_globalConfig!.services.notification.mode},
+                        onSelectionChanged: (Set<NotificationMode> selection) async {
+                          final newMode = selection.first;
+                          await _updateNotificationMode(newMode);
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        l10n.settings_notificationMode_desc,
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+
+          // 插件管理
           _buildSection(
             context,
             title: l10n.settings_plugins,
@@ -153,30 +277,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 subtitle: Text(l10n.plugin_screenshot_description),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => _openPluginSettings('com.example.screenshot'),
-              ),
-            ],
-          ),
-
-          // Theme Settings Section
-          _buildSection(
-            context,
-            title: l10n.settings_theme,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.palette),
-                title: Text(l10n.settings_theme),
-                subtitle: Text(
-                  themeProvider.getThemeModeDisplayName(
-                    themeProvider.themeMode,
-                    isChinese: localeProvider.isChinese,
-                  ),
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => _showThemeModeDialog(
-                  context,
-                  themeProvider,
-                  localeProvider.isChinese,
-                ),
               ),
             ],
           ),
@@ -460,5 +560,163 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       ),
     );
+  }
+
+  /// Show auto start confirmation dialog
+  void _showAutoStartConfirmDialog(BuildContext context, bool enabled) {
+    final l10n = AppLocalizations.of(context)!;
+
+    // Check if running in debug mode
+    final isDebugMode = _isRunningInDebugMode();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(enabled ? '启用开机自启' : '禁用开机自启'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              enabled
+                  ? '将允许 Plugin Platform 在 Windows 启动时自动运行。'
+                  : '将禁止 Plugin Platform 在 Windows 启动时自动运行。',
+            ),
+            const SizedBox(height: 12),
+            if (enabled && isDebugMode) ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.shade200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.warning,
+                          color: Colors.red.shade700,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '⚠️ 开发模式警告',
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                color: Colors.red.shade700,
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '当前运行的是开发版本，重启后无法正常启动！\n\n'
+                      '原因：开发版本依赖 Flutter 开发服务器，重启后服务器已关闭。\n\n'
+                      '正确测试方法：\n'
+                      '1. 运行：flutter build windows --release\n'
+                      '2. 直接运行：build\\windows\\x64\\runner\\Release\\plugin_platform.exe\n'
+                      '3. 在发布版本中启用开机自启',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.red.shade900,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ] else if (enabled) ...[
+              Text(
+                '注意：每次重新编译后需要重新设置，因为可执行文件路径会变化。',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.orange,
+                    ),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.common_cancel),
+          ),
+          FilledButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              await _setAutoStart(enabled);
+            },
+            style: isDebugMode && enabled
+                ? FilledButton.styleFrom(backgroundColor: Colors.orange)
+                : null,
+            child: Text(l10n.common_confirm),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Check if running in debug mode
+  bool _isRunningInDebugMode() {
+    try {
+      // Check executable path
+      final exePath = io.Platform.resolvedExecutable;
+      // Debug versions usually in Debug directory
+      return exePath.contains('Debug') || exePath.contains('debug');
+    } catch (e) {
+      // If detection fails, assume debug mode (safer)
+      return true;
+    }
+  }
+
+  /// Set auto start
+  Future<void> _setAutoStart(bool enabled) async {
+    try {
+      final success = await PlatformServiceManager.autoStart.setEnabled(enabled);
+      if (success) {
+        // Update autoStart status in config
+        if (_globalConfig != null) {
+          final newFeatures = _globalConfig!.features.copyWith(autoStart: enabled);
+          final newConfig = _globalConfig!.copyWith(features: newFeatures);
+          await ConfigManager.instance.updateGlobalConfig(newConfig);
+
+          if (mounted) {
+            setState(() => _globalConfig = newConfig);
+            _showSuccessMessage();
+          }
+        }
+      } else {
+        _showErrorMessage();
+      }
+    } catch (e) {
+      debugPrint('Failed to set auto start: $e');
+      _showErrorMessage();
+    }
+  }
+
+  /// Update notification mode
+  Future<void> _updateNotificationMode(NotificationMode mode) async {
+    if (_globalConfig == null) return;
+
+    final newNotificationConfig = _globalConfig!.services.notification.copyWith(
+      mode: mode,
+    );
+
+    final newServices = _globalConfig!.services.copyWith(
+      notification: newNotificationConfig,
+    );
+
+    final newConfig = _globalConfig!.copyWith(services: newServices);
+
+    try {
+      await ConfigManager.instance.updateGlobalConfig(newConfig);
+      if (mounted) {
+        setState(() => _globalConfig = newConfig);
+        _showSuccessMessage();
+      }
+    } catch (e) {
+      debugPrint('Failed to update notification mode: $e');
+      _showErrorMessage();
+    }
   }
 }

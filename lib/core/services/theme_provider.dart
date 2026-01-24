@@ -22,8 +22,7 @@ class ThemeProvider extends ChangeNotifier {
 
   /// 设置主题模式
   Future<void> setThemeMode(ThemeMode mode) async {
-    if (_themeMode == mode) return;
-
+    // 总是更新，即使值相同（确保 UI 刷新）
     _themeMode = mode;
     await _saveThemeModePreference(mode);
     notifyListeners();

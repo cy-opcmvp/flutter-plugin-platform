@@ -846,6 +846,338 @@ factory MyPluginConfig.fromJson(Map<String, dynamic> json) {
 }
 ```
 
+### 国际化 (i18n)
+
+#### 概述
+
+所有内部插件必须支持完整的国际化（中文/英文），使用系统级国际化配置。插件不得硬编码任何用户可见的文本。
+
+#### 为什么插件需要国际化
+
+1. **用户体验**：确保应用语言切换时，所有插件界面也同步切换
+2. **系统一致性**：所有插件使用统一的翻译源，避免重复翻译
+3. **易于维护**：集中管理翻译，修改更方便
+4. **扩展性**：未来添加新语言时，所有插件自动支持
+
+#### 插件翻译键命名规范
+
+**格式**：`{plugin_name}_{component}_{text}`
+
+**命名规则**：
+- 使用小写字母和下划线
+- 按插件和组件分组
+- 使用描述性名称
+
+**示例**：
+```
+screenshot_main_history          - 截图主界面：历史记录
+screenshot_main_settings         - 截图主界面：设置
+screenshot_config_title          - 截图配置：标题
+worldclock_main_add_clock        - 世界时钟主界面：添加时钟
+worldclock_settings_title        - 世界时钟设置：标题
+calculator_settings_precision    - 计算器设置：精度
+```
+
+**组件分类**：
+- `main` - 主界面组件
+- `settings` / `config` - 设置界面
+- `dialog` - 对话框
+- `error` - 错误消息
+- `tooltip` - 工具提示
+
+#### 插件国际化完整流程
+
+**步骤 1：添加翻译键到 ARB 文件**
+
+在 `lib/l10n/app_zh.arb` 添加中文翻译：
+```json
+{
+  "@@locale": "zh_CN",
+  "myplugin_main_title": "我的插件",
+  "myplugin_main_welcome": "欢迎使用",
+  "myplugin_settings_title": "设置",
+  "myplugin_dialog_save": "保存"
+}
+```
+
+在 `lib/l10n/app_en.arb` 添加英文翻译：
+```json
+{
+  "@@locale": "en",
+  "myplugin_main_title": "My Plugin",
+  "myplugin_main_welcome": "Welcome",
+  "myplugin_settings_title": "Settings",
+  "myplugin_dialog_save": "Save"
+}
+```
+
+**步骤 2：生成国际化代码**
+
+```bash
+flutter gen-l10n
+```
+
+这将在 `lib/l10n/generated/` 目录生成必要的代码文件。
+
+**步骤 3：在插件中使用国际化**
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:plugin_platform/l10n/generated/app_localizations.dart';
+
+class MyPluginWidget extends StatefulWidget {
+  @override
+  State<MyPluginWidget> createState() => _MyPluginWidgetState();
+}
+
+class _MyPluginWidgetState extends State<MyPluginWidget> {
+  @override
+  Widget build(BuildContext context) {
+    // ✅ 获取 l10n 实例
+    final l10n = AppLocalizations.of(context)!;
+
+    return Scaffold(
+      appBar: AppBar(
+        // ✅ 使用 l10n 访问翻译
+        title: Text(l10n.myplugin_main_title),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            // ✅ tooltip 也要国际化
+            tooltip: l10n.myplugin_main_settings,
+            onPressed: () => _openSettings(),
+          ),
+        ],
+      ),
+      body: Center(
+        // ✅ 所有文本都使用 l10n
+        child: Text(l10n.myplugin_main_welcome),
+      ),
+    );
+  }
+
+  void _openSettings() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => MyPluginSettingsScreen(),
+      ),
+    );
+  }
+}
+```
+
+#### 插件国际化最佳实践
+
+**1. 在 build 方法开始获取 l10n**
+
+```dart
+@override
+Widget build(BuildContext context) {
+  final l10n = AppLocalizations.of(context)!;  // ✅ 在开始时获取
+  // ... 后续代码使用 l10n
+}
+```
+
+**2. 所有用户可见文本必须国际化**
+
+```dart
+// ❌ 错误：硬编码中文
+Text('历史记录')
+tooltip: '设置'
+
+// ❌ 错误：硬编码英文
+Text('History')
+tooltip: 'Settings'
+
+// ✅ 正确：使用 l10n
+Text(l10n.myplugin_main_history)
+tooltip: l10n.myplugin_main_settings
+```
+
+**3. Tooltip 也要国际化**
+
+```dart
+IconButton(
+  icon: const Icon(Icons.settings),
+  tooltip: l10n.myplugin_main_settings,  // ✅ tooltip 国际化
+  onPressed: () {},
+)
+```
+
+**4. 对话框文本国际化**
+
+```dart
+void _showConfirmDialog(BuildContext context) {
+  final l10n = AppLocalizations.of(context)!;
+
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(l10n.myplugin_dialog_delete_title),
+      content: Text(l10n.myplugin_dialog_delete_message),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(l10n.common_cancel),
+        ),
+        FilledButton(
+          onPressed: () {
+            // 确认删除逻辑
+            Navigator.pop(context);
+          },
+          child: Text(l10n.common_confirm),
+        ),
+      ],
+    ),
+  );
+}
+```
+
+**5. 使用通用翻译键**
+
+项目中已定义的通用翻译键可直接使用：
+
+```dart
+// 通用按钮
+l10n.common_save       // 保存
+l10n.common_cancel     // 取消
+l10n.common_confirm    // 确认
+l10n.common_add        // 添加
+l10n.common_delete     // 删除
+
+// 通用消息
+l10n.common_success    // 操作成功
+l10n.common_error      // 操作失败
+l10n.common_loading    // 加载中...
+```
+
+#### 常见错误和解决方案
+
+**错误 1：硬编码文本**
+
+```dart
+// ❌ 错误
+Text('历史记录')
+
+// ✅ 正确
+Text(l10n.myplugin_main_history)
+```
+
+**错误 2：忘记添加 l10n 声明**
+
+```dart
+// ❌ 错误：直接使用 l10n
+@override
+Widget build(BuildContext context) {
+  return Text(l10n.myplugin_title);  // l10n 未定义
+}
+
+// ✅ 正确：先声明 l10n
+@override
+Widget build(BuildContext context) {
+  final l10n = AppLocalizations.of(context)!;
+  return Text(l10n.myplugin_title);
+}
+```
+
+**错误 3：翻译键拼写错误**
+
+```dart
+// ❌ 错误：拼写错误
+Text(l10n.myplugin_main_histroy)  // 应该是 history
+
+// ✅ 正确：检查翻译键
+Text(l10n.myplugin_main_history)
+```
+
+**错误 4：忘记运行 flutter gen-l10n**
+
+添加翻译键后必须运行 `flutter gen-l10n` 生成代码：
+```bash
+flutter gen-l10n
+```
+
+#### 插件国际化检查清单
+
+在提交插件代码前，确认以下内容：
+
+- [ ] 所有用户可见文本使用 `l10n.xxx`
+- [ ] 没有硬编码的中文字符串
+- [ ] 没有硬编码的英文字符串
+- [ ] 所有 tooltip 已国际化
+- [ ] 所有对话框文本已国际化
+- [ ] 所有按钮文本已国际化
+- [ ] 所有错误消息已国际化
+- [ ] 翻译键遵循 `{plugin}_{component}_{text}` 命名规范
+- [ ] 中文翻译已添加到 `app_zh.arb`
+- [ ] 英文翻译已添加到 `app_en.arb`
+- [ ] 已运行 `flutter gen-l10n` 生成代码
+- [ ] 在中文环境下测试过插件
+- [ ] 在英文环境下测试过插件
+
+#### 完整示例：世界时钟插件国际化
+
+**ARB 文件** (`app_zh.arb`):
+```json
+{
+  "worldclock_main_add_countdown": "添加倒计时",
+  "worldclock_main_add_clock": "添加时钟",
+  "worldclock_main_settings": "设置",
+  "worldclock_main_world_clocks": "世界时钟",
+  "worldclock_main_no_clocks": "暂无时钟",
+  "worldclock_main_countdown_timers": "倒计时"
+}
+```
+
+**ARB 文件** (`app_en.arb`):
+```json
+{
+  "worldclock_main_add_countdown": "Add Countdown",
+  "worldclock_main_add_clock": "Add Clock",
+  "worldclock_main_settings": "Settings",
+  "worldclock_main_world_clocks": "World Clocks",
+  "worldclock_main_no_clocks": "No Clocks",
+  "worldclock_main_countdown_timers": "Countdown Timers"
+}
+```
+
+**插件代码**:
+```dart
+@override
+Widget build(BuildContext context) {
+  final l10n = AppLocalizations.of(context)!;
+  final theme = Theme.of(context);
+
+  return Scaffold(
+    appBar: AppBar(
+      title: Text(widget.plugin.name),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.add_alarm),
+          tooltip: l10n.worldclock_main_add_countdown,  // ✅ 国际化
+          onPressed: () => _showAddCountdownDialog(context),
+        ),
+        IconButton(
+          icon: const Icon(Icons.settings),
+          tooltip: l10n.worldclock_main_settings,  // ✅ 国际化
+          onPressed: () => _openSettings(),
+        ),
+      ],
+    ),
+    body: Column(
+      children: [
+        Text(
+          l10n.worldclock_main_world_clocks,  // ✅ 国际化
+          style: theme.textTheme.titleLarge,
+        ),
+        if (widget.plugin.worldClocks.isEmpty)
+          Text(l10n.worldclock_main_no_clocks),  // ✅ 国际化
+      ],
+    ),
+  );
+}
+```
+
 ### 网络访问
 
 #### HTTP 请求

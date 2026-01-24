@@ -3,6 +3,7 @@ library;
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 
 /// 配置文件服务
@@ -40,6 +41,9 @@ class ConfigService {
         if (!await _configDir.exists()) {
           await _configDir.create(recursive: true);
         }
+
+        // 检查并复制 example 配置文件
+        await _ensureExampleConfigExists();
       }
 
       _isInitialized = true;
@@ -50,13 +54,49 @@ class ConfigService {
     }
   }
 
+  /// 确保 example 配置文件存在于配置目录
+  Future<void> _ensureExampleConfigExists() async {
+    final exampleFile = File('${_configDir.path}/global_config.example.json');
+
+    // 如果 example 文件已存在，跳过
+    if (await exampleFile.exists()) {
+      debugPrint('Example config file already exists');
+      return;
+    }
+
+    try {
+      // 从 assets 加载 example 配置
+      final exampleConfigString = await rootBundle.loadString('assets/config/global_config.example.json');
+      await exampleFile.writeAsString(exampleConfigString);
+      debugPrint('Example config file created from assets');
+    } catch (e) {
+      debugPrint('Failed to create example config file: $e');
+      // 不抛出异常，允许应用继续运行
+    }
+  }
+
   /// 读取全局配置文件
   Future<Map<String, dynamic>> loadGlobalConfig() async {
     final file = File('${_configDir.path}/global_config.json');
 
     if (!await file.exists()) {
-      // 返回默认配置
-      return _getDefaultGlobalConfig();
+      // 配置文件不存在，尝试从 example 文件复制
+      final exampleFile = File('${_configDir.path}/global_config.example.json');
+
+      if (await exampleFile.exists()) {
+        // 从 example 文件复制
+        await file.writeAsString(await exampleFile.readAsString());
+        debugPrint('Global config created from example file');
+
+        // 读取并返回
+        final jsonString = await file.readAsString();
+        final json = jsonDecode(jsonString) as Map<String, dynamic>;
+        return json;
+      } else {
+        // example 文件也不存在，返回默认配置
+        debugPrint('No config file found, using default config');
+        return _getDefaultGlobalConfig();
+      }
     }
 
     try {

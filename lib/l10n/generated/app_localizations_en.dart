@@ -15,13 +15,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appName => 'Multi-Function Plugin Platform';
 
   @override
-  String get autoStart => 'Auto-start';
+  String get autoStart => 'Default Start';
 
   @override
-  String get autoStartPlugin => 'Plugin Auto-start';
+  String get autoStartPlugin => 'Plugin Default Start';
 
   @override
-  String get autoStartDescription => 'Auto-start on boot';
+  String get autoStartDescription => 'Default Start';
 
   @override
   String autoStartedPlugins(Object count) {
@@ -158,6 +158,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tag_favorite => 'Favorite';
+
+  @override
+  String get common_add => 'Add';
 
   @override
   String get common_confirm => 'Confirm';
@@ -298,10 +301,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get button_exitPetMode => 'Exit Pet Mode';
 
   @override
-  String get autoStartEnabled => 'Auto-start: Enabled';
+  String get autoStartEnabled => 'Remove from default start';
 
   @override
-  String get autoStartDisabled => 'Auto-start: Disabled';
+  String get autoStartDisabled => 'Set as default start';
 
   @override
   String get dialog_confirmTitle => 'Confirm Action';
@@ -675,7 +678,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_theme => 'Theme';
 
   @override
-  String get settings_app => 'App Info';
+  String get settings_app => 'App';
 
   @override
   String get settings_general => 'General Settings';
@@ -691,7 +694,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appInfo_viewDetails =>
-      'View app info, configure features and manage tags';
+      'View application information and configuration';
 
   @override
   String get appInfo_section_app => 'Application';
@@ -832,6 +835,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_autoStart => 'Auto Start';
+
+  @override
+  String get settings_autoStart_description => 'Launch app on system startup';
 
   @override
   String get settings_minimizeToTray => 'Minimize to Tray';
@@ -1272,6 +1278,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Are you sure you want to reset desktop pet settings?';
 
   @override
+  String get desktopPet_config_name => 'Desktop Pet Configuration';
+
+  @override
+  String get desktopPet_config_description =>
+      'Appearance and behavior settings for the desktop pet, including opacity, animations, and interactions';
+
+  @override
   String get common_enabled => 'Enabled';
 
   @override
@@ -1425,7 +1438,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Running on desktop operating system (Windows, macOS, Linux)';
 
   @override
-  String get feature_autoStart => 'Auto Start';
+  String get feature_autoStart => 'Default Start';
 
   @override
   String get feature_minimizeToTray => 'Minimize to Tray';
@@ -2736,4 +2749,98 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get image_editor_mosaic => 'Mosaic';
+
+  @override
+  String get screenshot_main_history => 'History';
+
+  @override
+  String get screenshot_main_settings => 'Settings';
+
+  @override
+  String get screenshot_main_platform_limited => 'Platform Features Limited';
+
+  @override
+  String get screenshot_main_platform_limited_desc =>
+      'Screenshot features are not fully supported on this platform. Supported platforms: Windows, macOS, Linux';
+
+  @override
+  String get screenshot_main_quick_actions => 'Quick Actions';
+
+  @override
+  String get screenshot_main_region_capture => 'Region Capture';
+
+  @override
+  String get screenshot_main_fullscreen_capture => 'Fullscreen Capture';
+
+  @override
+  String get screenshot_main_window_capture => 'Window Capture';
+
+  @override
+  String get screenshot_main_recent_screenshots => 'Recent Screenshots';
+
+  @override
+  String get screenshot_main_no_records => 'No screenshots yet';
+
+  @override
+  String get screenshot_main_no_records_hint =>
+      'Click buttons above to start capturing';
+
+  @override
+  String get screenshot_main_statistics => 'Statistics';
+
+  @override
+  String get screenshot_main_total_count => 'Total Screenshots';
+
+  @override
+  String get screenshot_main_today_count => 'Today';
+
+  @override
+  String get screenshot_main_total_size => 'Total Size';
+
+  @override
+  String get screenshot_main_delete => 'Delete';
+
+  @override
+  String get screenshot_main_copy_to_clipboard => 'Copy to Clipboard';
+
+  @override
+  String get screenshot_main_share => 'Share';
+
+  @override
+  String get screenshot_main_loading => 'Loading...';
+
+  @override
+  String get screenshot_main_load_failed => 'Cannot Load Image';
+
+  @override
+  String get screenshot_main_just_now => 'Just now';
+
+  @override
+  String get worldclock_main_add_countdown => 'Add Countdown';
+
+  @override
+  String get worldclock_main_add_clock => 'Add Clock';
+
+  @override
+  String get worldclock_main_settings => 'Settings';
+
+  @override
+  String get worldclock_main_world_clocks => 'World Clocks';
+
+  @override
+  String get worldclock_main_no_clocks => 'No Clocks';
+
+  @override
+  String get worldclock_main_add_clock_hint =>
+      'Click + in top right to add clock';
+
+  @override
+  String get worldclock_main_countdown_timers => 'Countdown Timers';
+
+  @override
+  String get worldclock_main_no_countdowns => 'No Countdowns';
+
+  @override
+  String get worldclock_main_add_countdown_hint =>
+      'Click alarm icon to add countdown';
 }

@@ -10,9 +10,9 @@
     "description": "应用名称"
   },
 
-  "autoStart": "开机自启动",
-  "autoStartPlugin": "插件自启动",
-  "autoStartDescription": "应用启动时自动启动此插件",
+  "autoStart": "默认启动",
+  "autoStartPlugin": "插件默认启动",
+  "autoStartDescription": "应用启动时默认启用此插件",
   "autoStartedPlugins": "已自动启动 {count} 个插件",
   "autoStartAdded": "已添加到自启动列表",
   "autoStartRemoved": "已从自启动列表移除",
@@ -59,6 +59,7 @@
   "tag_development": "开发工具",
   "tag_favorite": "常用",
 
+  "common_add": "添加",
   "common_confirm": "确认",
   "common_cancel": "取消",
   "common_save": "保存",
@@ -126,9 +127,9 @@
   "button_enablePetMode": "启用宠物模式",
   "button_exitPetMode": "退出宠物模式",
 
-  "autoStartEnabled": "开机自启：已开启",
-  "autoStartDisabled": "开机自启：已关闭",
-  "autoStartDescription": "开机自启动",
+  "autoStartEnabled": "取消默认启动",
+  "autoStartDisabled": "设为默认启动",
+  "autoStartDescription": "默认启动",
 
   "dialog_confirmTitle": "确认操作",
   "dialog_uninstallPlugin": "确定要卸载此插件吗？此操作无法撤销。",
@@ -379,12 +380,12 @@
   "settings_title": "设置",
   "settings_language": "语言设置",
   "settings_theme": "主题设置",
-  "settings_app": "应用信息",
-  "settings_general": "应用设置",
+  "settings_app": "应用",
+  "settings_general": "通用设置",
   "settings_appName": "应用名称",
   "settings_appVersion": "应用版本",
   "appInfo_title": "应用信息",
-  "appInfo_viewDetails": "查看应用信息、配置功能和管理标签",
+  "appInfo_viewDetails": "查看应用信息和配置",
   "appInfo_section_app": "应用",
   "appInfo_section_features": "功能状态",
   "appInfo_section_developerTools": "开发者工具",
@@ -443,6 +444,7 @@
   "settings_appName": "应用名称",
   "settings_appVersion": "应用版本",
   "settings_autoStart": "开机自启",
+  "settings_autoStart_description": "开机时自动启动应用",
   "settings_minimizeToTray": "最小化到托盘",
   "settings_showDesktopPet": "显示桌面宠物",
   "settings_enableNotifications": "启用通知",
@@ -650,6 +652,8 @@
   "desktopPet_settingsSaved": "桌面宠物设置已保存",
   "desktopPet_reset": "重置为默认设置",
   "desktopPet_resetConfirm": "确定要重置桌面宠物设置吗？",
+  "desktopPet_config_name": "桌面宠物配置",
+  "desktopPet_config_description": "桌面宠物的外观和行为配置，包括透明度、动画和交互设置",
 
   "common_enabled": "已启用",
   "common_disabled": "已禁用",
@@ -712,7 +716,7 @@
   "capability_desktop": "桌面平台",
   "capability_desktop_desc": "运行在桌面操作系统上（Windows、macOS、Linux）",
 
-  "feature_autoStart": "开机启动",
+  "feature_autoStart": "默认启动",
   "feature_minimizeToTray": "最小化到托盘",
   "feature_enableNotifications": "通知功能",
 
@@ -941,7 +945,6 @@
     }
   },
 
-  "settings_general": "常规设置",
   "settings_behavior": "行为",
   "screenshot_config_title": "截图插件配置",
 
@@ -1219,5 +1222,36 @@
   "image_editor_rectangle": "矩形",
   "image_editor_arrow": "箭头",
   "image_editor_text": "文字",
-  "image_editor_mosaic": "马赛克"
+  "image_editor_mosaic": "马赛克",
+
+  "screenshot_main_history": "历史记录",
+  "screenshot_main_settings": "设置",
+  "screenshot_main_platform_limited": "平台功能受限",
+  "screenshot_main_platform_limited_desc": "此平台暂不完全支持截图功能。支持的平台：Windows、macOS、Linux",
+  "screenshot_main_quick_actions": "快速操作",
+  "screenshot_main_region_capture": "区域截图",
+  "screenshot_main_fullscreen_capture": "全屏截图",
+  "screenshot_main_window_capture": "窗口截图",
+  "screenshot_main_recent_screenshots": "最近截图",
+  "screenshot_main_no_records": "暂无截图记录",
+  "screenshot_main_no_records_hint": "点击上方按钮开始截图",
+  "screenshot_main_statistics": "统计信息",
+  "screenshot_main_total_count": "总截图数",
+  "screenshot_main_today_count": "今日截图",
+  "screenshot_main_total_size": "占用空间",
+  "screenshot_main_delete": "删除",
+  "screenshot_main_copy_to_clipboard": "复制到剪贴板",
+  "screenshot_main_share": "分享",
+  "screenshot_main_loading": "加载中...",
+  "screenshot_main_load_failed": "无法加载图片",
+  "screenshot_main_just_now": "刚刚",
+  "worldclock_main_add_countdown": "添加倒计时",
+  "worldclock_main_add_clock": "添加时钟",
+  "worldclock_main_settings": "设置",
+  "worldclock_main_world_clocks": "世界时钟",
+  "worldclock_main_no_clocks": "暂无时钟",
+  "worldclock_main_add_clock_hint": "点击右上角 + 添加时钟",
+  "worldclock_main_countdown_timers": "倒计时",
+  "worldclock_main_no_countdowns": "暂无倒计时",
+  "worldclock_main_add_countdown_hint": "点击闹钟图标添加倒计时"
 }

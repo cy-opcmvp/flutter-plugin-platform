@@ -15,13 +15,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get appName => '多功能插件平台';
 
   @override
-  String get autoStart => '开机自启动';
+  String get autoStart => '默认启动';
 
   @override
-  String get autoStartPlugin => '插件自启动';
+  String get autoStartPlugin => '插件默认启动';
 
   @override
-  String get autoStartDescription => '开机自启动';
+  String get autoStartDescription => '默认启动';
 
   @override
   String autoStartedPlugins(Object count) {
@@ -157,6 +157,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get tag_favorite => '常用';
+
+  @override
+  String get common_add => '添加';
 
   @override
   String get common_confirm => '确认';
@@ -296,10 +299,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get button_exitPetMode => '退出宠物模式';
 
   @override
-  String get autoStartEnabled => '开机自启：已开启';
+  String get autoStartEnabled => '取消默认启动';
 
   @override
-  String get autoStartDisabled => '开机自启：已关闭';
+  String get autoStartDisabled => '设为默认启动';
 
   @override
   String get dialog_confirmTitle => '确认操作';
@@ -666,7 +669,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_app => '应用设置';
 
   @override
-  String get settings_general => '常规设置';
+  String get settings_general => '通用设置';
 
   @override
   String get settings_appName => '应用名称';
@@ -678,7 +681,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get appInfo_title => '应用信息';
 
   @override
-  String get appInfo_viewDetails => '查看应用信息、配置功能和管理标签';
+  String get appInfo_viewDetails => '查看应用信息和配置';
 
   @override
   String get appInfo_section_app => '应用';
@@ -818,6 +821,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_autoStart => '开机自启';
+
+  @override
+  String get settings_autoStart_description => '开机时自动启动应用';
 
   @override
   String get settings_minimizeToTray => '最小化到托盘';
@@ -1251,6 +1257,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get desktopPet_resetConfirm => '确定要重置桌面宠物设置吗？';
 
   @override
+  String get desktopPet_config_name => '桌面宠物配置';
+
+  @override
+  String get desktopPet_config_description => '桌面宠物的外观和行为配置，包括透明度、动画和交互设置';
+
+  @override
   String get common_enabled => '已启用';
 
   @override
@@ -1395,7 +1407,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get capability_desktop_desc => '运行在桌面操作系统上（Windows、macOS、Linux）';
 
   @override
-  String get feature_autoStart => '开机启动';
+  String get feature_autoStart => '默认启动';
 
   @override
   String get feature_minimizeToTray => '最小化到托盘';
@@ -2651,4 +2663,95 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get image_editor_mosaic => '马赛克';
+
+  @override
+  String get screenshot_main_history => '历史记录';
+
+  @override
+  String get screenshot_main_settings => '设置';
+
+  @override
+  String get screenshot_main_platform_limited => '平台功能受限';
+
+  @override
+  String get screenshot_main_platform_limited_desc =>
+      '此平台暂不完全支持截图功能。支持的平台：Windows、macOS、Linux';
+
+  @override
+  String get screenshot_main_quick_actions => '快速操作';
+
+  @override
+  String get screenshot_main_region_capture => '区域截图';
+
+  @override
+  String get screenshot_main_fullscreen_capture => '全屏截图';
+
+  @override
+  String get screenshot_main_window_capture => '窗口截图';
+
+  @override
+  String get screenshot_main_recent_screenshots => '最近截图';
+
+  @override
+  String get screenshot_main_no_records => '暂无截图记录';
+
+  @override
+  String get screenshot_main_no_records_hint => '点击上方按钮开始截图';
+
+  @override
+  String get screenshot_main_statistics => '统计信息';
+
+  @override
+  String get screenshot_main_total_count => '总截图数';
+
+  @override
+  String get screenshot_main_today_count => '今日截图';
+
+  @override
+  String get screenshot_main_total_size => '占用空间';
+
+  @override
+  String get screenshot_main_delete => '删除';
+
+  @override
+  String get screenshot_main_copy_to_clipboard => '复制到剪贴板';
+
+  @override
+  String get screenshot_main_share => '分享';
+
+  @override
+  String get screenshot_main_loading => '加载中...';
+
+  @override
+  String get screenshot_main_load_failed => '无法加载图片';
+
+  @override
+  String get screenshot_main_just_now => '刚刚';
+
+  @override
+  String get worldclock_main_add_countdown => '添加倒计时';
+
+  @override
+  String get worldclock_main_add_clock => '添加时钟';
+
+  @override
+  String get worldclock_main_settings => '设置';
+
+  @override
+  String get worldclock_main_world_clocks => '世界时钟';
+
+  @override
+  String get worldclock_main_no_clocks => '暂无时钟';
+
+  @override
+  String get worldclock_main_add_clock_hint => '点击右上角 + 添加时钟';
+
+  @override
+  String get worldclock_main_countdown_timers => '倒计时';
+
+  @override
+  String get worldclock_main_no_countdowns => '暂无倒计时';
+
+  @override
+  String get worldclock_main_add_countdown_hint => '点击闹钟图标添加倒计时';
 }

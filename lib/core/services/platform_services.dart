@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import '../interfaces/i_platform_services.dart';
 import '../interfaces/i_plugin.dart';
+import '../interfaces/i_plugin_i18n.dart';
 import '../models/platform_models.dart';
 import '../models/plugin_models.dart';
 
@@ -295,11 +296,13 @@ class EnhancedPluginContext extends PluginContext {
     required IPlatformServices platformServices,
     required IDataStorage dataStorage,
     required INetworkAccess networkAccess,
+    required IPluginI18n i18n,
     required Map<String, dynamic> configuration,
   }) : super(
          platformServices: platformServices,
          dataStorage: dataStorage,
          networkAccess: networkAccess,
+         i18n: i18n,
          configuration: configuration,
        );
 

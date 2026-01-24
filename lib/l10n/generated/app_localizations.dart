@@ -113,19 +113,19 @@ abstract class AppLocalizations {
   /// No description provided for @autoStart.
   ///
   /// In zh, this message translates to:
-  /// **'开机自启动'**
+  /// **'默认启动'**
   String get autoStart;
 
   /// No description provided for @autoStartPlugin.
   ///
   /// In zh, this message translates to:
-  /// **'插件自启动'**
+  /// **'插件默认启动'**
   String get autoStartPlugin;
 
   /// No description provided for @autoStartDescription.
   ///
   /// In zh, this message translates to:
-  /// **'开机自启动'**
+  /// **'默认启动'**
   String get autoStartDescription;
 
   /// No description provided for @autoStartedPlugins.
@@ -385,6 +385,12 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'常用'**
   String get tag_favorite;
+
+  /// No description provided for @common_add.
+  ///
+  /// In zh, this message translates to:
+  /// **'添加'**
+  String get common_add;
 
   /// No description provided for @common_confirm.
   ///
@@ -647,13 +653,13 @@ abstract class AppLocalizations {
   /// No description provided for @autoStartEnabled.
   ///
   /// In zh, this message translates to:
-  /// **'开机自启：已开启'**
+  /// **'取消默认启动'**
   String get autoStartEnabled;
 
   /// No description provided for @autoStartDisabled.
   ///
   /// In zh, this message translates to:
-  /// **'开机自启：已关闭'**
+  /// **'设为默认启动'**
   String get autoStartDisabled;
 
   /// No description provided for @dialog_confirmTitle.
@@ -1271,7 +1277,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_general.
   ///
   /// In zh, this message translates to:
-  /// **'常规设置'**
+  /// **'通用设置'**
   String get settings_general;
 
   /// No description provided for @settings_appName.
@@ -1295,7 +1301,7 @@ abstract class AppLocalizations {
   /// No description provided for @appInfo_viewDetails.
   ///
   /// In zh, this message translates to:
-  /// **'查看应用信息、配置功能和管理标签'**
+  /// **'查看应用信息和配置'**
   String get appInfo_viewDetails;
 
   /// No description provided for @appInfo_section_app.
@@ -1567,6 +1573,12 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'开机自启'**
   String get settings_autoStart;
+
+  /// No description provided for @settings_autoStart_description.
+  ///
+  /// In zh, this message translates to:
+  /// **'开机时自动启动应用'**
+  String get settings_autoStart_description;
 
   /// No description provided for @settings_minimizeToTray.
   ///
@@ -2378,6 +2390,18 @@ abstract class AppLocalizations {
   /// **'确定要重置桌面宠物设置吗？'**
   String get desktopPet_resetConfirm;
 
+  /// No description provided for @desktopPet_config_name.
+  ///
+  /// In zh, this message translates to:
+  /// **'桌面宠物配置'**
+  String get desktopPet_config_name;
+
+  /// No description provided for @desktopPet_config_description.
+  ///
+  /// In zh, this message translates to:
+  /// **'桌面宠物的外观和行为配置，包括透明度、动画和交互设置'**
+  String get desktopPet_config_description;
+
   /// No description provided for @common_enabled.
   ///
   /// In zh, this message translates to:
@@ -2669,7 +2693,7 @@ abstract class AppLocalizations {
   /// No description provided for @feature_autoStart.
   ///
   /// In zh, this message translates to:
-  /// **'开机启动'**
+  /// **'默认启动'**
   String get feature_autoStart;
 
   /// No description provided for @feature_minimizeToTray.
@@ -5048,6 +5072,186 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'马赛克'**
   String get image_editor_mosaic;
+
+  /// No description provided for @screenshot_main_history.
+  ///
+  /// In zh, this message translates to:
+  /// **'历史记录'**
+  String get screenshot_main_history;
+
+  /// No description provided for @screenshot_main_settings.
+  ///
+  /// In zh, this message translates to:
+  /// **'设置'**
+  String get screenshot_main_settings;
+
+  /// No description provided for @screenshot_main_platform_limited.
+  ///
+  /// In zh, this message translates to:
+  /// **'平台功能受限'**
+  String get screenshot_main_platform_limited;
+
+  /// No description provided for @screenshot_main_platform_limited_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'此平台暂不完全支持截图功能。支持的平台：Windows、macOS、Linux'**
+  String get screenshot_main_platform_limited_desc;
+
+  /// No description provided for @screenshot_main_quick_actions.
+  ///
+  /// In zh, this message translates to:
+  /// **'快速操作'**
+  String get screenshot_main_quick_actions;
+
+  /// No description provided for @screenshot_main_region_capture.
+  ///
+  /// In zh, this message translates to:
+  /// **'区域截图'**
+  String get screenshot_main_region_capture;
+
+  /// No description provided for @screenshot_main_fullscreen_capture.
+  ///
+  /// In zh, this message translates to:
+  /// **'全屏截图'**
+  String get screenshot_main_fullscreen_capture;
+
+  /// No description provided for @screenshot_main_window_capture.
+  ///
+  /// In zh, this message translates to:
+  /// **'窗口截图'**
+  String get screenshot_main_window_capture;
+
+  /// No description provided for @screenshot_main_recent_screenshots.
+  ///
+  /// In zh, this message translates to:
+  /// **'最近截图'**
+  String get screenshot_main_recent_screenshots;
+
+  /// No description provided for @screenshot_main_no_records.
+  ///
+  /// In zh, this message translates to:
+  /// **'暂无截图记录'**
+  String get screenshot_main_no_records;
+
+  /// No description provided for @screenshot_main_no_records_hint.
+  ///
+  /// In zh, this message translates to:
+  /// **'点击上方按钮开始截图'**
+  String get screenshot_main_no_records_hint;
+
+  /// No description provided for @screenshot_main_statistics.
+  ///
+  /// In zh, this message translates to:
+  /// **'统计信息'**
+  String get screenshot_main_statistics;
+
+  /// No description provided for @screenshot_main_total_count.
+  ///
+  /// In zh, this message translates to:
+  /// **'总截图数'**
+  String get screenshot_main_total_count;
+
+  /// No description provided for @screenshot_main_today_count.
+  ///
+  /// In zh, this message translates to:
+  /// **'今日截图'**
+  String get screenshot_main_today_count;
+
+  /// No description provided for @screenshot_main_total_size.
+  ///
+  /// In zh, this message translates to:
+  /// **'占用空间'**
+  String get screenshot_main_total_size;
+
+  /// No description provided for @screenshot_main_delete.
+  ///
+  /// In zh, this message translates to:
+  /// **'删除'**
+  String get screenshot_main_delete;
+
+  /// No description provided for @screenshot_main_copy_to_clipboard.
+  ///
+  /// In zh, this message translates to:
+  /// **'复制到剪贴板'**
+  String get screenshot_main_copy_to_clipboard;
+
+  /// No description provided for @screenshot_main_share.
+  ///
+  /// In zh, this message translates to:
+  /// **'分享'**
+  String get screenshot_main_share;
+
+  /// No description provided for @screenshot_main_loading.
+  ///
+  /// In zh, this message translates to:
+  /// **'加载中...'**
+  String get screenshot_main_loading;
+
+  /// No description provided for @screenshot_main_load_failed.
+  ///
+  /// In zh, this message translates to:
+  /// **'无法加载图片'**
+  String get screenshot_main_load_failed;
+
+  /// No description provided for @screenshot_main_just_now.
+  ///
+  /// In zh, this message translates to:
+  /// **'刚刚'**
+  String get screenshot_main_just_now;
+
+  /// No description provided for @worldclock_main_add_countdown.
+  ///
+  /// In zh, this message translates to:
+  /// **'添加倒计时'**
+  String get worldclock_main_add_countdown;
+
+  /// No description provided for @worldclock_main_add_clock.
+  ///
+  /// In zh, this message translates to:
+  /// **'添加时钟'**
+  String get worldclock_main_add_clock;
+
+  /// No description provided for @worldclock_main_settings.
+  ///
+  /// In zh, this message translates to:
+  /// **'设置'**
+  String get worldclock_main_settings;
+
+  /// No description provided for @worldclock_main_world_clocks.
+  ///
+  /// In zh, this message translates to:
+  /// **'世界时钟'**
+  String get worldclock_main_world_clocks;
+
+  /// No description provided for @worldclock_main_no_clocks.
+  ///
+  /// In zh, this message translates to:
+  /// **'暂无时钟'**
+  String get worldclock_main_no_clocks;
+
+  /// No description provided for @worldclock_main_add_clock_hint.
+  ///
+  /// In zh, this message translates to:
+  /// **'点击右上角 + 添加时钟'**
+  String get worldclock_main_add_clock_hint;
+
+  /// No description provided for @worldclock_main_countdown_timers.
+  ///
+  /// In zh, this message translates to:
+  /// **'倒计时'**
+  String get worldclock_main_countdown_timers;
+
+  /// No description provided for @worldclock_main_no_countdowns.
+  ///
+  /// In zh, this message translates to:
+  /// **'暂无倒计时'**
+  String get worldclock_main_no_countdowns;
+
+  /// No description provided for @worldclock_main_add_countdown_hint.
+  ///
+  /// In zh, this message translates to:
+  /// **'点击闹钟图标添加倒计时'**
+  String get worldclock_main_add_countdown_hint;
 }
 
 class _AppLocalizationsDelegate

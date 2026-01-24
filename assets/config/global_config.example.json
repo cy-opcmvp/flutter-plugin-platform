@@ -1,0 +1,62 @@
+{
+  "app": {
+    "name": "Flutter Plugin Platform",
+    "version": "0.4.3",
+    "language": "zh_CN",
+    "theme": "system",
+    "autoStartPlugins": []
+  },
+  "features": {
+    "autoStart": false,
+    "minimizeToTray": true,
+    "showDesktopPet": true,
+    "enableNotifications": true
+  },
+  "services": {
+    "audio": {
+      "enabled": true
+    },
+    "notification": {
+      "enabled": true,
+      "mode": "app"
+    },
+    "taskScheduler": {
+      "enabled": true
+    }
+  },
+  "advanced": {
+    "debugMode": false,
+    "logLevel": "info",
+    "maxLogFileSize": 10
+  },
+  "desktopPet": {
+    "enabled": true,
+    "opacity": 1.0,
+    "animationsEnabled": true,
+    "interactionsEnabled": true
+  },
+  "screenshot": {
+    "savePath": "{documents}/Screenshots",
+    "filenameFormat": "Screenshot_{date}_{time}",
+    "imageFormat": "png",
+    "quality": 100,
+    "showPreview": true,
+    "copyToClipboard": true,
+    "clipboardContentType": "image"
+  },
+  "worldClock": {
+    "showSeconds": false,
+    "use24HourFormat": true,
+    "timeZones": [
+      "Asia/Shanghai",
+      "America/New_York",
+      "Europe/London"
+    ]
+  },
+  "calculator": {
+    "precision": 10,
+    "angleMode": "deg",
+    "showHistory": true,
+    "historySize": 20
+  }
+}

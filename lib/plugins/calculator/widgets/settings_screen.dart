@@ -38,6 +38,13 @@ class _CalculatorSettingsScreenState extends State<CalculatorSettingsScreen> {
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.restore),
+            onPressed: () => _showResetDialog(context),
+            tooltip: l10n.settings_resetToDefaults,
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.only(
@@ -433,6 +440,74 @@ class _CalculatorSettingsScreenState extends State<CalculatorSettingsScreen> {
     } catch (e) {
       debugPrint('Failed to save settings: $e');
       return false;
+    }
+  }
+
+  /// 显示恢复默认设置确认对话框
+  Future<void> _showResetDialog(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.settings_resetToDefaults),
+        content: Text(l10n.settings_resetConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.common_cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.orange,
+            ),
+            child: Text(l10n.common_confirm),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      await _resetToDefaults();
+    }
+  }
+
+  /// 恢复默认设置
+  Future<void> _resetToDefaults() async {
+    try {
+      // 从默认配置中解析设置
+      final defaultData = jsonDecode(CalculatorConfigDefaults.defaultConfig)
+          as Map<String, dynamic>;
+      final defaultSettings = CalculatorSettings.fromJson(defaultData);
+
+      // 保存默认设置
+      if (await _saveSettings(defaultSettings) && mounted) {
+        setState(() {
+          _settings = defaultSettings;
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.settings_configSaved),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Failed to reset to defaults: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.settings_configSaveFailed),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
     }
   }
 }

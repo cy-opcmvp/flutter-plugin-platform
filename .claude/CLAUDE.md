@@ -261,6 +261,308 @@ if (PlatformServiceManager.isServiceAvailable<IAudioService>()) {
    - 日志输出：`debugPrint()` 中的文本（但用户可见的日志需国际化）
    - API 返回的原始数据
 
+#### 插件国际化特别规定
+
+**插件必须使用系统级国际化配置，不得硬编码任何用户可见文本。**
+
+1. **插件翻译键命名规范**：
+   - 使用插件前缀：`{plugin_name}_{component}_{text}`
+   - 示例：
+     - `screenshot_main_history` - 截图主界面历史记录
+     - `worldclock_main_add_clock` - 世界时钟主界面添加时钟
+     - `calculator_settings_title` - 计算器设置标题
+   - 主界面使用 `{plugin}_main_*` 前缀
+   - 设置界面使用 `{plugin}_settings_*` 或 `{plugin}_config_*` 前缀
+
+2. **插件访问 l10n 的标准方式**：
+   ```dart
+   class MyPluginWidget extends StatelessWidget {
+     @override
+     Widget build(BuildContext context) {
+       final l10n = AppLocalizations.of(context)!;  // ✅ 从 context 获取
+
+       return Scaffold(
+         appBar: AppBar(
+           title: Text(l10n.plugin_myplugin_name),  // ✅ 使用 l10n
+         ),
+         body: Column(
+           children: [
+             Text(l10n.myplugin_main_welcome),  // ✅ 所有文本都国际化
+           ],
+         ),
+       );
+     }
+   }
+   ```
+
+3. **插件国际化完整示例**：
+
+   **步骤 1**：在 `lib/l10n/app_zh.arb` 添加翻译
+   ```json
+   "screenshot_main_history": "历史记录",
+   "screenshot_main_settings": "设置",
+   "screenshot_main_recent_screenshots": "最近截图",
+   "worldclock_main_add_clock": "添加时钟",
+   "worldclock_main_no_clocks": "暂无时钟",
+   "calculator_settings_title": "计算器设置"
+   ```
+
+   **步骤 2**：在 `lib/l10n/app_en.arb` 添加对应英文翻译
+   ```json
+   "screenshot_main_history": "History",
+   "screenshot_main_settings": "Settings",
+   "screenshot_main_recent_screenshots": "Recent Screenshots",
+   "worldclock_main_add_clock": "Add Clock",
+   "worldclock_main_no_clocks": "No Clocks",
+   "calculator_settings_title": "Calculator Settings"
+   ```
+
+   **步骤 3**：在插件代码中使用
+   ```dart
+   @override
+   Widget build(BuildContext context) {
+     final l10n = AppLocalizations.of(context)!;
+
+     return Scaffold(
+       appBar: AppBar(
+         title: Text(l10n.screenshot_main_history),  // ✅ 国际化
+         actions: [
+           IconButton(
+             icon: const Icon(Icons.settings),
+             tooltip: l10n.screenshot_main_settings,  // ✅ tooltip 也要国际化
+             onPressed: () {},
+           ),
+         ],
+       ),
+       body: Text(l10n.screenshot_main_recent_screenshots),  // ✅ 所有文本
+     );
+   }
+   ```
+
+4. **插件国际化常见错误**：
+   ```dart
+   // ❌ 错误：硬编码中文字符串
+   Text('历史记录')
+   tooltip: '设置'
+
+   // ❌ 错误：硬编码英文字符串
+   Text('History')
+   tooltip: 'Settings'
+
+   // ❌ 错误：使用三元运算符但硬编码
+   Text(l10n?.localeName ?? '中文')
+
+   // ✅ 正确：使用 l10n 访问翻译
+   Text(l10n.screenshot_main_history)
+   tooltip: l10n.screenshot_main_settings
+   ```
+
+5. **插件组件分类翻译键**：
+   - **主界面组件**：`{plugin}_main_*` - 如 `screenshot_main_history`
+   - **设置界面**：`{plugin}_settings_*` 或 `{plugin}_config_*`
+   - **对话框**：`{plugin}_dialog_*` - 如 `worldclock_dialog_add`
+   - **错误消息**：`{plugin}_error_*` - 如 `calculator_error_division_by_zero`
+   - **工具提示**：与对应按钮使用相同的键
+
+6. **插件国际化检查清单**：
+   - [ ] 插件主界面所有文本使用 l10n
+   - [ ] 插件设置界面所有文本使用 l10n
+   - [ ] 所有 tooltip 已国际化
+   - [ ] 所有按钮文本已国际化
+   - [ ] 所有错误消息已国际化
+   - [ ] 翻译键遵循 `{plugin}_component_*` 命名规范
+   - [ ] 中英文翻译已添加到 ARB 文件
+   - [ ] 已运行 `flutter gen-l10n` 生成代码
+   - [ ] 在中文和英文环境下都测试过插件
+
+#### 外部插件国际化支持
+
+**内部插件必须使用系统级国际化（AppLocalizations），外部插件必须提供自带的翻译资源。**
+
+##### 内部插件 vs 外部插件国际化
+
+| 特性 | 内部插件 | 外部插件 |
+|------|---------|---------|
+| **翻译来源** | 系统 ARB 文件（`lib/l10n/app_*.arb`） | 插件自带翻译 |
+| **访问方式** | `AppLocalizations.of(context)!` | `context.i18n.translate()` |
+| **翻译注册** | 自动（系统管理） | 手动注册（`initialize()` 中） |
+| **语言切换** | 自动响应系统语言切换 | 自动响应系统语言切换 |
+| **翻译键冲突** | 系统统一管理 | 插件内部隔离 |
+
+##### 外部插件国际化实现
+
+**1. 定义插件翻译资源**
+
+在插件的 `initialize()` 方法中注册翻译：
+
+```dart
+class MyExternalPlugin implements IPlugin {
+  @override
+  Future<void> initialize(PluginContext context) async {
+    // 注册插件的翻译资源
+    context.i18n.registerTranslations('com.example.myplugin', {
+      'zh': {
+        'myplugin_title': '我的插件',
+        'myplugin_welcome': '欢迎使用',
+        'myplugin_settings': '设置',
+        'myplugin_save': '保存',
+        'myplugin_cancel': '取消',
+      },
+      'en': {
+        'myplugin_title': 'My Plugin',
+        'myplugin_welcome': 'Welcome',
+        'myplugin_settings': 'Settings',
+        'myplugin_save': 'Save',
+        'myplugin_cancel': 'Cancel',
+      },
+    });
+  }
+
+  @override
+  Widget buildUI(BuildContext context) {
+    final i18n = _context.i18n;  // 保存 context 引用
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(i18n.translate('myplugin_title')),
+      ),
+      body: Center(
+        child: Text(i18n.translate('myplugin_welcome')),
+      ),
+    );
+  }
+}
+```
+
+**2. 使用占位符翻译**
+
+翻译支持占位符替换：
+
+```dart
+// 翻译文本（包含 {name} 占位符）
+"myplugin_greeting": "欢迎，{name}！"
+
+// 使用时传递参数
+Text(
+  i18n.translate('myplugin_greeting', args: {'name': 'John'}),
+  // 输出：欢迎，John！
+)
+```
+
+**3. 检查翻译是否可用**
+
+```dart
+void _showWelcomeMessage() {
+  final i18n = _context.i18n;
+
+  if (i18n.hasTranslation('myplugin_welcome')) {
+    // 使用插件自己的翻译
+    final message = i18n.translate('myplugin_welcome');
+    _showSnackBar(message);
+  } else {
+    // 回退到系统翻译或默认文本
+    final l10n = AppLocalizations.of(context)!;
+    _showSnackBar(l10n.common_welcome ?? 'Welcome');
+  }
+}
+```
+
+**4. 获取当前语言**
+
+```dart
+void _logCurrentLanguage() {
+  final i18n = _context.i18n;
+  final currentLocale = i18n.currentLocale;  // "zh" 或 "en"
+
+  debugPrint('当前语言: $currentLocale');
+}
+```
+
+**5. 翻译优先级规则**
+
+外部插件应该按以下优先级查找翻译：
+
+1. **系统翻译**（优先）- 如果主应用提供了该翻译键
+   ```dart
+   final l10n = AppLocalizations.of(context)!;
+   final text = l10n.plugin_myplugin_name ?? i18n.translate('myplugin_title');
+   ```
+
+2. **插件翻译**（回退）- 使用插件自带的翻译
+   ```dart
+   final text = i18n.translate('myplugin_title');
+   ```
+
+3. **键名本身**（最终回退）- 便于调试
+   ```dart
+   // 如果找不到翻译，返回键名 'myplugin_title'
+   ```
+
+##### 外部插件翻译文件组织
+
+推荐将翻译资源放在插件包的独立文件中：
+
+**文件结构**：
+```
+com.example.myplugin/
+├── lib/
+│   └── myplugin.dart
+├── assets/
+│   └── translations/
+│       ├── zh.json
+│       └── en.json
+└── pubspec.yaml
+```
+
+**翻译文件格式** (`assets/translations/zh.json`):
+```json
+{
+  "myplugin_title": "我的插件",
+  "myplugin_welcome": "欢迎使用",
+  "myplugin_settings": "设置"
+}
+```
+
+**加载翻译文件**：
+```dart
+import 'dart:convert';
+import 'package:flutter/services.dart';
+
+Future<Map<String, Map<String, String>>> _loadTranslations() async {
+  final zhJson = await rootBundle.loadString('assets/translations/zh.json');
+  final enJson = await rootBundle.loadString('assets/translations/en.json');
+
+  return {
+    'zh': json.decode(zhJson),
+    'en': json.decode(enJson),
+  };
+}
+
+@override
+Future<void> initialize(PluginContext context) async {
+  final translations = await _loadTranslations();
+  context.i18n.registerTranslations('com.example.myplugin', translations);
+}
+```
+
+##### 外部插件国际化最佳实践
+
+1. **提供完整翻译**：至少支持中文和英文
+2. **使用命名空间**：所有翻译键使用插件前缀，避免冲突
+3. **占位符统一**：使用 `{key}` 格式的占位符
+4. **语言回退**：如果某个语言缺少翻译，自动回退到英文或键名
+5. **测试验证**：在切换系统语言时测试插件显示是否正确
+
+##### 外部插件国际化检查清单
+
+- [ ] 在 `initialize()` 中注册了所有翻译
+- [ ] 提供了中文和英文两种翻译
+- [ ] 所有用户可见文本使用 `i18n.translate()`
+- [ ] 翻译键使用插件前缀（避免冲突）
+- [ ] 占位符使用正确（`{key}` 格式）
+- [ ] 在系统语言切换时测试过插件
+- [ ] 处理了翻译缺失的情况（有回退方案）
+
 #### 国际化代码示例
 ```dart
 // 1. 在 .arb 文件中添加翻译

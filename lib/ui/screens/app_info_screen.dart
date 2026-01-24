@@ -1,9 +1,8 @@
 /// App Info Screen
 ///
-/// 应用信息页面
+/// 应用信息与配置页面
 library;
 
-import 'dart:io' as io;
 import 'package:flutter/material.dart';
 import 'package:plugin_platform/l10n/generated/app_localizations.dart';
 import 'package:plugin_platform/core/services/config_manager.dart';
@@ -11,8 +10,6 @@ import 'package:plugin_platform/core/services/tag_manager.dart';
 import 'package:plugin_platform/core/services/tag_color_helper.dart';
 import 'package:plugin_platform/core/models/global_config.dart';
 import 'package:plugin_platform/core/models/tag_model.dart';
-import 'package:plugin_platform/core/services/platform_service_manager.dart';
-import 'desktop_pet_settings_screen.dart';
 import 'service_test_screen.dart';
 import 'tag_management_screen.dart';
 import 'plugin_tag_assignment_screen.dart';
@@ -88,17 +85,11 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
 
           const SizedBox(height: 24),
 
-          // 功能状态
-          _buildSectionHeader(l10n.appInfo_section_features),
+          // 标签配置
+          _buildSectionHeader(l10n.tag_title),
           const SizedBox(height: 8),
-          _buildDesktopPetStatusTile(l10n),
-
-          const SizedBox(height: 24),
-
-          // 功能设置
-          _buildSectionHeader(l10n.settings_features),
-          const SizedBox(height: 8),
-          _buildFeatureSettingsTile(l10n),
+          _buildTagsTile(l10n),
+          _buildPluginTagAssignmentTile(l10n),
 
           const SizedBox(height: 24),
 
@@ -106,14 +97,6 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
           _buildSectionHeader(l10n.settings_advanced),
           const SizedBox(height: 8),
           _buildAdvancedSettingsTile(l10n),
-
-          const SizedBox(height: 24),
-
-          // 标签配置
-          _buildSectionHeader(l10n.tag_title),
-          const SizedBox(height: 8),
-          _buildTagsTile(l10n),
-          _buildPluginTagAssignmentTile(l10n),
 
           const SizedBox(height: 24),
 
@@ -159,33 +142,6 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
             subtitle: Text(_globalConfig!.app.version),
           ),
         ],
-      ),
-    );
-  }
-
-  /// 桌面宠物状态卡片
-  Widget _buildDesktopPetStatusTile(AppLocalizations l10n) {
-    return Card(
-      child: ListTile(
-        leading: Icon(
-          Icons.pets,
-          color: _globalConfig!.features.showDesktopPet
-              ? Colors.green
-              : Colors.black87,
-        ),
-        title: Text(l10n.desktopPet_settings_title),
-        subtitle: _globalConfig!.features.showDesktopPet
-            ? Text(l10n.common_enabled)
-            : null,
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const DesktopPetSettingsScreen(),
-            ),
-          );
-        },
       ),
     );
   }
@@ -307,81 +263,6 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
     );
   }
 
-  /// 功能设置卡片
-  Widget _buildFeatureSettingsTile(AppLocalizations l10n) {
-    return Card(
-      child: Column(
-        children: [
-          // 开机自启
-          SwitchListTile(
-            secondary: const Icon(Icons.start),
-            title: Text(l10n.settings_autoStart),
-            subtitle: Text(
-              '当前状态: ${PlatformServiceManager.autoStart.isEnabled ? "已启用" : "已禁用"}',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            value: PlatformServiceManager.autoStart.isEnabled,
-            onChanged: (value) => _showAutoStartConfirmDialog(value),
-          ),
-          // TODO: 实现最小化到托盘功能
-          // SwitchListTile(
-          //   secondary: const Icon(Icons.web_asset),
-          //   title: Text(l10n.settings_minimizeToTray),
-          //   value: _globalConfig!.features.minimizeToTray,
-          //   onChanged: (value) => _updateFeature('minimizeToTray', value),
-          // ),
-          // 通知模式选择
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 8.0,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.notifications_active, size: 20),
-                    const SizedBox(width: 16),
-                    Text(
-                      l10n.settings_notificationMode,
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                SegmentedButton<NotificationMode>(
-                  segments: [
-                    ButtonSegment(
-                      value: NotificationMode.app,
-                      label: Text(l10n.settings_notificationMode_app),
-                    ),
-                    ButtonSegment(
-                      value: NotificationMode.system,
-                      label: Text(l10n.settings_notificationMode_system),
-                    ),
-                  ],
-                  selected: {_globalConfig!.services.notification.mode},
-                  onSelectionChanged: (Set<NotificationMode> selection) async {
-                    final newMode = selection.first;
-                    await _updateNotificationMode(newMode);
-                  },
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  l10n.settings_notificationMode_desc,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: Colors.grey),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   /// 高级设置卡片
   Widget _buildAdvancedSettingsTile(AppLocalizations l10n) {
     return Card(
@@ -403,32 +284,6 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
         ],
       ),
     );
-  }
-
-  /// 更新通知模式
-  Future<void> _updateNotificationMode(NotificationMode mode) async {
-    if (_globalConfig == null) return;
-
-    final newNotificationConfig = _globalConfig!.services.notification.copyWith(
-      mode: mode,
-    );
-
-    final newServices = _globalConfig!.services.copyWith(
-      notification: newNotificationConfig,
-    );
-
-    final newConfig = _globalConfig!.copyWith(services: newServices);
-
-    try {
-      await ConfigManager.instance.updateGlobalConfig(newConfig);
-      if (mounted) {
-        setState(() => _globalConfig = newConfig);
-        _showSuccessMessage();
-      }
-    } catch (e) {
-      debugPrint('Failed to update notification mode: $e');
-      _showErrorMessage();
-    }
   }
 
   /// 更新高级配置
@@ -500,141 +355,6 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
       }
     } catch (e) {
       debugPrint('Failed to update log level: $e');
-      _showErrorMessage();
-    }
-  }
-
-  /// 显示开机自启确认对话框
-  void _showAutoStartConfirmDialog(bool enabled) {
-    final l10n = AppLocalizations.of(context)!;
-
-    // 检查是否为开发模式
-    final isDebugMode = _isRunningInDebugMode();
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(enabled ? '启用开机自启' : '禁用开机自启'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              enabled
-                  ? '将允许 Plugin Platform 在 Windows 启动时自动运行。'
-                  : '将禁止 Plugin Platform 在 Windows 启动时自动运行。',
-            ),
-            const SizedBox(height: 12),
-            if (enabled && isDebugMode) ...[
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.red.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.red.shade200),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.warning,
-                          color: Colors.red.shade700,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '⚠️ 开发模式警告',
-                          style: Theme.of(context).textTheme.titleSmall
-                              ?.copyWith(
-                                color: Colors.red.shade700,
-                                fontWeight: FontWeight.bold,
-                              ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '当前运行的是开发版本，重启后无法正常启动！\n\n'
-                      '原因：开发版本依赖 Flutter 开发服务器，重启后服务器已关闭。\n\n'
-                      '正确测试方法：\n'
-                      '1. 运行：flutter build windows --release\n'
-                      '2. 直接运行：build\\windows\\x64\\runner\\Release\\plugin_platform.exe\n'
-                      '3. 在发布版本中启用开机自启',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.red.shade900,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ] else if (enabled) ...[
-              Text(
-                '注意：每次重新编译后需要重新设置，因为可执行文件路径会变化。',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: Colors.orange),
-              ),
-            ],
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(l10n.common_cancel),
-          ),
-          FilledButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await _setAutoStart(enabled);
-            },
-            style: isDebugMode && enabled
-                ? FilledButton.styleFrom(backgroundColor: Colors.orange)
-                : null,
-            child: Text(l10n.common_confirm),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// 检查是否运行在开发模式
-  bool _isRunningInDebugMode() {
-    try {
-      // 检查可执行文件路径
-      final exePath = io.Platform.resolvedExecutable;
-      // Debug 版本通常在 Debug 目录
-      return exePath.contains('Debug') || exePath.contains('debug');
-    } catch (e) {
-      // 如果检测失败，假设是开发模式（更安全）
-      return true;
-    }
-  }
-
-  /// 设置开机自启
-  Future<void> _setAutoStart(bool enabled) async {
-    try {
-      final success = await PlatformServiceManager.autoStart.setEnabled(
-        enabled,
-      );
-      if (success) {
-        // 更新配置中的 autoStart 状态
-        final newFeatures = _globalConfig!.features.copyWith(
-          autoStart: enabled,
-        );
-        final newConfig = _globalConfig!.copyWith(features: newFeatures);
-        await ConfigManager.instance.updateGlobalConfig(newConfig);
-
-        if (mounted) {
-          setState(() => _globalConfig = newConfig);
-          _showSuccessMessage();
-        }
-      } else {
-        _showErrorMessage();
-      }
-    } catch (e) {
-      debugPrint('Failed to set auto start: $e');
       _showErrorMessage();
     }
   }
