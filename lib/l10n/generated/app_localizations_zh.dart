@@ -85,6 +85,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tag_assign_success => '标签分配成功';
 
   @override
+  String get tag_plugin_assignment_title => '插件标签关联';
+
+  @override
+  String get tag_search_plugins => '搜索插件...';
+
+  @override
+  String get tag_select_tags_for_plugin => '为插件选择标签';
+
+  @override
+  String get tag_selected_tags => '已选标签';
+
+  @override
+  String get tag_all_available_tags => '所有可用标签';
+
+  @override
+  String get tag_no_plugins_found => '未找到匹配的插件';
+
+  @override
   String get tag_assign_removed => '标签已移除';
 
   @override
@@ -788,6 +806,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_plugins => '插件配置';
+
+  @override
+  String get settings_addPlugin => '新增插件';
+
+  @override
+  String get settings_addPlugin_desc => '添加新的插件到平台';
+
+  @override
+  String get settings_selectPluginType => '选择插件类型';
 
   @override
   String get settings_autoStart => '开机自启';

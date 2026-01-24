@@ -28,6 +28,15 @@ class WorldClockPlugin extends PlatformPluginBase {
   // 插件设置
   WorldClockSettings _settings = WorldClockSettings.defaultSettings();
 
+  /// 获取插件初始化状态
+  bool get isInitialized => _isInitialized;
+
+  /// 获取世界时钟列表（只读）
+  List<WorldClockItem> get worldClocks => List.unmodifiable(_worldClocks);
+
+  /// 获取倒计时列表（只读）
+  List<CountdownTimer> get countdownTimers => List.unmodifiable(_countdownTimers);
+
   // 用于触发UI更新的回调
   VoidCallback? _onStateChanged;
 
@@ -96,15 +105,11 @@ class WorldClockPlugin extends PlatformPluginBase {
 
       _isInitialized = true;
 
-      final l10n = AppLocalizations.of(_context as BuildContext)!;
-      await _context.platformServices.showNotification(
-        l10n.world_clock_plugin_initialized(name),
-      );
+      // 注意：这里不显示通知，因为 initialize() 中的 context 不是 BuildContext
+      // 无法访问 AppLocalizations。插件初始化成功后会通过其他方式通知用户。
     } catch (e) {
-      final l10n = AppLocalizations.of(_context as BuildContext)!;
-      await _context.platformServices.showNotification(
-        l10n.world_clock_plugin_init_failed(name, e.toString()),
-      );
+      // 注意：这里不显示通知，原因同上
+      debugPrint('WorldClock plugin initialization failed: $e');
       rethrow;
     }
   }
@@ -280,7 +285,7 @@ class WorldClockPlugin extends PlatformPluginBase {
 
     // 处理完成的倒计时
     for (final timer in completedTimers) {
-      _onCountdownComplete(timer);
+      onCountdownComplete(timer);
     }
 
     if (completedTimers.isNotEmpty) {
@@ -289,16 +294,16 @@ class WorldClockPlugin extends PlatformPluginBase {
     }
   }
 
-  void _onCountdownComplete(CountdownTimer timer) async {
+  void onCountdownComplete(CountdownTimer timer) async {
     if (_settings.enableNotifications) {
-      final l10n = AppLocalizations.of(_context as BuildContext)!;
+      // 使用硬编码的文本，因为 _context 不是 BuildContext
       await _context.platformServices.showNotification(
-        l10n.world_clock_countdown_complete(timer.title),
+        '倒计时完成: ${timer.title}',
       );
     }
   }
 
-  void _addClock(String cityName, String timeZone) {
+  void addClock(String cityName, String timeZone) {
     final newClock = WorldClockItem(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       cityName: cityName,
@@ -311,13 +316,13 @@ class WorldClockPlugin extends PlatformPluginBase {
     _onStateChanged?.call();
   }
 
-  void _removeClock(String clockId) {
+  void removeClock(String clockId) {
     _worldClocks.removeWhere((clock) => clock.id == clockId);
     _saveCurrentState();
     _onStateChanged?.call();
   }
 
-  void _addCountdownTimer(String title, Duration duration) {
+  void addCountdownTimer(String title, Duration duration) {
     final newTimer = CountdownTimer(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: title,
@@ -330,7 +335,7 @@ class WorldClockPlugin extends PlatformPluginBase {
     _onStateChanged?.call();
   }
 
-  void _removeCountdownTimer(String timerId) {
+  void removeCountdownTimer(String timerId) {
     _countdownTimers.removeWhere((timer) => timer.id == timerId);
     _saveCurrentState();
     _onStateChanged?.call();
@@ -361,7 +366,7 @@ class _WorldClockPluginWidgetState extends State<_WorldClockPluginWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.plugin._isInitialized) {
+    if (!widget.plugin.isInitialized) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
@@ -430,7 +435,7 @@ class _WorldClockPluginWidgetState extends State<_WorldClockPluginWidget> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      if (widget.plugin._worldClocks.isEmpty)
+                      if (widget.plugin.worldClocks.isEmpty)
                         Center(
                           child: Padding(
                             padding: const EdgeInsets.all(32.0),
@@ -460,7 +465,7 @@ class _WorldClockPluginWidgetState extends State<_WorldClockPluginWidget> {
                           ),
                         )
                       else
-                        ...widget.plugin._worldClocks.map(
+                        ...widget.plugin.worldClocks.map(
                           (clock) => Padding(
                             padding: const EdgeInsets.only(bottom: 8.0),
                             child: WorldClockWidget(
@@ -470,7 +475,7 @@ class _WorldClockPluginWidgetState extends State<_WorldClockPluginWidget> {
                               onDelete: clock.isDefault
                                   ? null
                                   : () {
-                                      widget.plugin._removeClock(clock.id);
+                                      widget.plugin.removeClock(clock.id);
                                     },
                             ),
                           ),
@@ -507,7 +512,7 @@ class _WorldClockPluginWidgetState extends State<_WorldClockPluginWidget> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      if (widget.plugin._countdownTimers.isEmpty)
+                      if (widget.plugin.countdownTimers.isEmpty)
                         Center(
                           child: Padding(
                             padding: const EdgeInsets.all(32.0),
@@ -537,17 +542,17 @@ class _WorldClockPluginWidgetState extends State<_WorldClockPluginWidget> {
                           ),
                         )
                       else
-                        ...widget.plugin._countdownTimers.map(
+                        ...widget.plugin.countdownTimers.map(
                           (timer) => Padding(
                             padding: const EdgeInsets.only(bottom: 8.0),
                             child: CountdownTimerWidget(
                               countdownTimer: timer,
                               enableAnimations: true,
                               onDelete: () {
-                                widget.plugin._removeCountdownTimer(timer.id);
+                                widget.plugin.removeCountdownTimer(timer.id);
                               },
                               onComplete: () {
-                                widget.plugin._onCountdownComplete(timer);
+                                widget.plugin.onCountdownComplete(timer);
                               },
                             ),
                           ),
@@ -568,7 +573,7 @@ class _WorldClockPluginWidgetState extends State<_WorldClockPluginWidget> {
       context: context,
       builder: (context) => _AddClockDialog(
         onAdd: (cityName, timeZone) {
-          widget.plugin._addClock(cityName, timeZone);
+          widget.plugin.addClock(cityName, timeZone);
         },
       ),
     );
@@ -579,7 +584,7 @@ class _WorldClockPluginWidgetState extends State<_WorldClockPluginWidget> {
       context: context,
       builder: (context) => _AddCountdownDialog(
         onAdd: (title, duration) {
-          widget.plugin._addCountdownTimer(title, duration);
+          widget.plugin.addCountdownTimer(title, duration);
         },
       ),
     );

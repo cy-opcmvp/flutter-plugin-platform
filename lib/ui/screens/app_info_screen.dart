@@ -7,14 +7,15 @@ import 'dart:io' as io;
 import 'package:flutter/material.dart';
 import 'package:plugin_platform/l10n/generated/app_localizations.dart';
 import 'package:plugin_platform/core/services/config_manager.dart';
-import 'package:plugin_platform/core/services/desktop_pet_manager.dart';
 import 'package:plugin_platform/core/services/tag_manager.dart';
+import 'package:plugin_platform/core/services/tag_color_helper.dart';
 import 'package:plugin_platform/core/models/global_config.dart';
 import 'package:plugin_platform/core/models/tag_model.dart';
 import 'package:plugin_platform/core/services/platform_service_manager.dart';
 import 'desktop_pet_settings_screen.dart';
 import 'service_test_screen.dart';
 import 'tag_management_screen.dart';
+import 'plugin_tag_assignment_screen.dart';
 
 /// App Info Screen
 ///
@@ -36,16 +37,12 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
   /// 标签管理器
   final TagManager _tagManager = TagManager.instance;
 
-  /// 桌面宠物管理器
-  late DesktopPetManager _desktopPetManager;
-
   /// 标签列表
   List<Tag> _tags = [];
 
   @override
   void initState() {
     super.initState();
-    _desktopPetManager = DesktopPetManager();
     _loadConfig();
   }
 
@@ -69,9 +66,7 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
 
     if (_isLoading || _globalConfig == null) {
       return Scaffold(
-        appBar: AppBar(
-          title: Text(l10n.settings_app),
-        ),
+        appBar: AppBar(title: Text(l10n.settings_app)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -90,13 +85,6 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
           _buildSectionHeader(l10n.appInfo_section_app),
           const SizedBox(height: 8),
           _buildAppInfoTile(l10n),
-
-          const SizedBox(height: 24),
-
-          // 平台信息
-          _buildSectionHeader(l10n.platform_platformInfo),
-          const SizedBox(height: 8),
-          _buildPlatformInfoTile(l10n),
 
           const SizedBox(height: 24),
 
@@ -125,6 +113,7 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
           _buildSectionHeader(l10n.tag_title),
           const SizedBox(height: 8),
           _buildTagsTile(l10n),
+          _buildPluginTagAssignmentTile(l10n),
 
           const SizedBox(height: 24),
 
@@ -215,81 +204,11 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const ServiceTestScreen(),
-            ),
+            MaterialPageRoute(builder: (context) => const ServiceTestScreen()),
           );
         },
       ),
     );
-  }
-
-  /// 平台信息卡片
-  Widget _buildPlatformInfoTile(AppLocalizations l10n) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.computer, color: Theme.of(context).colorScheme.primary),
-                const SizedBox(width: 8),
-                Text(
-                  l10n.info_platformType,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const Spacer(),
-                Text(_getPlatformType()),
-                const SizedBox(width: 8),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Icon(Icons.settings, color: Theme.of(context).colorScheme.primary),
-                const SizedBox(width: 8),
-                Text(
-                  l10n.info_currentMode,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const Spacer(),
-                Text(_getCurrentModeText(l10n)),
-                const SizedBox(width: 8),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// 获取平台类型显示文本
-  String _getPlatformType() {
-    // 从实际运行的操作系统获取平台类型
-    if (io.Platform.isWindows) {
-      return 'Windows';
-    } else if (io.Platform.isMacOS) {
-      return 'macOS';
-    } else if (io.Platform.isLinux) {
-      return 'Linux';
-    } else if (io.Platform.isAndroid) {
-      return 'Android';
-    } else if (io.Platform.isIOS) {
-      return 'iOS';
-    } else {
-      return io.Platform.operatingSystem; // Web 或其他平台
-    }
-  }
-
-  /// 获取当前运行模式显示文本
-  String _getCurrentModeText(AppLocalizations l10n) {
-    // 检查桌面宠物的实际运行状态，而不是配置中的开关
-    final isPetMode = _desktopPetManager.isDesktopPetMode;
-
-    // 如果桌面宠物正在运行，显示"在线模式"，否则显示"本地模式"
-    return isPetMode ? l10n.mode_online : l10n.mode_local;
   }
 
   /// 标签配置卡片
@@ -319,10 +238,10 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
                 spacing: 8,
                 runSpacing: 8,
                 children: _tags.take(5).map((tag) {
-                  final color = _getTagColor(tag.color);
+                  final color = TagColorHelper.getTagColor(tag.color);
                   return Chip(
                     label: Text(tag.name),
-                    backgroundColor: color.withOpacity(0.2),
+                    backgroundColor: color.withValues(alpha: 0.2),
                     side: BorderSide(color: color),
                   );
                 }).toList(),
@@ -332,18 +251,18 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(
                     '... ${l10n.tag_and_more} ${_tags.length - 5} ${l10n.tag_items}',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey,
-                        ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: Colors.grey),
                   ),
                 ),
             ] else ...[
               const SizedBox(height: 12),
               Text(
                 l10n.tag_no_tags,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.grey),
               ),
             ],
             const SizedBox(height: 16),
@@ -365,26 +284,27 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
     );
   }
 
-  /// 将 TagColor 转换为 Color
-  Color _getTagColor(TagColor color) {
-    switch (color) {
-      case TagColor.blue:
-        return Colors.blue;
-      case TagColor.green:
-        return Colors.green;
-      case TagColor.orange:
-        return Colors.orange;
-      case TagColor.purple:
-        return Colors.purple;
-      case TagColor.red:
-        return Colors.red;
-      case TagColor.teal:
-        return Colors.teal;
-      case TagColor.indigo:
-        return Colors.indigo;
-      case TagColor.pink:
-        return Colors.pink;
-    }
+  /// 插件标签关联卡片
+  Widget _buildPluginTagAssignmentTile(AppLocalizations l10n) {
+    return Card(
+      child: ListTile(
+        leading: Icon(
+          Icons.label_outline,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        title: Text(l10n.tag_plugin_assignment_title),
+        subtitle: Text('为每个插件设置标签分类'),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const PluginTagAssignmentScreen(),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   /// 功能设置卡片
@@ -412,7 +332,10 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
           // ),
           // 通知模式选择
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -447,9 +370,9 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
                 const SizedBox(height: 8),
                 Text(
                   l10n.settings_notificationMode_desc,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: Colors.grey),
                 ),
               ],
             ),
@@ -480,30 +403,6 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
         ],
       ),
     );
-  }
-
-  /// 更新功能配置
-  Future<void> _updateFeature(String key, bool value) async {
-    if (_globalConfig == null) return;
-
-    final newFeatures = _globalConfig!.features.copyWith(
-      autoStart: key == 'autoStart' ? value : null,
-      minimizeToTray: key == 'minimizeToTray' ? value : null,
-      enableNotifications: key == 'enableNotifications' ? value : null,
-    );
-
-    final newConfig = _globalConfig!.copyWith(features: newFeatures);
-
-    try {
-      await ConfigManager.instance.updateGlobalConfig(newConfig);
-      if (mounted) {
-        setState(() => _globalConfig = newConfig);
-        _showSuccessMessage();
-      }
-    } catch (e) {
-      debugPrint('Failed to update feature: $e');
-      _showErrorMessage();
-    }
   }
 
   /// 更新通知模式
@@ -620,9 +519,11 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(enabled
-                ? '将允许 Plugin Platform 在 Windows 启动时自动运行。'
-                : '将禁止 Plugin Platform 在 Windows 启动时自动运行。'),
+            Text(
+              enabled
+                  ? '将允许 Plugin Platform 在 Windows 启动时自动运行。'
+                  : '将禁止 Plugin Platform 在 Windows 启动时自动运行。',
+            ),
             const SizedBox(height: 12),
             if (enabled && isDebugMode) ...[
               Container(
@@ -637,14 +538,19 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.warning, color: Colors.red.shade700, size: 20),
+                        Icon(
+                          Icons.warning,
+                          color: Colors.red.shade700,
+                          size: 20,
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           '⚠️ 开发模式警告',
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            color: Colors.red.shade700,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                color: Colors.red.shade700,
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
                       ],
                     ),
@@ -666,9 +572,9 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
             ] else if (enabled) ...[
               Text(
                 '注意：每次重新编译后需要重新设置，因为可执行文件路径会变化。',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.orange,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.orange),
               ),
             ],
           ],
@@ -709,7 +615,9 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
   /// 设置开机自启
   Future<void> _setAutoStart(bool enabled) async {
     try {
-      final success = await PlatformServiceManager.autoStart.setEnabled(enabled);
+      final success = await PlatformServiceManager.autoStart.setEnabled(
+        enabled,
+      );
       if (success) {
         // 更新配置中的 autoStart 状态
         final newFeatures = _globalConfig!.features.copyWith(

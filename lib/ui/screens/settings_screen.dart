@@ -12,8 +12,6 @@ import 'package:plugin_platform/core/services/config_manager.dart';
 import 'package:plugin_platform/core/services/platform_core.dart';
 import 'package:plugin_platform/core/models/global_config.dart';
 import 'package:plugin_platform/plugins/plugin_registry.dart';
-import 'tag_management_screen.dart';
-import 'desktop_pet_settings_screen.dart';
 import 'app_info_screen.dart';
 
 /// Settings Screen
@@ -136,20 +134,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: l10n.settings_plugins,
             children: [
               ListTile(
-                leading: const Icon(Icons.extension),
-                title: Text(l10n.settings_pluginManagement),
-                subtitle: Text(l10n.settings_pluginManagement_desc),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const TagManagementScreen(),
-                    ),
-                  );
-                },
-              ),
-              ListTile(
                 leading: const Icon(Icons.schedule),
                 title: Text(l10n.plugin_worldclock_name),
                 subtitle: Text(l10n.plugin_worldclock_description),
@@ -188,7 +172,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () => _showThemeModeDialog(context, themeProvider, localeProvider.isChinese),
+                onTap: () => _showThemeModeDialog(
+                  context,
+                  themeProvider,
+                  localeProvider.isChinese,
+                ),
               ),
             ],
           ),
@@ -423,11 +411,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     bool isChinese,
   ) {
     final l10n = AppLocalizations.of(context)!;
-    final modes = [
-      ThemeMode.system,
-      ThemeMode.light,
-      ThemeMode.dark,
-    ];
+    final modes = [ThemeMode.system, ThemeMode.light, ThemeMode.dark];
 
     showDialog(
       context: context,

@@ -22,7 +22,8 @@ class DesktopPetManager with WindowListener {
   bool _isMonitoringWindow = false;
 
   /// 是否启用调试模式
-  bool get _isDebugMode => ConfigManager.instance.globalConfig.advanced.debugMode;
+  bool get _isDebugMode =>
+      ConfigManager.instance.globalConfig.advanced.debugMode;
 
   /// 是否应该输出日志
   bool get _shouldLog => _isDebugMode;
@@ -32,15 +33,16 @@ class DesktopPetManager with WindowListener {
       DesktopPetClickThroughService();
 
   // Desktop pet preferences - 使用 ValueNotifier 以便 Widget 可以监听变化
-  final ValueNotifier<Map<String, dynamic>> _petPreferencesNotifier = ValueNotifier<Map<String, dynamic>>({
-    'position': {'x': 100.0, 'y': 100.0},
-    'size': {'width': 200.0, 'height': 200.0},
-    'opacity': 1.0,
-    'animations_enabled': true,
-    'interactions_enabled': true,
-    'auto_hide': false,
-    'theme': 'default',
-  });
+  final ValueNotifier<Map<String, dynamic>> _petPreferencesNotifier =
+      ValueNotifier<Map<String, dynamic>>({
+        'position': {'x': 100.0, 'y': 100.0},
+        'size': {'width': 200.0, 'height': 200.0},
+        'opacity': 1.0,
+        'animations_enabled': true,
+        'interactions_enabled': true,
+        'auto_hide': false,
+        'theme': 'default',
+      });
 
   // 内部访问器
   Map<String, dynamic> get _petPreferences => _petPreferencesNotifier.value;
@@ -118,12 +120,18 @@ class DesktopPetManager with WindowListener {
 
       _isDesktopPetMode = true;
       PlatformLogger.instance.logInfo('Desktop Pet mode enabled');
+
+      // 同步状态到 GlobalConfig
+      await _syncModeToGlobalConfig(true);
     } catch (e) {
       // 如果平台特定实现失败，使用基本实现
       PlatformLogger.instance.logWarning(
         'Platform specific implementation failed, using basic mode: $e',
       );
       _isDesktopPetMode = true;
+
+      // 同步状态到 GlobalConfig
+      await _syncModeToGlobalConfig(true);
     }
   }
 
@@ -150,6 +158,9 @@ class DesktopPetManager with WindowListener {
     _isDesktopPetMode = false;
     _isAlwaysOnTop = false;
     PlatformLogger.instance.logInfo('Desktop Pet mode disabled');
+
+    // 同步状态到 GlobalConfig
+    await _syncModeToGlobalConfig(false);
   }
 
   /// 检查是否在Desktop Pet模式
@@ -211,17 +222,25 @@ class DesktopPetManager with WindowListener {
       // 从 preferences 中提取值并更新到 GlobalConfig
       final newPetConfig = petConfig.copyWith(
         opacity: preferences['opacity'] ?? petConfig.opacity,
-        animationsEnabled: preferences['animations_enabled'] ?? petConfig.animationsEnabled,
-        interactionsEnabled: preferences['interactions_enabled'] ?? petConfig.interactionsEnabled,
+        animationsEnabled:
+            preferences['animations_enabled'] ?? petConfig.animationsEnabled,
+        interactionsEnabled:
+            preferences['interactions_enabled'] ??
+            petConfig.interactionsEnabled,
       );
 
-      final newFeatures = globalConfig.features.copyWith(desktopPet: newPetConfig);
+      final newFeatures = globalConfig.features.copyWith(
+        desktopPet: newPetConfig,
+      );
       final newConfig = globalConfig.copyWith(features: newFeatures);
 
       await ConfigManager.instance.updateGlobalConfig(newConfig);
       PlatformLogger.instance.logInfo('✅ 已同步偏好设置到 GlobalConfig: $preferences');
     } catch (e) {
-      PlatformLogger.instance.logError('Failed to sync preferences to GlobalConfig', e);
+      PlatformLogger.instance.logError(
+        'Failed to sync preferences to GlobalConfig',
+        e,
+      );
     }
 
     await _savePetPreferences();
@@ -236,7 +255,8 @@ class DesktopPetManager with WindowListener {
   Map<String, dynamic> get petPreferences => Map.from(_petPreferences);
 
   /// 获取偏好设置的 ValueNotifier（用于监听变化）
-  ValueNotifier<Map<String, dynamic>> get petPreferencesNotifier => _petPreferencesNotifier;
+  ValueNotifier<Map<String, dynamic>> get petPreferencesNotifier =>
+      _petPreferencesNotifier;
 
   /// 平滑过渡到Desktop Pet模式
   Future<void> transitionToDesktopPet() async {
@@ -265,12 +285,18 @@ class DesktopPetManager with WindowListener {
       await _createDesktopPetWindow();
 
       _isDesktopPetMode = true;
+
+      // 同步状态到 GlobalConfig
+      await _syncModeToGlobalConfig(true);
     } catch (e) {
       // 回退到基本模式 - 直接启用Desktop Pet模式
       PlatformLogger.instance.logWarning(
         'Platform channel not available, using basic mode: $e',
       );
       _isDesktopPetMode = true;
+
+      // 同步状态到 GlobalConfig
+      await _syncModeToGlobalConfig(true);
     }
   }
 
@@ -301,6 +327,9 @@ class DesktopPetManager with WindowListener {
 
       _isDesktopPetMode = false;
       _isAlwaysOnTop = false;
+
+      // 同步状态到 GlobalConfig
+      await _syncModeToGlobalConfig(false);
     } catch (e) {
       // 回退到基本模式 - 直接禁用Desktop Pet模式
       PlatformLogger.instance.logWarning(
@@ -308,6 +337,9 @@ class DesktopPetManager with WindowListener {
       );
       _isDesktopPetMode = false;
       _isAlwaysOnTop = false;
+
+      // 同步状态到 GlobalConfig
+      await _syncModeToGlobalConfig(false);
     }
   }
 
@@ -483,7 +515,9 @@ class DesktopPetManager with WindowListener {
 
       // 调整窗口大小
       if (_shouldLog) {
-        PlatformLogger.instance.logInfo('   - 设置窗口大小为 ${petWindowSize.width}x${petWindowSize.height}');
+        PlatformLogger.instance.logInfo(
+          '   - 设置窗口大小为 ${petWindowSize.width}x${petWindowSize.height}',
+        );
       }
       await windowManager.setSize(petWindowSize);
 
@@ -774,6 +808,31 @@ class DesktopPetManager with WindowListener {
       );
     } catch (e) {
       PlatformLogger.instance.logWarning('Failed to save pet preferences: $e');
+    }
+  }
+
+  /// 同步桌面宠物模式状态到 GlobalConfig
+  Future<void> _syncModeToGlobalConfig(bool isPetMode) async {
+    try {
+      final globalConfig = ConfigManager.instance.globalConfig;
+
+      // 更新 showDesktopPet 状态
+      final newFeatures = globalConfig.features.copyWith(
+        showDesktopPet: isPetMode,
+      );
+
+      final newConfig = globalConfig.copyWith(features: newFeatures);
+
+      await ConfigManager.instance.updateGlobalConfig(newConfig);
+
+      PlatformLogger.instance.logInfo(
+        '✅ 已同步桌面宠物模式到 GlobalConfig: ${isPetMode ? "在线模式" : "本地模式"}',
+      );
+    } catch (e) {
+      PlatformLogger.instance.logError(
+        'Failed to sync mode to GlobalConfig',
+        e,
+      );
     }
   }
 }

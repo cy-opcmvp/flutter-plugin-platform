@@ -86,6 +86,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tag_assign_success => 'Tag assigned successfully';
 
   @override
+  String get tag_plugin_assignment_title => 'Plugin Tag Assignment';
+
+  @override
+  String get tag_search_plugins => 'Search plugins...';
+
+  @override
+  String get tag_select_tags_for_plugin => 'Select tags for plugin';
+
+  @override
+  String get tag_selected_tags => 'Selected Tags';
+
+  @override
+  String get tag_all_available_tags => 'All Available Tags';
+
+  @override
+  String get tag_no_plugins_found => 'No matching plugins found';
+
+  @override
   String get tag_assign_removed => 'Tag removed';
 
   @override
@@ -802,6 +820,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_plugins => 'Plugin Config';
+
+  @override
+  String get settings_addPlugin => 'Add Plugin';
+
+  @override
+  String get settings_addPlugin_desc => 'Add a new plugin to the platform';
+
+  @override
+  String get settings_selectPluginType => 'Select Plugin Type';
 
   @override
   String get settings_autoStart => 'Auto Start';

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../core/extensions/context_extensions.dart';
 import '../../core/models/tag_model.dart';
 import '../../core/services/tag_manager.dart';
+import '../../core/services/tag_color_helper.dart';
 
 /// 标签管理界面
 ///
@@ -215,18 +216,36 @@ class _TagManagementScreenState extends State<TagManagementScreen> {
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                // 搜索框
+                // 搜索框和新增按钮
                 Padding(
                   padding: const EdgeInsets.all(16),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: l10n.common_search,
-                      prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          decoration: InputDecoration(
+                            hintText: l10n.common_search,
+                            prefixIcon: const Icon(Icons.search),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          onChanged: _filterTags,
+                        ),
                       ),
-                    ),
-                    onChanged: _filterTags,
+                      const SizedBox(width: 8),
+                      FilledButton.icon(
+                        onPressed: _createTag,
+                        icon: const Icon(Icons.add),
+                        label: Text(l10n.tag_add),
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 20,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
 
@@ -284,6 +303,15 @@ class _TagManagementScreenState extends State<TagManagementScreen> {
                     color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                   ),
             ),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: _createTag,
+              icon: const Icon(Icons.add),
+              label: Text(l10n.tag_add),
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+            ),
           ],
         ],
       ),
@@ -291,7 +319,7 @@ class _TagManagementScreenState extends State<TagManagementScreen> {
   }
 
   Widget _buildTagCard(Tag tag) {
-    final color = _getTagColor(tag.color);
+    final color = TagColorHelper.getTagColor(tag.color);
     final pluginCount = _tagManager.getPluginsByTag(tag.id).length;
 
     return Card(
@@ -401,27 +429,6 @@ class _TagManagementScreenState extends State<TagManagementScreen> {
         ),
       ),
     );
-  }
-
-  Color _getTagColor(TagColor color) {
-    switch (color) {
-      case TagColor.blue:
-        return Colors.blue;
-      case TagColor.green:
-        return Colors.green;
-      case TagColor.orange:
-        return Colors.orange;
-      case TagColor.purple:
-        return Colors.purple;
-      case TagColor.red:
-        return Colors.red;
-      case TagColor.teal:
-        return Colors.teal;
-      case TagColor.indigo:
-        return Colors.indigo;
-      case TagColor.pink:
-        return Colors.pink;
-    }
   }
 }
 
@@ -556,7 +563,7 @@ class _TagEditDialogState extends State<_TagEditDialog> {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: _getTagColor(color),
+                            color: TagColorHelper.getTagColor(color),
                             shape: BoxShape.circle,
                             border: Border.all(
                               color: isSelected ? Colors.black : Colors.white,
@@ -614,27 +621,6 @@ class _TagEditDialogState extends State<_TagEditDialog> {
         ),
       ],
     );
-  }
-
-  Color _getTagColor(TagColor color) {
-    switch (color) {
-      case TagColor.blue:
-        return Colors.blue;
-      case TagColor.green:
-        return Colors.green;
-      case TagColor.orange:
-        return Colors.orange;
-      case TagColor.purple:
-        return Colors.purple;
-      case TagColor.red:
-        return Colors.red;
-      case TagColor.teal:
-        return Colors.teal;
-      case TagColor.indigo:
-        return Colors.indigo;
-      case TagColor.pink:
-        return Colors.pink;
-    }
   }
 
   /// 获取预设图标列表

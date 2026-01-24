@@ -242,6 +242,42 @@ abstract class AppLocalizations {
   /// **'标签分配成功'**
   String get tag_assign_success;
 
+  /// No description provided for @tag_plugin_assignment_title.
+  ///
+  /// In zh, this message translates to:
+  /// **'插件标签关联'**
+  String get tag_plugin_assignment_title;
+
+  /// No description provided for @tag_search_plugins.
+  ///
+  /// In zh, this message translates to:
+  /// **'搜索插件...'**
+  String get tag_search_plugins;
+
+  /// No description provided for @tag_select_tags_for_plugin.
+  ///
+  /// In zh, this message translates to:
+  /// **'为插件选择标签'**
+  String get tag_select_tags_for_plugin;
+
+  /// No description provided for @tag_selected_tags.
+  ///
+  /// In zh, this message translates to:
+  /// **'已选标签'**
+  String get tag_selected_tags;
+
+  /// No description provided for @tag_all_available_tags.
+  ///
+  /// In zh, this message translates to:
+  /// **'所有可用标签'**
+  String get tag_all_available_tags;
+
+  /// No description provided for @tag_no_plugins_found.
+  ///
+  /// In zh, this message translates to:
+  /// **'未找到匹配的插件'**
+  String get tag_no_plugins_found;
+
   /// No description provided for @tag_assign_removed.
   ///
   /// In zh, this message translates to:
@@ -1507,6 +1543,24 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'插件配置'**
   String get settings_plugins;
+
+  /// No description provided for @settings_addPlugin.
+  ///
+  /// In zh, this message translates to:
+  /// **'新增插件'**
+  String get settings_addPlugin;
+
+  /// No description provided for @settings_addPlugin_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'添加新的插件到平台'**
+  String get settings_addPlugin_desc;
+
+  /// No description provided for @settings_selectPluginType.
+  ///
+  /// In zh, this message translates to:
+  /// **'选择插件类型'**
+  String get settings_selectPluginType;
 
   /// No description provided for @settings_autoStart.
   ///
