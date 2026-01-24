@@ -326,6 +326,18 @@ class ServiceConfig {
     };
   }
 
+  ServiceConfig copyWith({
+    AudioServiceConfig? audio,
+    NotificationServiceConfig? notification,
+    TaskSchedulerServiceConfig? taskScheduler,
+  }) {
+    return ServiceConfig(
+      audio: audio ?? this.audio,
+      notification: notification ?? this.notification,
+      taskScheduler: taskScheduler ?? this.taskScheduler,
+    );
+  }
+
   static const defaultConfig = ServiceConfig(
     audio: AudioServiceConfig.defaultConfig,
     notification: NotificationServiceConfig.defaultConfig,
@@ -350,21 +362,55 @@ class AudioServiceConfig {
   static const defaultConfig = AudioServiceConfig(enabled: true);
 }
 
+/// 通知模式枚举
+enum NotificationMode {
+  /// App 内部通知（使用 Flutter LocalNotifications）
+  app,
+
+  /// 系统级通知（Windows 使用 local_notifier，其他平台使用系统通知）
+  system,
+}
+
 /// 通知服务配置
 class NotificationServiceConfig {
   final bool enabled;
+  final NotificationMode mode;
 
-  const NotificationServiceConfig({required this.enabled});
+  const NotificationServiceConfig({
+    required this.enabled,
+    this.mode = NotificationMode.system,
+  });
 
   factory NotificationServiceConfig.fromJson(Map<String, dynamic> json) {
-    return NotificationServiceConfig(enabled: json['enabled'] as bool? ?? true);
+    return NotificationServiceConfig(
+      enabled: json['enabled'] as bool? ?? true,
+      mode: json['mode'] == 'app'
+          ? NotificationMode.app
+          : NotificationMode.system,
+    );
   }
 
   Map<String, dynamic> toJson() {
-    return {'enabled': enabled};
+    return {
+      'enabled': enabled,
+      'mode': mode.name,
+    };
   }
 
-  static const defaultConfig = NotificationServiceConfig(enabled: true);
+  NotificationServiceConfig copyWith({
+    bool? enabled,
+    NotificationMode? mode,
+  }) {
+    return NotificationServiceConfig(
+      enabled: enabled ?? this.enabled,
+      mode: mode ?? this.mode,
+    );
+  }
+
+  static const defaultConfig = NotificationServiceConfig(
+    enabled: true,
+    mode: NotificationMode.system,
+  );
 }
 
 /// 任务调度服务配置

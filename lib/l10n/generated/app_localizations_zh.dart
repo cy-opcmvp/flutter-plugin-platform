@@ -802,6 +802,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_enableNotifications => '启用通知';
 
   @override
+  String get settings_notificationMode => '通知模式';
+
+  @override
+  String get settings_notificationMode_app => 'App 内部';
+
+  @override
+  String get settings_notificationMode_system => '系统通知';
+
+  @override
+  String get settings_notificationMode_desc => '选择通知显示方式';
+
+  @override
   String get settings_debugMode => '调试模式';
 
   @override

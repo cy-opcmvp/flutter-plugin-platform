@@ -102,8 +102,8 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
   bool get _isAnimationsEnabled =>
       widget.preferences['animations_enabled'] ?? true;
 
-  bool get _isInteractionsEnabled =>
-      widget.preferences['interactions_enabled'] ?? true;
+  // 交互功能始终启用
+  bool get _isInteractionsEnabled => true;
 
   double get _opacity => widget.preferences['opacity'] ?? 1.0;
 
@@ -137,9 +137,9 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
       child: Opacity(
         opacity: _opacity,
         child: Listener(
-        onPointerDown: _isInteractionsEnabled ? _handlePointerDown : null,
-        onPointerMove: _isInteractionsEnabled ? _handlePointerMove : null,
-        onPointerUp: _isInteractionsEnabled ? _handlePointerUp : null,
+        onPointerDown: _handlePointerDown,
+        onPointerMove: _handlePointerMove,
+        onPointerUp: _handlePointerUp,
         onPointerSignal: (event) {},
         behavior: HitTestBehavior.opaque,
         child: ValueListenableBuilder<bool>(
@@ -150,14 +150,10 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
                   ? SystemMouseCursors.grabbing
                   : SystemMouseCursors.grab,
               onEnter: (_) {
-                if (_isInteractionsEnabled) {
-                  _isHovered.value = true;
-                }
+                _isHovered.value = true;
               },
               onExit: (_) {
-                if (_isInteractionsEnabled) {
-                  _isHovered.value = false;
-                }
+                _isHovered.value = false;
               },
               child: ValueListenableBuilder<bool>(
                 valueListenable: _isHovered,
@@ -471,6 +467,34 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
         _lastWindowPosition = position;
       });
     }
+  }
+
+  @override
+  void didUpdateWidget(DesktopPetWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // 检查动画配置是否变化
+    final oldAnimationsEnabled = oldWidget.preferences['animations_enabled'] ?? true;
+    final newAnimationsEnabled = widget.preferences['animations_enabled'] ?? true;
+
+    if (oldAnimationsEnabled != newAnimationsEnabled) {
+      if (newAnimationsEnabled) {
+        // 启用动画 - 启动动画控制器
+        if (_breathingController != null) {
+          _breathingController!.repeat(reverse: true);
+        }
+        _startRandomBlinking();
+      } else {
+        // 禁用动画 - 停止动画控制器
+        _breathingController?.stop();
+        _blinkController?.stop();
+        _breathingController?.reset();
+        _blinkController?.reset();
+      }
+    }
+
+    // 透明度变化会自动应用，因为 build() 会重新读取 _opacity
+    // 交互配置变化会自动应用，因为 Listener 的回调会在 build() 中重新创建
   }
 
   @override
@@ -821,17 +845,6 @@ class _DesktopPetSettingsPanelState extends State<DesktopPetSettingsPanel> {
                   dense: true,
                 ),
 
-                // 交互开关
-                CheckboxListTile(
-                  secondary: const Icon(Icons.touch_app, size: 20),
-                  title: Text(context.l10n.pet_enableInteractions),
-                  subtitle: Text(context.l10n.pet_interactionsSubtitle),
-                  value: preferences['interactions_enabled'] ?? true,
-                  onChanged: (value) =>
-                      _updatePreference('interactions_enabled', value ?? false),
-                  dense: true,
-                ),
-
                 // 自动隐藏
                 CheckboxListTile(
                   secondary: const Icon(Icons.visibility_off, size: 20),
@@ -855,7 +868,6 @@ class _DesktopPetSettingsPanelState extends State<DesktopPetSettingsPanel> {
                           final defaultPrefs = {
                             'opacity': 1.0,
                             'animations_enabled': true,
-                            'interactions_enabled': true,
                             'auto_hide': false,
                           };
                           _preferences.value = defaultPrefs;

@@ -816,6 +816,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_enableNotifications => 'Enable Notifications';
 
   @override
+  String get settings_notificationMode => 'Notification Mode';
+
+  @override
+  String get settings_notificationMode_app => 'App Internal';
+
+  @override
+  String get settings_notificationMode_system => 'System Notification';
+
+  @override
+  String get settings_notificationMode_desc =>
+      'Choose how notifications are displayed';
+
+  @override
   String get settings_debugMode => 'Debug Mode';
 
   @override

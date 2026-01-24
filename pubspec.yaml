@@ -62,6 +62,7 @@ dependencies:
   # === Platform Common Services - Phase 1: Core Services ===
   # Local notifications
   flutter_local_notifications: ^17.2.3
+  local_notifier: ^0.1.1
 
   # Audio playback - using just_audio for better Windows compatibility
   just_audio: ^0.9.36

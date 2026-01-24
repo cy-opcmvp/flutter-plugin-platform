@@ -47,6 +47,9 @@ class _DesktopPetScreenState extends State<DesktopPetScreen>
   bool _isReady = false; // 控制是否显示内容
   List<PluginDescriptor> _availablePlugins = [];
 
+  // 监听宠物偏好设置变化
+  Map<String, dynamic> _currentPetPreferences = {};
+
   // 窗口和宠物位置信息
   Size _windowSize = Size.zero;
   Offset _windowPosition = Offset.zero;
@@ -73,8 +76,21 @@ class _DesktopPetScreenState extends State<DesktopPetScreen>
       curve: Curves.easeIn,
     );
 
+    // 监听宠物偏好设置变化
+    _currentPetPreferences = widget.petManager.petPreferences;
+    widget.petManager.petPreferencesNotifier.addListener(_onPetPreferencesChanged);
+
     // 延迟显示内容，确保窗口透明设置完成
     _initializeWindow();
+  }
+
+  /// 宠物偏好设置变化回调
+  void _onPetPreferencesChanged() {
+    if (mounted) {
+      setState(() {
+        _currentPetPreferences = widget.petManager.petPreferences;
+      });
+    }
   }
 
   Future<void> _initializeWindow() async {
@@ -151,6 +167,7 @@ class _DesktopPetScreenState extends State<DesktopPetScreen>
   @override
   void dispose() {
     windowManager.removeListener(this);
+    widget.petManager.petPreferencesNotifier.removeListener(_onPetPreferencesChanged);
     _fadeController.dispose();
     super.dispose();
   }
@@ -320,7 +337,7 @@ class _DesktopPetScreenState extends State<DesktopPetScreen>
             left: petLeft,
             top: petTop,
             child: DesktopPetWidget(
-              preferences: widget.petManager.petPreferences,
+              preferences: _currentPetPreferences,
               onDoubleClick: _returnToFullApp,
               onRightClick: () {
                 PlatformLogger.instance.logInfo(

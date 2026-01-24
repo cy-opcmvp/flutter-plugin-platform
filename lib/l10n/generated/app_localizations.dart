@@ -1532,6 +1532,30 @@ abstract class AppLocalizations {
   /// **'启用通知'**
   String get settings_enableNotifications;
 
+  /// No description provided for @settings_notificationMode.
+  ///
+  /// In zh, this message translates to:
+  /// **'通知模式'**
+  String get settings_notificationMode;
+
+  /// No description provided for @settings_notificationMode_app.
+  ///
+  /// In zh, this message translates to:
+  /// **'App 内部'**
+  String get settings_notificationMode_app;
+
+  /// No description provided for @settings_notificationMode_system.
+  ///
+  /// In zh, this message translates to:
+  /// **'系统通知'**
+  String get settings_notificationMode_system;
+
+  /// No description provided for @settings_notificationMode_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'选择通知显示方式'**
+  String get settings_notificationMode_desc;
+
   /// No description provided for @settings_debugMode.
   ///
   /// In zh, this message translates to:

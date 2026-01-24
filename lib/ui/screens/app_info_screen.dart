@@ -178,7 +178,7 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
           Icons.pets,
           color: _globalConfig!.features.showDesktopPet
               ? Colors.green
-              : Colors.grey,
+              : Colors.black87,
         ),
         title: Text(l10n.desktopPet_settings_title),
         subtitle: _globalConfig!.features.showDesktopPet
@@ -385,6 +385,50 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
             value: _globalConfig!.features.enableNotifications,
             onChanged: (value) => _updateFeature('enableNotifications', value),
           ),
+          // 通知模式选择
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.notifications_active, size: 20),
+                    const SizedBox(width: 16),
+                    Text(
+                      l10n.settings_notificationMode,
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                SegmentedButton<NotificationMode>(
+                  segments: [
+                    ButtonSegment(
+                      value: NotificationMode.app,
+                      label: Text(l10n.settings_notificationMode_app),
+                    ),
+                    ButtonSegment(
+                      value: NotificationMode.system,
+                      label: Text(l10n.settings_notificationMode_system),
+                    ),
+                  ],
+                  selected: {_globalConfig!.services.notification.mode},
+                  onSelectionChanged: (Set<NotificationMode> selection) async {
+                    final newMode = selection.first;
+                    await _updateNotificationMode(newMode);
+                  },
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.settings_notificationMode_desc,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -433,6 +477,32 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
       }
     } catch (e) {
       debugPrint('Failed to update feature: $e');
+      _showErrorMessage();
+    }
+  }
+
+  /// 更新通知模式
+  Future<void> _updateNotificationMode(NotificationMode mode) async {
+    if (_globalConfig == null) return;
+
+    final newNotificationConfig = _globalConfig!.services.notification.copyWith(
+      mode: mode,
+    );
+
+    final newServices = _globalConfig!.services.copyWith(
+      notification: newNotificationConfig,
+    );
+
+    final newConfig = _globalConfig!.copyWith(services: newServices);
+
+    try {
+      await ConfigManager.instance.updateGlobalConfig(newConfig);
+      if (mounted) {
+        setState(() => _globalConfig = newConfig);
+        _showSuccessMessage();
+      }
+    } catch (e) {
+      debugPrint('Failed to update notification mode: $e');
       _showErrorMessage();
     }
   }

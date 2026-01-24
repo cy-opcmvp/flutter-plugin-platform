@@ -4,6 +4,7 @@
 library;
 
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -11,6 +12,14 @@ import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:plugin_platform/core/interfaces/services/i_notification_service.dart'
     as platform;
 import 'package:plugin_platform/core/services/disposable.dart' as platform_core;
+import 'package:plugin_platform/core/models/global_config.dart';
+import 'package:plugin_platform/core/services/config_manager.dart';
+
+// Windows platform imports
+import 'package:local_notifier/local_notifier.dart';
+
+// Global notifier instance
+final LocalNotifier localNotifier = LocalNotifier.instance;
 
 /// Notification service implementation
 class NotificationServiceImpl extends platform.INotificationService
@@ -23,6 +32,9 @@ class NotificationServiceImpl extends platform.INotificationService
       StreamController<platform.NotificationEvent>.broadcast();
 
   bool _isInitialized = false;
+
+  // Windows scheduled notifications map
+  final Map<String, Timer> _scheduledTimers = {};
 
   @override
   bool get isInitialized => _isInitialized;
@@ -39,19 +51,27 @@ class NotificationServiceImpl extends platform.INotificationService
     }
 
     try {
-      // Windows platform: flutter_local_notifications 17.x doesn't properly support Windows
-      // Skip initialization and mark as successful to prevent crashes
+      // Windows platform: Setup local_notifier for system notifications
       if (defaultTargetPlatform == TargetPlatform.windows) {
-        if (kDebugMode) {
-          debugPrint(
-            'NotificationService: Windows platform detected - using UI notifications',
+        try {
+          await localNotifier.setup(
+            appName: 'Plugin Platform',
           );
+          _isInitialized = true;
+          if (kDebugMode) {
+            debugPrint('NotificationService: Windows local_notifier setup complete');
+          }
+          return true;
+        } catch (e) {
+          if (kDebugMode) {
+            debugPrint('NotificationService: Failed to setup local_notifier: $e');
+          }
+          _isInitialized = false;
+          return false;
         }
-        _isInitialized = true;
-        return true;
       }
 
-      // Initialize timezone database for other platforms
+      // Initialize timezone database
       tz_data.initializeTimeZones();
 
       // Android initialization settings
@@ -184,26 +204,30 @@ class NotificationServiceImpl extends platform.INotificationService
       throw StateError('NotificationService not initialized');
     }
 
-    // Windows platform: Emit notification event for UI to handle
-    if (defaultTargetPlatform == TargetPlatform.windows) {
-      if (kDebugMode) {
-        debugPrint(
-          'NotificationService: [Windows] Emitting notification event: $title - $body',
+    // Get notification mode from config
+    final useSystemNotification = ConfigManager.instance.globalConfig.services.notification.mode == NotificationMode.system;
+
+    // Windows platform: Use local_notifier for system notifications (if configured)
+    if (defaultTargetPlatform == TargetPlatform.windows && useSystemNotification) {
+      try {
+        final notification = LocalNotification(
+          title: title,
+          body: body,
         );
+        localNotifier.notify(notification);
+        if (kDebugMode) {
+          debugPrint('NotificationService: Showed Windows system notification $id');
+        }
+        return;
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('NotificationService: Error showing Windows notification: $e');
+        }
+        rethrow;
       }
-
-      // Emit event so UI can display SnackBar or similar
-      _notificationClickController.add(
-        platform.NotificationEvent(
-          id: id,
-          payload: '$title|$body', // Encode title and body in payload
-          timestamp: DateTime.now(),
-        ),
-      );
-
-      return;
     }
 
+    // App-internal notifications or non-Windows platforms: Use flutter_local_notifications
     try {
       final notificationDetails = _buildNotificationDetails(priority, sound);
 
@@ -216,7 +240,7 @@ class NotificationServiceImpl extends platform.INotificationService
       );
 
       if (kDebugMode) {
-        debugPrint('NotificationService: Showed notification $id');
+        debugPrint('NotificationService: Showed app-internal notification $id');
       }
     } catch (e) {
       if (kDebugMode) {
@@ -246,26 +270,42 @@ class NotificationServiceImpl extends platform.INotificationService
       throw ArgumentError('scheduledTime must be in the future');
     }
 
-    // Windows doesn't support scheduled notifications in flutter_local_notifications 17.x
-    // Use task scheduler instead
-    if (defaultTargetPlatform == TargetPlatform.windows) {
+    // Get notification mode from config
+    final useSystemNotification = ConfigManager.instance.globalConfig.services.notification.mode == NotificationMode.system;
+
+    // Windows platform: Use Timer for scheduled notifications (if configured)
+    if (defaultTargetPlatform == TargetPlatform.windows && useSystemNotification) {
+      // Cancel existing timer if any
+      _scheduledTimers[id]?.cancel();
+
+      final delay = scheduledTime.difference(DateTime.now());
+      _scheduledTimers[id] = Timer(delay, () async {
+        try {
+          final notification = LocalNotification(
+            title: title,
+            body: body,
+          );
+          localNotifier.notify(notification);
+          if (kDebugMode) {
+            debugPrint('NotificationService: Scheduled system notification $id shown');
+          }
+          _scheduledTimers.remove(id);
+        } catch (e) {
+          if (kDebugMode) {
+            debugPrint('NotificationService: Error showing scheduled notification: $e');
+          }
+        }
+      });
+
       if (kDebugMode) {
         debugPrint(
-          'NotificationService: Scheduled notifications not supported on Windows, showing immediately',
+          'NotificationService: Scheduled system notification $id for $scheduledTime (in ${delay.inSeconds}s)',
         );
       }
-      // Fall back to immediate notification
-      await showNotification(
-        id: id,
-        title: title,
-        body: body,
-        payload: payload,
-        priority: priority,
-        sound: sound,
-      );
       return;
     }
 
+    // App-internal notifications or non-Windows platforms: Use flutter_local_notifications
     final notificationDetails = _buildNotificationDetails(priority, sound);
 
     // For mobile platforms, use zonedSchedule with timezone support
@@ -284,7 +324,7 @@ class NotificationServiceImpl extends platform.INotificationService
 
     if (kDebugMode) {
       debugPrint(
-        'NotificationService: Scheduled notification $id for $scheduledTime',
+        'NotificationService: Scheduled app-internal notification $id for $scheduledTime',
       );
     }
   }
@@ -296,16 +336,17 @@ class NotificationServiceImpl extends platform.INotificationService
       throw StateError('NotificationService not initialized');
     }
 
-    // Windows platform: No-op since notifications aren't supported
+    // Windows platform: Cancel timer if exists
     if (defaultTargetPlatform == TargetPlatform.windows) {
+      _scheduledTimers[id]?.cancel();
+      _scheduledTimers.remove(id);
       if (kDebugMode) {
-        debugPrint(
-          'NotificationService: [Windows] Cancel notification $id (no-op)',
-        );
+        debugPrint('NotificationService: Cancelled scheduled notification $id');
       }
       return;
     }
 
+    // Other platforms: Use flutter_local_notifications
     try {
       await _plugin.cancel(int.tryParse(id) ?? 0);
 
@@ -327,16 +368,19 @@ class NotificationServiceImpl extends platform.INotificationService
       throw StateError('NotificationService not initialized');
     }
 
-    // Windows platform: No-op since notifications aren't supported
+    // Windows platform: Cancel all timers
     if (defaultTargetPlatform == TargetPlatform.windows) {
+      for (final timer in _scheduledTimers.values) {
+        timer.cancel();
+      }
+      _scheduledTimers.clear();
       if (kDebugMode) {
-        debugPrint(
-          'NotificationService: [Windows] Cancel all notifications (no-op)',
-        );
+        debugPrint('NotificationService: Cancelled all scheduled notifications');
       }
       return;
     }
 
+    // Other platforms: Use flutter_local_notifications
     try {
       await _plugin.cancelAll();
 
@@ -456,6 +500,12 @@ class NotificationServiceImpl extends platform.INotificationService
   /// Dispose of resources
   @override
   Future<void> dispose() async {
+    // Cancel all scheduled timers
+    for (final timer in _scheduledTimers.values) {
+      timer.cancel();
+    }
+    _scheduledTimers.clear();
+
     await _notificationClickController.close();
     _isInitialized = false;
 

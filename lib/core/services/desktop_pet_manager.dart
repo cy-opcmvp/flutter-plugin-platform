@@ -26,8 +26,8 @@ class DesktopPetManager with WindowListener {
   final DesktopPetClickThroughService _clickThroughService =
       DesktopPetClickThroughService();
 
-  // Desktop pet preferences
-  final Map<String, dynamic> _petPreferences = {
+  // Desktop pet preferences - 使用 ValueNotifier 以便 Widget 可以监听变化
+  final ValueNotifier<Map<String, dynamic>> _petPreferencesNotifier = ValueNotifier<Map<String, dynamic>>({
     'position': {'x': 100.0, 'y': 100.0},
     'size': {'width': 200.0, 'height': 200.0},
     'opacity': 1.0,
@@ -35,7 +35,10 @@ class DesktopPetManager with WindowListener {
     'interactions_enabled': true,
     'auto_hide': false,
     'theme': 'default',
-  };
+  });
+
+  // 内部访问器
+  Map<String, dynamic> get _petPreferences => _petPreferencesNotifier.value;
 
   /// 初始化Desktop Pet管理器
   Future<void> initialize() async {
@@ -189,7 +192,33 @@ class DesktopPetManager with WindowListener {
 
   /// 更新Pet偏好设置
   Future<void> updatePetPreferences(Map<String, dynamic> preferences) async {
-    _petPreferences.addAll(preferences);
+    // 更新内部偏好设置并通知监听器
+    _petPreferencesNotifier.value = {
+      ..._petPreferencesNotifier.value,
+      ...preferences,
+    };
+
+    // 同时同步到 GlobalConfig（这是关键！）
+    try {
+      final globalConfig = ConfigManager.instance.globalConfig;
+      final petConfig = globalConfig.features.desktopPet;
+
+      // 从 preferences 中提取值并更新到 GlobalConfig
+      final newPetConfig = petConfig.copyWith(
+        opacity: preferences['opacity'] ?? petConfig.opacity,
+        animationsEnabled: preferences['animations_enabled'] ?? petConfig.animationsEnabled,
+        interactionsEnabled: preferences['interactions_enabled'] ?? petConfig.interactionsEnabled,
+      );
+
+      final newFeatures = globalConfig.features.copyWith(desktopPet: newPetConfig);
+      final newConfig = globalConfig.copyWith(features: newFeatures);
+
+      await ConfigManager.instance.updateGlobalConfig(newConfig);
+      PlatformLogger.instance.logInfo('✅ 已同步偏好设置到 GlobalConfig: $preferences');
+    } catch (e) {
+      PlatformLogger.instance.logError('Failed to sync preferences to GlobalConfig', e);
+    }
+
     await _savePetPreferences();
 
     // 如果在Pet模式下，应用更改
@@ -200,6 +229,9 @@ class DesktopPetManager with WindowListener {
 
   /// 获取当前偏好设置
   Map<String, dynamic> get petPreferences => Map.from(_petPreferences);
+
+  /// 获取偏好设置的 ValueNotifier（用于监听变化）
+  ValueNotifier<Map<String, dynamic>> get petPreferencesNotifier => _petPreferencesNotifier;
 
   /// 平滑过渡到Desktop Pet模式
   Future<void> transitionToDesktopPet() async {
@@ -381,6 +413,9 @@ class DesktopPetManager with WindowListener {
     if (kIsWeb || !_isSupported) return;
 
     try {
+      // 【关键】从 GlobalConfig 加载最新的宠物配置
+      await _loadPetPreferences();
+
       // 宠物窗口最终大小 - 120x120（给呼吸动画和边框留出空间）
       const petWindowSize = Size(120.0, 120.0);
 

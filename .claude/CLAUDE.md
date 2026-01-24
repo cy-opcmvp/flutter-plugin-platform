@@ -99,11 +99,27 @@ lib/plugins/            # 插件实现
 
 ## 重要注意事项
 
+### 已启用的平台服务
+
+**音频服务** ✅: 已启用并正常工作。使用 `just_audio` 包实现：
+- Windows 平台：使用 SystemSound（系统声音）作为回退方案
+- 其他平台（macOS/Linux/Android/iOS）：使用 just_audio 完整功能
+- 自动回退机制：如果 just_audio 初始化失败，自动使用 SystemSound
+- 相关代码：`lib/core/services/audio/audio_service.dart`
+
+**通知服务** ✅: 使用 `flutter_local_notifications`，支持所有平台
+**任务调度服务** ✅: 使用 `flutter_local_notifications` 实现定时任务
+
 ### 暂时禁用的功能
 
-**音频服务**: 由于 Windows 构建时的 NuGet 依赖问题，音频服务已暂时禁用。相关代码在 `pubspec.yaml` 和 `platform_service_manager.dart` 中已注释。待实现 Windows 特定的音频播放方案（如 Win32 API）后再启用。
+**权限处理**: 由于 Windows 构建时的 NuGet 依赖问题暂时禁用。在移动平台需要时取消注释 `pubspec.yaml:71` 中的 `permission_handler`。
 
-**权限处理**: 同样因 NuGet 依赖问题暂时禁用。在移动平台需要时重新启用。
+### 内置插件
+
+项目包含 **3 个内置插件**：
+1. **Calculator** (计算器) - 基础计算功能
+2. **Screenshot** (截图) - 区域截图、历史记录、图片编辑
+3. **World Clock** (世界时钟) - 多时区时钟显示
 
 ### 文件组织规则
 
@@ -135,6 +151,7 @@ lib/plugins/            # 插件实现
 ```dart
 // 通过 PlatformServiceManager 静态方法访问
 final notificationService = PlatformServiceManager.notification;
+final audioService = PlatformServiceManager.audio;
 final taskScheduler = PlatformServiceManager.taskScheduler;
 
 // 或通过 ServiceLocator
@@ -145,6 +162,11 @@ if (PlatformServiceManager.isServiceAvailable<IAudioService>()) {
   final audio = PlatformServiceManager.audio;
 }
 ```
+
+**可用的平台服务**：
+- **INotificationService** - 通知服务（已启用）
+- **IAudioService** - 音频服务（已启用，Windows 使用 SystemSound）
+- **ITaskSchedulerService** - 任务调度服务（已启用）
 
 ### 测试策略
 
