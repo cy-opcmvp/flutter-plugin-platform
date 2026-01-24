@@ -5,6 +5,68 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.4] - 2026-01-25
+
+### Added - 外部插件国际化支持
+- 🌍 **IPluginI18n 接口** - 为外部插件提供完整的国际化支持
+  - 定义 IPluginI18n 接口，提供翻译、占位符替换、语言回退等功能
+  - 实现 PluginI18nHelper 类，支持翻译注册和管理
+  - 支持自动语言回退机制（zh_CN → zh）
+  - 集成到 PluginContext，插件可通过 context.i18n 访问
+- 📝 **文档更新** - 完善插件国际化文档
+  - 更新 .claude/CLAUDE.md，添加外部插件国际化支持章节
+  - 更新 external-plugin-development.md，添加完整国际化实现指南
+  - 包含翻译文件组织、占位符使用、最佳实践等内容
+
+### Added - 配置管理系统
+- 📋 **配置管理文档** - 新增 CONFIG_MANAGEMENT.md 指南
+  - 配置文件格式和结构说明
+  - 全局配置和插件配置管理
+  - 配置验证和错误处理
+- 📄 **配置示例** - 新增 global_config.example.json 示例文件
+  - 完整的配置结构示例
+  - 包含桌面宠物、插件配置等示例
+  - 提供配置验证规则
+
+### Changed - 桌面宠物优化
+- 🐾 **设置界面改进**
+  - 优化宠物设置界面布局
+  - 改进配置管理的实时保存机制
+  - 增强用户体验和响应性
+- ⚙️ **配置管理优化**
+  - 改进配置的加载和保存流程
+  - 优化配置验证逻辑
+
+### Changed - 插件配置优化
+- 🔧 **计算器插件** - 优化配置界面布局
+- 🕐 **世界时钟插件** - 改进配置界面
+- 📸 **截图插件** - 修复配置相关问题
+
+### Fixed - 国际化问题
+- 🐛 **修复编译错误** - 修复 7 个国际化相关编译错误
+  - 修复 screenshot_main_widget.dart 中的 replaceAll 错误
+  - 修复 _ScreenshotListItem context 访问问题
+  - 修复函数调用占位符错误
+- 📝 **补充翻译键** - 添加缺失的 common_add 翻译键
+  - 添加到 app_zh.arb: "添加"
+  - 添加到 app_en.arb: "Add"
+
+### Technical Details
+- **新增文件**:
+  - lib/core/interfaces/i_plugin_i18n.dart (76 行)
+  - lib/core/services/plugin_i18n_helper.dart (129 行)
+  - assets/config/global_config.example.json
+  - docs/guides/CONFIG_MANAGEMENT.md
+- **修改文件**: 27 个文件，+2781/-469 行
+
+### Known Issues
+- 🐾 **宠物窗口缩小时有背景闪烁** - 预留问题，下版本修复
+
+### Next Version Plans
+- 验证和修复各插件的配置功能
+- 优化部分插件功能
+- 修复宠物窗口缩小时的背景闪烁问题
+
 ## [0.4.3] - 2026-01-21
 
 ### Added - 文档全面中文化和重组
