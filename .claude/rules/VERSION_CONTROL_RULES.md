@@ -134,38 +134,147 @@ git log v{previous-version}..HEAD --oneline
 - 如果包含新功能 → Minor 版本 (+0.1.0)
 - 如果包含重大变更 → Major 版本 (+1.0.0)
 
-**4. 创建 Tag 注释**
+**4. 创建归档文件** ⭐ 重要
+
+**必须创建归档文件存放详细信息**：
+
+文件路径: `docs/releases/archive/v{version}-details.md`
+
+**归档文件内容模板**：
+```markdown
+# v{version} 详细归档
+
+**发布日期**: {date}
+**版本类型**: {Major/Minor/Patch}
+
+## 📦 完整功能列表
+
+### 新增功能
+- 功能1（3-5行详细说明）
+- 功能2（3-5行详细说明）
+
+### 改进
+- 改进1（3-5行详细说明）
+- 改进2（3-5行详细说明）
+
+### Bug 修复
+- 修复1（3-5行详细说明）
+- 修复2（3-5行详细说明）
+
+## 🔧 技术细节
+
+### 新增文件
+- `path/to/file1` - 说明
+- `path/to/file2` - 说明
+
+### 修改文件
+- `path/to/file3` - 修改说明
+- `path/to/file4` - 修改说明
+
+### 代码统计
+- 文件变更数
+- 代码行数变更
+
+## 📝 完整提交历史
+- {hash} {message}
+- {hash} {message}
+
+## ⚠️ 已知问题
+- 问题1
+- 问题2
+
+## 🎯 下版本计划
+- 计划1
+- 计划2
+```
+
+**5. 创建 Tag 注释** ⭐ 简洁原则
+
+**Tag 注释必须简洁，只包含核心信息，详细内容放在归档文件中**
 
 ```markdown
 Release v{version}
 
-## 新增功能
-- {feature-1}
-- {feature-2}
+{简洁的一句话总结}
 
-## 改进
-- {improvement-1}
+## 主要更新
+- {核心功能1}
+- {核心功能2}
 
-## 修复
-- {fix-1}
+## 完整提交
+{commit-range} ({commit-count} commits)
 
-## 完整提交历史
-- {commit-hash} {commit-message}
-- {commit-hash} {commit-message}
+## 详细文档
+docs/releases/archive/v{version}-details.md
 ```
 
-**5. 创建并推送 Tag**
+**示例**：
+```markdown
+Release v0.4.4
+
+外部插件国际化支持和配置管理系统优化
+
+## 主要更新
+- 外部插件国际化接口系统（IPluginI18n）
+- 配置管理文档和示例文件
+- 桌面宠物和插件配置优化
+
+## 完整提交
+1e12358..5fcd384 (3 commits)
+
+## 详细文档
+docs/releases/archive/v0.4.4-details.md
+```
+
+**6. 创建并推送 Tag**
 
 ```bash
+# 1. 提交所有更改（包括归档文件）
+git add -A
+git commit -m "chore: prepare v{version} release"
+
+# 2. 创建 tag
 git tag -a v{version} -m "{tag-message}"
+
+# 3. 推送
+git push origin main
 git push origin v{version}
 ```
 
 ### Tag 记录文档
 
-**每次创建 tag 后，必须创建对应的发布文档**:
+**每次创建 tag 后，必须更新以下文档**：
 
-文件路径: `docs/releases/RELEASE_NOTES_v{version}.md`
+1. **CHANGELOG.md** - 简洁的版本条目
+2. **VERSION_CONTROL_HISTORY.md** - 简洁的版本记录
+3. **归档文件** - `docs/releases/archive/v{version}-details.md` - 详细信息
+4. **发布说明** - `docs/releases/RELEASE_NOTES_v{version}.md` - 用户友好的发布说明
+
+### 归档文件管理
+
+**⚠️ 重要：归档文件必须加入 git 提交**
+
+```bash
+# 创建 tag 时的标准流程
+git add docs/releases/archive/v{version}-details.md  # ⭐ 必须包含
+git add CHANGELOG.md
+git add VERSION_CONTROL_HISTORY.md
+git add docs/releases/RELEASE_NOTES_v{version}.md
+git commit -m "chore: prepare v{version} release"
+git tag -a v{version} -m "..."
+```
+
+**归档文件组织**：
+```
+docs/releases/
+├── archive/
+│   ├── v0.4.4-details.md
+│   ├── v0.4.5-details.md
+│   └── ...
+├── RELEASE_NOTES_v0.4.4.md
+├── RELEASE_NOTES_v0.4.5.md
+└── ...
+```
 
 内容模板:
 
