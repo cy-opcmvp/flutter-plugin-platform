@@ -2422,7 +2422,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get world_clock_time_format_24h => '24小时制';
 
   @override
+  String get world_clock_time_format_desc => '选择12小时或24小时制显示';
+
+  @override
   String get world_clock_setting_showSeconds => '显示秒数';
+
+  @override
+  String get world_clock_showSeconds_desc => '在时间显示中包含秒数';
 
   @override
   String get world_clock_setting_enableNotifications => '启用倒计时通知';
@@ -2434,9 +2440,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get world_clock_setting_updateInterval => '更新间隔';
 
   @override
-  String world_clock_update_interval_description(Object ms) {
-    return '每 $ms 毫秒更新一次';
-  }
+  String get world_clock_update_interval_desc => '时钟刷新频率（毫秒），数值越小更新越快';
 
   @override
   String get world_clock_config_name => '世界时钟配置';

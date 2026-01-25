@@ -201,13 +201,13 @@ class _WorldClockWidgetState extends State<WorldClockWidget> {
                     Row(
                       children: [
                         Icon(
-                          Icons.public,
+                          Icons.schedule,
                           size: 14,
                           color: theme.colorScheme.onSurface.withOpacity(0.5),
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          widget.worldClock.timeZone,
+                          widget.worldClock.displayName,
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.onSurface.withOpacity(0.7),
                             fontSize: 13,

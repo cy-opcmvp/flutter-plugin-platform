@@ -24,7 +24,7 @@ class CalculatorPlugin extends PlatformPluginBase {
   String get id => 'com.example.calculator';
 
   @override
-  String get name => 'Calculator';
+  String get name => '计算器';
 
   @override
   String get version => '1.0.0';

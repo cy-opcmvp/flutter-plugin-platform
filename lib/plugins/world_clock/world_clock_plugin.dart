@@ -85,8 +85,9 @@ class WorldClockPlugin extends PlatformPluginBase {
       // 如果没有保存的时钟，添加默认时区的时钟
       if (_worldClocks.isEmpty) {
         final defaultTz = _settings.defaultTimeZone;
-        // 从时区ID中提取城市名
-        final cityName = defaultTz.split('/').last.replaceAll('_', ' ');
+        // 从 TimeZoneInfo 查找中文城市名，如果没有找到则使用时区ID提取的名称
+        final timeZoneInfo = TimeZoneInfo.findByTimeZoneId(defaultTz);
+        final cityName = timeZoneInfo?.displayName ?? defaultTz.split('/').last.replaceAll('_', ' ');
         _worldClocks.add(
           WorldClockItem(
             id: 'default',
@@ -150,6 +151,8 @@ class WorldClockPlugin extends PlatformPluginBase {
     // 重启定时器以应用新的更新间隔
     _clockUpdateTimer?.cancel();
     _startClockTimer();
+    // 触发 UI 更新
+    _onStateChanged?.call();
   }
 
   /// 保存设置

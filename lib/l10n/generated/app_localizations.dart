@@ -4652,11 +4652,23 @@ abstract class AppLocalizations {
   /// **'24小时制'**
   String get world_clock_time_format_24h;
 
+  /// No description provided for @world_clock_time_format_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'选择12小时或24小时制显示'**
+  String get world_clock_time_format_desc;
+
   /// No description provided for @world_clock_setting_showSeconds.
   ///
   /// In zh, this message translates to:
   /// **'显示秒数'**
   String get world_clock_setting_showSeconds;
+
+  /// No description provided for @world_clock_showSeconds_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'在时间显示中包含秒数'**
+  String get world_clock_showSeconds_desc;
 
   /// No description provided for @world_clock_setting_enableNotifications.
   ///
@@ -4676,11 +4688,11 @@ abstract class AppLocalizations {
   /// **'更新间隔'**
   String get world_clock_setting_updateInterval;
 
-  /// No description provided for @world_clock_update_interval_description.
+  /// No description provided for @world_clock_update_interval_desc.
   ///
   /// In zh, this message translates to:
-  /// **'每 {ms} 毫秒更新一次'**
-  String world_clock_update_interval_description(Object ms);
+  /// **'时钟刷新频率（毫秒），数值越小更新越快'**
+  String get world_clock_update_interval_desc;
 
   /// No description provided for @world_clock_config_name.
   ///

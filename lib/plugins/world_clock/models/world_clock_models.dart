@@ -12,6 +12,12 @@ class WorldClockItem {
     required this.isDefault,
   });
 
+  /// 获取时区显示名称（中文）
+  String get displayName {
+    final timeZoneInfo = TimeZoneInfo.findByTimeZoneId(timeZone);
+    return timeZoneInfo?.displayName ?? cityName;
+  }
+
   /// 获取当前时区的时间
   DateTime get currentTime {
     // 注意：这是一个简化的实现
@@ -34,8 +40,9 @@ class WorldClockItem {
     String timeStr;
     if (timeFormat == '12h') {
       // 12小时制
-      final period = hour >= 12 ? 'PM' : 'AM';
-      final displayHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+      final period = hour >= 12 ? '下午' : '上午';
+      int displayHour = hour % 12;
+      if (displayHour == 0) displayHour = 12;
       timeStr =
           '${displayHour.toString().padLeft(2, '0')}:'
           '${minute.toString().padLeft(2, '0')}';

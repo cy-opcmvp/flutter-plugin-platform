@@ -7,6 +7,7 @@ import '../../../../ui/widgets/json_editor_screen.dart';
 import '../../../../core/services/json_validator.dart';
 import '../config/world_clock_config_defaults.dart';
 import '../models/world_clock_settings.dart';
+import '../models/world_clock_models.dart';
 import '../world_clock_plugin.dart';
 
 /// 世界时钟插件设置界面
@@ -86,10 +87,14 @@ class _WorldClockSettingsScreenState extends State<WorldClockSettingsScreen> {
   }
 
   Widget _buildTimeZoneTile(AppLocalizations l10n) {
+    // 查找时区对应的中文名称
+    final timeZoneInfo = TimeZoneInfo.findByTimeZoneId(_settings.defaultTimeZone);
+    final displayName = timeZoneInfo?.displayName ?? _settings.defaultTimeZone;
+
     return Card(
       child: ListTile(
         title: Text(l10n.world_clock_setting_defaultTimeZone),
-        subtitle: Text(_settings.defaultTimeZone),
+        subtitle: Text(displayName),
         trailing: const Icon(Icons.chevron_right),
         onTap: () => _selectTimeZone(),
       ),
@@ -100,11 +105,7 @@ class _WorldClockSettingsScreenState extends State<WorldClockSettingsScreen> {
     return Card(
       child: ListTile(
         title: Text(l10n.world_clock_setting_timeFormat),
-        subtitle: Text(
-          _settings.timeFormat == '24h'
-              ? l10n.world_clock_time_format_24h
-              : l10n.world_clock_time_format_12h,
-        ),
+        subtitle: Text(l10n.world_clock_time_format_desc),
         trailing: SegmentedButton<String>(
           segments: [
             ButtonSegment(value: '12h', label: Text('12')),
@@ -114,7 +115,7 @@ class _WorldClockSettingsScreenState extends State<WorldClockSettingsScreen> {
           onSelectionChanged: (Set<String> selection) async {
             final newFormat = selection.first;
             final newSettings = _settings.copyWith(timeFormat: newFormat);
-            if (await _saveSettings(newSettings)) {
+            if (await _saveSettings(newSettings, context)) {
               setState(() {
                 _settings = newSettings;
               });
@@ -128,10 +129,11 @@ class _WorldClockSettingsScreenState extends State<WorldClockSettingsScreen> {
   Widget _buildShowSecondsTile(AppLocalizations l10n) {
     return SwitchListTile(
       title: Text(l10n.world_clock_setting_showSeconds),
+      subtitle: Text(l10n.world_clock_showSeconds_desc),
       value: _settings.showSeconds,
       onChanged: (value) async {
         final newSettings = _settings.copyWith(showSeconds: value);
-        if (await _saveSettings(newSettings)) {
+        if (await _saveSettings(newSettings, context)) {
           setState(() {
             _settings = newSettings;
           });
@@ -147,7 +149,7 @@ class _WorldClockSettingsScreenState extends State<WorldClockSettingsScreen> {
       value: _settings.enableNotifications,
       onChanged: (value) async {
         final newSettings = _settings.copyWith(enableNotifications: value);
-        if (await _saveSettings(newSettings)) {
+        if (await _saveSettings(newSettings, context)) {
           setState(() {
             _settings = newSettings;
           });
@@ -163,11 +165,30 @@ class _WorldClockSettingsScreenState extends State<WorldClockSettingsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              l10n.world_clock_setting_updateInterval,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              l10n.world_clock_update_interval_desc,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              ),
+            ),
+            const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(l10n.world_clock_setting_updateInterval),
                 Text('${_settings.updateInterval} ms'),
+                Text(
+                  _settings.updateInterval >= 1000
+                      ? '${(_settings.updateInterval / 1000).toStringAsFixed(1)} s'
+                      : '${_settings.updateInterval} ms',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -181,7 +202,7 @@ class _WorldClockSettingsScreenState extends State<WorldClockSettingsScreen> {
                 final newSettings = _settings.copyWith(
                   updateInterval: value.toInt(),
                 );
-                if (await _saveSettings(newSettings)) {
+                if (await _saveSettings(newSettings, context)) {
                   setState(() {
                     _settings = newSettings;
                   });
@@ -226,8 +247,21 @@ class _WorldClockSettingsScreenState extends State<WorldClockSettingsScreen> {
   }
 
   Future<void> _selectTimeZone() async {
-    // TODO: 显示时区选择对话框
-    // 暂时保持默认值
+    final selected = await showDialog<String>(
+      context: context,
+      builder: (context) => _TimeZoneSelectionDialog(
+        currentTimeZone: _settings.defaultTimeZone,
+      ),
+    );
+
+    if (selected != null && selected != _settings.defaultTimeZone) {
+      final newSettings = _settings.copyWith(defaultTimeZone: selected);
+      if (await _saveSettings(newSettings, context) && mounted) {
+        setState(() {
+          _settings = newSettings;
+        });
+      }
+    }
   }
 
   Future<void> _openJsonEditor(BuildContext context) async {
@@ -275,19 +309,41 @@ class _WorldClockSettingsScreenState extends State<WorldClockSettingsScreen> {
         throw Exception('Invalid configuration values');
       }
 
-      return await _saveSettings(settings);
+      return await _saveSettings(settings, context);
     } catch (e) {
       debugPrint('Failed to save config: $e');
       return false;
     }
   }
 
-  Future<bool> _saveSettings(WorldClockSettings settings) async {
+  Future<bool> _saveSettings(WorldClockSettings settings, BuildContext context) async {
     try {
       widget.plugin.updateSettings(settings);
+
+      if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.settings_configSaved),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+
       return true;
     } catch (e) {
       debugPrint('Failed to save settings: $e');
+      if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.settings_configSaveFailed),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
       return false;
     }
   }
@@ -331,20 +387,20 @@ class _WorldClockSettingsScreenState extends State<WorldClockSettingsScreen> {
       final defaultSettings = WorldClockSettings.fromJson(defaultData);
 
       // 保存默认设置
-      if (await _saveSettings(defaultSettings) && mounted) {
+      widget.plugin.updateSettings(defaultSettings);
+
+      if (mounted) {
         setState(() {
           _settings = defaultSettings;
         });
 
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(AppLocalizations.of(context)!.settings_configSaved),
-              backgroundColor: Colors.green,
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.settings_configSaved),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
       }
     } catch (e) {
       debugPrint('Failed to reset to defaults: $e');
@@ -358,5 +414,66 @@ class _WorldClockSettingsScreenState extends State<WorldClockSettingsScreen> {
         );
       }
     }
+  }
+}
+
+/// 时区选择对话框
+class _TimeZoneSelectionDialog extends StatefulWidget {
+  final String currentTimeZone;
+
+  const _TimeZoneSelectionDialog({required this.currentTimeZone});
+
+  @override
+  State<_TimeZoneSelectionDialog> createState() => _TimeZoneSelectionDialogState();
+}
+
+class _TimeZoneSelectionDialogState extends State<_TimeZoneSelectionDialog> {
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+
+    return AlertDialog(
+      title: Text(l10n.world_clock_time_zone),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: TimeZoneInfo.predefinedTimeZones.length,
+          itemBuilder: (context, index) {
+            final timeZone = TimeZoneInfo.predefinedTimeZones[index];
+            final isSelected = timeZone.timeZoneId == widget.currentTimeZone;
+
+            return RadioListTile<String>(
+              title: Text(
+                timeZone.displayName,
+                style: theme.textTheme.titleMedium,
+              ),
+              subtitle: Text(
+                timeZone.timeZoneId,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                ),
+              ),
+              value: timeZone.timeZoneId,
+              groupValue: widget.currentTimeZone,
+              onChanged: (value) {
+                if (value != null) {
+                  Navigator.of(context).pop(value);
+                }
+              },
+              selected: isSelected,
+              activeColor: theme.colorScheme.primary,
+            );
+          },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.common_cancel),
+        ),
+      ],
+    );
   }
 }

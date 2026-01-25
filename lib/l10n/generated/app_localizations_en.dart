@@ -2504,7 +2504,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get world_clock_time_format_24h => '24-hour';
 
   @override
+  String get world_clock_time_format_desc =>
+      'Choose 12-hour or 24-hour time format';
+
+  @override
   String get world_clock_setting_showSeconds => 'Show Seconds';
+
+  @override
+  String get world_clock_showSeconds_desc => 'Include seconds in time display';
 
   @override
   String get world_clock_setting_enableNotifications =>
@@ -2518,9 +2525,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get world_clock_setting_updateInterval => 'Update Interval';
 
   @override
-  String world_clock_update_interval_description(Object ms) {
-    return 'Update every $ms milliseconds';
-  }
+  String get world_clock_update_interval_desc =>
+      'Clock refresh rate in milliseconds (lower = faster updates)';
 
   @override
   String get world_clock_config_name => 'World Clock Configuration';
