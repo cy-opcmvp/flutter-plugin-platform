@@ -62,7 +62,7 @@ class _WorldClockSettingsScreenState extends State<WorldClockSettingsScreen> {
           _buildSectionHeader(l10n.world_clock_settings_notification),
           const SizedBox(height: 8),
           _buildEnableNotificationsTile(l10n),
-          _buildUpdateIntervalTile(l10n),
+          _buildNotificationTypeTile(l10n),
 
           const SizedBox(height: 24),
 
@@ -158,7 +158,7 @@ class _WorldClockSettingsScreenState extends State<WorldClockSettingsScreen> {
     );
   }
 
-  Widget _buildUpdateIntervalTile(AppLocalizations l10n) {
+  Widget _buildNotificationTypeTile(AppLocalizations l10n) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -166,48 +166,50 @@ class _WorldClockSettingsScreenState extends State<WorldClockSettingsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              l10n.world_clock_setting_updateInterval,
-              style: Theme.of(context).textTheme.titleMedium,
+              l10n.world_clock_notification_type,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
-              l10n.world_clock_update_interval_desc,
+              l10n.world_clock_notification_type_desc,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
               ),
             ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('${_settings.updateInterval} ms'),
-                Text(
-                  _settings.updateInterval >= 1000
-                      ? '${(_settings.updateInterval / 1000).toStringAsFixed(1)} s'
-                      : '${_settings.updateInterval} ms',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-              ],
-            ),
             const SizedBox(height: 16),
-            Slider(
-              value: _settings.updateInterval.toDouble(),
-              min: 100,
-              max: 10000,
-              divisions: 99,
-              label: '${_settings.updateInterval}',
-              onChanged: (value) async {
-                final newSettings = _settings.copyWith(
-                  updateInterval: value.toInt(),
+            Column(
+              children: NotificationType.values.map((type) {
+                return RadioListTile<NotificationType>(
+                  title: Text(
+                    type == NotificationType.system
+                        ? l10n.world_clock_notification_system
+                        : l10n.world_clock_notification_in_app,
+                  ),
+                  subtitle: Text(
+                    type == NotificationType.system
+                        ? l10n.world_clock_notification_system_desc
+                        : l10n.world_clock_notification_in_app_desc,
+                  ),
+                  value: type,
+                  groupValue: _settings.notificationType,
+                  onChanged: _settings.enableNotifications
+                      ? (NotificationType? newValue) async {
+                          if (newValue != null) {
+                            final newSettings = _settings.copyWith(notificationType: newValue);
+                            if (await _saveSettings(newSettings, context)) {
+                              setState(() {
+                                _settings = newSettings;
+                              });
+                            }
+                          }
+                        }
+                      : null,
+                  selected: _settings.notificationType == type,
+                  activeColor: Theme.of(context).colorScheme.primary,
                 );
-                if (await _saveSettings(newSettings, context)) {
-                  setState(() {
-                    _settings = newSettings;
-                  });
-                }
-              },
+              }).toList(),
             ),
           ],
         ),

@@ -86,7 +86,6 @@ class WorldClockPluginFactory {
         },
         'configuration': const {
           'defaultTimeZone': 'Asia/Shanghai',
-          'updateInterval': 1000,
           'maxClocks': 10,
           'maxCountdowns': 20,
           'enableNotifications': true,

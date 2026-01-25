@@ -14,6 +14,7 @@ import 'plugin_sandbox.dart';
 import 'plugin_i18n_helper.dart';
 import 'hot_reload_manager.dart';
 import 'locale_provider.dart';
+import 'plugin_data_storage.dart';
 import '../../plugins/plugin_registry.dart';
 
 /// Exception thrown when plugin operations fail
@@ -284,7 +285,8 @@ class PluginManager implements IPluginManager {
       final sandbox = _pluginSandboxes[pluginId];
 
       // Dispose plugin resources within sandbox if available
-      if (sandbox != null) {
+      if (sandbox != null && sandbox.isActive) {
+        // Sandbox 存在且处于 active 状态，使用 sandbox 执行 dispose
         await sandbox.executeInSandbox(
           () => plugin.dispose(),
           operationDescription: 'Plugin disposal',
@@ -293,6 +295,13 @@ class PluginManager implements IPluginManager {
         await sandbox.dispose();
         _pluginSandboxes.remove(pluginId);
       } else {
+        // Sandbox 不存在或已停止，直接调用 dispose
+        if (sandbox != null) {
+          // 如果 sandbox 存在但不 active，仍然需要清理它
+          sandbox.stop();
+          await sandbox.dispose();
+          _pluginSandboxes.remove(pluginId);
+        }
         await plugin.dispose();
       }
 
@@ -649,7 +658,13 @@ class PluginManager implements IPluginManager {
   }
 
   IDataStorage _createDataStorage(String pluginId) {
-    return _MockDataStorage(pluginId);
+    // 使用持久化存储而不是 Mock 存储
+    final storage = PluginDataStorage(pluginId);
+    // 确保在后台初始化（不阻塞）
+    storage.initialize().catchError((e) {
+      debugPrint('Failed to initialize PluginDataStorage for $pluginId: $e');
+    });
+    return storage;
   }
 
   INetworkAccess _createNetworkAccess(String pluginId) {

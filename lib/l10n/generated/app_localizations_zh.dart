@@ -2437,6 +2437,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String get world_clock_enable_notifications_desc => '倒计时完成时显示通知';
 
   @override
+  String get world_clock_notification_type => '通知类型';
+
+  @override
+  String get world_clock_notification_type_desc => '选择倒计时完成时的通知方式';
+
+  @override
+  String get world_clock_notification_system => '系统通知';
+
+  @override
+  String get world_clock_notification_system_desc => '使用操作系统通知（推荐）';
+
+  @override
+  String get world_clock_notification_in_app => 'App 内通知';
+
+  @override
+  String get world_clock_notification_in_app_desc => '在 App 内显示提示消息';
+
+  @override
   String get world_clock_setting_updateInterval => '更新间隔';
 
   @override

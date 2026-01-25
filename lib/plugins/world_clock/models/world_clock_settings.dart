@@ -2,6 +2,15 @@ library;
 
 import '../../../core/models/base_plugin_settings.dart';
 
+/// 通知类型
+enum NotificationType {
+  /// App 内通知（SnackBar）
+  inApp,
+
+  /// 系统通知
+  system,
+}
+
 /// 世界时钟设置模型
 class WorldClockSettings extends BasePluginSettings {
   /// 配置版本
@@ -20,8 +29,8 @@ class WorldClockSettings extends BasePluginSettings {
   /// 启用倒计时通知
   final bool enableNotifications;
 
-  /// 更新间隔（毫秒）
-  final int updateInterval;
+  /// 通知类型
+  final NotificationType notificationType;
 
   WorldClockSettings({
     this.version = '1.0.0',
@@ -29,7 +38,7 @@ class WorldClockSettings extends BasePluginSettings {
     required this.timeFormat,
     required this.showSeconds,
     required this.enableNotifications,
-    required this.updateInterval,
+    required this.notificationType,
   });
 
   /// 默认设置
@@ -40,7 +49,7 @@ class WorldClockSettings extends BasePluginSettings {
       timeFormat: '24h',
       showSeconds: false,
       enableNotifications: true,
-      updateInterval: 1000,
+      notificationType: NotificationType.system,
     );
   }
 
@@ -52,7 +61,11 @@ class WorldClockSettings extends BasePluginSettings {
       timeFormat: json['timeFormat'] as String? ?? '24h',
       showSeconds: json['showSeconds'] as bool? ?? false,
       enableNotifications: json['enableNotifications'] as bool? ?? true,
-      updateInterval: json['updateInterval'] as int? ?? 1000,
+      notificationType: json['notificationType'] == 'inApp'
+          ? NotificationType.inApp
+          : (json['notificationType'] == 'system'
+              ? NotificationType.system
+              : NotificationType.system),
     );
   }
 
@@ -65,7 +78,7 @@ class WorldClockSettings extends BasePluginSettings {
       'timeFormat': timeFormat,
       'showSeconds': showSeconds,
       'enableNotifications': enableNotifications,
-      'updateInterval': updateInterval,
+      'notificationType': notificationType.name,
     };
   }
 
@@ -77,7 +90,7 @@ class WorldClockSettings extends BasePluginSettings {
     String? timeFormat,
     bool? showSeconds,
     bool? enableNotifications,
-    int? updateInterval,
+    NotificationType? notificationType,
   }) {
     return WorldClockSettings(
       version: version ?? this.version,
@@ -85,7 +98,7 @@ class WorldClockSettings extends BasePluginSettings {
       timeFormat: timeFormat ?? this.timeFormat,
       showSeconds: showSeconds ?? this.showSeconds,
       enableNotifications: enableNotifications ?? this.enableNotifications,
-      updateInterval: updateInterval ?? this.updateInterval,
+      notificationType: notificationType ?? this.notificationType,
     );
   }
 
@@ -93,7 +106,6 @@ class WorldClockSettings extends BasePluginSettings {
   @override
   bool isValid() {
     if (!['12h', '24h'].contains(timeFormat)) return false;
-    if (updateInterval < 100 || updateInterval > 60000) return false;
     return true;
   }
 }

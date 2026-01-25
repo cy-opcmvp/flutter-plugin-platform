@@ -4682,6 +4682,42 @@ abstract class AppLocalizations {
   /// **'倒计时完成时显示通知'**
   String get world_clock_enable_notifications_desc;
 
+  /// No description provided for @world_clock_notification_type.
+  ///
+  /// In zh, this message translates to:
+  /// **'通知类型'**
+  String get world_clock_notification_type;
+
+  /// No description provided for @world_clock_notification_type_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'选择倒计时完成时的通知方式'**
+  String get world_clock_notification_type_desc;
+
+  /// No description provided for @world_clock_notification_system.
+  ///
+  /// In zh, this message translates to:
+  /// **'系统通知'**
+  String get world_clock_notification_system;
+
+  /// No description provided for @world_clock_notification_system_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'使用操作系统通知（推荐）'**
+  String get world_clock_notification_system_desc;
+
+  /// No description provided for @world_clock_notification_in_app.
+  ///
+  /// In zh, this message translates to:
+  /// **'App 内通知'**
+  String get world_clock_notification_in_app;
+
+  /// No description provided for @world_clock_notification_in_app_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'在 App 内显示提示消息'**
+  String get world_clock_notification_in_app_desc;
+
   /// No description provided for @world_clock_setting_updateInterval.
   ///
   /// In zh, this message translates to:

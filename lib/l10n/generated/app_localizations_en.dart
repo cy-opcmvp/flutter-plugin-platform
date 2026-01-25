@@ -2522,6 +2522,27 @@ class AppLocalizationsEn extends AppLocalizations {
       'Show notification when countdown completes';
 
   @override
+  String get world_clock_notification_type => 'Notification Type';
+
+  @override
+  String get world_clock_notification_type_desc =>
+      'Choose how to display countdown completion notifications';
+
+  @override
+  String get world_clock_notification_system => 'System Notification';
+
+  @override
+  String get world_clock_notification_system_desc =>
+      'Use operating system notification (recommended)';
+
+  @override
+  String get world_clock_notification_in_app => 'In-App Notification';
+
+  @override
+  String get world_clock_notification_in_app_desc =>
+      'Show notification within the app';
+
+  @override
   String get world_clock_setting_updateInterval => 'Update Interval';
 
   @override
