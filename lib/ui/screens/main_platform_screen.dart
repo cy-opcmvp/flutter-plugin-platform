@@ -329,8 +329,8 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
 
     // 获取插件友好名称
     String getPluginName() {
-      final descriptor = _platformCore.pluginManager.getPluginDescriptor(event.pluginId);
-      return descriptor?.name ?? event.pluginId;
+      final plugin = _platformCore.pluginManager.getPlugin(event.pluginId);
+      return plugin?.name ?? event.pluginId;
     }
 
     final pluginName = getPluginName();
@@ -369,7 +369,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
       case PluginLaunchEventType.paused:
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.plugin_pauseSuccess(event.pluginId)),
+            content: Text(l10n.plugin_pauseSuccess(pluginName)),
             backgroundColor: Colors.grey,
             duration: const Duration(seconds: 2),
           ),
