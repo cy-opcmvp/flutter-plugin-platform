@@ -269,15 +269,16 @@ class PluginManager implements IPluginManager {
 
     final plugin = _activePlugins[pluginId];
     if (plugin == null) {
-      throw PluginException('Plugin $pluginId is not loaded');
+      // 如果插件已经不在活跃列表中，说明已经被卸载了，直接返回（幂等操作）
+      debugPrint('Plugin $pluginId is not loaded, skipping unload');
+      return;
     }
 
     final runtimeInfo = _pluginRuntimeInfo[pluginId];
     if (runtimeInfo == null) {
-      throw PluginException(
-        'Plugin runtime info not found',
-        pluginId: pluginId,
-      );
+      // 如果运行时信息不存在，说明已经被清理了，直接返回（幂等操作）
+      debugPrint('Plugin runtime info not found for $pluginId, skipping unload');
+      return;
     }
 
     try {
