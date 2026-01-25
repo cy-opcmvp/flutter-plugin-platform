@@ -5300,6 +5300,12 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'点击闹钟图标添加倒计时'**
   String get worldclock_main_add_countdown_hint;
+
+  /// No description provided for @worldclock_error_timezone_exists.
+  ///
+  /// In zh, this message translates to:
+  /// **'该时区已存在，请勿重复添加'**
+  String get worldclock_error_timezone_exists;
 }
 
 class _AppLocalizationsDelegate

@@ -2870,4 +2870,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get worldclock_main_add_countdown_hint =>
       'Click alarm icon to add countdown';
+
+  @override
+  String get worldclock_error_timezone_exists =>
+      'This timezone already exists, please do not add it again';
 }

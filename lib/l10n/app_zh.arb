@@ -1261,5 +1261,6 @@
   "worldclock_main_add_clock_hint": "点击右上角 + 添加时钟",
   "worldclock_main_countdown_timers": "倒计时",
   "worldclock_main_no_countdowns": "暂无倒计时",
-  "worldclock_main_add_countdown_hint": "点击闹钟图标添加倒计时"
+  "worldclock_main_add_countdown_hint": "点击闹钟图标添加倒计时",
+  "worldclock_error_timezone_exists": "该时区已存在，请勿重复添加"
 }

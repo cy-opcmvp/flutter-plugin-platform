@@ -2776,4 +2776,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get worldclock_main_add_countdown_hint => '点击闹钟图标添加倒计时';
+
+  @override
+  String get worldclock_error_timezone_exists => '该时区已存在，请勿重复添加';
 }

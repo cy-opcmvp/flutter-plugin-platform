@@ -1030,5 +1030,6 @@
   "worldclock_main_add_clock_hint": "Click + in top right to add clock",
   "worldclock_main_countdown_timers": "Countdown Timers",
   "worldclock_main_no_countdowns": "No Countdowns",
-  "worldclock_main_add_countdown_hint": "Click alarm icon to add countdown"
+  "worldclock_main_add_countdown_hint": "Click alarm icon to add countdown",
+  "worldclock_error_timezone_exists": "This timezone already exists, please do not add it again"
 }

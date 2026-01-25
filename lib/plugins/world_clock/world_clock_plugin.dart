@@ -170,6 +170,11 @@ class WorldClockPlugin extends PlatformPluginBase {
 
       // 如果默认时区改变，更新默认时钟的时区
       if (defaultClock.timeZone != settings.defaultTimeZone) {
+        // 如果新时区在列表中已存在（非默认时钟），先删除
+        if (_worldClocks.any((clock) => clock.timeZone == settings.defaultTimeZone && !clock.isDefault)) {
+          _worldClocks.removeWhere((clock) => clock.timeZone == settings.defaultTimeZone && !clock.isDefault);
+        }
+
         final timeZoneInfo = TimeZoneInfo.findByTimeZoneId(settings.defaultTimeZone);
         final cityName = timeZoneInfo?.displayName ?? settings.defaultTimeZone.split('/').last.replaceAll('_', ' ');
 
@@ -291,7 +296,15 @@ class WorldClockPlugin extends PlatformPluginBase {
     }
   }
 
-  void addClock(String timeZone) {
+  /// 添加时钟
+  /// 返回 true 表示添加成功，false 表示时区已存在
+  bool addClock(String timeZone) {
+    // 检查是否已存在相同时区的时钟（包括默认时钟）
+    if (_worldClocks.any((clock) => clock.timeZone == timeZone)) {
+      // 时区已存在，返回 false
+      return false;
+    }
+
     // 获取当前时间戳（用于同步所有时钟）
     final now = DateTime.now();
 
@@ -299,9 +312,9 @@ class WorldClockPlugin extends PlatformPluginBase {
     final timeZoneInfo = TimeZoneInfo.findByTimeZoneId(timeZone);
     final cityName = timeZoneInfo?.displayName ?? timeZone.split('/').last.replaceAll('_', ' ');
 
-    // 创建新时钟
+    // 创建新时钟（使用唯一 ID）
     final newClock = WorldClockItem(
-      id: now.millisecondsSinceEpoch.toString(),
+      id: '${now.millisecondsSinceEpoch}_${_worldClocks.length}',
       cityName: cityName,
       timeZone: timeZone,
       isDefault: false,
@@ -310,21 +323,11 @@ class WorldClockPlugin extends PlatformPluginBase {
     // 添加新时钟
     _worldClocks.add(newClock);
 
-    // 刷新所有时钟（使用同一时间戳更新 ID，确保同步）
-    for (int i = 0; i < _worldClocks.length - 1; i++) {
-      final clock = _worldClocks[i];
-      // 为保持同步，更新所有时钟的 ID 为同一时间戳
-      _worldClocks[i] = WorldClockItem(
-        id: now.millisecondsSinceEpoch.toString(),
-        cityName: clock.cityName,
-        timeZone: clock.timeZone,
-        isDefault: clock.isDefault,
-      );
-    }
-
     _saveCurrentState();
     // 触发 UI 更新，确保所有时钟同时刷新显示
     _onStateChanged?.call();
+
+    return true;
   }
 
   void removeClock(String clockId) {
@@ -640,11 +643,22 @@ class _WorldClockPluginWidgetState extends State<_WorldClockPluginWidget> {
   }
 
   void _showAddClockDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => _AddClockDialog(
         onAdd: (timeZone) {
-          widget.plugin.addClock(timeZone);
+          final success = widget.plugin.addClock(timeZone);
+          if (!success && context.mounted) {
+            // 显示国际化错误消息
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(l10n.worldclock_error_timezone_exists),
+                backgroundColor: Colors.orange,
+                duration: const Duration(seconds: 2),
+              ),
+            );
+          }
         },
       ),
     );
