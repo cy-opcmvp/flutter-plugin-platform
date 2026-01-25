@@ -54,23 +54,15 @@ class CalculatorPlugin extends PlatformPluginBase {
   Future<void> initialize(PluginContext context) async {
     _context = context;
 
-    // Load saved settings if available
-    final savedSettings = await _context.dataStorage
-        .retrieve<Map<String, dynamic>>('calculator_settings');
-    if (savedSettings != null) {
-      _settings = CalculatorSettings.fromJson(savedSettings);
+    // 从单一配置加载设置
+    final savedConfig = await _context.dataStorage
+        .retrieve<Map<String, dynamic>>('calculator_config');
+    if (savedConfig != null) {
+      _settings = CalculatorSettings.fromJson(savedConfig);
     }
 
-    // Load saved state if available
-    final savedState = await _context.dataStorage
-        .retrieve<Map<String, dynamic>>('calculator_state');
-    if (savedState != null) {
-      calculatorState.display = savedState['display'] ?? '0';
-      calculatorState.previousValue = savedState['previousValue'] ?? '';
-      calculatorState.operation = savedState['operation'] ?? '';
-      calculatorState.waitingForOperand =
-          savedState['waitingForOperand'] ?? false;
-    }
+    // 计算器状态是临时数据，每次初始化时重置
+    calculatorState.clear();
 
     // Note: Notifications skipped as we need BuildContext for localization
     // In production, you might want to implement a different notification system
@@ -82,16 +74,9 @@ class CalculatorPlugin extends PlatformPluginBase {
   /// 更新设置
   void updateSettings(CalculatorSettings settings) {
     _settings = settings;
-    _saveSettings();
+    _saveConfig();
     // 触发 UI 更新
     _onStateChanged?.call();
-  }
-
-  @override
-  Future<void> dispose() async {
-    await _saveState();
-    await _saveSettings();
-    // Note: Notifications skipped as we need BuildContext for localization
   }
 
   @override
@@ -100,7 +85,7 @@ class CalculatorPlugin extends PlatformPluginBase {
       plugin: this,
       state: calculatorState,
       settings: _settings,
-      onStateChanged: _saveState,
+      onStateChanged: () {}, // 临时状态不需要保存
     );
   }
 
@@ -109,18 +94,18 @@ class CalculatorPlugin extends PlatformPluginBase {
     return CalculatorSettingsScreen(plugin: this);
   }
 
-  Future<void> _saveState() async {
-    final state = {
-      'display': calculatorState.display,
-      'previousValue': calculatorState.previousValue,
-      'operation': calculatorState.operation,
-      'waitingForOperand': calculatorState.waitingForOperand,
-    };
-    await _context.dataStorage.store('calculator_state', state);
+  /// 保存配置
+  Future<void> _saveConfig() async {
+    await _context.dataStorage.store(
+      'calculator_config',
+      _settings.toJson(),
+    );
   }
 
-  Future<void> _saveSettings() async {
-    await _context.dataStorage.store('calculator_settings', _settings.toJson());
+  @override
+  Future<void> dispose() async {
+    // 保存配置
+    await _saveConfig();
   }
 
   @override
@@ -130,7 +115,7 @@ class CalculatorPlugin extends PlatformPluginBase {
         break;
       case PluginState.paused:
       case PluginState.inactive:
-        await _saveState();
+        // 临时状态不需要保存
         break;
       case PluginState.error:
         calculatorState.clear();

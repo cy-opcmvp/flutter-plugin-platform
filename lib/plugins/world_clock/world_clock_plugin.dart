@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../core/interfaces/i_plugin.dart';
 import '../../core/interfaces/i_platform_plugin.dart';
@@ -81,15 +80,24 @@ class WorldClockPlugin extends PlatformPluginBase {
     _context = context;
 
     try {
-      // 加载保存的设置
-      final savedSettings = await _context.dataStorage
-          .retrieve<Map<String, dynamic>>('world_clock_settings');
-      if (savedSettings != null) {
-        _settings = WorldClockSettings.fromJson(savedSettings);
-      }
+      // 从单一配置加载所有数据
+      final savedConfig = await _context.dataStorage
+          .retrieve<Map<String, dynamic>>('world_clock_config');
 
-      // 加载保存的状态
-      await _loadSavedState();
+      if (savedConfig != null) {
+        // 从 JSON 加载完整配置
+        _settings = WorldClockSettings.fromJson(savedConfig);
+
+        // 从配置中恢复数据
+        _worldClocks.clear();
+        _worldClocks.addAll(_settings.worldClocks);
+
+        _countdownTimers.clear();
+        _countdownTimers.addAll(_settings.countdownTimers);
+      } else {
+        // 使用默认配置
+        _settings = WorldClockSettings.defaultSettings();
+      }
 
       // 如果没有保存的时钟，添加默认时区的时钟
       if (_worldClocks.isEmpty) {
@@ -152,7 +160,6 @@ class WorldClockPlugin extends PlatformPluginBase {
   /// 更新设置
   void updateSettings(WorldClockSettings settings) {
     _settings = settings;
-    _saveSettings();
 
     // 如果默认时区发生变化，更新默认时钟
     if (_worldClocks.isNotEmpty) {
@@ -174,22 +181,14 @@ class WorldClockPlugin extends PlatformPluginBase {
           timeZone: settings.defaultTimeZone,
           isDefault: true,
         );
-
-        // 保存更新后的时钟列表
-        _saveCurrentState();
       }
     }
 
+    // 保存完整配置（包括设置、时钟列表、倒计时列表、模板列表）
+    _saveCurrentState();
+
     // 触发 UI 更新
     _onStateChanged?.call();
-  }
-
-  /// 保存设置
-  Future<void> _saveSettings() async {
-    await _context.dataStorage.store(
-      'world_clock_settings',
-      _settings.toJson(),
-    );
   }
 
   @override
@@ -231,56 +230,21 @@ class WorldClockPlugin extends PlatformPluginBase {
   }
 
   // 私有方法实现
-  Future<void> _loadSavedState() async {
-    try {
-      // 加载世界时钟（从 JSON 字符串解析）
-      final clocksJson = await _context.dataStorage.retrieve<String>('worldClocks');
-      if (clocksJson != null && clocksJson.isNotEmpty) {
-        final clocksData = jsonDecode(clocksJson) as List;
-        _worldClocks.clear();
-        _worldClocks.addAll(
-          clocksData
-              .map(
-                (data) => WorldClockItem.fromJson(data as Map<String, dynamic>),
-              )
-              .toList(),
-        );
-      }
-
-      // 加载倒计时（从 JSON 字符串解析）
-      final timersJson = await _context.dataStorage.retrieve<String>('countdownTimers');
-      if (timersJson != null && timersJson.isNotEmpty) {
-        final timersData = jsonDecode(timersJson) as List;
-        _countdownTimers.clear();
-        _countdownTimers.addAll(
-          timersData
-              .map(
-                (data) => CountdownTimer.fromJson(data as Map<String, dynamic>),
-              )
-              .toList(),
-        );
-      }
-
-      // 加载设置
-      // 设置已在 initialize() 中加载
-    } catch (e) {
-      debugPrint('Failed to load saved state: $e');
-    }
-  }
-
   Future<void> _saveCurrentState() async {
     try {
-      // 将列表转为 JSON 字符串存储
-      final clocksJson = jsonEncode(_worldClocks.map((clock) => clock.toJson()).toList());
-      await _context.dataStorage.store('worldClocks', clocksJson);
+      // 创建包含所有数据的配置对象
+      final config = _settings.copyWith(
+        worldClocks: List.from(_worldClocks),
+        countdownTimers: List.from(_countdownTimers),
+      );
 
-      final timersJson = jsonEncode(_countdownTimers.map((timer) => timer.toJson()).toList());
-      await _context.dataStorage.store('countdownTimers', timersJson);
-
-      // 保存设置
-      // 设置已通过 _saveSettings() 保存
+      // 保存单一配置 JSON
+      await _context.dataStorage.store(
+        'world_clock_config',
+        config.toJson(),
+      );
     } catch (e) {
-      debugPrint('Failed to save state: $e');
+      debugPrint('Failed to save config: $e');
     }
   }
 
@@ -693,6 +657,7 @@ class _WorldClockPluginWidgetState extends State<_WorldClockPluginWidget> {
         onAdd: (title, duration) {
           widget.plugin.addCountdownTimer(title, duration);
         },
+        plugin: widget.plugin,
       ),
     );
   }
@@ -774,8 +739,12 @@ class _AddClockDialogState extends State<_AddClockDialog> {
 // 添加倒计时对话框
 class _AddCountdownDialog extends StatefulWidget {
   final Function(String title, Duration duration) onAdd;
+  final WorldClockPlugin plugin;
 
-  const _AddCountdownDialog({required this.onAdd});
+  const _AddCountdownDialog({
+    required this.onAdd,
+    required this.plugin,
+  });
 
   @override
   State<_AddCountdownDialog> createState() => _AddCountdownDialogState();
@@ -787,15 +756,9 @@ class _AddCountdownDialogState extends State<_AddCountdownDialog> {
   final _minutesController = TextEditingController(text: '5');
   final _secondsController = TextEditingController(text: '0');
 
-  // 默认模板（可动态添加自定义模板）
-  // ignore: prefer_final_fields
-  List<Map<String, dynamic>> _templates = [
-    {'name': '番茄时钟', 'hours': 0, 'minutes': 15, 'seconds': 0},
-    {'name': '午休', 'hours': 1, 'minutes': 0, 'seconds': 0},
-    {'name': '短休息', 'hours': 0, 'minutes': 5, 'seconds': 0},
-    {'name': '长休息', 'hours': 0, 'minutes': 30, 'seconds': 0},
-    {'name': '专注时段', 'hours': 2, 'minutes': 0, 'seconds': 0},
-  ];
+  // 从插件配置加载模板
+  List<Map<String, dynamic>> get _templates =>
+      widget.plugin.settings.countdownTemplates;
 
   int get _hours => int.tryParse(_hoursController.text) ?? 0;
   int get _minutes => int.tryParse(_minutesController.text) ?? 0;
@@ -855,15 +818,22 @@ class _AddCountdownDialogState extends State<_AddCountdownDialog> {
       return;
     }
 
-    // 添加新模板
-    setState(() {
-      _templates.add({
-        'name': title,
-        'hours': _hours,
-        'minutes': _minutes,
-        'seconds': _seconds,
-      });
+    // 添加新模板到插件配置
+    final newTemplates = List<Map<String, dynamic>>.from(_templates);
+    newTemplates.add({
+      'name': title,
+      'hours': _hours,
+      'minutes': _minutes,
+      'seconds': _seconds,
     });
+
+    final newSettings = widget.plugin.settings.copyWith(
+      countdownTemplates: newTemplates,
+    );
+    widget.plugin.updateSettings(newSettings);
+
+    // 触发 UI 刷新
+    setState(() {});
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -890,9 +860,17 @@ class _AddCountdownDialogState extends State<_AddCountdownDialog> {
 
   /// 删除自定义模板
   void _deleteTemplate(String name) {
-    setState(() {
-      _templates.removeWhere((t) => t['name'] == name);
-    });
+    // 从插件配置中删除模板
+    final newTemplates = List<Map<String, dynamic>>.from(_templates);
+    newTemplates.removeWhere((t) => t['name'] == name);
+
+    final newSettings = widget.plugin.settings.copyWith(
+      countdownTemplates: newTemplates,
+    );
+    widget.plugin.updateSettings(newSettings);
+
+    // 触发 UI 刷新
+    setState(() {});
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

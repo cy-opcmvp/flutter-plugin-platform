@@ -8,6 +8,7 @@ class CalculatorConfigDefaults {
   /// 默认配置 JSON
   static const String defaultConfig = '''
 {
+  "version": "1.0.0",
   "precision": 10,
   "angleMode": "deg",
   "historySize": 50,
@@ -98,6 +99,10 @@ class CalculatorConfigDefaults {
   "type": "object",
   "description": "计算器配置",
   "properties": {
+    "version": {
+      "type": "string",
+      "description": "配置版本号"
+    },
     "precision": {
       "type": "integer",
       "minimum": 0,
@@ -136,7 +141,7 @@ class CalculatorConfigDefaults {
       "description": "按键音效音量"
     }
   },
-  "required": ["precision", "angleMode", "historySize", "memorySlots", "showGroupingSeparator", "enableVibration", "buttonSoundVolume"]
+  "required": ["version", "precision", "angleMode", "historySize", "memorySlots", "showGroupingSeparator", "enableVibration", "buttonSoundVolume"]
 }''';
 
   /// 获取默认配置对象

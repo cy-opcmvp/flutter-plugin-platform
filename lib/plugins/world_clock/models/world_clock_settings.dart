@@ -1,6 +1,7 @@
 library;
 
 import '../../../core/models/base_plugin_settings.dart';
+import 'world_clock_models.dart';
 
 /// 通知类型
 enum NotificationType {
@@ -11,7 +12,7 @@ enum NotificationType {
   system,
 }
 
-/// 世界时钟设置模型
+/// 世界时钟设置模型（包含所有插件数据）
 class WorldClockSettings extends BasePluginSettings {
   /// 配置版本
   @override
@@ -32,6 +33,15 @@ class WorldClockSettings extends BasePluginSettings {
   /// 通知类型
   final NotificationType notificationType;
 
+  /// 世界时钟列表
+  final List<WorldClockItem> worldClocks;
+
+  /// 倒计时列表
+  final List<CountdownTimer> countdownTimers;
+
+  /// 倒计时模板列表
+  final List<Map<String, dynamic>> countdownTemplates;
+
   WorldClockSettings({
     this.version = '1.0.0',
     required this.defaultTimeZone,
@@ -39,6 +49,9 @@ class WorldClockSettings extends BasePluginSettings {
     required this.showSeconds,
     required this.enableNotifications,
     required this.notificationType,
+    this.worldClocks = const [],
+    this.countdownTimers = const [],
+    this.countdownTemplates = const [],
   });
 
   /// 默认设置
@@ -50,11 +63,47 @@ class WorldClockSettings extends BasePluginSettings {
       showSeconds: false,
       enableNotifications: true,
       notificationType: NotificationType.system,
+      worldClocks: [],
+      countdownTimers: [],
+      countdownTemplates: [
+        {'name': '番茄时钟', 'hours': 0, 'minutes': 15, 'seconds': 0},
+        {'name': '午休', 'hours': 1, 'minutes': 0, 'seconds': 0},
+        {'name': '短休息', 'hours': 0, 'minutes': 5, 'seconds': 0},
+        {'name': '长休息', 'hours': 0, 'minutes': 30, 'seconds': 0},
+        {'name': '专注时段', 'hours': 2, 'minutes': 0, 'seconds': 0},
+      ],
     );
   }
 
   /// 从 JSON 创建实例
   factory WorldClockSettings.fromJson(Map<String, dynamic> json) {
+    // 解析世界时钟列表
+    final worldClocksList = json['worldClocks'] as List?;
+    final worldClocks = worldClocksList
+            ?.map((data) => WorldClockItem.fromJson(data as Map<String, dynamic>))
+            .toList() ??
+        [];
+
+    // 解析倒计时列表
+    final countdownTimersList = json['countdownTimers'] as List?;
+    final countdownTimers = countdownTimersList
+            ?.map((data) => CountdownTimer.fromJson(data as Map<String, dynamic>))
+            .toList() ??
+        [];
+
+    // 解析倒计时模板列表
+    final templatesList = json['countdownTemplates'] as List?;
+    final countdownTemplates = templatesList
+            ?.map((item) => Map<String, dynamic>.from(item as Map))
+            .toList() ??
+        [
+      {'name': '番茄时钟', 'hours': 0, 'minutes': 15, 'seconds': 0},
+      {'name': '午休', 'hours': 1, 'minutes': 0, 'seconds': 0},
+      {'name': '短休息', 'hours': 0, 'minutes': 5, 'seconds': 0},
+      {'name': '长休息', 'hours': 0, 'minutes': 30, 'seconds': 0},
+      {'name': '专注时段', 'hours': 2, 'minutes': 0, 'seconds': 0},
+    ];
+
     return WorldClockSettings(
       version: json['version'] as String? ?? '1.0.0',
       defaultTimeZone: json['defaultTimeZone'] as String? ?? 'Asia/Shanghai',
@@ -66,6 +115,9 @@ class WorldClockSettings extends BasePluginSettings {
           : (json['notificationType'] == 'system'
               ? NotificationType.system
               : NotificationType.system),
+      worldClocks: worldClocks,
+      countdownTimers: countdownTimers,
+      countdownTemplates: countdownTemplates,
     );
   }
 
@@ -79,6 +131,10 @@ class WorldClockSettings extends BasePluginSettings {
       'showSeconds': showSeconds,
       'enableNotifications': enableNotifications,
       'notificationType': notificationType.name,
+      'worldClocks': worldClocks.map((clock) => clock.toJson()).toList(),
+      'countdownTimers':
+          countdownTimers.map((timer) => timer.toJson()).toList(),
+      'countdownTemplates': countdownTemplates,
     };
   }
 
@@ -91,6 +147,9 @@ class WorldClockSettings extends BasePluginSettings {
     bool? showSeconds,
     bool? enableNotifications,
     NotificationType? notificationType,
+    List<WorldClockItem>? worldClocks,
+    List<CountdownTimer>? countdownTimers,
+    List<Map<String, dynamic>>? countdownTemplates,
   }) {
     return WorldClockSettings(
       version: version ?? this.version,
@@ -99,6 +158,9 @@ class WorldClockSettings extends BasePluginSettings {
       showSeconds: showSeconds ?? this.showSeconds,
       enableNotifications: enableNotifications ?? this.enableNotifications,
       notificationType: notificationType ?? this.notificationType,
+      worldClocks: worldClocks ?? this.worldClocks,
+      countdownTimers: countdownTimers ?? this.countdownTimers,
+      countdownTemplates: countdownTemplates ?? this.countdownTemplates,
     );
   }
 

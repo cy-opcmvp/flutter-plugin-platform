@@ -326,11 +326,20 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
     if (!mounted) return;
 
     final l10n = context.l10n;
+
+    // 获取插件友好名称
+    String getPluginName() {
+      final descriptor = _platformCore.pluginManager.getPluginDescriptor(event.pluginId);
+      return descriptor?.name ?? event.pluginId;
+    }
+
+    final pluginName = getPluginName();
+
     switch (event.type) {
       case PluginLaunchEventType.launched:
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.plugin_launchSuccess(event.pluginId)),
+            content: Text(l10n.plugin_launchSuccess(pluginName)),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 2),
           ),
@@ -340,7 +349,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
       case PluginLaunchEventType.switched:
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.plugin_switchSuccess(event.pluginId)),
+            content: Text(l10n.plugin_switchSuccess(pluginName)),
             backgroundColor: Colors.blue,
             duration: const Duration(seconds: 2),
           ),
@@ -350,7 +359,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
       case PluginLaunchEventType.closed:
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.plugin_closeSuccess(event.pluginId)),
+            content: Text(l10n.plugin_closeSuccess(pluginName)),
             backgroundColor: Colors.orange,
             duration: const Duration(seconds: 2),
           ),

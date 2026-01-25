@@ -8,18 +8,31 @@ class WorldClockConfigDefaults {
   /// 默认配置 JSON
   static const String defaultConfig = '''
 {
+  "version": "1.0.0",
   "defaultTimeZone": "Asia/Shanghai",
   "timeFormat": "24h",
   "showSeconds": false,
   "enableNotifications": true,
-  "updateInterval": 1000
+  "notificationType": "system",
+  "worldClocks": [],
+  "countdownTimers": [],
+  "countdownTemplates": [
+    {"name": "番茄时钟", "hours": 0, "minutes": 15, "seconds": 0},
+    {"name": "午休", "hours": 1, "minutes": 0, "seconds": 0},
+    {"name": "短休息", "hours": 0, "minutes": 5, "seconds": 0},
+    {"name": "长休息", "hours": 0, "minutes": 30, "seconds": 0},
+    {"name": "专注时段", "hours": 2, "minutes": 0, "seconds": 0}
+  ]
 }''';
 
   /// 示例配置 JSON（带详细注释的版本）
   static const String exampleConfig = '''
 {
   "_comment": "世界时钟配置文件",
-  "_description": "修改此文件可以自定义世界时钟行为",
+  "_description": "修改此文件可以自定义世界时钟行为，包括设置、时钟、倒计时和模板",
+
+  "version": "1.0.0",
+  "_version_help": "配置版本号，用于未来的迁移和兼容性检查",
 
   "defaultTimeZone": "Asia/Shanghai",
   "_defaultTimeZone_help": "默认显示的时区",
@@ -43,10 +56,47 @@ class WorldClockConfigDefaults {
   "enableNotifications": true,
   "_enableNotifications_help": "倒计时完成时是否显示通知",
 
-  "updateInterval": 1000,
-  "_updateInterval_help": "时钟更新间隔（毫秒）",
-  "_updateInterval_range": "取值范围: 100-60000",
-  "_updateInterval_note": "1000 = 1秒，建议保持默认值"
+  "notificationType": "system",
+  "_notificationType_help": "通知类型",
+  "_notificationType_options": [
+    "system - 系统通知（需要在通知栏中显示）",
+    "inApp - App 内通知（SnackBar 显示）"
+  ],
+
+  "worldClocks": [
+    {
+      "id": "1706185200000",
+      "cityName": "北京",
+      "timeZone": "Asia/Shanghai",
+      "isDefault": true
+    },
+    {
+      "id": "1706185200001",
+      "cityName": "伦敦",
+      "timeZone": "Europe/London",
+      "isDefault": false
+    }
+  ],
+  "_worldClocks_help": "已添加的世界时钟列表",
+
+  "countdownTimers": [
+    {
+      "id": "1706185200002",
+      "title": "专注时段",
+      "endTime": "2026-01-25T15:30:00.000Z",
+      "isCompleted": false
+    }
+  ],
+  "_countdownTimers_help": "已创建的倒计时列表",
+
+  "countdownTemplates": [
+    {"name": "番茄时钟", "hours": 0, "minutes": 15, "seconds": 0},
+    {"name": "午休", "hours": 1, "minutes": 0, "seconds": 0},
+    {"name": "短休息", "hours": 0, "minutes": 5, "seconds": 0},
+    {"name": "长休息", "hours": 0, "minutes": 30, "seconds": 0},
+    {"name": "专注时段", "hours": 2, "minutes": 0, "seconds": 0}
+  ],
+  "_countdownTemplates_help": "倒计时快速模板列表，可在设置中添加自定义模板"
 }''';
 
   /// 清理后的示例（移除注释）
@@ -90,6 +140,10 @@ class WorldClockConfigDefaults {
   "type": "object",
   "description": "世界时钟配置",
   "properties": {
+    "version": {
+      "type": "string",
+      "description": "配置版本号"
+    },
     "defaultTimeZone": {
       "type": "string",
       "description": "默认显示的时区（IANA 时区标识符）"
@@ -107,14 +161,55 @@ class WorldClockConfigDefaults {
       "type": "boolean",
       "description": "倒计时完成时是否显示通知"
     },
-    "updateInterval": {
-      "type": "integer",
-      "minimum": 100,
-      "maximum": 60000,
-      "description": "时钟更新间隔（毫秒）"
+    "notificationType": {
+      "type": "string",
+      "enum": ["system", "inApp"],
+      "description": "通知类型"
+    },
+    "worldClocks": {
+      "type": "array",
+      "description": "已添加的世界时钟列表",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "cityName": {"type": "string"},
+          "timeZone": {"type": "string"},
+          "isDefault": {"type": "boolean"}
+        },
+        "required": ["id", "cityName", "timeZone", "isDefault"]
+      }
+    },
+    "countdownTimers": {
+      "type": "array",
+      "description": "已创建的倒计时列表",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "title": {"type": "string"},
+          "endTime": {"type": "string", "format": "date-time"},
+          "isCompleted": {"type": "boolean"}
+        },
+        "required": ["id", "title", "endTime", "isCompleted"]
+      }
+    },
+    "countdownTemplates": {
+      "type": "array",
+      "description": "倒计时快速模板列表",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string"},
+          "hours": {"type": "integer"},
+          "minutes": {"type": "integer"},
+          "seconds": {"type": "integer"}
+        },
+        "required": ["name", "hours", "minutes", "seconds"]
+      }
     }
   },
-  "required": ["defaultTimeZone", "timeFormat", "showSeconds", "enableNotifications", "updateInterval"]
+  "required": ["version", "defaultTimeZone", "timeFormat", "showSeconds", "enableNotifications", "notificationType"]
 }''';
 
   /// 获取默认配置对象

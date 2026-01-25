@@ -6,9 +6,7 @@ import 'package:flutter/material.dart' hide TargetPlatform;
 import '../../core/interfaces/i_plugin.dart';
 import '../../core/interfaces/i_platform_plugin.dart';
 import '../../core/models/plugin_models.dart';
-import '../../core/services/config_manager.dart';
 import '../../core/utils/platform_capability_helper.dart';
-import '../../core/models/screenshot_config.dart';
 import 'models/screenshot_models.dart';
 import 'models/screenshot_settings.dart' as ss;
 import 'services/screenshot_service.dart';
@@ -122,8 +120,27 @@ class ScreenshotPlugin extends PlatformPluginBase {
       // 初始化热键服务
       await _hotkeyService.initialize();
 
-      // 加载保存的状态
-      await _loadSavedState();
+      // 从单一配置加载设置
+      final savedConfig = await _context.dataStorage
+          .retrieve<Map<String, dynamic>>('screenshot_config');
+      if (savedConfig != null) {
+        _settings = ss.ScreenshotSettings.fromJson(savedConfig);
+      }
+
+      // 加载截图历史记录元数据（仅加载元数据，不加载实际文件）
+      final screenshotsData = await _context.dataStorage
+          .retrieve<List<dynamic>>('screenshot_history');
+      if (screenshotsData != null) {
+        _screenshots.clear();
+        _screenshots.addAll(
+          screenshotsData
+              .map(
+                (data) =>
+                    ScreenshotRecord.fromJson(data as Map<String, dynamic>),
+              )
+              .toList(),
+        );
+      }
 
       // 检查平台支持
       if (!isCurrentPlatformSupported) {
@@ -155,8 +172,8 @@ class ScreenshotPlugin extends PlatformPluginBase {
       // 释放热键服务
       await _hotkeyService.dispose();
 
-      // 保存当前状态
-      await _saveCurrentState();
+      // 保存配置
+      await _saveConfig();
 
       _isInitialized = false;
     } catch (e) {
@@ -181,10 +198,10 @@ class ScreenshotPlugin extends PlatformPluginBase {
         // 激活快捷键监听（待实现）
         break;
       case PluginState.paused:
-        await _saveCurrentState();
+        await _saveConfig();
         break;
       case PluginState.inactive:
-        await _saveCurrentState();
+        await _saveConfig();
         break;
       case PluginState.error:
         break;
@@ -262,7 +279,7 @@ class ScreenshotPlugin extends PlatformPluginBase {
       final record = _screenshots[index];
       await _fileManager.deleteScreenshot(record.filePath);
       _screenshots.removeAt(index);
-      await _saveCurrentState();
+      await _saveConfig();
       _onStateChanged?.call();
     }
   }
@@ -273,7 +290,7 @@ class ScreenshotPlugin extends PlatformPluginBase {
       await _fileManager.deleteScreenshot(record.filePath);
     }
     _screenshots.clear();
-    await _saveCurrentState();
+    await _saveConfig();
     _onStateChanged?.call();
   }
 
@@ -281,7 +298,7 @@ class ScreenshotPlugin extends PlatformPluginBase {
   Future<void> updateSettings(ss.ScreenshotSettings newSettings) async {
     _settings = newSettings;
     _fileManager.updateSettings(newSettings);
-    await _saveCurrentState();
+    await _saveConfig();
     _onStateChanged?.call();
   }
 
@@ -329,8 +346,8 @@ class ScreenshotPlugin extends PlatformPluginBase {
         );
       }
 
-      // 保存状态
-      await _saveCurrentState();
+      // 保存配置和历史
+      await _saveConfig();
 
       // 通知 UI 更新
       _onStateChanged?.call();
@@ -343,121 +360,23 @@ class ScreenshotPlugin extends PlatformPluginBase {
     }
   }
 
-  /// 将 ScreenshotConfig 转换为 ss.ScreenshotSettings
-  ss.ScreenshotSettings _configToSettings(ScreenshotConfig config) {
-    return ss.ScreenshotSettings(
-      savePath: config.savePath,
-      filenameFormat: config.filenameFormat,
-      imageFormat: _parseImageFormat(config.imageFormat),
-      imageQuality: config.imageQuality,
-      autoCopyToClipboard: config.autoCopyToClipboard,
-      showPreview: config.showPreview,
-      saveHistory: config.saveHistory,
-      maxHistoryCount: config.maxHistoryCount,
-      historyRetentionPeriod: Duration(days: config.historyRetentionDays),
-      shortcuts: config.shortcuts,
-      pinSettings: _configPinToSettingsPin(config.pinSettings),
-    );
-  }
-
-  /// 将 ss.ScreenshotSettings 转换为 ScreenshotConfig
-  ScreenshotConfig _settingsToConfig(ss.ScreenshotSettings settings) {
-    return ScreenshotConfig(
-      savePath: settings.savePath,
-      filenameFormat: settings.filenameFormat,
-      imageFormat: settings.imageFormat.name,
-      imageQuality: settings.imageQuality,
-      autoCopyToClipboard: settings.autoCopyToClipboard,
-      showPreview: settings.showPreview,
-      saveHistory: settings.saveHistory,
-      maxHistoryCount: settings.maxHistoryCount,
-      historyRetentionDays: settings.historyRetentionPeriod.inDays,
-      shortcuts: settings.shortcuts,
-      pinSettings: _settingsPinToConfigPin(settings.pinSettings),
-    );
-  }
-
-  /// 解析图片格式字符串
-  ss.ImageFormat _parseImageFormat(String format) {
-    switch (format.toLowerCase()) {
-      case 'png':
-        return ss.ImageFormat.png;
-      case 'jpeg':
-      case 'jpg':
-        return ss.ImageFormat.jpeg;
-      case 'webp':
-        return ss.ImageFormat.webp;
-      default:
-        return ss.ImageFormat.png;
-    }
-  }
-
-  /// 将 PinScreenshotConfig 转换为 ss.PinSettings
-  ss.PinSettings _configPinToSettingsPin(PinScreenshotConfig configPin) {
-    return ss.PinSettings(
-      alwaysOnTop: configPin.alwaysOnTop,
-      defaultOpacity: configPin.defaultOpacity,
-      enableDrag: configPin.enableDrag,
-      enableResize: configPin.enableResize,
-      showCloseButton: configPin.showCloseButton,
-    );
-  }
-
-  /// 将 ss.PinSettings 转换为 PinScreenshotConfig
-  PinScreenshotConfig _settingsPinToConfigPin(ss.PinSettings settingsPin) {
-    return PinScreenshotConfig(
-      alwaysOnTop: settingsPin.alwaysOnTop,
-      defaultOpacity: settingsPin.defaultOpacity,
-      enableDrag: settingsPin.enableDrag,
-      enableResize: settingsPin.enableResize,
-      showCloseButton: settingsPin.showCloseButton,
-    );
-  }
-
-  /// 加载保存的状态
-  Future<void> _loadSavedState() async {
+  /// 保存配置
+  Future<void> _saveConfig() async {
     try {
-      // 从 ConfigManager 加载设置
-      final configData = await ConfigManager.instance.loadPluginConfig(id);
-      if (configData.isNotEmpty) {
-        final config = ScreenshotConfig.fromJson(configData);
-        _settings = _configToSettings(config);
-      }
-
-      // 加载截图历史记录（仅加载元数据，不加载实际文件）
-      final screenshotsData = await _context.dataStorage
-          .retrieve<List<dynamic>>('screenshots');
-      if (screenshotsData != null) {
-        _screenshots.clear();
-        _screenshots.addAll(
-          screenshotsData
-              .map(
-                (data) =>
-                    ScreenshotRecord.fromJson(data as Map<String, dynamic>),
-              )
-              .toList(),
-        );
-      }
-    } catch (e) {
-      debugPrint('Failed to load saved state: $e');
-    }
-  }
-
-  /// 保存当前状态
-  Future<void> _saveCurrentState() async {
-    try {
-      // 保存设置到 ConfigManager
-      final config = _settingsToConfig(_settings);
-      await ConfigManager.instance.savePluginConfig(id, config.toJson());
+      // 保存设置到单一配置键
+      await _context.dataStorage.store(
+        'screenshot_config',
+        _settings.toJson(),
+      );
 
       // 只保存最近 100 条记录的元数据到 dataStorage
       final screenshotsToSave = _screenshots
           .take(100)
           .map((s) => s.toJson())
           .toList();
-      await _context.dataStorage.store('screenshots', screenshotsToSave);
+      await _context.dataStorage.store('screenshot_history', screenshotsToSave);
     } catch (e) {
-      debugPrint('Failed to save state: $e');
+      debugPrint('Failed to save config: $e');
     }
   }
 

@@ -8,6 +8,7 @@ class ScreenshotConfigDefaults {
   /// 默认配置 JSON
   static const String defaultConfig = '''
 {
+  "version": "1.0.0",
   "savePath": "{documents}/Screenshots",
   "filenameFormat": "screenshot_{timestamp}",
   "imageFormat": "png",
@@ -141,6 +142,10 @@ class ScreenshotConfigDefaults {
   "type": "object",
   "description": "截图插件配置",
   "properties": {
+    "version": {
+      "type": "string",
+      "description": "配置版本号"
+    },
     "savePath": {
       "type": "string",
       "description": "保存路径，支持占位符"
