@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../interfaces/i_plugin.dart';
 import '../interfaces/i_plugin_manager.dart';
 import '../models/plugin_models.dart';
+import '../models/platform_models.dart' as models;
 
 /// Service responsible for plugin launching and switching
 /// Implements requirements 1.2, 1.4 for plugin launching and state preservation
@@ -22,7 +23,15 @@ class PluginLauncher {
   final StreamController<PluginLaunchEvent> _eventController =
       StreamController<PluginLaunchEvent>.broadcast();
 
-  PluginLauncher(this._pluginManager);
+  // Subscription to PluginManager events
+  StreamSubscription<models.PluginEvent>? _pluginEventSubscription;
+
+  PluginLauncher(this._pluginManager) {
+    // Listen to PluginManager events to keep state in sync
+    _pluginEventSubscription = _pluginManager.eventStream.listen((event) {
+      _handlePluginEvent(event);
+    });
+  }
 
   /// Current active plugin
   IPlugin? get currentPlugin => _currentPlugin;
@@ -293,8 +302,39 @@ class PluginLauncher {
     }
   }
 
+  /// Handle events from PluginManager to keep state in sync
+  void _handlePluginEvent(models.PluginEvent event) {
+    switch (event.type) {
+      case models.PluginEventType.unloaded:
+        // Remove from current or background plugins
+        if (_currentPlugin?.id == event.pluginId) {
+          _currentPlugin = null;
+        }
+        _backgroundPlugins.remove(event.pluginId);
+        _pluginStates.remove(event.pluginId);
+        break;
+      case models.PluginEventType.loaded:
+        // Plugin was loaded, but we don't need to do anything here
+        // as PluginLauncher will handle it through launchPlugin()
+        break;
+      case models.PluginEventType.error:
+        // If plugin encountered an error, remove from active plugins
+        if (_currentPlugin?.id == event.pluginId) {
+          _currentPlugin = null;
+        }
+        _backgroundPlugins.remove(event.pluginId);
+        break;
+      default:
+        // Other events don't affect PluginLauncher state
+        break;
+    }
+  }
+
   /// Clean up all plugins and resources
   Future<void> dispose() async {
+    // Cancel event subscription
+    await _pluginEventSubscription?.cancel();
+
     // Save all plugin states
     if (_currentPlugin != null) {
       await _saveCurrentPluginState();
