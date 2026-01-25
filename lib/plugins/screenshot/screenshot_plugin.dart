@@ -531,6 +531,13 @@ class _ScreenshotPluginWidgetState extends State<_ScreenshotPluginWidget> {
   }
 
   @override
+  void dispose() {
+    // 清理回调
+    widget.plugin._onStateChanged = null;
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (!widget.plugin._isInitialized) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));

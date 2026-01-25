@@ -148,6 +148,33 @@ class WorldClockPlugin extends PlatformPluginBase {
   void updateSettings(WorldClockSettings settings) {
     _settings = settings;
     _saveSettings();
+
+    // 如果默认时区发生变化，更新默认时钟
+    if (_worldClocks.isNotEmpty) {
+      final defaultClock = _worldClocks.firstWhere(
+        (clock) => clock.isDefault,
+        orElse: () => _worldClocks.first,
+      );
+
+      // 如果默认时区改变，更新默认时钟的时区
+      if (defaultClock.timeZone != settings.defaultTimeZone) {
+        final timeZoneInfo = TimeZoneInfo.findByTimeZoneId(settings.defaultTimeZone);
+        final cityName = timeZoneInfo?.displayName ?? settings.defaultTimeZone.split('/').last.replaceAll('_', ' ');
+
+        // 更新默认时钟
+        final index = _worldClocks.indexOf(defaultClock);
+        _worldClocks[index] = WorldClockItem(
+          id: defaultClock.id,
+          cityName: cityName,
+          timeZone: settings.defaultTimeZone,
+          isDefault: true,
+        );
+
+        // 保存更新后的时钟列表
+        _saveCurrentState();
+      }
+    }
+
     // 重启定时器以应用新的更新间隔
     _clockUpdateTimer?.cancel();
     _startClockTimer();

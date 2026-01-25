@@ -20,6 +20,9 @@ class CalculatorPlugin extends PlatformPluginBase {
   // Calculator settings
   CalculatorSettings _settings = CalculatorSettings.defaultSettings();
 
+  // 用于触发UI更新的回调
+  VoidCallback? _onStateChanged;
+
   @override
   String get id => 'com.example.calculator';
 
@@ -80,6 +83,8 @@ class CalculatorPlugin extends PlatformPluginBase {
   void updateSettings(CalculatorSettings settings) {
     _settings = settings;
     _saveSettings();
+    // 触发 UI 更新
+    _onStateChanged?.call();
   }
 
   @override
@@ -182,6 +187,24 @@ class CalculatorWidget extends StatefulWidget {
 
 class _CalculatorWidgetState extends State<CalculatorWidget> {
   CalculatorState get _state => widget.state;
+
+  @override
+  void initState() {
+    super.initState();
+    // 监听插件配置变化
+    widget.plugin._onStateChanged = () {
+      if (mounted) {
+        setState(() {});
+      }
+    };
+  }
+
+  @override
+  void dispose() {
+    // 清理回调
+    widget.plugin._onStateChanged = null;
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
