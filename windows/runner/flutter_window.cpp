@@ -8,26 +8,15 @@
 #include <fstream>
 #include <windowsx.h>  // 用于 GET_X_LPARAM 和 GET_Y_LPARAM
 
-#include "flutter/generated_plugin_registrant.h"
-#include "screenshot_plugin.h"
-#include "native_screenshot_window.h"
-#include "hotkey_manager.h"
+// GDI+ 支持（用于图片处理）
+#include <gdiplus.h>
+#pragma comment(lib, "gdiplus.lib")
 
-// 用于同步存储原生窗口选择结果
-static struct {
-  bool completed = false;
-  bool cancelled = false;
-  int x = 0, y = 0, width = 0, height = 0;
-} g_regionSelectionResult;
+using namespace Gdiplus;
 
-// 桌宠点击穿透 - 宠物图标区域（用于 WM_NCHITTEST 判断）
-static struct {
-  bool valid = false;
-  int left = 0;
-  int top = 0;
-  int right = 0;
-  int bottom = 0;
-} g_petRegion;
+// GDI+ token（用于初始化和关闭）
+static ULONG_PTR gdiplusToken = 0;
+static bool gdiplusInitialized = false;
 
 // 文件日志函数
 static void LogToFile(const char* message) {
@@ -59,6 +48,57 @@ static void LogToFile(const char* message) {
     OutputDebugStringA(buffer); \
     LogToFile(buffer); \
   } while (0)
+
+// 初始化 GDI+
+static void InitializeGDIPlus() {
+  if (gdiplusInitialized) return;
+
+  GdiplusStartupInput gdiplusStartupInput;
+  GdiplusStartupOutput gdiplusStartupOutput;
+
+  Status status = GdiplusStartup(
+    &gdiplusToken,
+    &gdiplusStartupInput,
+    &gdiplusStartupOutput
+  );
+
+  if (status == Ok) {
+    gdiplusInitialized = true;
+    LOG_FLUTTER("GDI+ initialized successfully");
+  } else {
+    LOG_FLUTTER_FMT("Failed to initialize GDI+: %d", status);
+  }
+}
+
+// 关闭 GDI+
+static void ShutdownGDIPlus() {
+  if (gdiplusInitialized) {
+    GdiplusShutdown(gdiplusToken);
+    gdiplusInitialized = false;
+    LOG_FLUTTER("GDI+ shutdown");
+  }
+}
+
+#include "flutter/generated_plugin_registrant.h"
+#include "screenshot_plugin.h"
+#include "native_screenshot_window.h"
+#include "hotkey_manager.h"
+
+// 用于同步存储原生窗口选择结果
+static struct {
+  bool completed = false;
+  bool cancelled = false;
+  int x = 0, y = 0, width = 0, height = 0;
+} g_regionSelectionResult;
+
+// 桌宠点击穿透 - 宠物图标区域（用于 WM_NCHITTEST 判断）
+static struct {
+  bool valid = false;
+  int left = 0;
+  int top = 0;
+  int right = 0;
+  int bottom = 0;
+} g_petRegion;
 
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
     : project_(project) {}
@@ -723,7 +763,6 @@ void FlutterWindow::HandleClipboardMethodCall(
     int width = bih.biWidth;
     int height = abs(bih.biHeight);
     int bitCount = bih.biBitCount;
-    int bytesPerPixel = bitCount / 8;
     int rowSize = ((width * bitCount + 31) / 32) * 4; // 对齐到 4 字节
     int imageSize = rowSize * height;
 
@@ -750,7 +789,7 @@ void FlutterWindow::HandleClipboardMethodCall(
     GlobalUnlock(hData);
     CloseClipboard();
 
-    LOG_FLUTTER_FMT("Retrieved image from clipboard: %dx%d, %d bytes", width, height, imageData.size());
+    LOG_FLUTTER_FMT("Retrieved image from clipboard: %dx%d, %zu bytes", width, height, imageData.size());
 
     flutter::EncodableList dataList(imageData.begin(), imageData.end());
     result->Success(flutter::EncodableValue(dataList));
@@ -782,6 +821,163 @@ void FlutterWindow::HandleClipboardMethodCall(
 
     LOG_FLUTTER_FMT("Clipboard cleared: %s", success ? "success" : "failed");
     result->Success(flutter::EncodableValue(success));
+
+  } else if (call.method_name() == "setImageToClipboard") {
+    // 设置图片到剪贴板
+    LOG_FLUTTER("setImageToClipboard method called");
+
+    auto* arguments = std::get_if<flutter::EncodableList>(call.arguments());
+    if (!arguments || arguments->size() < 1) {
+      LOG_FLUTTER("Invalid arguments for setImageToClipboard");
+      result->Success(flutter::EncodableValue(false));
+      return;
+    }
+
+    // 获取图片字节数据
+    const auto& image_list = (*arguments)[0];
+    const auto* byte_list = std::get_if<flutter::EncodableList>(&image_list);
+    if (!byte_list) {
+      LOG_FLUTTER("Invalid image data format");
+      result->Success(flutter::EncodableValue(false));
+      return;
+    }
+
+    LOG_FLUTTER_FMT("Image data received: %zu bytes", byte_list->size());
+
+    // 转换为vector<uint8_t>
+    std::vector<uint8_t> imageBytes;
+    imageBytes.reserve(byte_list->size());
+    for (const auto& item : *byte_list) {
+      if (auto byte_value = std::get_if<int>(&item)) {
+        imageBytes.push_back(static_cast<uint8_t>(*byte_value));
+      }
+    }
+
+    LOG_FLUTTER_FMT("Converted to vector: %zu bytes", imageBytes.size());
+
+    // 创建IStream从内存数据
+    IStream* pStream = nullptr;
+    HRESULT hr = CreateStreamOnHGlobal(nullptr, TRUE, &pStream);
+    if (FAILED(hr) || !pStream) {
+      LOG_FLUTTER_FMT("Failed to create stream: 0x%X", hr);
+      result->Success(flutter::EncodableValue(false));
+      return;
+    }
+
+    // 写入数据到流
+    ULONG bytesWritten = 0;
+    hr = pStream->Write(imageBytes.data(), static_cast<ULONG>(imageBytes.size()), &bytesWritten);
+    if (FAILED(hr) || bytesWritten != imageBytes.size()) {
+      LOG_FLUTTER_FMT("Failed to write to stream: 0x%X", hr);
+      pStream->Release();
+      result->Success(flutter::EncodableValue(false));
+      return;
+    }
+
+    // 重置流指针到开始
+    LARGE_INTEGER dlibMove = {0};
+    hr = pStream->Seek(dlibMove, STREAM_SEEK_SET, nullptr);
+    if (FAILED(hr)) {
+      LOG_FLUTTER_FMT("Failed to seek stream: 0x%X", hr);
+      pStream->Release();
+      result->Success(flutter::EncodableValue(false));
+      return;
+    }
+
+    // 使用GDI+加载图片
+    Gdiplus::Bitmap* pBitmap = Gdiplus::Bitmap::FromStream(pStream);
+    pStream->Release();
+
+    if (!pBitmap || pBitmap->GetLastStatus() != Gdiplus::Ok) {
+      LOG_FLUTTER("Failed to load bitmap from stream");
+      if (pBitmap) delete pBitmap;
+      result->Success(flutter::EncodableValue(false));
+      return;
+    }
+
+    // 转换为HBITMAP
+    HBITMAP hBitmap = nullptr;
+    Gdiplus::Status status = pBitmap->GetHBITMAP(Gdiplus::Color::Transparent, &hBitmap);
+    delete pBitmap;
+
+    if (status != Gdiplus::Ok || !hBitmap) {
+      LOG_FLUTTER_FMT("Failed to get HBITMAP: %d", status);
+      result->Success(flutter::EncodableValue(false));
+      return;
+    }
+
+    // 将HBITMAP转换为DIB格式
+    BITMAP bm;
+    GetObject(hBitmap, sizeof(BITMAP), &bm);
+
+    // 计算DIB大小
+    int paletteSize = 0;
+    if (bm.bmBitsPixel <= 8) {
+      paletteSize = (1ULL << bm.bmBitsPixel) * sizeof(RGBQUAD);
+    }
+    int dibSize = sizeof(BITMAPINFOHEADER) + paletteSize + bm.bmWidthBytes * bm.bmHeight;
+
+    // 分配全局内存
+    HGLOBAL hDIB = GlobalAlloc(GHND, dibSize);
+    if (!hDIB) {
+      LOG_FLUTTER("Failed to allocate global memory for DIB");
+      DeleteObject(hBitmap);
+      result->Success(flutter::EncodableValue(false));
+      return;
+    }
+
+    LPBITMAPINFOHEADER lpbi = (LPBITMAPINFOHEADER)GlobalLock(hDIB);
+    if (!lpbi) {
+      LOG_FLUTTER("Failed to lock global memory");
+      GlobalFree(hDIB);
+      DeleteObject(hBitmap);
+      result->Success(flutter::EncodableValue(false));
+      return;
+    }
+
+    // 填充BITMAPINFOHEADER
+    lpbi->biSize = sizeof(BITMAPINFOHEADER);
+    lpbi->biWidth = bm.bmWidth;
+    lpbi->biHeight = bm.bmHeight;
+    lpbi->biPlanes = 1;
+    lpbi->biBitCount = bm.bmBitsPixel;
+    lpbi->biCompression = BI_RGB;
+    lpbi->biSizeImage = bm.bmWidthBytes * bm.bmHeight;
+    lpbi->biXPelsPerMeter = 0;
+    lpbi->biYPelsPerMeter = 0;
+    lpbi->biClrUsed = 0;
+    lpbi->biClrImportant = 0;
+
+    // 获取位图数据
+    HDC hdc = GetDC(nullptr);
+    HDC hdcMem = CreateCompatibleDC(hdc);
+    HBITMAP hOldBitmap = (HBITMAP)SelectObject(hdcMem, hBitmap);
+
+    // 复制位图数据
+    BYTE* lpDIBBits = (BYTE*)lpbi + sizeof(BITMAPINFOHEADER) + paletteSize;
+    GetDIBits(hdc, hBitmap, 0, bm.bmHeight, lpDIBBits, (LPBITMAPINFO)lpbi, DIB_RGB_COLORS);
+
+    SelectObject(hdcMem, hOldBitmap);
+    DeleteDC(hdcMem);
+    ReleaseDC(nullptr, hdc);
+    DeleteObject(hBitmap);
+
+    GlobalUnlock(hDIB);
+
+    // 设置到剪贴板
+    if (!OpenClipboard(nullptr)) {
+      LOG_FLUTTER("Failed to open clipboard");
+      GlobalFree(hDIB);
+      result->Success(flutter::EncodableValue(false));
+      return;
+    }
+
+    EmptyClipboard();
+    SetClipboardData(CF_DIB, hDIB);
+    CloseClipboard();
+
+    LOG_FLUTTER("Image set to clipboard successfully");
+    result->Success(flutter::EncodableValue(true));
 
   } else {
     LOG_FLUTTER_FMT("Unknown clipboard method: %s", call.method_name().c_str());

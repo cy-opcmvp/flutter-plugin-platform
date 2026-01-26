@@ -55,6 +55,37 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam) {
         return TRUE;
     }
 
+    // 清理窗口标题：移除所有特殊字符
+    // 先移除末尾的空白字符和控制字符
+    size_t titleLen = wcslen(title);
+    while (titleLen > 0) {
+      wchar_t lastChar = title[titleLen - 1];
+      if (iswspace(lastChar) || iswcntrl(lastChar)) {
+        title[titleLen - 1] = L'\0';
+        titleLen--;
+      } else {
+        break;
+      }
+    }
+
+    // 移除标题中的所有特殊字符（□、■、▪、▫、─、│等）
+    int writePos = 0;
+    for (int readPos = 0; title[readPos] != L'\0'; readPos++) {
+      wchar_t ch = title[readPos];
+      // 保留正常字符，移除特殊字符
+      if (ch != L'□' && ch != L'■' && ch != L'▪' && ch != L'▫' &&
+          ch != L'─' && ch != L'│' && !iswcntrl(ch)) {
+        title[writePos++] = ch;
+      }
+    }
+    title[writePos] = L'\0';
+
+    // 再次检查标题是否为空（清理后可能变空）
+    if (wcslen(title) == 0) {
+      return TRUE;
+    }
+
+
     // Skip special window classes (like tooltips, menus, etc.)
     WCHAR className[256];
     GetClassNameW(hwnd, className, 256);
@@ -83,9 +114,9 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam) {
     sprintf_s(windowId, "%p", hwnd);
 
     // Convert title to UTF-8
-    int titleLen = WideCharToMultiByte(CP_UTF8, 0, title, -1, NULL, 0, NULL, NULL);
-    std::string titleUtf8(titleLen, 0);
-    WideCharToMultiByte(CP_UTF8, 0, title, -1, &titleUtf8[0], titleLen, NULL, NULL);
+    int titleUtf8Len = WideCharToMultiByte(CP_UTF8, 0, title, -1, NULL, 0, NULL, NULL);
+    std::string titleUtf8(titleUtf8Len, 0);
+    WideCharToMultiByte(CP_UTF8, 0, title, -1, &titleUtf8[0], titleUtf8Len, NULL, NULL);
 
     // Get application name from class name or process
     std::string appName;

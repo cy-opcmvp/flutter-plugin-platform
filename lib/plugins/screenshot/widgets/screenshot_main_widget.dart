@@ -8,6 +8,7 @@ import '../screenshot_plugin.dart';
 import '../models/screenshot_models.dart';
 import 'settings_screen.dart';
 import 'history_screen.dart';
+import 'window_capture_screen.dart';
 
 /// 智能截图插件主界面
 class ScreenshotMainWidget extends StatefulWidget {
@@ -145,30 +146,30 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
               ],
             ),
             const SizedBox(height: 16),
-            GridView.count(
-              crossAxisCount: 3,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
+            Row(
               children: [
-                _QuickActionTile(
-                  icon: Icons.crop_square,
-                  title: l10n.screenshot_main_region_capture,
-                  subtitle: 'Ctrl+Shift+A',
-                  onTap: widget.plugin.isAvailable ? _startRegionCapture : null,
+                Expanded(
+                  child: _QuickActionTile(
+                    icon: Icons.crop_square,
+                    title: l10n.screenshot_main_region_capture,
+                    onTap: widget.plugin.isAvailable ? _startRegionCapture : null,
+                  ),
                 ),
-                _QuickActionTile(
-                  icon: Icons.fullscreen,
-                  title: l10n.screenshot_main_fullscreen_capture,
-                  subtitle: 'Ctrl+Shift+F',
-                  onTap: widget.plugin.isAvailable ? _captureFullScreen : null,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _QuickActionTile(
+                    icon: Icons.fullscreen,
+                    title: l10n.screenshot_main_fullscreen_capture,
+                    onTap: widget.plugin.isAvailable ? _captureFullScreen : null,
+                  ),
                 ),
-                _QuickActionTile(
-                  icon: Icons.window,
-                  title: l10n.screenshot_main_window_capture,
-                  subtitle: 'Ctrl+Shift+W',
-                  onTap: widget.plugin.isAvailable ? _showWindowList : null,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _QuickActionTile(
+                    icon: Icons.window,
+                    title: l10n.screenshot_main_window_capture,
+                    onTap: widget.plugin.isAvailable ? _showWindowList : null,
+                  ),
                 ),
               ],
             ),
@@ -192,18 +193,28 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Icon(
-                  Icons.history,
-                  color: Theme.of(context).colorScheme.secondary,
+                Row(
+                  children: [
+                    Icon(
+                      Icons.history,
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      l10n.screenshot_main_recent_screenshots,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.secondary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  l10n.screenshot_main_recent_screenshots,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.secondary,
-                    fontWeight: FontWeight.bold,
-                  ),
+                IconButton(
+                  icon: const Icon(Icons.folder_open),
+                  onPressed: widget.plugin.isAvailable ? _openScreenshotFolder : null,
+                  tooltip: l10n.screenshot_open_folder,
                 ),
               ],
             ),
@@ -435,41 +446,11 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
 
   /// 显示窗口列表
   void _showWindowList() async {
-    try {
-      final windows = await widget.plugin.getAvailableWindows();
-      if (!mounted) return;
-
-      if (windows.isEmpty) {
-        final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.screenshot_window_not_available),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-        return;
-      }
-
-      // 显示窗口选择对话框
-      final selectedWindowId = await showDialog<String>(
-        context: context,
-        builder: (context) => _WindowListDialog(windows: windows),
-      );
-
-      if (selectedWindowId != null) {
-        await widget.plugin.captureWindow(selectedWindowId);
-      }
-    } catch (e) {
-      if (mounted) {
-        final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.screenshot_window_failed(e.toString())),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
-    }
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => WindowCaptureScreen(plugin: widget.plugin),
+      ),
+    );
   }
 
   /// 查看截图
@@ -533,19 +514,77 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
       ),
     );
   }
+
+  /// 打开截图文件夹
+  void _openScreenshotFolder() async {
+    try {
+      // 获取保存路径
+      final fileManager = widget.plugin.fileManager;
+      final savePath = await fileManager.getDefaultSavePath();
+
+      // 确保文件夹存在
+      final directory = Directory(savePath);
+      if (!await directory.exists()) {
+        await directory.create(recursive: true);
+      }
+
+      // 使用 Process.run 在 Windows/macOS/Linux 上打开文件夹
+      // Windows: explorer
+      // macOS: open
+      // Linux: xdg-open
+
+      String command;
+      List<String> args;
+
+      if (Platform.isWindows) {
+        command = 'explorer';
+        args = [savePath];
+      } else if (Platform.isMacOS) {
+        command = 'open';
+        args = [savePath];
+      } else if (Platform.isLinux) {
+        command = 'xdg-open';
+        args = [savePath];
+      } else {
+        throw UnsupportedError('不支持的平台');
+      }
+
+      await Process.run(command, args);
+
+      if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.screenshot_folder_opened),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${l10n.screenshot_open_folder_failed}: $e'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
 }
 
 /// 快速操作按钮
 class _QuickActionTile extends StatelessWidget {
   final IconData icon;
   final String title;
-  final String subtitle;
+  final String? subtitle;
   final VoidCallback? onTap;
 
   const _QuickActionTile({
     required this.icon,
     required this.title,
-    required this.subtitle,
+    this.subtitle,
     this.onTap,
   });
 
@@ -589,16 +628,18 @@ class _QuickActionTile extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: onTap != null
-                      ? Theme.of(context).colorScheme.onSurfaceVariant
-                      : Theme.of(context).colorScheme.outline,
+              if (subtitle != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  subtitle!,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: onTap != null
+                        ? Theme.of(context).colorScheme.onSurfaceVariant
+                        : Theme.of(context).colorScheme.outline,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
-              ),
+              ],
             ],
           ),
         ),
@@ -625,11 +666,13 @@ class _ScreenshotListItem extends StatelessWidget {
     return ListTile(
       leading: const Icon(Icons.image),
       title: Text(
-        _formatDate(record.createdAt, l10n),
+        record.fileName,
         style: Theme.of(context).textTheme.bodyMedium,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
       ),
       subtitle: Text(
-        '${record.formattedFileSize} • ${_getTypeName(record.type, l10n)}',
+        '${_formatDate(record.createdAt, l10n)} • ${record.formattedFileSize} • ${_getTypeName(record.type, l10n)}',
         style: Theme.of(context).textTheme.bodySmall,
       ),
       trailing: IconButton(
@@ -727,8 +770,18 @@ class _WindowListDialog extends StatelessWidget {
             final window = windows[index];
             return ListTile(
               leading: _buildWindowIcon(window),
-              title: Text(window.title),
-              subtitle: window.appName != null ? Text(window.appName!) : null,
+              title: Text(
+                window.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              subtitle: window.appName != null
+                  ? Text(
+                      window.appName!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    )
+                  : null,
               onTap: () => Navigator.of(context).pop(window.id),
             );
           },

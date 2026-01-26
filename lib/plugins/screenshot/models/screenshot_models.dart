@@ -18,6 +18,21 @@ enum ScreenshotType {
 /// 图片格式枚举
 enum ImageFormat { png, jpeg, webp }
 
+/// 历史记录时间段分组
+enum HistoryPeriod {
+  /// 今日
+  today,
+
+  /// 三天内
+  threeDays,
+
+  /// 一周内
+  week,
+
+  /// 一周前
+  older,
+}
+
 /// 截图记录模型
 class ScreenshotRecord {
   /// 唯一标识符
@@ -94,6 +109,11 @@ class ScreenshotRecord {
   /// 获取文件扩展名
   String get fileExtension {
     return filePath.split('.').last.toLowerCase();
+  }
+
+  /// 获取文件名（不含路径）
+  String get fileName {
+    return filePath.split(RegExp(r'[\\/]')).last;
   }
 
   /// 格式化文件大小显示

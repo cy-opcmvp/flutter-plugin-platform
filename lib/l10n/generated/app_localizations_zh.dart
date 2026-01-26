@@ -216,6 +216,67 @@ class AppLocalizationsZh extends AppLocalizations {
   String get common_info => '信息';
 
   @override
+  String get common_details => '详情';
+
+  @override
+  String get path_placeholders_title => '路径占位符说明';
+
+  @override
+  String get path_placeholders_description =>
+      '在配置路径时，可以使用以下占位符来代表系统目录。这些占位符会在运行时自动替换为实际路径。';
+
+  @override
+  String get path_placeholders_available => '可用的占位符';
+
+  @override
+  String get path_placeholder_documents_desc => '用户文档目录';
+
+  @override
+  String get path_placeholder_documents_example =>
+      'Windows: C:\\Users\\用户名\\Documents';
+
+  @override
+  String get path_placeholder_home_desc => '用户主目录';
+
+  @override
+  String get path_placeholder_home_example => 'Windows: C:\\Users\\用户名';
+
+  @override
+  String get path_placeholder_temp_desc => '系统临时目录';
+
+  @override
+  String get path_placeholder_temp_example =>
+      'Windows: C:\\Users\\用户名\\AppData\\Local\\Temp';
+
+  @override
+  String get path_placeholder_appdata_desc => '应用数据目录';
+
+  @override
+  String get path_placeholder_appdata_example =>
+      'Windows: C:\\Users\\用户名\\AppData\\Roaming';
+
+  @override
+  String get path_placeholders_usage => '使用方法';
+
+  @override
+  String get path_placeholders_usage_step1 => '在保存路径或文件名格式中输入占位符';
+
+  @override
+  String get path_placeholders_usage_step2 => '保存配置后，占位符会自动替换为实际路径';
+
+  @override
+  String get path_placeholders_usage_step3 => '下次截图时，会使用替换后的完整路径';
+
+  @override
+  String get path_placeholders_example_title => '使用示例';
+
+  @override
+  String get path_placeholders_example_input => '输入配置';
+
+  @override
+  String get path_placeholders_example_output => '实际路径';
+
+  @override
   String get error_unknown => '发生未知错误';
 
   @override
@@ -1959,6 +2020,78 @@ class AppLocalizationsZh extends AppLocalizations {
   String get screenshot_select_window => '选择窗口';
 
   @override
+  String get screenshot_window_capture_title => '窗口截图';
+
+  @override
+  String get screenshot_available_windows => '可用窗口';
+
+  @override
+  String get screenshot_no_windows => '没有可用的窗口';
+
+  @override
+  String get screenshot_recurring_tasks => '循环任务';
+
+  @override
+  String get screenshot_create_task => '创建任务';
+
+  @override
+  String get screenshot_create_recurring_task => '创建循环截图任务';
+
+  @override
+  String get screenshot_no_tasks => '暂无循环任务';
+
+  @override
+  String get screenshot_create_task_hint => '点击右上角 + 创建循环任务';
+
+  @override
+  String get screenshot_task_name => '任务名称';
+
+  @override
+  String get screenshot_task_name_required => '请输入任务名称';
+
+  @override
+  String get screenshot_interval => '间隔';
+
+  @override
+  String get screenshot_interval_required => '请输入间隔时间';
+
+  @override
+  String get screenshot_interval_invalid => '间隔必须在1秒到24小时之间';
+
+  @override
+  String get screenshot_infinite_execution => '无限执行';
+
+  @override
+  String get screenshot_total_shots => '总截图次数';
+
+  @override
+  String get screenshot_total_shots_required => '请输入总截图次数';
+
+  @override
+  String get screenshot_total_shots_invalid => '截图次数必须大于0';
+
+  @override
+  String get screenshot_use_default_directory => '使用默认目录';
+
+  @override
+  String get screenshot_save_directory => '保存目录';
+
+  @override
+  String get screenshot_interval_unit => '单位';
+
+  @override
+  String get screenshot_completed => '已完成';
+
+  @override
+  String get screenshot_pause_task => '暂停任务';
+
+  @override
+  String get screenshot_resume_task => '恢复任务';
+
+  @override
+  String get screenshot_delete_task => '删除任务';
+
+  @override
   String get screenshot_close_preview => '关闭预览';
 
   @override
@@ -1968,7 +2101,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get screenshot_saved_to_temp => '已保存到临时文件';
 
   @override
-  String get screenshot_copy_failed => '复制到剪贴板失败';
+  String get screenshot_copy_failed => '复制失败';
 
   @override
   String get screenshot_image_load_failed => '图片加载失败';
@@ -2127,6 +2260,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get screenshot_settings_save_path_hint => '[documents]/Screenshots';
 
   @override
+  String get screenshot_select_folder => '选择文件夹';
+
+  @override
   String get screenshot_settings_save_path_helper =>
       '可用占位符: [documents], [home], [temp]';
 
@@ -2183,6 +2319,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get screenshot_settings_json_saved => '配置已保存';
 
   @override
+  String get screenshot_settings_view_placeholders => '查看可用占位符';
+
+  @override
+  String get screenshot_settings_view_placeholders_desc => '查看路径中可以使用的占位符及其说明';
+
+  @override
   String get screenshot_tooltip_history => '历史记录';
 
   @override
@@ -2196,6 +2338,48 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get screenshot_confirm_capture => '确认截图';
+
+  @override
+  String get screenshot_copy_path => '复制路径';
+
+  @override
+  String get screenshot_copy_image => '复制图片';
+
+  @override
+  String get screenshot_path_copied => '路径已复制';
+
+  @override
+  String get screenshot_image_copied => '图片已复制';
+
+  @override
+  String get screenshot_open_folder => '打开文件夹';
+
+  @override
+  String get screenshot_open_folder_hint => '在文件管理器中打开截图文件夹';
+
+  @override
+  String get screenshot_folder_opened => '已打开截图文件夹';
+
+  @override
+  String get screenshot_open_folder_failed => '打开文件夹失败';
+
+  @override
+  String get screenshot_info_title => '截图信息';
+
+  @override
+  String get screenshot_info_path => '路径';
+
+  @override
+  String get screenshot_info_size => '大小';
+
+  @override
+  String get screenshot_info_type => '截图类型';
+
+  @override
+  String get screenshot_info_created => '创建时间';
+
+  @override
+  String get screenshot_info_dimensions => '图片尺寸';
 
   @override
   String get ui_retry => '重试';
@@ -2608,6 +2792,27 @@ class AppLocalizationsZh extends AppLocalizations {
   String get screenshot_history_hint => '开始截图后，历史记录将显示在这里';
 
   @override
+  String get screenshot_history_today => '今日';
+
+  @override
+  String get screenshot_history_three_days => '三天内';
+
+  @override
+  String get screenshot_history_this_week => '一周内';
+
+  @override
+  String get screenshot_history_older => '一周前';
+
+  @override
+  String get screenshot_history_items => '张截图';
+
+  @override
+  String get screenshot_history_refresh => '刷新';
+
+  @override
+  String get screenshot_history_load_failed => '加载历史记录失败';
+
+  @override
   String get screenshot_recent => '刚刚';
 
   @override
@@ -2653,15 +2858,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get screenshot_info_file_size => '文件大小';
-
-  @override
-  String get screenshot_info_type => '截图类型';
-
-  @override
-  String get screenshot_info_created => '创建时间';
-
-  @override
-  String get screenshot_info_dimensions => '图片尺寸';
 
   @override
   String screenshot_shortcut_edit_pending(Object action) {
@@ -2779,4 +2975,22 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get worldclock_error_timezone_exists => '该时区已存在，请勿重复添加';
+
+  @override
+  String get screenshot_refresh => '刷新';
+
+  @override
+  String get screenshot_fullscreen_capture => '全屏截图';
+
+  @override
+  String get screenshot_fullscreen_hint => '截取整个屏幕';
+
+  @override
+  String get screenshot_capture => '截图';
+
+  @override
+  String get screenshot_capturing => '正在截图中...';
+
+  @override
+  String get screenshot_create => '创建';
 }

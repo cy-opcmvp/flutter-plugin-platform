@@ -217,6 +217,70 @@ class AppLocalizationsEn extends AppLocalizations {
   String get common_info => 'Info';
 
   @override
+  String get common_details => 'Details';
+
+  @override
+  String get path_placeholders_title => 'Path Placeholders Guide';
+
+  @override
+  String get path_placeholders_description =>
+      'When configuring paths, you can use these placeholders to represent system directories. Placeholders will be automatically replaced with actual paths at runtime.';
+
+  @override
+  String get path_placeholders_available => 'Available Placeholders';
+
+  @override
+  String get path_placeholder_documents_desc => 'User documents directory';
+
+  @override
+  String get path_placeholder_documents_example =>
+      'Windows: C:\\Users\\Username\\Documents';
+
+  @override
+  String get path_placeholder_home_desc => 'User home directory';
+
+  @override
+  String get path_placeholder_home_example => 'Windows: C:\\Users\\Username';
+
+  @override
+  String get path_placeholder_temp_desc => 'System temporary directory';
+
+  @override
+  String get path_placeholder_temp_example =>
+      'Windows: C:\\Users\\Username\\AppData\\Local\\Temp';
+
+  @override
+  String get path_placeholder_appdata_desc => 'Application data directory';
+
+  @override
+  String get path_placeholder_appdata_example =>
+      'Windows: C:\\Users\\Username\\AppData\\Roaming';
+
+  @override
+  String get path_placeholders_usage => 'How to Use';
+
+  @override
+  String get path_placeholders_usage_step1 =>
+      'Enter placeholders in save path or filename format';
+
+  @override
+  String get path_placeholders_usage_step2 =>
+      'After saving config, placeholders will be replaced with actual paths';
+
+  @override
+  String get path_placeholders_usage_step3 =>
+      'Next screenshot will use the replaced full path';
+
+  @override
+  String get path_placeholders_example_title => 'Example';
+
+  @override
+  String get path_placeholders_example_input => 'Input Config';
+
+  @override
+  String get path_placeholders_example_output => 'Actual Path';
+
+  @override
   String get error_unknown => 'An unknown error occurred';
 
   @override
@@ -2016,6 +2080,81 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screenshot_select_window => 'Select Window';
 
   @override
+  String get screenshot_window_capture_title => 'Window Capture';
+
+  @override
+  String get screenshot_available_windows => 'Available Windows';
+
+  @override
+  String get screenshot_no_windows => 'No available windows';
+
+  @override
+  String get screenshot_recurring_tasks => 'Recurring Tasks';
+
+  @override
+  String get screenshot_create_task => 'Create Task';
+
+  @override
+  String get screenshot_create_recurring_task => 'Create Recurring Task';
+
+  @override
+  String get screenshot_no_tasks => 'No recurring tasks';
+
+  @override
+  String get screenshot_create_task_hint =>
+      'Click + button to create recurring task';
+
+  @override
+  String get screenshot_task_name => 'Task Name';
+
+  @override
+  String get screenshot_task_name_required => 'Please enter task name';
+
+  @override
+  String get screenshot_interval => 'Interval';
+
+  @override
+  String get screenshot_interval_required => 'Please enter interval';
+
+  @override
+  String get screenshot_interval_invalid =>
+      'Interval must be between 1 second and 24 hours';
+
+  @override
+  String get screenshot_infinite_execution => 'Infinite execution';
+
+  @override
+  String get screenshot_total_shots => 'Total Shots';
+
+  @override
+  String get screenshot_total_shots_required => 'Please enter total shots';
+
+  @override
+  String get screenshot_total_shots_invalid =>
+      'Total shots must be greater than 0';
+
+  @override
+  String get screenshot_use_default_directory => 'Use default directory';
+
+  @override
+  String get screenshot_save_directory => 'Save Directory';
+
+  @override
+  String get screenshot_interval_unit => 'Unit';
+
+  @override
+  String get screenshot_completed => 'Completed';
+
+  @override
+  String get screenshot_pause_task => 'Pause Task';
+
+  @override
+  String get screenshot_resume_task => 'Resume Task';
+
+  @override
+  String get screenshot_delete_task => 'Delete Task';
+
+  @override
   String get screenshot_close_preview => 'Close Preview';
 
   @override
@@ -2026,7 +2165,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screenshot_saved_to_temp => 'Saved to temporary file';
 
   @override
-  String get screenshot_copy_failed => 'Failed to copy to clipboard';
+  String get screenshot_copy_failed => 'Copy failed';
 
   @override
   String get screenshot_image_load_failed => 'Image load failed';
@@ -2199,6 +2338,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screenshot_settings_save_path_hint => '[documents]/Screenshots';
 
   @override
+  String get screenshot_select_folder => 'Select Folder';
+
+  @override
   String get screenshot_settings_save_path_helper =>
       'Available placeholders: [documents], [home], [temp]';
 
@@ -2257,6 +2399,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screenshot_settings_json_saved => 'Configuration saved';
 
   @override
+  String get screenshot_settings_view_placeholders =>
+      'View Available Placeholders';
+
+  @override
+  String get screenshot_settings_view_placeholders_desc =>
+      'View available placeholders in path and their descriptions';
+
+  @override
   String get screenshot_tooltip_history => 'History';
 
   @override
@@ -2270,6 +2420,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get screenshot_confirm_capture => 'Confirm Capture';
+
+  @override
+  String get screenshot_copy_path => 'Copy Path';
+
+  @override
+  String get screenshot_copy_image => 'Copy Image';
+
+  @override
+  String get screenshot_path_copied => 'Path copied';
+
+  @override
+  String get screenshot_image_copied => 'Image copied';
+
+  @override
+  String get screenshot_open_folder => 'Open Folder';
+
+  @override
+  String get screenshot_open_folder_hint =>
+      'Open screenshot folder in file manager';
+
+  @override
+  String get screenshot_folder_opened => 'Screenshot folder opened';
+
+  @override
+  String get screenshot_open_folder_failed => 'Failed to open folder';
+
+  @override
+  String get screenshot_info_title => 'Screenshot Info';
+
+  @override
+  String get screenshot_info_path => 'Path';
+
+  @override
+  String get screenshot_info_size => 'Size';
+
+  @override
+  String get screenshot_info_type => 'Type';
+
+  @override
+  String get screenshot_info_created => 'Created';
+
+  @override
+  String get screenshot_info_dimensions => 'Dimensions';
 
   @override
   String get ui_retry => 'Retry';
@@ -2699,6 +2892,27 @@ class AppLocalizationsEn extends AppLocalizations {
       'Screenshot history will appear here after taking screenshots';
 
   @override
+  String get screenshot_history_today => 'Today';
+
+  @override
+  String get screenshot_history_three_days => 'Last 3 Days';
+
+  @override
+  String get screenshot_history_this_week => 'This Week';
+
+  @override
+  String get screenshot_history_older => 'Older';
+
+  @override
+  String get screenshot_history_items => 'screenshots';
+
+  @override
+  String get screenshot_history_refresh => 'Refresh';
+
+  @override
+  String get screenshot_history_load_failed => 'Failed to load history';
+
+  @override
   String get screenshot_recent => 'Just now';
 
   @override
@@ -2744,15 +2958,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get screenshot_info_file_size => 'File Size';
-
-  @override
-  String get screenshot_info_type => 'Screenshot Type';
-
-  @override
-  String get screenshot_info_created => 'Created';
-
-  @override
-  String get screenshot_info_dimensions => 'Dimensions';
 
   @override
   String screenshot_shortcut_edit_pending(Object action) {
@@ -2874,4 +3079,22 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get worldclock_error_timezone_exists =>
       'This timezone already exists, please do not add it again';
+
+  @override
+  String get screenshot_refresh => 'Refresh';
+
+  @override
+  String get screenshot_fullscreen_capture => 'Fullscreen Capture';
+
+  @override
+  String get screenshot_fullscreen_hint => 'Capture the entire screen';
+
+  @override
+  String get screenshot_capture => 'Capture';
+
+  @override
+  String get screenshot_capturing => 'Capturing...';
+
+  @override
+  String get screenshot_create => 'Create';
 }

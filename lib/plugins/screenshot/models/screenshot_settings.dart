@@ -101,7 +101,6 @@ class ScreenshotSettings extends BasePluginSettings {
       shortcuts: {
         'regionCapture': 'Ctrl+Shift+A',
         'fullScreenCapture': 'Ctrl+Shift+F',
-        'windowCapture': 'Ctrl+Shift+W',
         'showHistory': 'Ctrl+Shift+H',
         'showSettings': 'Ctrl+Shift+S',
       },

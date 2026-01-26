@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../ui/widgets/json_editor_screen.dart';
+import '../../../../ui/screens/path_placeholders_info_screen.dart';
 import '../../../../core/services/json_validator.dart';
 import '../config/screenshot_config_defaults.dart';
 import '../models/screenshot_settings.dart';
@@ -578,8 +579,6 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
         return l10n.screenshot_shortcut_region;
       case 'fullScreenCapture':
         return l10n.screenshot_shortcut_fullscreen;
-      case 'windowCapture':
-        return l10n.screenshot_shortcut_window;
       case 'showHistory':
         return l10n.screenshot_shortcut_history;
       case 'showSettings':
@@ -850,12 +849,40 @@ class _SavePathDialogState extends State<_SavePathDialog> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          TextField(
-            controller: _controller,
-            decoration: InputDecoration(
-              labelText: l10n.screenshot_savePath,
-              hintText: l10n.screenshot_settings_save_path_hint,
-              helperText: l10n.screenshot_settings_save_path_helper,
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _controller,
+                  decoration: InputDecoration(
+                    labelText: l10n.screenshot_savePath,
+                    hintText: l10n.screenshot_settings_save_path_hint,
+                    helperText: l10n.screenshot_settings_save_path_helper,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                icon: const Icon(Icons.folder_open),
+                tooltip: l10n.screenshot_select_folder,
+                onPressed: _selectFolder,
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // 查看可用占位符按钮
+          TextButton.icon(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const PathPlaceholdersInfoScreen(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.info_outline, size: 18),
+            label: Text(l10n.screenshot_settings_view_placeholders),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.primary,
             ),
           ),
         ],
@@ -874,6 +901,25 @@ class _SavePathDialogState extends State<_SavePathDialog> {
         ),
       ],
     );
+  }
+
+  /// 选择文件夹
+  Future<void> _selectFolder() async {
+    try {
+      // TODO: 实现跨平台文件夹选择
+      // 当前只显示提示，实际选择需要平台特定代码或第三方包
+      // 可以使用 file_picker 包：https://pub.dev/packages/file_picker
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('文件夹选择功能开发中，请手动输入路径'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('Failed to select folder: $e');
+    }
   }
 }
 

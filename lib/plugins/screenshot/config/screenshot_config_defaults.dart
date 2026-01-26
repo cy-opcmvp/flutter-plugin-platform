@@ -22,7 +22,6 @@ class ScreenshotConfigDefaults {
   "shortcuts": {
     "regionCapture": "Ctrl+Shift+A",
     "fullScreenCapture": "Ctrl+Shift+F",
-    "windowCapture": "Ctrl+Shift+W",
     "showHistory": "Ctrl+Shift+H",
     "showSettings": "Ctrl+Shift+S"
   },
@@ -86,7 +85,6 @@ class ScreenshotConfigDefaults {
     "_help": "快捷键设置",
     "regionCapture": "Ctrl+Shift+A",
     "fullScreenCapture": "Ctrl+Shift+F",
-    "windowCapture": "Ctrl+Shift+W",
     "showHistory": "Ctrl+Shift+H",
     "showSettings": "Ctrl+Shift+S"
   },
@@ -200,7 +198,6 @@ class ScreenshotConfigDefaults {
       "properties": {
         "regionCapture": {"type": "string"},
         "fullScreenCapture": {"type": "string"},
-        "windowCapture": {"type": "string"},
         "showHistory": {"type": "string"},
         "showSettings": {"type": "string"}
       }

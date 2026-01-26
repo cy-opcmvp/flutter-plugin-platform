@@ -156,8 +156,11 @@ class FileManagerService {
       final file = File(filePath);
       await file.writeAsBytes(imageBytes);
 
-      debugPrint('Screenshot saved to: $filePath');
-      return filePath;
+      // 规范化路径（Windows 上统一使用反斜杠）
+      final normalizedPath = path.normalize(filePath);
+
+      debugPrint('Screenshot saved to: $normalizedPath');
+      return normalizedPath;
     } catch (e) {
       debugPrint('Failed to save screenshot: $e');
       rethrow;

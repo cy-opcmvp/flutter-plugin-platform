@@ -1,12 +1,19 @@
 library;
 
 import 'dart:io';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../models/screenshot_models.dart';
+import '../models/screenshot_settings.dart';
+import '../services/clipboard_service.dart';
+import '../utils/history_grouper.dart';
 import '../screenshot_plugin.dart';
 
 /// 截图历史记录界面
+///
+/// 支持按时间段分组显示，每个分组独立折叠和懒加载
 class ScreenshotHistoryScreen extends StatefulWidget {
   final ScreenshotPlugin plugin;
 
@@ -18,9 +25,29 @@ class ScreenshotHistoryScreen extends StatefulWidget {
 }
 
 class _ScreenshotHistoryScreenState extends State<ScreenshotHistoryScreen> {
+  /// 分组后的历史记录
+  Future<Map<HistoryPeriod, List<ScreenshotRecord>>>? _groupedRecords;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadGroupedRecords();
+  }
+
+  /// 加载并分组历史记录
+  Future<void> _loadGroupedRecords() async {
+    final allRecords = widget.plugin.screenshots;
+
+    // 先过滤掉文件不存在的记录，再按时间段分组
+    final grouped = await HistoryGrouper.groupAndFilter(allRecords);
+
+    setState(() {
+      _groupedRecords = Future.value(grouped);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final screenshots = widget.plugin.screenshots;
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
@@ -30,17 +57,106 @@ class _ScreenshotHistoryScreenState extends State<ScreenshotHistoryScreen> {
         foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
         elevation: 0,
         actions: [
-          if (screenshots.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.delete_sweep),
-              onPressed: _confirmClearAll,
-              tooltip: l10n.screenshot_clear_history,
-            ),
+          // 刷新按钮
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _loadGroupedRecords,
+            tooltip: l10n.screenshot_history_refresh,
+          ),
+          // 清空所有按钮（如果有记录）
+          IconButton(
+            icon: const Icon(Icons.delete_sweep),
+            onPressed: _confirmClearAll,
+            tooltip: l10n.screenshot_clear_history,
+          ),
         ],
       ),
-      body: screenshots.isEmpty
-          ? _buildEmptyState()
-          : _buildHistoryGrid(screenshots),
+      body: FutureBuilder<Map<HistoryPeriod, List<ScreenshotRecord>>>(
+        future: _groupedRecords,
+        builder: (context, snapshot) {
+          // 加载中
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          // 加载出错
+          if (snapshot.hasError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline,
+                      size: 64, color: Theme.of(context).colorScheme.error),
+                  const SizedBox(height: 16),
+                  Text(
+                    l10n.screenshot_history_load_failed,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    snapshot.error.toString(),
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            );
+          }
+
+          final groups = snapshot.data!;
+
+          // 所有分组都为空
+          if (groups.values.every((list) => list.isEmpty)) {
+            return _buildEmptyState();
+          }
+
+          // 显示分组列表
+          return ListView(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            children: [
+              // 今日
+              if (groups[HistoryPeriod.today]!.isNotEmpty)
+                _HistoryGroupSection(
+                  period: HistoryPeriod.today,
+                  groupName: l10n.screenshot_history_today,
+                  allRecords: groups[HistoryPeriod.today]!,
+                  onView: _viewScreenshot,
+                  onDelete: _deleteScreenshot,
+                ),
+
+              // 三天内
+              if (groups[HistoryPeriod.threeDays]!.isNotEmpty)
+                _HistoryGroupSection(
+                  period: HistoryPeriod.threeDays,
+                  groupName: l10n.screenshot_history_three_days,
+                  allRecords: groups[HistoryPeriod.threeDays]!,
+                  onView: _viewScreenshot,
+                  onDelete: _deleteScreenshot,
+                ),
+
+              // 一周内
+              if (groups[HistoryPeriod.week]!.isNotEmpty)
+                _HistoryGroupSection(
+                  period: HistoryPeriod.week,
+                  groupName: l10n.screenshot_history_this_week,
+                  allRecords: groups[HistoryPeriod.week]!,
+                  onView: _viewScreenshot,
+                  onDelete: _deleteScreenshot,
+                ),
+
+              // 一周前
+              if (groups[HistoryPeriod.older]!.isNotEmpty)
+                _HistoryGroupSection(
+                  period: HistoryPeriod.older,
+                  groupName: l10n.screenshot_history_older,
+                  allRecords: groups[HistoryPeriod.older]!,
+                  onView: _viewScreenshot,
+                  onDelete: _deleteScreenshot,
+                ),
+            ],
+          );
+        },
+      ),
     );
   }
 
@@ -75,28 +191,6 @@ class _ScreenshotHistoryScreenState extends State<ScreenshotHistoryScreen> {
     );
   }
 
-  /// 构建历史记录网格
-  Widget _buildHistoryGrid(List<ScreenshotRecord> screenshots) {
-    return GridView.builder(
-      padding: const EdgeInsets.all(8),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 8,
-        childAspectRatio: 16 / 9,
-      ),
-      itemCount: screenshots.length,
-      itemBuilder: (context, index) {
-        final record = screenshots[index];
-        return _ScreenshotThumbnail(
-          record: record,
-          onTap: () => _viewScreenshot(record),
-          onDelete: () => _deleteScreenshot(record.id),
-        );
-      },
-    );
-  }
-
   /// 查看截图
   void _viewScreenshot(ScreenshotRecord record) {
     Navigator.of(context).push(
@@ -110,7 +204,8 @@ class _ScreenshotHistoryScreenState extends State<ScreenshotHistoryScreen> {
   void _deleteScreenshot(String screenshotId) async {
     await widget.plugin.deleteScreenshot(screenshotId);
     if (mounted) {
-      setState(() {});
+      // 重新加载数据
+      _loadGroupedRecords();
     }
   }
 
@@ -132,7 +227,8 @@ class _ScreenshotHistoryScreenState extends State<ScreenshotHistoryScreen> {
               await widget.plugin.clearHistory();
               if (mounted) {
                 Navigator.of(context).pop();
-                setState(() {});
+                // 重新加载数据
+                _loadGroupedRecords();
               }
             },
             style: FilledButton.styleFrom(
@@ -140,6 +236,170 @@ class _ScreenshotHistoryScreenState extends State<ScreenshotHistoryScreen> {
             ),
             child: Text(l10n.screenshot_clear),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 历史记录分组组件
+///
+/// 独立管理每个时间段的展开/折叠状态和懒加载
+class _HistoryGroupSection extends StatefulWidget {
+  final HistoryPeriod period;
+  final String groupName;
+  final List<ScreenshotRecord> allRecords;
+  final void Function(ScreenshotRecord) onView;
+  final void Function(String) onDelete;
+
+  const _HistoryGroupSection({
+    required this.period,
+    required this.groupName,
+    required this.allRecords,
+    required this.onView,
+    required this.onDelete,
+  });
+
+  @override
+  State<_HistoryGroupSection> createState() => _HistoryGroupSectionState();
+}
+
+class _HistoryGroupSectionState extends State<_HistoryGroupSection> {
+  /// 是否展开
+  bool _isExpanded = false;
+
+  /// 当前可见的记录（懒加载）
+  final List<ScreenshotRecord> _visibleRecords = [];
+
+  /// 滚动控制器
+  final ScrollController _scrollController = ScrollController();
+
+  /// 每次加载的图片数量（3 行 × 3 列 = 9 张）
+  static const int _pageSize = 9;
+
+  /// 是否正在加载
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  /// 监听滚动，触发懒加载
+  void _onScroll() {
+    if (!_scrollController.hasClients || _isLoading) return;
+
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.position.pixels;
+
+    // 当滚动到距离底部 200px 时加载更多
+    if (maxScroll - currentScroll < 200 && _hasMore) {
+      _loadMore();
+    }
+  }
+
+  /// 是否还有更多可加载
+  bool get _hasMore =>
+      _visibleRecords.length < widget.allRecords.length;
+
+  /// 加载更多记录
+  Future<void> _loadMore() async {
+    if (_isLoading || !_hasMore) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    // 模拟异步加载（实际上数据已在内存中）
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    final start = _visibleRecords.length;
+    final end = math.min(start + _pageSize, widget.allRecords.length);
+
+    setState(() {
+      _visibleRecords.addAll(widget.allRecords.sublist(start, end));
+      _isLoading = false;
+    });
+  }
+
+  /// 切换展开/折叠状态
+  void _toggleExpanded() {
+    setState(() {
+      _isExpanded = !_isExpanded;
+      // 首次展开时加载数据
+      if (_isExpanded && _visibleRecords.isEmpty) {
+        _loadMore();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      child: Column(
+        children: [
+          // 分组标题栏
+          ListTile(
+            title: Text(
+              widget.groupName,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            subtitle: Text(
+              '${widget.allRecords.length} ${l10n.screenshot_history_items}'),
+            trailing: Icon(
+              _isExpanded ? Icons.expand_less : Icons.expand_more,
+            ),
+            onTap: _toggleExpanded,
+          ),
+
+          // 分组内容（可折叠）
+          if (_isExpanded)
+            SizedBox(
+              height: 400, // 限制高度，避免一次性渲染太多
+              child: GridView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.all(8),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 8,
+                  mainAxisSpacing: 8,
+                  childAspectRatio: 16 / 9,
+                ),
+                itemCount: _visibleRecords.length +
+                    (_hasMore ? 1 : 0),
+                itemBuilder: (context, index) {
+                  // 加载更多指示器
+                  if (index == _visibleRecords.length && _hasMore) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(16),
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+
+                  // 正常的缩略图
+                  final record = _visibleRecords[index];
+                  return _ScreenshotThumbnail(
+                    record: record,
+                    onTap: () => widget.onView(record),
+                    onDelete: () => widget.onDelete(record.id),
+                  );
+                },
+              ),
+            ),
         ],
       ),
     );
@@ -199,16 +459,7 @@ class _ScreenshotThumbnail extends StatelessWidget {
   }
 
   Widget _buildThumbnail(BuildContext context) {
-    // 检查文件是否存在
     final file = File(record.filePath);
-    if (!file.existsSync()) {
-      return Container(
-        color: Colors.grey[300],
-        child: const Center(
-          child: Icon(Icons.broken_image, size: 48, color: Colors.grey),
-        ),
-      );
-    }
 
     // 显示缩略图
     return Image.file(
@@ -231,7 +482,10 @@ class _ScreenshotThumbnail extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.bottomCenter,
           end: Alignment.topCenter,
-          colors: [Colors.black.withOpacity(0.7), Colors.transparent],
+          colors: [
+            Colors.black.withOpacity(0.7),
+            Colors.transparent,
+          ],
         ),
       ),
       padding: const EdgeInsets.all(8),
@@ -239,37 +493,24 @@ class _ScreenshotThumbnail extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            children: [
-              Icon(_getTypeIcon(record.type), size: 16, color: Colors.white),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  _formatDate(context, record.createdAt),
-                  style: const TextStyle(color: Colors.white, fontSize: 12),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
+          // 文件名
           Text(
-            record.formattedFileSize,
+            record.fileName,
+            style: const TextStyle(color: Colors.white, fontSize: 13),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 2),
+          // 时间和大小
+          Text(
+            '${_formatDate(context, record.createdAt)} • ${record.formattedFileSize}',
             style: const TextStyle(color: Colors.white70, fontSize: 11),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
     );
-  }
-
-  IconData _getTypeIcon(ScreenshotType type) {
-    switch (type) {
-      case ScreenshotType.fullScreen:
-        return Icons.fullscreen;
-      case ScreenshotType.region:
-        return Icons.crop_square;
-      case ScreenshotType.window:
-        return Icons.window;
-    }
   }
 
   String _formatDate(BuildContext context, DateTime date) {
@@ -305,16 +546,48 @@ class _ScreenshotPreviewScreen extends StatefulWidget {
 class _ScreenshotPreviewScreenState extends State<_ScreenshotPreviewScreen> {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black87,
-        title: Text(_formatDate(widget.record.createdAt)),
+        foregroundColor: Colors.white,
+        leading: Container(
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.2),
+            shape: BoxShape.circle,
+          ),
+          child: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.of(context).pop(),
+            tooltip: l10n.common_back,
+          ),
+        ),
+        title: Text(
+          widget.record.fileName,
+          style: const TextStyle(fontSize: 16),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
         actions: [
+          // 复制路径
+          IconButton(
+            icon: const Icon(Icons.link),
+            onPressed: _copyFilePath,
+            tooltip: l10n.screenshot_copy_path,
+          ),
+          // 复制图片
+          IconButton(
+            icon: const Icon(Icons.copy),
+            onPressed: _copyImage,
+            tooltip: l10n.screenshot_copy_image,
+          ),
+          // 详细信息
           IconButton(
             icon: const Icon(Icons.info_outline),
             onPressed: _showInfo,
-            tooltip: '详细信息',
+            tooltip: l10n.common_details,
           ),
         ],
       ),
@@ -370,30 +643,106 @@ class _ScreenshotPreviewScreenState extends State<_ScreenshotPreviewScreen> {
   }
 
   void _showInfo() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('截图信息'),
+        title: Text(l10n.screenshot_info_title),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildInfoRow('文件路径', widget.record.filePath),
-            _buildInfoRow('文件大小', widget.record.formattedFileSize),
-            _buildInfoRow('截图类型', _getTypeName(widget.record.type)),
-            _buildInfoRow('创建时间', widget.record.createdAt.toString()),
+            _buildInfoRow(l10n.screenshot_info_path, widget.record.filePath),
+            _buildInfoRow(l10n.screenshot_info_size, widget.record.formattedFileSize),
+            _buildInfoRow(l10n.screenshot_info_type, _getTypeName(widget.record.type)),
+            _buildInfoRow(l10n.screenshot_info_created, widget.record.createdAt.toString()),
             if (widget.record.dimensions != null)
-              _buildInfoRow('图片尺寸', widget.record.dimensions!),
+              _buildInfoRow(l10n.screenshot_info_dimensions, widget.record.dimensions!),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('关闭'),
+            child: Text(l10n.common_close),
           ),
         ],
       ),
     );
+  }
+
+  /// 复制文件路径到剪贴板
+  void _copyFilePath() async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      await Clipboard.setData(ClipboardData(text: widget.record.filePath));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.screenshot_path_copied),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${l10n.screenshot_copy_failed}: $e'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
+
+  /// 复制图片到剪贴板
+  void _copyImage() async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final file = File(widget.record.filePath);
+      if (!await file.exists()) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.screenshot_file_not_exists),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+        return;
+      }
+
+      // 读取图片数据
+      final imageBytes = await file.readAsBytes();
+
+      // 使用 ClipboardService 复制图片到剪贴板
+      final clipboardService = ClipboardService();
+      final success = await clipboardService.copyContent(
+        widget.record.filePath,
+        contentType: ClipboardContentType.image,
+        imageBytes: imageBytes,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              success ? l10n.screenshot_image_copied : '${l10n.screenshot_copy_failed}',
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${l10n.screenshot_copy_failed}: $e'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildInfoRow(String label, String value) {
@@ -413,13 +762,6 @@ class _ScreenshotPreviewScreenState extends State<_ScreenshotPreviewScreen> {
         ],
       ),
     );
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.year}年${date.month}月${date.day}日 '
-        '${date.hour.toString().padLeft(2, '0')}:'
-        '${date.minute.toString().padLeft(2, '0')}:'
-        '${date.second.toString().padLeft(2, '0')}';
   }
 
   String _getTypeName(ScreenshotType type) {

@@ -44,6 +44,10 @@ class PluginDataStorage implements IDataStorage {
         await _prefs!.setBool(fullKey, value);
       } else if (value is List<String>) {
         await _prefs!.setStringList(fullKey, value);
+      } else if (value is List) {
+        // 其他 List 类型（如 List<Map>）转为 JSON 字符串存储
+        final jsonString = jsonEncode(value);
+        await _prefs!.setString(fullKey, jsonString);
       } else if (value is Map) {
         // Map 类型转为 JSON 字符串存储
         final jsonString = jsonEncode(value);
@@ -76,15 +80,29 @@ class PluginDataStorage implements IDataStorage {
 
       final value = _prefs!.get(fullKey);
 
-      // 特殊处理：如果需要的是 Map<String, dynamic> 且值是字符串
-      // 尝试解析 JSON
-      if (value is String && T.toString() == 'Map<String, dynamic>') {
-        try {
-          final decoded = jsonDecode(value) as Map<String, dynamic>;
-          return decoded as T;
-        } catch (e) {
-          debugPrint('PluginDataStorage: Failed to parse JSON for $key: $e');
-          return null;
+      // 如果值是字符串，尝试解析为复杂类型
+      if (value is String) {
+        // 检查是否需要解析为 Map<String, dynamic>
+        if (T.toString() == 'Map<String, dynamic>') {
+          try {
+            final decoded = jsonDecode(value) as Map<String, dynamic>;
+            return decoded as T;
+          } catch (e) {
+            debugPrint('PluginDataStorage: Failed to parse JSON for $key: $e');
+            return null;
+          }
+        }
+
+        // 检查是否需要解析为 List<dynamic> 或 List<Map>
+        if (T.toString() == 'List<dynamic>' ||
+            T.toString() == 'List<Map<String, dynamic>>') {
+          try {
+            final decoded = jsonDecode(value) as List<dynamic>;
+            return decoded as T;
+          } catch (e) {
+            debugPrint('PluginDataStorage: Failed to parse JSON list for $key: $e');
+            return null;
+          }
         }
       }
 

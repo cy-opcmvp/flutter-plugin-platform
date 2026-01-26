@@ -500,6 +500,120 @@ abstract class AppLocalizations {
   /// **'信息'**
   String get common_info;
 
+  /// No description provided for @common_details.
+  ///
+  /// In zh, this message translates to:
+  /// **'详情'**
+  String get common_details;
+
+  /// No description provided for @path_placeholders_title.
+  ///
+  /// In zh, this message translates to:
+  /// **'路径占位符说明'**
+  String get path_placeholders_title;
+
+  /// No description provided for @path_placeholders_description.
+  ///
+  /// In zh, this message translates to:
+  /// **'在配置路径时，可以使用以下占位符来代表系统目录。这些占位符会在运行时自动替换为实际路径。'**
+  String get path_placeholders_description;
+
+  /// No description provided for @path_placeholders_available.
+  ///
+  /// In zh, this message translates to:
+  /// **'可用的占位符'**
+  String get path_placeholders_available;
+
+  /// No description provided for @path_placeholder_documents_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'用户文档目录'**
+  String get path_placeholder_documents_desc;
+
+  /// No description provided for @path_placeholder_documents_example.
+  ///
+  /// In zh, this message translates to:
+  /// **'Windows: C:\\Users\\用户名\\Documents'**
+  String get path_placeholder_documents_example;
+
+  /// No description provided for @path_placeholder_home_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'用户主目录'**
+  String get path_placeholder_home_desc;
+
+  /// No description provided for @path_placeholder_home_example.
+  ///
+  /// In zh, this message translates to:
+  /// **'Windows: C:\\Users\\用户名'**
+  String get path_placeholder_home_example;
+
+  /// No description provided for @path_placeholder_temp_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'系统临时目录'**
+  String get path_placeholder_temp_desc;
+
+  /// No description provided for @path_placeholder_temp_example.
+  ///
+  /// In zh, this message translates to:
+  /// **'Windows: C:\\Users\\用户名\\AppData\\Local\\Temp'**
+  String get path_placeholder_temp_example;
+
+  /// No description provided for @path_placeholder_appdata_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'应用数据目录'**
+  String get path_placeholder_appdata_desc;
+
+  /// No description provided for @path_placeholder_appdata_example.
+  ///
+  /// In zh, this message translates to:
+  /// **'Windows: C:\\Users\\用户名\\AppData\\Roaming'**
+  String get path_placeholder_appdata_example;
+
+  /// No description provided for @path_placeholders_usage.
+  ///
+  /// In zh, this message translates to:
+  /// **'使用方法'**
+  String get path_placeholders_usage;
+
+  /// No description provided for @path_placeholders_usage_step1.
+  ///
+  /// In zh, this message translates to:
+  /// **'在保存路径或文件名格式中输入占位符'**
+  String get path_placeholders_usage_step1;
+
+  /// No description provided for @path_placeholders_usage_step2.
+  ///
+  /// In zh, this message translates to:
+  /// **'保存配置后，占位符会自动替换为实际路径'**
+  String get path_placeholders_usage_step2;
+
+  /// No description provided for @path_placeholders_usage_step3.
+  ///
+  /// In zh, this message translates to:
+  /// **'下次截图时，会使用替换后的完整路径'**
+  String get path_placeholders_usage_step3;
+
+  /// No description provided for @path_placeholders_example_title.
+  ///
+  /// In zh, this message translates to:
+  /// **'使用示例'**
+  String get path_placeholders_example_title;
+
+  /// No description provided for @path_placeholders_example_input.
+  ///
+  /// In zh, this message translates to:
+  /// **'输入配置'**
+  String get path_placeholders_example_input;
+
+  /// No description provided for @path_placeholders_example_output.
+  ///
+  /// In zh, this message translates to:
+  /// **'实际路径'**
+  String get path_placeholders_example_output;
+
   /// No description provided for @error_unknown.
   ///
   /// In zh, this message translates to:
@@ -3752,6 +3866,150 @@ abstract class AppLocalizations {
   /// **'选择窗口'**
   String get screenshot_select_window;
 
+  /// No description provided for @screenshot_window_capture_title.
+  ///
+  /// In zh, this message translates to:
+  /// **'窗口截图'**
+  String get screenshot_window_capture_title;
+
+  /// No description provided for @screenshot_available_windows.
+  ///
+  /// In zh, this message translates to:
+  /// **'可用窗口'**
+  String get screenshot_available_windows;
+
+  /// No description provided for @screenshot_no_windows.
+  ///
+  /// In zh, this message translates to:
+  /// **'没有可用的窗口'**
+  String get screenshot_no_windows;
+
+  /// No description provided for @screenshot_recurring_tasks.
+  ///
+  /// In zh, this message translates to:
+  /// **'循环任务'**
+  String get screenshot_recurring_tasks;
+
+  /// No description provided for @screenshot_create_task.
+  ///
+  /// In zh, this message translates to:
+  /// **'创建任务'**
+  String get screenshot_create_task;
+
+  /// No description provided for @screenshot_create_recurring_task.
+  ///
+  /// In zh, this message translates to:
+  /// **'创建循环截图任务'**
+  String get screenshot_create_recurring_task;
+
+  /// No description provided for @screenshot_no_tasks.
+  ///
+  /// In zh, this message translates to:
+  /// **'暂无循环任务'**
+  String get screenshot_no_tasks;
+
+  /// No description provided for @screenshot_create_task_hint.
+  ///
+  /// In zh, this message translates to:
+  /// **'点击右上角 + 创建循环任务'**
+  String get screenshot_create_task_hint;
+
+  /// No description provided for @screenshot_task_name.
+  ///
+  /// In zh, this message translates to:
+  /// **'任务名称'**
+  String get screenshot_task_name;
+
+  /// No description provided for @screenshot_task_name_required.
+  ///
+  /// In zh, this message translates to:
+  /// **'请输入任务名称'**
+  String get screenshot_task_name_required;
+
+  /// No description provided for @screenshot_interval.
+  ///
+  /// In zh, this message translates to:
+  /// **'间隔'**
+  String get screenshot_interval;
+
+  /// No description provided for @screenshot_interval_required.
+  ///
+  /// In zh, this message translates to:
+  /// **'请输入间隔时间'**
+  String get screenshot_interval_required;
+
+  /// No description provided for @screenshot_interval_invalid.
+  ///
+  /// In zh, this message translates to:
+  /// **'间隔必须在1秒到24小时之间'**
+  String get screenshot_interval_invalid;
+
+  /// No description provided for @screenshot_infinite_execution.
+  ///
+  /// In zh, this message translates to:
+  /// **'无限执行'**
+  String get screenshot_infinite_execution;
+
+  /// No description provided for @screenshot_total_shots.
+  ///
+  /// In zh, this message translates to:
+  /// **'总截图次数'**
+  String get screenshot_total_shots;
+
+  /// No description provided for @screenshot_total_shots_required.
+  ///
+  /// In zh, this message translates to:
+  /// **'请输入总截图次数'**
+  String get screenshot_total_shots_required;
+
+  /// No description provided for @screenshot_total_shots_invalid.
+  ///
+  /// In zh, this message translates to:
+  /// **'截图次数必须大于0'**
+  String get screenshot_total_shots_invalid;
+
+  /// No description provided for @screenshot_use_default_directory.
+  ///
+  /// In zh, this message translates to:
+  /// **'使用默认目录'**
+  String get screenshot_use_default_directory;
+
+  /// No description provided for @screenshot_save_directory.
+  ///
+  /// In zh, this message translates to:
+  /// **'保存目录'**
+  String get screenshot_save_directory;
+
+  /// No description provided for @screenshot_interval_unit.
+  ///
+  /// In zh, this message translates to:
+  /// **'单位'**
+  String get screenshot_interval_unit;
+
+  /// No description provided for @screenshot_completed.
+  ///
+  /// In zh, this message translates to:
+  /// **'已完成'**
+  String get screenshot_completed;
+
+  /// No description provided for @screenshot_pause_task.
+  ///
+  /// In zh, this message translates to:
+  /// **'暂停任务'**
+  String get screenshot_pause_task;
+
+  /// No description provided for @screenshot_resume_task.
+  ///
+  /// In zh, this message translates to:
+  /// **'恢复任务'**
+  String get screenshot_resume_task;
+
+  /// No description provided for @screenshot_delete_task.
+  ///
+  /// In zh, this message translates to:
+  /// **'删除任务'**
+  String get screenshot_delete_task;
+
   /// No description provided for @screenshot_close_preview.
   ///
   /// In zh, this message translates to:
@@ -3773,7 +4031,7 @@ abstract class AppLocalizations {
   /// No description provided for @screenshot_copy_failed.
   ///
   /// In zh, this message translates to:
-  /// **'复制到剪贴板失败'**
+  /// **'复制失败'**
   String get screenshot_copy_failed;
 
   /// No description provided for @screenshot_image_load_failed.
@@ -4076,6 +4334,12 @@ abstract class AppLocalizations {
   /// **'[documents]/Screenshots'**
   String get screenshot_settings_save_path_hint;
 
+  /// No description provided for @screenshot_select_folder.
+  ///
+  /// In zh, this message translates to:
+  /// **'选择文件夹'**
+  String get screenshot_select_folder;
+
   /// No description provided for @screenshot_settings_save_path_helper.
   ///
   /// In zh, this message translates to:
@@ -4184,6 +4448,18 @@ abstract class AppLocalizations {
   /// **'配置已保存'**
   String get screenshot_settings_json_saved;
 
+  /// No description provided for @screenshot_settings_view_placeholders.
+  ///
+  /// In zh, this message translates to:
+  /// **'查看可用占位符'**
+  String get screenshot_settings_view_placeholders;
+
+  /// No description provided for @screenshot_settings_view_placeholders_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'查看路径中可以使用的占位符及其说明'**
+  String get screenshot_settings_view_placeholders_desc;
+
   /// No description provided for @screenshot_tooltip_history.
   ///
   /// In zh, this message translates to:
@@ -4213,6 +4489,90 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'确认截图'**
   String get screenshot_confirm_capture;
+
+  /// No description provided for @screenshot_copy_path.
+  ///
+  /// In zh, this message translates to:
+  /// **'复制路径'**
+  String get screenshot_copy_path;
+
+  /// No description provided for @screenshot_copy_image.
+  ///
+  /// In zh, this message translates to:
+  /// **'复制图片'**
+  String get screenshot_copy_image;
+
+  /// No description provided for @screenshot_path_copied.
+  ///
+  /// In zh, this message translates to:
+  /// **'路径已复制'**
+  String get screenshot_path_copied;
+
+  /// No description provided for @screenshot_image_copied.
+  ///
+  /// In zh, this message translates to:
+  /// **'图片已复制'**
+  String get screenshot_image_copied;
+
+  /// No description provided for @screenshot_open_folder.
+  ///
+  /// In zh, this message translates to:
+  /// **'打开文件夹'**
+  String get screenshot_open_folder;
+
+  /// No description provided for @screenshot_open_folder_hint.
+  ///
+  /// In zh, this message translates to:
+  /// **'在文件管理器中打开截图文件夹'**
+  String get screenshot_open_folder_hint;
+
+  /// No description provided for @screenshot_folder_opened.
+  ///
+  /// In zh, this message translates to:
+  /// **'已打开截图文件夹'**
+  String get screenshot_folder_opened;
+
+  /// No description provided for @screenshot_open_folder_failed.
+  ///
+  /// In zh, this message translates to:
+  /// **'打开文件夹失败'**
+  String get screenshot_open_folder_failed;
+
+  /// No description provided for @screenshot_info_title.
+  ///
+  /// In zh, this message translates to:
+  /// **'截图信息'**
+  String get screenshot_info_title;
+
+  /// No description provided for @screenshot_info_path.
+  ///
+  /// In zh, this message translates to:
+  /// **'路径'**
+  String get screenshot_info_path;
+
+  /// No description provided for @screenshot_info_size.
+  ///
+  /// In zh, this message translates to:
+  /// **'大小'**
+  String get screenshot_info_size;
+
+  /// No description provided for @screenshot_info_type.
+  ///
+  /// In zh, this message translates to:
+  /// **'截图类型'**
+  String get screenshot_info_type;
+
+  /// No description provided for @screenshot_info_created.
+  ///
+  /// In zh, this message translates to:
+  /// **'创建时间'**
+  String get screenshot_info_created;
+
+  /// No description provided for @screenshot_info_dimensions.
+  ///
+  /// In zh, this message translates to:
+  /// **'图片尺寸'**
+  String get screenshot_info_dimensions;
 
   /// No description provided for @ui_retry.
   ///
@@ -4994,6 +5354,48 @@ abstract class AppLocalizations {
   /// **'开始截图后，历史记录将显示在这里'**
   String get screenshot_history_hint;
 
+  /// No description provided for @screenshot_history_today.
+  ///
+  /// In zh, this message translates to:
+  /// **'今日'**
+  String get screenshot_history_today;
+
+  /// No description provided for @screenshot_history_three_days.
+  ///
+  /// In zh, this message translates to:
+  /// **'三天内'**
+  String get screenshot_history_three_days;
+
+  /// No description provided for @screenshot_history_this_week.
+  ///
+  /// In zh, this message translates to:
+  /// **'一周内'**
+  String get screenshot_history_this_week;
+
+  /// No description provided for @screenshot_history_older.
+  ///
+  /// In zh, this message translates to:
+  /// **'一周前'**
+  String get screenshot_history_older;
+
+  /// No description provided for @screenshot_history_items.
+  ///
+  /// In zh, this message translates to:
+  /// **'张截图'**
+  String get screenshot_history_items;
+
+  /// No description provided for @screenshot_history_refresh.
+  ///
+  /// In zh, this message translates to:
+  /// **'刷新'**
+  String get screenshot_history_refresh;
+
+  /// No description provided for @screenshot_history_load_failed.
+  ///
+  /// In zh, this message translates to:
+  /// **'加载历史记录失败'**
+  String get screenshot_history_load_failed;
+
   /// No description provided for @screenshot_recent.
   ///
   /// In zh, this message translates to:
@@ -5060,24 +5462,6 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'文件大小'**
   String get screenshot_info_file_size;
-
-  /// No description provided for @screenshot_info_type.
-  ///
-  /// In zh, this message translates to:
-  /// **'截图类型'**
-  String get screenshot_info_type;
-
-  /// No description provided for @screenshot_info_created.
-  ///
-  /// In zh, this message translates to:
-  /// **'创建时间'**
-  String get screenshot_info_created;
-
-  /// No description provided for @screenshot_info_dimensions.
-  ///
-  /// In zh, this message translates to:
-  /// **'图片尺寸'**
-  String get screenshot_info_dimensions;
 
   /// No description provided for @screenshot_shortcut_edit_pending.
   ///
@@ -5306,6 +5690,42 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'该时区已存在，请勿重复添加'**
   String get worldclock_error_timezone_exists;
+
+  /// No description provided for @screenshot_refresh.
+  ///
+  /// In zh, this message translates to:
+  /// **'刷新'**
+  String get screenshot_refresh;
+
+  /// No description provided for @screenshot_fullscreen_capture.
+  ///
+  /// In zh, this message translates to:
+  /// **'全屏截图'**
+  String get screenshot_fullscreen_capture;
+
+  /// No description provided for @screenshot_fullscreen_hint.
+  ///
+  /// In zh, this message translates to:
+  /// **'截取整个屏幕'**
+  String get screenshot_fullscreen_hint;
+
+  /// No description provided for @screenshot_capture.
+  ///
+  /// In zh, this message translates to:
+  /// **'截图'**
+  String get screenshot_capture;
+
+  /// No description provided for @screenshot_capturing.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在截图中...'**
+  String get screenshot_capturing;
+
+  /// No description provided for @screenshot_create.
+  ///
+  /// In zh, this message translates to:
+  /// **'创建'**
+  String get screenshot_create;
 }
 
 class _AppLocalizationsDelegate

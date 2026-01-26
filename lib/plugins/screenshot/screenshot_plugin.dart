@@ -15,6 +15,8 @@ import 'services/clipboard_service.dart';
 import 'services/hotkey_service.dart';
 import 'widgets/screenshot_main_widget.dart';
 import 'widgets/settings_screen.dart';
+import 'services/recurring_task_manager.dart';
+import 'models/recurring_screenshot_task.dart';
 
 /// 智能截图插件
 ///
@@ -42,6 +44,10 @@ class ScreenshotPlugin extends PlatformPluginBase {
   late FileManagerService _fileManager;
   late ClipboardService _clipboard;
   late HotkeyService _hotkeyService;
+  late RecurringTaskManager _taskManager;
+
+  /// 获取文件管理器服务（用于外部访问）
+  FileManagerService get fileManager => _fileManager;
 
   // 用于触发UI更新的回调
   VoidCallback? _onStateChanged;
@@ -117,6 +123,14 @@ class ScreenshotPlugin extends PlatformPluginBase {
       _clipboard = ClipboardService();
       _hotkeyService = HotkeyService();
 
+      // 初始化任务管理器
+      _taskManager = RecurringTaskManager(
+        plugin: this,
+        onTasksChanged: () {
+          _onStateChanged?.call();
+        },
+      );
+
       // 初始化热键服务
       await _hotkeyService.initialize();
 
@@ -141,6 +155,10 @@ class ScreenshotPlugin extends PlatformPluginBase {
               .toList(),
         );
       }
+
+      // 清理遗留的循环任务列表（任务只在单次会话中有效）
+      await _context.dataStorage.remove('recurring_tasks');
+      debugPrint('ScreenshotPlugin: Cleared legacy recurring tasks');
 
       // 检查平台支持
       if (!isCurrentPlatformSupported) {
@@ -169,6 +187,13 @@ class ScreenshotPlugin extends PlatformPluginBase {
   @override
   Future<void> dispose() async {
     try {
+      // 停止所有循环任务
+      _taskManager.dispose();
+
+      // 删除任务列表（任务只在单次会话中有效，不保存到下次启动）
+      await _context.dataStorage.remove('recurring_tasks');
+      debugPrint('ScreenshotPlugin: Cleared recurring tasks on dispose');
+
       // 释放热键服务
       await _hotkeyService.dispose();
 
@@ -302,6 +327,63 @@ class ScreenshotPlugin extends PlatformPluginBase {
     _onStateChanged?.call();
   }
 
+  // ========== 循环截图任务管理 ==========
+
+  /// 获取所有循环任务
+  List<RecurringScreenshotTask> get recurringTasks => _taskManager.tasks;
+
+  /// 创建循环截图任务
+  RecurringScreenshotTask createRecurringTask({
+    required String name,
+    String? windowId,
+    String? windowTitle,
+    required int intervalSeconds,
+    int? totalShots,
+    String? saveDirectory,
+  }) {
+    final task = _taskManager.createTask(
+      name: name,
+      windowId: windowId,
+      windowTitle: windowTitle,
+      intervalSeconds: intervalSeconds,
+      totalShots: totalShots,
+      saveDirectory: saveDirectory,
+    );
+
+    // 保存到配置
+    _saveTasksConfig();
+
+    return task;
+  }
+
+  /// 暂停循环任务
+  void pauseRecurringTask(String taskId) {
+    _taskManager.pauseTask(taskId);
+    _saveTasksConfig();
+  }
+
+  /// 恢复循环任务
+  void resumeRecurringTask(String taskId) {
+    _taskManager.resumeTask(taskId);
+    _saveTasksConfig();
+  }
+
+  /// 删除循环任务
+  void deleteRecurringTask(String taskId) {
+    _taskManager.deleteTask(taskId);
+    _saveTasksConfig();
+  }
+
+  /// 保存任务配置
+  Future<void> _saveTasksConfig() async {
+    try {
+      final tasksJson = _taskManager.exportTasksToJson();
+      await _context.dataStorage.store('recurring_tasks', tasksJson);
+    } catch (e) {
+      debugPrint('Failed to save tasks config: $e');
+    }
+  }
+
   /// 显示原生区域截图窗口（桌面级）
   ///
   /// 返回 true 如果成功显示窗口
@@ -312,6 +394,35 @@ class ScreenshotPlugin extends PlatformPluginBase {
   /// 获取区域选择结果（用于轮询）
   Future<RegionSelectedEvent?> getRegionSelectionResult() {
     return _screenshotService.getRegionSelectionResult();
+  }
+
+  /// 轮询获取区域选择结果（用于快捷键触发）
+  Future<void> _pollForResultForHotkey() async {
+    const maxPolls = 300; // 最多轮询 30 秒（每 100ms 一次）
+    int polls = 0;
+
+    debugPrint('快捷键：开始轮询，最多 $maxPolls 次...');
+
+    while (polls < maxPolls) {
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      final result = await getRegionSelectionResult();
+      polls++;
+
+      if (result != null) {
+        debugPrint(
+          '快捷键：收到选择结果: ${result.x}, ${result.y}, ${result.width}x${result.height}',
+        );
+        // 用户选择了区域
+        final rect = result.toRect();
+        debugPrint('快捷键：开始捕获区域: $rect');
+        await captureRegion(rect);
+        debugPrint('快捷键：区域捕获完成');
+        return;
+      }
+    }
+
+    debugPrint('快捷键：轮询超时，用户可能取消了截图');
   }
 
   /// 处理截图
@@ -395,7 +506,11 @@ class ScreenshotPlugin extends PlatformPluginBase {
           final success = await showNativeRegionCapture();
           if (!success) {
             debugPrint('Failed to show native region capture window');
+            return;
           }
+
+          // 轮询获取选择结果
+          await _pollForResultForHotkey();
         },
       );
     }
@@ -408,18 +523,6 @@ class ScreenshotPlugin extends PlatformPluginBase {
         () async {
           debugPrint('Hotkey: Full screen capture triggered');
           await captureFullScreen();
-        },
-      );
-    }
-
-    // 注册窗口截图快捷键
-    if (shortcuts.containsKey('windowCapture')) {
-      await _hotkeyService.registerHotkey(
-        'windowCapture',
-        shortcuts['windowCapture']!,
-        () async {
-          debugPrint('Hotkey: Window capture triggered');
-          // TODO: 实现窗口截图功能
         },
       );
     }
