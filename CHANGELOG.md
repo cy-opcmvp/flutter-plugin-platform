@@ -5,6 +5,50 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added - 剪贴板服务完整实现
+- 📋 **Windows C++ 层实现** - 完成剪贴板服务的原生实现
+  * 注册 MethodChannel: `com.example.screenshot/clipboard`
+  * `getImageFromClipboard`: 从剪贴板获取 CF_DIB 格式图片
+    - 使用 Windows Clipboard API (OpenClipboard, GetClipboardData)
+    - 处理 BITMAPINFOHEADER 和像素数据
+    - 支持自上而下和自下而上两种 DIB 方向
+    - 计算行对齐（4字节边界）
+  * `hasImage`: 使用 IsClipboardFormatAvailable(CF_DIB) 检查剪贴板是否有图片
+  * `clearClipboard`: 使用 EmptyClipboard() 清空剪贴板
+  * 添加完整的错误处理和日志输出
+
+### Added - 系统级配置文件
+- ⚙️ **GlobalConfig Schema** - 创建完整的 JSON Schema 定义
+  * `global_config_schema.dart` (196 行)
+  * 定义所有配置项的验证规则（类型、枚举、模式、范围）
+  * 包含 $schema 声明（draft-07）
+  * 提供 Schema 版本和创建日期元数据
+- 📝 **GlobalConfig Defaults** - 创建默认配置和示例
+  * `global_config_defaults.dart` (318 行)
+  * `defaultConfig`: 干净的默认 JSON
+  * `exampleConfig`: 带详细注释的示例（_help, _options 字段）
+  * `cleanExample`: 自动清理注释后的示例
+  * `schemaJson`: 内嵌的 JSON Schema
+  * `_removeHelpFields()`: 递归清理帮助字段的工具方法
+
+### Changed - 配置实施进度更新
+- 📊 **更新进度文档** - 标记系统级配置为已完成
+  * CONFIG_IMPLEMENTATION_PROGRESS.md
+  * 系统级配置完成度：40% → 100%
+  * 添加 global_config_schema.dart 和 global_config_defaults.dart 完成标记
+
+### Technical Details
+- **新增文件**:
+  - lib/core/config/global_config_schema.dart (196 行)
+  - lib/core/config/global_config_defaults.dart (318 行)
+- **修改文件**:
+  - windows/runner/flutter_window.h (+4 行)
+  - windows/runner/flutter_window.cpp (+107 行)
+  - docs/reports/CONFIG_IMPLEMENTATION_PROGRESS.md (进度更新)
+- **总代码变更**: 5 个文件，+720 行，-49 行
+
 ## [0.4.4] - 2026-01-25
 
 ### Added - 外部插件国际化支持
