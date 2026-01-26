@@ -1,4 +1,4 @@
-﻿#include "native_screenshot_window.h"
+#include "native_screenshot_window.h"
 #include <dwmapi.h>
 #include <cwchar>
 #include <string>
@@ -10,16 +10,16 @@ static const wchar_t kClassName[] = L"NativeScreenshotWindow";
 
 // 文件日志函数
 static void LogToFile(const char* message) {
-  static std::ofstream logFile;
-  static bool initialized = false;
-  if (!initialized) {
-    logFile.open("C:\\temp\\screenshot_native.log", std::ios::app);
-    initialized = true;
-  }
-  if (logFile.is_open()) {
-    logFile << message << std::endl;
-    logFile.flush();
-  }
+    static std::ofstream logFile;
+    static bool initialized = false;
+    if (!initialized) {
+        logFile.open("C:\\\\temp\\\\screenshot_native.log", std::ios::app);
+        initialized = true;
+    }
+    if (logFile.is_open()) {
+        logFile << message << std::endl;
+        logFile.flush();
+    }
 }
 
 // 简单的日志输出宏
@@ -39,13 +39,23 @@ static void LogToFile(const char* message) {
     LogToFile(buffer); \
   } while (0)
 
+// 按钮尺寸
+const int BUTTON_WIDTH = 80;
+const int BUTTON_HEIGHT = 30;
+const int BUTTON_MARGIN = 10;
+
 NativeScreenshotWindow::NativeScreenshotWindow()
-    : hwnd_(NULL), onSelected_(NULL), onCancelled_(NULL), isSelecting_(false),
-      hBackgroundBitmap_(NULL), screenWidth_(0), screenHeight_(0) {
-    startPoint_.x = 0;
-    startPoint_.y = 0;
-    endPoint_.x = 0;
-    endPoint_.y = 0;
+    : hwnd_(NULL), onSelected_(NULL), onCancelled_(NULL),
+      state_(ScreenshotState::Idle),
+      isDragging_(false), activeHandle_(HandleType::None),
+      hBackgroundBitmap_(NULL), screenWidth_(0), screenHeight_(0),
+      isHoveringConfirm_(false), isHoveringCancel_(false),
+      hHoveredWindow_(NULL) {
+    ZeroMemory(&selectionRect_, sizeof(RECT));
+    ZeroMemory(&dragStartPoint_, sizeof(POINT));
+    ZeroMemory(&dragStartRect_, sizeof(RECT));
+    ZeroMemory(&confirmButtonRect_, sizeof(RECT));
+    ZeroMemory(&cancelButtonRect_, sizeof(RECT));
 }
 
 NativeScreenshotWindow::~NativeScreenshotWindow() {
@@ -70,7 +80,7 @@ bool NativeScreenshotWindow::Show(RegionSelectedCallback onSelected, CancelledCa
     wc.style = CS_HREDRAW | CS_VREDRAW;
     wc.lpfnWndProc = WindowProc;
     wc.hInstance = hInstance;
-    wc.hCursor = LoadCursor(NULL, IDC_CROSS);
+    wc.hCursor = LoadCursor(NULL, IDC_ARROW);
     wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
     wc.lpszClassName = kClassName;
 
@@ -96,7 +106,6 @@ bool NativeScreenshotWindow::Show(RegionSelectedCallback onSelected, CancelledCa
     }
 
     LOG_DEBUG("Creating window...");
-    // 不使用 WS_EX_LAYERED，使用普通窗口
     hwnd_ = CreateWindowExW(
         WS_EX_TOPMOST | WS_EX_TOOLWINDOW,
         kClassName,
@@ -132,13 +141,13 @@ bool NativeScreenshotWindow::Show(RegionSelectedCallback onSelected, CancelledCa
         TranslateMessage(&msg);
         DispatchMessage(&msg);
 
-        // 确保窗口始终在最上层（处理某些应用可能抢占焦点的情况）
+        // 确保窗口始终在最上层
         if (IsWindow(hwnd_)) {
-          SetWindowPos(hwnd_, HWND_TOPMOST, 0, 0, 0, 0,
+            SetWindowPos(hwnd_, HWND_TOPMOST, 0, 0, 0, 0,
                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
         } else {
-          LOG_DEBUG("Window destroyed, exiting message loop");
-          break;
+            LOG_DEBUG("Window destroyed, exiting message loop");
+            break;
         }
     }
     LOG_DEBUG("Message loop exited");
@@ -177,77 +186,160 @@ LRESULT CALLBACK NativeScreenshotWindow::WindowProc(HWND hwnd, UINT msg, WPARAM 
 LRESULT NativeScreenshotWindow::HandleMessage(UINT msg, WPARAM wParam, LPARAM lParam) {
     switch (msg) {
         case WM_PAINT: {
-            LOG_DEBUG("WM_PAINT");
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hwnd_, &ps);
 
-            // 始终绘制，即使没有选择时也显示背景
+            // 始终绘制
             DrawSelection(hdc);
 
             EndPaint(hwnd_, &ps);
             break;
         }
 
-        case WM_LBUTTONDOWN: {
-            LOG_DEBUG("WM_LBUTTONDOWN");
-            isSelecting_ = true;
-            startPoint_.x = LOWORD(lParam);
-            startPoint_.y = HIWORD(lParam);
-            endPoint_ = startPoint_;
-            LOG_DEBUG_FMT("Start point: (%d, %d)", startPoint_.x, startPoint_.y);
-            SetCapture(hwnd_);
-            InvalidateRect(hwnd_, NULL, TRUE);
+        case WM_MOUSEMOVE: {
+            int mouseX = LOWORD(lParam);
+            int mouseY = HIWORD(lParam);
+
+            if (state_ == ScreenshotState::Idle || state_ == ScreenshotState::Hovering) {
+                // 检测窗体
+                RECT windowRect;
+                DetectWindowAtPoint({mouseX, mouseY}, windowRect);
+
+                if (!IsRectEmpty(&windowRect)) {
+                    state_ = ScreenshotState::Hovering;
+                    selectionRect_ = windowRect;
+                    InvalidateRect(hwnd_, NULL, FALSE);
+                } else {
+                    state_ = ScreenshotState::Idle;
+                    InvalidateRect(hwnd_, NULL, FALSE);
+                }
+            }
+
+            if (isDragging_) {
+                UpdateSelectionFromDrag(mouseX, mouseY);
+                InvalidateRect(hwnd_, NULL, FALSE);
+            } else if (state_ == ScreenshotState::Selected) {
+                // 检查是否悬停在按钮上
+                POINT pt = {mouseX, mouseY};
+                bool wasHoveringConfirm = isHoveringConfirm_;
+                bool wasHoveringCancel = isHoveringCancel_;
+
+                isHoveringConfirm_ = PointInRect(pt, confirmButtonRect_);
+                isHoveringCancel_ = PointInRect(pt, cancelButtonRect_);
+
+                if (wasHoveringConfirm != isHoveringConfirm_ || wasHoveringCancel != isHoveringCancel_) {
+                    InvalidateRect(hwnd_, NULL, FALSE);
+                }
+
+                // 更新光标
+                HandleType handle = HitTest(mouseX, mouseY);
+                HCURSOR hCursor = GetHandleCursor(handle);
+                if (hCursor) {
+                    SetCursor(hCursor);
+                }
+            }
+
+            // 始终重绘以显示放大镜
+            InvalidateRect(hwnd_, NULL, FALSE);
             break;
         }
 
-        case WM_MOUSEMOVE: {
-            if (isSelecting_) {
-                endPoint_.x = LOWORD(lParam);
-                endPoint_.y = HIWORD(lParam);
-                // LOG_DEBUG_FMT("Mouse move: (%d, %d)", endPoint_.x, endPoint_.y);
-                InvalidateRect(hwnd_, NULL, FALSE);
+        case WM_LBUTTONDOWN: {
+            int mouseX = LOWORD(lParam);
+            int mouseY = HIWORD(lParam);
+
+            // 检查按钮点击
+            if (state_ == ScreenshotState::Selected) {
+                if (PointInRect({mouseX, mouseY}, confirmButtonRect_)) {
+                    LOG_DEBUG("Confirm button clicked");
+                    int width = selectionRect_.right - selectionRect_.left;
+                    int height = selectionRect_.bottom - selectionRect_.top;
+                    if (width >= 10 && height >= 10 && onSelected_) {
+                        onSelected_(selectionRect_.left, selectionRect_.top, width, height);
+                    }
+                    Close();
+                    return 0;
+                }
+
+                if (PointInRect({mouseX, mouseY}, cancelButtonRect_)) {
+                    LOG_DEBUG("Cancel button clicked");
+                    if (onCancelled_) {
+                        onCancelled_();
+                    }
+                    Close();
+                    return 0;
+                }
+            }
+
+            // 开始拖拽
+            if (state_ == ScreenshotState::Idle || state_ == ScreenshotState::Hovering) {
+                // 开始新的选择
+                isDragging_ = true;
+                activeHandle_ = HandleType::Move;
+                dragStartPoint_ = {mouseX, mouseY};
+
+                if (state_ == ScreenshotState::Hovering) {
+                    dragStartRect_ = selectionRect_;
+                } else {
+                    dragStartRect_ = {mouseX, mouseY, mouseX, mouseY};
+                }
+
+                SetCapture(hwnd_);
+            } else if (state_ == ScreenshotState::Selected) {
+                HandleType handle = HitTest(mouseX, mouseY);
+                if (handle != HandleType::None) {
+                    isDragging_ = true;
+                    activeHandle_ = handle;
+                    dragStartPoint_ = {mouseX, mouseY};
+                    dragStartRect_ = selectionRect_;
+                    SetCapture(hwnd_);
+                }
             }
             break;
         }
 
         case WM_LBUTTONUP: {
-            LOG_DEBUG("WM_LBUTTONUP");
-            if (isSelecting_) {
-                isSelecting_ = false;
+            if (isDragging_) {
+                isDragging_ = false;
                 ReleaseCapture();
 
-                int left = (startPoint_.x < endPoint_.x) ? startPoint_.x : endPoint_.x;
-                int top = (startPoint_.y < endPoint_.y) ? startPoint_.y : endPoint_.y;
-                int width = abs(endPoint_.x - startPoint_.x);
-                int height = abs(endPoint_.y - startPoint_.y);
-
-                LOG_DEBUG_FMT("Selection: (%d, %d) size: %dx%d", left, top, width, height);
+                NormalizeRect(selectionRect_);
+                int width = selectionRect_.right - selectionRect_.left;
+                int height = selectionRect_.bottom - selectionRect_.top;
 
                 if (width >= 10 && height >= 10) {
-                    LOG_DEBUG("Calling onSelected callback");
-                    if (onSelected_) {
-                        onSelected_(left, top, width, height);
-                    }
+                    state_ = ScreenshotState::Selected;
+
+                    // 计算按钮位置
+                    confirmButtonRect_.left = selectionRect_.right + BUTTON_MARGIN;
+                    confirmButtonRect_.top = selectionRect_.bottom + BUTTON_MARGIN;
+                    confirmButtonRect_.right = confirmButtonRect_.left + BUTTON_WIDTH;
+                    confirmButtonRect_.bottom = confirmButtonRect_.top + BUTTON_HEIGHT;
+
+                    cancelButtonRect_.left = confirmButtonRect_.right + BUTTON_MARGIN;
+                    cancelButtonRect_.top = confirmButtonRect_.top;
+                    cancelButtonRect_.right = cancelButtonRect_.left + BUTTON_WIDTH;
+                    cancelButtonRect_.bottom = cancelButtonRect_.top + BUTTON_HEIGHT;
+
+                    LOG_DEBUG_FMT("Selection complete: (%d, %d) size: %dx%d",
+                                selectionRect_.left, selectionRect_.top, width, height);
                 } else {
-                    LOG_DEBUG("Selection too small, calling onCancelled");
-                    if (onCancelled_) {
-                        onCancelled_();
-                    }
+                    state_ = ScreenshotState::Idle;
                 }
 
-                Close();
+                InvalidateRect(hwnd_, NULL, FALSE);
             }
             break;
         }
 
         case WM_KEYDOWN: {
-            LOG_DEBUG_FMT("WM_KEYDOWN, key code: 0x%X", static_cast<unsigned int>(wParam));
             if (wParam == VK_ESCAPE) {
                 LOG_DEBUG("ESC pressed, cancelling");
                 if (onCancelled_) {
                     onCancelled_();
                 }
                 Close();
+                return 0;
             }
             break;
         }
@@ -265,13 +357,12 @@ LRESULT NativeScreenshotWindow::HandleMessage(UINT msg, WPARAM wParam, LPARAM lP
 }
 
 void NativeScreenshotWindow::DrawSelection(HDC hdc) {
-    // 使用双缓冲技术避免闪烁
-    // 1. 创建内存 DC 和位图
+    // 使用双缓冲技术
     HDC hdcMem = CreateCompatibleDC(hdc);
     HBITMAP hbmMem = CreateCompatibleBitmap(hdc, screenWidth_, screenHeight_);
     HBITMAP hbmOld = (HBITMAP)SelectObject(hdcMem, hbmMem);
 
-    // 2. 在内存 DC 中绘制背景
+    // 绘制背景
     if (hBackgroundBitmap_) {
         HDC hdcBg = CreateCompatibleDC(hdc);
         HBITMAP hbmBgOld = (HBITMAP)SelectObject(hdcBg, hBackgroundBitmap_);
@@ -279,35 +370,255 @@ void NativeScreenshotWindow::DrawSelection(HDC hdc) {
         SelectObject(hdcBg, hbmBgOld);
         DeleteDC(hdcBg);
     } else {
-        // 如果没有捕获到背景，填充黑色
         RECT rect = {0, 0, screenWidth_, screenHeight_};
         HBRUSH hBrush = CreateSolidBrush(RGB(0, 0, 0));
         FillRect(hdcMem, &rect, hBrush);
         DeleteObject(hBrush);
     }
 
-    // 如果没有选择，只显示背景
-    if (!isSelecting_) {
-        // 一次性将内存 DC 拷贝到屏幕
-        BitBlt(hdc, 0, 0, screenWidth_, screenHeight_, hdcMem, 0, 0, SRCCOPY);
-        SelectObject(hdcMem, hbmOld);
-        DeleteObject(hbmMem);
-        DeleteDC(hdcMem);
+    // 绘制遮罩
+    RECT excludeRect;
+    if (state_ == ScreenshotState::Selected || state_ == ScreenshotState::Hovering) {
+        excludeRect = selectionRect_;
+    } else {
+        excludeRect = {0, 0, 0, 0};
+    }
+    DrawDimmedMask(hdcMem, excludeRect);
+
+    // 绘制选择框
+    if (state_ == ScreenshotState::Selected || state_ == ScreenshotState::Hovering) {
+        int left = selectionRect_.left;
+        int top = selectionRect_.top;
+        int right = selectionRect_.right;
+        int bottom = selectionRect_.bottom;
+
+        // 绘制边框
+        HPEN hPen = CreatePen(PS_SOLID, 3, RGB(255, 0, 0));
+        HPEN hOldPen = (HPEN)SelectObject(hdcMem, hPen);
+        SelectObject(hdcMem, (HBRUSH)GetStockObject(NULL_BRUSH));
+
+        if (state_ == ScreenshotState::Hovering) {
+            // 虚线边框
+            HPEN hDashPen = CreatePen(PS_DOT, 2, RGB(255, 0, 0));
+            SelectObject(hdcMem, hDashPen);
+            Rectangle(hdcMem, left, top, right, bottom);
+            SelectObject(hdcMem, hPen);
+            DeleteObject(hDashPen);
+        } else {
+            Rectangle(hdcMem, left, top, right, bottom);
+        }
+
+        SelectObject(hdcMem, hOldPen);
+        DeleteObject(hPen);
+
+        // 绘制8个控制点（仅在选中状态）
+        if (state_ == ScreenshotState::Selected) {
+            HBRUSH hHandleBrush = CreateSolidBrush(RGB(255, 0, 0));
+            SelectObject(hdcMem, hHandleBrush);
+
+            for (int i = (int)HandleType::TopLeft; i <= (int)HandleType::LeftCenter; i++) {
+                RECT handleRect = GetHandleRect((HandleType)i, selectionRect_);
+                Ellipse(hdcMem, handleRect.left, handleRect.top, handleRect.right, handleRect.bottom);
+            }
+
+            DeleteObject(hHandleBrush);
+
+            // 绘制尺寸文字
+            wchar_t text[64];
+            swprintf_s(text, 64, L"%d x %d", right - left, bottom - top);
+
+            HFONT hFont = CreateFont(18, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
+                                    DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+                                    DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, L"Arial");
+            HFONT hOldFont = (HFONT)SelectObject(hdcMem, hFont);
+
+            RECT textRect = {left, bottom + 5, left + 150, bottom + 30};
+            SetBkMode(hdcMem, TRANSPARENT);
+            SetTextColor(hdcMem, RGB(255, 255, 255));
+            DrawText(hdcMem, text, -1, &textRect, DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+
+            SelectObject(hdcMem, hOldFont);
+            DeleteObject(hFont);
+
+            // 绘制按钮
+            DrawButtons(hdcMem);
+        }
+    }
+
+    // 获取鼠标位置并绘制放大镜
+    POINT cursorPos;
+    GetCursorPos(&cursorPos);
+    ScreenToClient(hwnd_, &cursorPos);
+    DrawMagnifier(hdcMem, cursorPos.x, cursorPos.y);
+
+    // 一次性拷贝到屏幕
+    BitBlt(hdc, 0, 0, screenWidth_, screenHeight_, hdcMem, 0, 0, SRCCOPY);
+
+    SelectObject(hdcMem, hbmOld);
+    DeleteObject(hbmMem);
+    DeleteDC(hdcMem);
+}
+
+void NativeScreenshotWindow::DrawMagnifier(HDC hdc, int mouseX, int mouseY) {
+    // 如果鼠标不在窗口内，不绘制
+    if (mouseX < 0 || mouseX >= screenWidth_ || mouseY < 0 || mouseY >= screenHeight_) {
         return;
     }
 
-    int left = (startPoint_.x < endPoint_.x) ? startPoint_.x : endPoint_.x;
-    int top = (startPoint_.y < endPoint_.y) ? startPoint_.y : endPoint_.y;
-    int right = (startPoint_.x > endPoint_.x) ? startPoint_.x : endPoint_.x;
-    int bottom = (startPoint_.y > endPoint_.y) ? startPoint_.y : endPoint_.y;
+    // 放大镜位置（右上角，偏移20px）
+    int magX = mouseX + 20;
+    int magY = mouseY + 20;
 
-    // 3. 在内存 DC 中绘制非选中区域的半透明黑色遮罩
-    BLENDFUNCTION blend = { AC_SRC_OVER, 0, 160, 0 };  // 160/255 ≈ 63% 不透明度
+    // 确保放大镜不会超出屏幕
+    if (magX + MAGNIFIER_SIZE > screenWidth_) {
+        magX = mouseX - MAGNIFIER_SIZE - 20;
+    }
+    if (magY + MAGNIFIER_SIZE + 30 > screenHeight_) {
+        magY = mouseY - MAGNIFIER_SIZE - 30;
+    }
 
-    // 辅助函数：绘制单个区域的半透明遮罩
+    // 绘制放大镜背景
+    RECT magRect = {magX, magY, magX + MAGNIFIER_SIZE, magY + MAGNIFIER_SIZE};
+    HBRUSH hBgBrush = CreateSolidBrush(RGB(255, 255, 255));
+    FrameRect(hdc, &magRect, hBgBrush);
+    DeleteObject(hBgBrush);
+
+    // 绘制边框
+    HPEN hPen = CreatePen(PS_SOLID, 2, RGB(0, 0, 0));
+    HPEN hOldPen = (HPEN)SelectObject(hdc, hPen);
+    Rectangle(hdc, magRect.left, magRect.top, magRect.right, magRect.bottom);
+    SelectObject(hdc, hOldPen);
+    DeleteObject(hPen);
+
+    // 获取鼠标位置的像素颜色
+    COLORREF pixelColor = 0;
+    if (hBackgroundBitmap_) {
+        HDC hdcBg = CreateCompatibleDC(hdc);
+        HBITMAP hbmBgOld = (HBITMAP)SelectObject(hdcBg, hBackgroundBitmap_);
+        pixelColor = GetPixel(hdcBg, mouseX, mouseY);
+        SelectObject(hdcBg, hbmBgOld);
+        DeleteDC(hdcBg);
+    }
+
+    // 计算放大区域的源矩形
+    int zoomHalfSize = MAGNIFIER_SIZE / (2 * MAGNIFIER_ZOOM);
+    int srcX = mouseX - zoomHalfSize;
+    int srcY = mouseY - zoomHalfSize;
+
+    // 绘制放大的内容
+    if (hBackgroundBitmap_) {
+        HDC hdcBg = CreateCompatibleDC(hdc);
+        HBITMAP hbmBgOld = (HBITMAP)SelectObject(hdcBg, hBackgroundBitmap_);
+
+        StretchBlt(hdc, magX, magY, MAGNIFIER_SIZE, MAGNIFIER_SIZE,
+                   hdcBg, srcX, srcY, MAGNIFIER_SIZE / MAGNIFIER_ZOOM, MAGNIFIER_SIZE / MAGNIFIER_ZOOM,
+                   SRCCOPY);
+
+        SelectObject(hdcBg, hbmBgOld);
+        DeleteDC(hdcBg);
+    }
+
+    // 绘制中心十字
+    HPEN hCrossPen = CreatePen(PS_SOLID, 1, RGB(255, 0, 0));
+    HPEN hOldPen2 = (HPEN)SelectObject(hdc, hCrossPen);
+    MoveToEx(hdc, magX + MAGNIFIER_SIZE / 2, magY, NULL);
+    LineTo(hdc, magX + MAGNIFIER_SIZE / 2, magY + MAGNIFIER_SIZE);
+    MoveToEx(hdc, magX, magY + MAGNIFIER_SIZE / 2, NULL);
+    LineTo(hdc, magX + MAGNIFIER_SIZE, magY + MAGNIFIER_SIZE / 2);
+    SelectObject(hdc, hOldPen2);
+    DeleteObject(hCrossPen);
+
+    // 绘制RGB值（在放大镜下方）
+    int r = GetRValue(pixelColor);
+    int g = GetGValue(pixelColor);
+    int b = GetBValue(pixelColor);
+
+    wchar_t rgbText[64];
+    swprintf_s(rgbText, 64, L"RGB(%d, %d, %d)   #%02X%02X%02X", r, g, b, r, g, b);
+
+    RECT rgbRect = {magX, magY + MAGNIFIER_SIZE + 5, magX + MAGNIFIER_SIZE, magY + MAGNIFIER_SIZE + 25};
+
+    // 半透明黑色背景
+    BLENDFUNCTION blend = { AC_SRC_OVER, 0, 200, 0 };
+    HDC hdcRgb = CreateCompatibleDC(hdc);
+    HBITMAP hbmRgb = CreateCompatibleBitmap(hdc, MAGNIFIER_SIZE, 20);
+    HBITMAP hbmRgbOld = (HBITMAP)SelectObject(hdcRgb, hbmRgb);
+
+    HBRUSH hBrush = CreateSolidBrush(RGB(0, 0, 0));
+    RECT fillRect = {0, 0, MAGNIFIER_SIZE, 20};
+    FillRect(hdcRgb, &fillRect, hBrush);
+    DeleteObject(hBrush);
+
+    AlphaBlend(hdc, rgbRect.left, rgbRect.top, MAGNIFIER_SIZE, 20,
+               hdcRgb, 0, 0, MAGNIFIER_SIZE, 20, blend);
+
+    SelectObject(hdcRgb, hbmRgbOld);
+    DeleteObject(hbmRgb);
+    DeleteDC(hdcRgb);
+
+    // 绘制文本
+    HFONT hFont = CreateFont(14, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
+                            DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+                            DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, L"Arial");
+    HFONT hOldFont = (HFONT)SelectObject(hdc, hFont);
+
+    SetBkMode(hdc, TRANSPARENT);
+    SetTextColor(hdc, RGB(255, 255, 255));
+    DrawText(hdc, rgbText, -1, &rgbRect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+
+    SelectObject(hdc, hOldFont);
+    DeleteObject(hFont);
+}
+
+void NativeScreenshotWindow::DrawButtons(HDC hdc) {
+    // 绘制确定按钮
+    HBRUSH hConfirmBrush = isHoveringConfirm_ ?
+        CreateSolidBrush(RGB(0, 120, 215)) : CreateSolidBrush(RGB(0, 100, 180));
+    HPEN hPen = CreatePen(PS_SOLID, 2, RGB(255, 255, 255));
+    HPEN hOldPen = (HPEN)SelectObject(hdc, hPen);
+    HBRUSH hOldBrush = (HBRUSH)SelectObject(hdc, hConfirmBrush);
+
+    RoundRect(hdc, confirmButtonRect_.left, confirmButtonRect_.top,
+              confirmButtonRect_.right, confirmButtonRect_.bottom, 5, 5);
+
+    SelectObject(hdc, hOldBrush);
+    DeleteObject(hConfirmBrush);
+
+    SetBkMode(hdc, TRANSPARENT);
+    SetTextColor(hdc, RGB(255, 255, 255));
+
+    HFONT hFont = CreateFont(16, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
+                            DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+                            DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, L"Microsoft YaHei");
+    HFONT hOldFont = (HFONT)SelectObject(hdc, hFont);
+
+    DrawText(hdc, L"确定", -1, &confirmButtonRect_, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+
+    // 绘制取消按钮
+    HBRUSH hCancelBrush = isHoveringCancel_ ?
+        CreateSolidBrush(RGB(200, 50, 50)) : CreateSolidBrush(RGB(180, 40, 40));
+    SelectObject(hdc, hCancelBrush);
+
+    RoundRect(hdc, cancelButtonRect_.left, cancelButtonRect_.top,
+              cancelButtonRect_.right, cancelButtonRect_.bottom, 5, 5);
+
+    SelectObject(hdc, hOldBrush);
+    DeleteObject(hCancelBrush);
+
+    DrawText(hdc, L"取消", -1, &cancelButtonRect_, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+
+    SelectObject(hdc, hOldFont);
+    DeleteObject(hFont);
+    SelectObject(hdc, hOldPen);
+    DeleteObject(hPen);
+}
+
+void NativeScreenshotWindow::DrawDimmedMask(HDC hdc, const RECT& excludeRect) {
+    BLENDFUNCTION blend = { AC_SRC_OVER, 0, 160, 0 };
+
     auto drawDimmedRegion = [&](const RECT& rect) {
         if (rect.left >= rect.right || rect.top >= rect.bottom) {
-            return;  // 跳过空区域
+            return;
         }
 
         int width = rect.right - rect.left;
@@ -317,14 +628,12 @@ void NativeScreenshotWindow::DrawSelection(HDC hdc) {
         HBITMAP hbmDim = CreateCompatibleBitmap(hdc, width, height);
         HBITMAP hbmDimOld = (HBITMAP)SelectObject(hdcDim, hbmDim);
 
-        // 填充黑色背景
         HBRUSH hBrush = CreateSolidBrush(RGB(0, 0, 0));
         RECT fillRect = {0, 0, width, height};
         FillRect(hdcDim, &fillRect, hBrush);
         DeleteObject(hBrush);
 
-        // 半透明混合到内存 DC
-        AlphaBlend(hdcMem, rect.left, rect.top, width, height,
+        AlphaBlend(hdc, rect.left, rect.top, width, height,
                    hdcDim, 0, 0, width, height, blend);
 
         SelectObject(hdcDim, hbmDimOld);
@@ -332,76 +641,27 @@ void NativeScreenshotWindow::DrawSelection(HDC hdc) {
         DeleteDC(hdcDim);
     };
 
-    // 定义四个遮罩区域并绘制
-    RECT topRect = {0, 0, screenWidth_, top};
-    RECT bottomRect = {0, bottom, screenWidth_, screenHeight_};
-    RECT leftRect = {0, top, left, bottom};
-    RECT rightRect = {right, top, screenWidth_, bottom};
+    // 四个遮罩区域
+    RECT topRect = {0, 0, screenWidth_, excludeRect.top};
+    RECT bottomRect = {0, excludeRect.bottom, screenWidth_, screenHeight_};
+    RECT leftRect = {0, excludeRect.top, excludeRect.left, excludeRect.bottom};
+    RECT rightRect = {excludeRect.right, excludeRect.top, screenWidth_, excludeRect.bottom};
 
     drawDimmedRegion(topRect);
     drawDimmedRegion(bottomRect);
     drawDimmedRegion(leftRect);
     drawDimmedRegion(rightRect);
-
-    // 4. 在内存 DC 中绘制红色边框
-    HPEN hPen = CreatePen(PS_SOLID, 4, RGB(255, 0, 0));
-    HPEN hOldPen = (HPEN)SelectObject(hdcMem, hPen);
-    SelectObject(hdcMem, (HBRUSH)GetStockObject(NULL_BRUSH));
-    Rectangle(hdcMem, left, top, right, bottom);
-    SelectObject(hdcMem, hOldPen);
-    DeleteObject(hPen);
-
-    // 5. 在内存 DC 中绘制控制点
-    HBRUSH hHandleBrush = CreateSolidBrush(RGB(255, 0, 0));
-    int handleSize = 8;
-    SelectObject(hdcMem, hHandleBrush);
-    Ellipse(hdcMem, left - handleSize, top - handleSize, left + handleSize, top + handleSize);
-    Ellipse(hdcMem, right - handleSize, top - handleSize, right + handleSize, top + handleSize);
-    Ellipse(hdcMem, left - handleSize, bottom - handleSize, left + handleSize, bottom + handleSize);
-    Ellipse(hdcMem, right - handleSize, bottom - handleSize, right + handleSize, bottom + handleSize);
-    DeleteObject(hHandleBrush);
-
-    // 6. 在内存 DC 中绘制尺寸文字
-    wchar_t text[64];
-    swprintf_s(text, 64, L"%d x %d", right - left, bottom - top);
-
-    HFONT hFont = CreateFont(20, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
-                            DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-                            DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, L"Arial");
-    HFONT hOldFont = (HFONT)SelectObject(hdcMem, hFont);
-
-    RECT textRect = {left, top - 40, right, top};
-    HBRUSH hTextBrush = CreateSolidBrush(RGB(255, 0, 0));
-    FillRect(hdcMem, &textRect, hTextBrush);
-    DeleteObject(hTextBrush);
-
-    SetBkMode(hdcMem, TRANSPARENT);
-    SetTextColor(hdcMem, RGB(255, 255, 255));
-    DrawText(hdcMem, text, -1, &textRect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-
-    SelectObject(hdcMem, hOldFont);
-    DeleteObject(hFont);
-
-    // 7. 一次性将内存 DC 的内容拷贝到屏幕（避免闪烁）
-    BitBlt(hdc, 0, 0, screenWidth_, screenHeight_, hdcMem, 0, 0, SRCCOPY);
-
-    // 8. 清理资源
-    SelectObject(hdcMem, hbmOld);
-    DeleteObject(hbmMem);
-    DeleteDC(hdcMem);
 }
 
 bool NativeScreenshotWindow::CaptureDesktopBackground() {
     LOG_DEBUG("Capturing desktop background...");
 
-    // 获取整个桌面的 DC
     HDC hdcDesktop = GetDC(NULL);
     if (!hdcDesktop) {
         LOG_DEBUG("Failed to get desktop DC");
         return false;
     }
 
-    // 创建内存 DC 和位图
     HDC hdcMem = CreateCompatibleDC(hdcDesktop);
     if (!hdcMem) {
         LOG_DEBUG("Failed to create memory DC");
@@ -419,7 +679,6 @@ bool NativeScreenshotWindow::CaptureDesktopBackground() {
 
     HBITMAP hbmOld = (HBITMAP)SelectObject(hdcMem, hBackgroundBitmap_);
 
-    // 捕获整个屏幕
     if (!BitBlt(hdcMem, 0, 0, screenWidth_, screenHeight_, hdcDesktop, 0, 0, SRCCOPY)) {
         LOG_DEBUG("Failed to capture screen");
         SelectObject(hdcMem, hbmOld);
@@ -436,4 +695,183 @@ bool NativeScreenshotWindow::CaptureDesktopBackground() {
 
     LOG_DEBUG("Desktop background captured successfully");
     return true;
+}
+
+HandleType NativeScreenshotWindow::HitTest(int x, int y) {
+    if (state_ != ScreenshotState::Selected) {
+        return HandleType::None;
+    }
+
+    const int HANDLE_SIZE = 10;
+
+    // 检查控制点
+    for (int i = (int)HandleType::TopLeft; i <= (int)HandleType::LeftCenter; i++) {
+        RECT handleRect = GetHandleRect((HandleType)i, selectionRect_);
+        if (x >= handleRect.left && x <= handleRect.right &&
+            y >= handleRect.top && y <= handleRect.bottom) {
+            return (HandleType)i;
+        }
+    }
+
+    // 检查是否在选择框内部
+    if (x >= selectionRect_.left && x <= selectionRect_.right &&
+        y >= selectionRect_.top && y <= selectionRect_.bottom) {
+        return HandleType::Move;
+    }
+
+    return HandleType::None;
+}
+
+RECT NativeScreenshotWindow::GetHandleRect(HandleType handle, const RECT& rect) {
+    const int HANDLE_SIZE = 8;
+    const int HALF_SIZE = HANDLE_SIZE / 2;
+
+    int centerX = (rect.left + rect.right) / 2;
+    int centerY = (rect.top + rect.bottom) / 2;
+
+    switch (handle) {
+        case HandleType::TopLeft:
+            return {rect.left - HALF_SIZE, rect.top - HALF_SIZE,
+                    rect.left + HALF_SIZE, rect.top + HALF_SIZE};
+        case HandleType::TopCenter:
+            return {centerX - HALF_SIZE, rect.top - HALF_SIZE,
+                    centerX + HALF_SIZE, rect.top + HALF_SIZE};
+        case HandleType::TopRight:
+            return {rect.right - HALF_SIZE, rect.top - HALF_SIZE,
+                    rect.right + HALF_SIZE, rect.top + HALF_SIZE};
+        case HandleType::RightCenter:
+            return {rect.right - HALF_SIZE, centerY - HALF_SIZE,
+                    rect.right + HALF_SIZE, centerY + HALF_SIZE};
+        case HandleType::BottomRight:
+            return {rect.right - HALF_SIZE, rect.bottom - HALF_SIZE,
+                    rect.right + HALF_SIZE, rect.bottom + HALF_SIZE};
+        case HandleType::BottomCenter:
+            return {centerX - HALF_SIZE, rect.bottom - HALF_SIZE,
+                    centerX + HALF_SIZE, rect.bottom + HALF_SIZE};
+        case HandleType::BottomLeft:
+            return {rect.left - HALF_SIZE, rect.bottom - HALF_SIZE,
+                    rect.left + HALF_SIZE, rect.bottom + HALF_SIZE};
+        case HandleType::LeftCenter:
+            return {rect.left - HALF_SIZE, centerY - HALF_SIZE,
+                    rect.left + HALF_SIZE, centerY + HALF_SIZE};
+        default:
+            return {0, 0, 0, 0};
+    }
+}
+
+HCURSOR NativeScreenshotWindow::GetHandleCursor(HandleType handle) {
+    switch (handle) {
+        case HandleType::TopLeft:
+        case HandleType::BottomRight:
+            return LoadCursor(NULL, IDC_SIZENWSE);
+        case HandleType::TopRight:
+        case HandleType::BottomLeft:
+            return LoadCursor(NULL, IDC_SIZENESW);
+        case HandleType::TopCenter:
+        case HandleType::BottomCenter:
+            return LoadCursor(NULL, IDC_SIZENS);
+        case HandleType::LeftCenter:
+        case HandleType::RightCenter:
+            return LoadCursor(NULL, IDC_SIZEWE);
+        case HandleType::Move:
+            return LoadCursor(NULL, IDC_SIZEALL);
+        default:
+            return LoadCursor(NULL, IDC_ARROW);
+    }
+}
+
+void NativeScreenshotWindow::UpdateSelectionFromDrag(int x, int y) {
+    int deltaX = x - dragStartPoint_.x;
+    int deltaY = y - dragStartPoint_.y;
+
+    switch (activeHandle_) {
+        case HandleType::TopLeft:
+            selectionRect_.left = dragStartRect_.left + deltaX;
+            selectionRect_.top = dragStartRect_.top + deltaY;
+            break;
+        case HandleType::TopCenter:
+            selectionRect_.top = dragStartRect_.top + deltaY;
+            break;
+        case HandleType::TopRight:
+            selectionRect_.right = dragStartRect_.right + deltaX;
+            selectionRect_.top = dragStartRect_.top + deltaY;
+            break;
+        case HandleType::RightCenter:
+            selectionRect_.right = dragStartRect_.right + deltaX;
+            break;
+        case HandleType::BottomRight:
+            selectionRect_.right = dragStartRect_.right + deltaX;
+            selectionRect_.bottom = dragStartRect_.bottom + deltaY;
+            break;
+        case HandleType::BottomCenter:
+            selectionRect_.bottom = dragStartRect_.bottom + deltaY;
+            break;
+        case HandleType::BottomLeft:
+            selectionRect_.left = dragStartRect_.left + deltaX;
+            selectionRect_.bottom = dragStartRect_.bottom + deltaY;
+            break;
+        case HandleType::LeftCenter:
+            selectionRect_.left = dragStartRect_.left + deltaX;
+            break;
+        case HandleType::Move:
+            selectionRect_.left = dragStartRect_.left + deltaX;
+            selectionRect_.top = dragStartRect_.top + deltaY;
+            selectionRect_.right = dragStartRect_.right + deltaX;
+            selectionRect_.bottom = dragStartRect_.bottom + deltaY;
+            break;
+        default:
+            break;
+    }
+
+    NormalizeRect(selectionRect_);
+}
+
+void NativeScreenshotWindow::DetectWindowAtPoint(POINT pt, RECT& windowRect) {
+    HWND hwnd = WindowFromPoint(pt);
+    if (!hwnd || hwnd == hwnd_) {
+        windowRect = {0, 0, 0, 0};
+        hHoveredWindow_ = NULL;
+        return;
+    }
+
+    // 获取窗口矩形
+    GetWindowRect(hwnd, &windowRect);
+
+    // 排除过小的窗口
+    int width = windowRect.right - windowRect.left;
+    int height = windowRect.bottom - windowRect.top;
+
+    if (width < 50 || height < 50) {
+        windowRect = {0, 0, 0, 0};
+        hHoveredWindow_ = NULL;
+        return;
+    }
+
+    // 转换为屏幕坐标
+    RECT screenRect;
+    screenRect.left = windowRect.left;
+    screenRect.top = windowRect.top;
+    screenRect.right = windowRect.right;
+    screenRect.bottom = windowRect.bottom;
+
+    windowRect = screenRect;
+    hHoveredWindow_ = hwnd;
+}
+
+void NativeScreenshotWindow::NormalizeRect(RECT& rect) {
+    if (rect.left > rect.right) {
+        int temp = rect.left;
+        rect.left = rect.right;
+        rect.right = temp;
+    }
+    if (rect.top > rect.bottom) {
+        int temp = rect.top;
+        rect.top = rect.bottom;
+        rect.bottom = temp;
+    }
+}
+
+bool NativeScreenshotWindow::PointInRect(POINT pt, const RECT& rect) {
+    return pt.x >= rect.left && pt.x <= rect.right &&
+           pt.y >= rect.top && pt.y <= rect.bottom;
 }
