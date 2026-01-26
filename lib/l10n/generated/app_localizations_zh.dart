@@ -2289,19 +2289,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get screenshot_settings_items => '条';
 
   @override
-  String get screenshot_shortcut_region => '区域截图';
+  String get screenshot_shortcut_region => 'Ctrl+Shift+A';
 
   @override
-  String get screenshot_shortcut_fullscreen => '全屏截图';
+  String get screenshot_shortcut_fullscreen => 'Ctrl+Shift+F';
 
   @override
-  String get screenshot_shortcut_window => '窗口截图';
-
-  @override
-  String get screenshot_shortcut_history => '显示历史';
-
-  @override
-  String get screenshot_shortcut_settings => '打开设置';
+  String get screenshot_shortcut_window => 'Ctrl+Shift+W';
 
   @override
   String get screenshot_settings_json_editor => 'JSON 配置编辑器';

@@ -152,6 +152,7 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
                   child: _QuickActionTile(
                     icon: Icons.crop_square,
                     title: l10n.screenshot_main_region_capture,
+                    subtitle: l10n.screenshot_shortcut_region,
                     onTap: widget.plugin.isAvailable ? _startRegionCapture : null,
                   ),
                 ),
@@ -160,6 +161,7 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
                   child: _QuickActionTile(
                     icon: Icons.fullscreen,
                     title: l10n.screenshot_main_fullscreen_capture,
+                    subtitle: l10n.screenshot_shortcut_fullscreen,
                     onTap: widget.plugin.isAvailable ? _captureFullScreen : null,
                   ),
                 ),

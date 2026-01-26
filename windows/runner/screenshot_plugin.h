@@ -1,20 +1,21 @@
 #ifndef RUNNER_SCREENSHOT_PLUGIN_H_
 #define RUNNER_SCREENSHOT_PLUGIN_H_
 
-// 定义 NOMINMAX 以避免 Windows 宏与 std::min/max 冲突
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-
+// 不定义 NOMINMAX，让 GDI+ 可以使用 min/max 宏
 #include <windows.h>
-#include <algorithm>  // 必须在 gdiplus.h 之前包含
+#include <algorithm>
 #include <vector>
 #include <string>
 #include <tuple>
 
-// 在全局作用域引入 std::min 和 std::max 供 GDI+ 使用
-using std::min;
-using std::max;
+// GDI+ 需要 min/max 宏，确保它们可用
+#ifndef min
+#define min(a, b) (((a) < (b)) ? (a) : (b))
+#endif
+
+#ifndef max
+#define max(a, b) (((a) > (b)) ? (a) : (b))
+#endif
 
 #include <gdiplus.h>
 

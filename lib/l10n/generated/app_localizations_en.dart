@@ -2367,19 +2367,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screenshot_settings_items => 'items';
 
   @override
-  String get screenshot_shortcut_region => 'Region Capture';
+  String get screenshot_shortcut_region => 'Ctrl+Shift+A';
 
   @override
-  String get screenshot_shortcut_fullscreen => 'Full Screen Capture';
+  String get screenshot_shortcut_fullscreen => 'Ctrl+Shift+F';
 
   @override
-  String get screenshot_shortcut_window => 'Window Capture';
-
-  @override
-  String get screenshot_shortcut_history => 'Show History';
-
-  @override
-  String get screenshot_shortcut_settings => 'Open Settings';
+  String get screenshot_shortcut_window => 'Ctrl+Shift+W';
 
   @override
   String get screenshot_settings_json_editor => 'JSON Configuration Editor';

@@ -38,17 +38,29 @@ class ClipboardService {
         case ClipboardContentType.filename:
           final filename = path.basename(filePath);
           debugPrint('ClipboardService: Copying filename: $filename');
+          // 在 Windows 上使用原生方法
+          if (Platform.isWindows) {
+            return await _setTextToClipboardWindows(filename);
+          }
           await Clipboard.setData(ClipboardData(text: filename));
           return true;
 
         case ClipboardContentType.fullPath:
           debugPrint('ClipboardService: Copying full path: $filePath');
+          // 在 Windows 上使用原生方法
+          if (Platform.isWindows) {
+            return await _setTextToClipboardWindows(filePath);
+          }
           await Clipboard.setData(ClipboardData(text: filePath));
           return true;
 
         case ClipboardContentType.directoryPath:
           final directory = path.dirname(filePath);
           debugPrint('ClipboardService: Copying directory path: $directory');
+          // 在 Windows 上使用原生方法
+          if (Platform.isWindows) {
+            return await _setTextToClipboardWindows(directory);
+          }
           await Clipboard.setData(ClipboardData(text: directory));
           return true;
       }
@@ -234,7 +246,7 @@ class ClipboardService {
 
       final result = await _clipboardMethodChannel.invokeMethod<bool>(
         'setImageToClipboard',
-        [fileBytes],
+        fileBytes,  // 直接传递 Uint8List，不包装在列表中
       );
 
       debugPrint('ClipboardService: Windows native method returned: $result');
@@ -267,6 +279,25 @@ class ClipboardService {
       return false;
     } catch (e) {
       debugPrint('Failed to copy image on web: $e');
+      return false;
+    }
+  }
+
+  /// 在 Windows 上复制文本到剪贴板（原生实现）
+  Future<bool> _setTextToClipboardWindows(String text) async {
+    try {
+      debugPrint('ClipboardService: Calling Windows native method setTextToClipboard');
+      debugPrint('ClipboardService: text=$text');
+
+      final result = await _clipboardMethodChannel.invokeMethod<bool>(
+        'setTextToClipboard',
+        text,
+      );
+
+      debugPrint('ClipboardService: Windows native method returned: $result');
+      return result ?? false;
+    } catch (e) {
+      debugPrint('ClipboardService: Failed to copy text to clipboard (Windows): $e');
       return false;
     }
   }

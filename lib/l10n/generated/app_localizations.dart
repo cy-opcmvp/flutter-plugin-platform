@@ -4391,32 +4391,20 @@ abstract class AppLocalizations {
   /// No description provided for @screenshot_shortcut_region.
   ///
   /// In zh, this message translates to:
-  /// **'区域截图'**
+  /// **'Ctrl+Shift+A'**
   String get screenshot_shortcut_region;
 
   /// No description provided for @screenshot_shortcut_fullscreen.
   ///
   /// In zh, this message translates to:
-  /// **'全屏截图'**
+  /// **'Ctrl+Shift+F'**
   String get screenshot_shortcut_fullscreen;
 
   /// No description provided for @screenshot_shortcut_window.
   ///
   /// In zh, this message translates to:
-  /// **'窗口截图'**
+  /// **'Ctrl+Shift+W'**
   String get screenshot_shortcut_window;
-
-  /// No description provided for @screenshot_shortcut_history.
-  ///
-  /// In zh, this message translates to:
-  /// **'显示历史'**
-  String get screenshot_shortcut_history;
-
-  /// No description provided for @screenshot_shortcut_settings.
-  ///
-  /// In zh, this message translates to:
-  /// **'打开设置'**
-  String get screenshot_shortcut_settings;
 
   /// No description provided for @screenshot_settings_json_editor.
   ///

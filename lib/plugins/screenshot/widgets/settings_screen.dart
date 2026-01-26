@@ -579,10 +579,6 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
         return l10n.screenshot_shortcut_region;
       case 'fullScreenCapture':
         return l10n.screenshot_shortcut_fullscreen;
-      case 'showHistory':
-        return l10n.screenshot_shortcut_history;
-      case 'showSettings':
-        return l10n.screenshot_shortcut_settings;
       default:
         return action;
     }
