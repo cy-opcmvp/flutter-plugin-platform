@@ -69,6 +69,11 @@ class FlutterWindow : public Win32Window {
 
   // Register desktop pet method channel
   void RegisterDesktopPetMethodChannel();
+
+  // Handle clipboard method calls from Flutter
+  void HandleClipboardMethodCall(
+      const flutter::MethodCall<flutter::EncodableValue>& call,
+      std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
 };
 
 #endif  // RUNNER_FLUTTER_WINDOW_H_

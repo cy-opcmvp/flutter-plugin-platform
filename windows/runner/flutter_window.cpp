@@ -124,6 +124,17 @@ bool FlutterWindow::OnCreate() {
         HandleDesktopPetMethodCall(call, std::move(result));
       });
 
+  // Register clipboard method channel
+  auto clipboard_channel =
+      std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
+          flutter_controller_->engine()->messenger(), "com.example.screenshot/clipboard",
+          &flutter::StandardMethodCodec::GetInstance());
+
+  clipboard_channel->SetMethodCallHandler(
+      [this](const auto& call, auto result) {
+        HandleClipboardMethodCall(call, std::move(result));
+      });
+
   // Initialize hotkey manager
   hotkey_manager_ = std::make_unique<HotkeyManager>();
   hotkey_manager_->SetCallback([this](const std::string& actionId) {
@@ -673,6 +684,107 @@ void FlutterWindow::HandleDesktopPetMethodCall(
 
   } else {
     LOG_FLUTTER_FMT("Unknown desktop pet method: %s", call.method_name().c_str());
+    result->NotImplemented();
+  }
+}
+
+void FlutterWindow::HandleClipboardMethodCall(
+    const flutter::MethodCall<flutter::EncodableValue>& call,
+    std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+  LOG_FLUTTER_FMT("Clipboard method called: %s", call.method_name().c_str());
+
+  if (call.method_name() == "getImageFromClipboard") {
+    // 从剪贴板获取图片
+    if (!OpenClipboard(nullptr)) {
+      LOG_FLUTTER("Failed to open clipboard");
+      result->Success(flutter::EncodableValue());
+      return;
+    }
+
+    HANDLE hData = GetClipboardData(CF_DIB);
+    if (!hData) {
+      LOG_FLUTTER("No image data in clipboard");
+      CloseClipboard();
+      result->Success(flutter::EncodableValue());
+      return;
+    }
+
+    // 获取 DIB 数据
+    LPBITMAPINFO lpbi = (LPBITMAPINFO)GlobalLock(hData);
+    if (!lpbi) {
+      LOG_FLUTTER("Failed to lock clipboard data");
+      CloseClipboard();
+      result->Success(flutter::EncodableValue());
+      return;
+    }
+
+    // 计算图像大小
+    BITMAPINFOHEADER& bih = lpbi->bmiHeader;
+    int width = bih.biWidth;
+    int height = abs(bih.biHeight);
+    int bitCount = bih.biBitCount;
+    int bytesPerPixel = bitCount / 8;
+    int rowSize = ((width * bitCount + 31) / 32) * 4; // 对齐到 4 字节
+    int imageSize = rowSize * height;
+
+    // 创建字节缓冲区
+    std::vector<uint8_t> imageData;
+    imageData.reserve(sizeof(BITMAPINFOHEADER) + imageSize);
+
+    // 添加 BITMAPINFOHEADER
+    uint8_t* headerBytes = reinterpret_cast<uint8_t*>(&bih);
+    imageData.insert(imageData.end(), headerBytes, headerBytes + sizeof(BITMAPINFOHEADER));
+
+    // 添加像素数据
+    uint8_t* pixels = reinterpret_cast<uint8_t*>(lpbi) + sizeof(BITMAPINFOHEADER);
+    if (bih.biHeight > 0) {
+      // 自下而上的 DIB, 需要翻转
+      for (int y = height - 1; y >= 0; y--) {
+        imageData.insert(imageData.end(), pixels + y * rowSize, pixels + (y + 1) * rowSize);
+      }
+    } else {
+      // 自上而下的 DIB
+      imageData.insert(imageData.end(), pixels, pixels + imageSize);
+    }
+
+    GlobalUnlock(hData);
+    CloseClipboard();
+
+    LOG_FLUTTER_FMT("Retrieved image from clipboard: %dx%d, %d bytes", width, height, imageData.size());
+
+    flutter::EncodableList dataList(imageData.begin(), imageData.end());
+    result->Success(flutter::EncodableValue(dataList));
+
+  } else if (call.method_name() == "hasImage") {
+    // 检查剪贴板是否有图片
+    if (!OpenClipboard(nullptr)) {
+      LOG_FLUTTER("Failed to open clipboard for check");
+      result->Success(flutter::EncodableValue(false));
+      return;
+    }
+
+    bool hasImage = IsClipboardFormatAvailable(CF_DIB) != 0;
+    CloseClipboard();
+
+    LOG_FLUTTER_FMT("Clipboard has image: %s", hasImage ? "true" : "false");
+    result->Success(flutter::EncodableValue(hasImage));
+
+  } else if (call.method_name() == "clearClipboard") {
+    // 清空剪贴板
+    if (!OpenClipboard(nullptr)) {
+      LOG_FLUTTER("Failed to open clipboard for clear");
+      result->Success(flutter::EncodableValue(false));
+      return;
+    }
+
+    BOOL success = EmptyClipboard();
+    CloseClipboard();
+
+    LOG_FLUTTER_FMT("Clipboard cleared: %s", success ? "success" : "failed");
+    result->Success(flutter::EncodableValue(success));
+
+  } else {
+    LOG_FLUTTER_FMT("Unknown clipboard method: %s", call.method_name().c_str());
     result->NotImplemented();
   }
 }
