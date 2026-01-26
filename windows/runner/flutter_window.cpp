@@ -93,6 +93,9 @@ static void ShutdownGDIPlus() {
 #include "native_screenshot_window.h"
 #include "hotkey_manager.h"
 
+// 互斥锁保护区域选择结果
+static SRWLOCK g_regionSelectionLock = SRWLOCK_INIT;
+
 // 用于同步存储原生窗口选择结果
 static struct {
   bool completed = false;
@@ -402,9 +405,11 @@ void FlutterWindow::HandleScreenshotMethodCall(
     LOG_FLUTTER("showNativeRegionCapture called");
 
     try {
-      // 重置全局结果
+      // 重置全局结果（独占锁写入）
+      AcquireSRWLockExclusive(&g_regionSelectionLock);
       g_regionSelectionResult.completed = false;
       g_regionSelectionResult.cancelled = false;
+      ReleaseSRWLockExclusive(&g_regionSelectionLock);
       LOG_FLUTTER("Reset result structure");
 
       // 在后台线程中显示原生截图窗口
@@ -415,20 +420,24 @@ void FlutterWindow::HandleScreenshotMethodCall(
         NativeScreenshotWindow window;
         bool showResult = window.Show(
           [](int x, int y, int width, int height) {
-            // 区域选择完成 - 存储结果
+            // 区域选择完成 - 存储结果（独占锁写入）
             LOG_FLUTTER_FMT("Region selected: (%d,%d) %dx%d", x, y, width, height);
+            AcquireSRWLockExclusive(&g_regionSelectionLock);
             g_regionSelectionResult.completed = true;
             g_regionSelectionResult.cancelled = false;
             g_regionSelectionResult.x = x;
             g_regionSelectionResult.y = y;
             g_regionSelectionResult.width = width;
             g_regionSelectionResult.height = height;
+            ReleaseSRWLockExclusive(&g_regionSelectionLock);
           },
           []() {
-            // 用户取消
+            // 用户取消（独占锁写入）
             LOG_FLUTTER("Region capture cancelled by user");
+            AcquireSRWLockExclusive(&g_regionSelectionLock);
             g_regionSelectionResult.completed = true;
             g_regionSelectionResult.cancelled = true;
+            ReleaseSRWLockExclusive(&g_regionSelectionLock);
           }
         );
 
@@ -449,29 +458,33 @@ void FlutterWindow::HandleScreenshotMethodCall(
       result->Error("WINDOW_ERROR", e.what());
     }
   } else if (method == "getRegionSelectionResult") {
+    // 获取区域选择结果（共享锁读取）
+    AcquireSRWLockShared(&g_regionSelectionLock);
+    bool completed = g_regionSelectionResult.completed;
+    bool cancelled = g_regionSelectionResult.cancelled;
+    int x = g_regionSelectionResult.x;
+    int y = g_regionSelectionResult.y;
+    int width = g_regionSelectionResult.width;
+    int height = g_regionSelectionResult.height;
+    ReleaseSRWLockShared(&g_regionSelectionLock);
+
     LOG_FLUTTER_FMT("getRegionSelectionResult called: completed=%d, cancelled=%d",
-                     g_regionSelectionResult.completed, g_regionSelectionResult.cancelled);
+                     completed, cancelled);
 
     // 获取区域选择结果（用于轮询）
-    if (g_regionSelectionResult.completed) {
-      if (g_regionSelectionResult.cancelled) {
+    if (completed) {
+      if (cancelled) {
         // 用户取消
         LOG_FLUTTER("Returning cancelled result");
         result->Success(flutter::EncodableValue());
       } else {
         // 用户选择了区域
-        LOG_FLUTTER_FMT("Returning selected region: (%d,%d) %dx%d",
-                         g_regionSelectionResult.x, g_regionSelectionResult.y,
-                         g_regionSelectionResult.width, g_regionSelectionResult.height);
+        LOG_FLUTTER_FMT("Returning selected region: (%d,%d) %dx%d", x, y, width, height);
         flutter::EncodableMap resultMap;
-        resultMap[flutter::EncodableValue("x")] =
-            flutter::EncodableValue(g_regionSelectionResult.x);
-        resultMap[flutter::EncodableValue("y")] =
-            flutter::EncodableValue(g_regionSelectionResult.y);
-        resultMap[flutter::EncodableValue("width")] =
-            flutter::EncodableValue(g_regionSelectionResult.width);
-        resultMap[flutter::EncodableValue("height")] =
-            flutter::EncodableValue(g_regionSelectionResult.height);
+        resultMap[flutter::EncodableValue("x")] = flutter::EncodableValue(x);
+        resultMap[flutter::EncodableValue("y")] = flutter::EncodableValue(y);
+        resultMap[flutter::EncodableValue("width")] = flutter::EncodableValue(width);
+        resultMap[flutter::EncodableValue("height")] = flutter::EncodableValue(height);
         result->Success(flutter::EncodableValue(resultMap));
       }
     } else {
@@ -566,18 +579,23 @@ void FlutterWindow::OnHotkeyPressed(const std::string& actionId) {
       bool success = window.Show(
           [](int x, int y, int width, int height) {
             LOG_FLUTTER_FMT("Region selected from hotkey: (%d,%d) %dx%d", x, y, width, height);
-            // 保存选择结果
+            // 保存选择结果（独占锁写入）
+            AcquireSRWLockExclusive(&g_regionSelectionLock);
             g_regionSelectionResult.completed = true;
             g_regionSelectionResult.cancelled = false;
             g_regionSelectionResult.x = x;
             g_regionSelectionResult.y = y;
             g_regionSelectionResult.width = width;
             g_regionSelectionResult.height = height;
+            ReleaseSRWLockExclusive(&g_regionSelectionLock);
           },
           []() {
             LOG_FLUTTER("Region capture cancelled from hotkey");
+            // 用户取消（独占锁写入）
+            AcquireSRWLockExclusive(&g_regionSelectionLock);
             g_regionSelectionResult.completed = true;
             g_regionSelectionResult.cancelled = true;
+            ReleaseSRWLockExclusive(&g_regionSelectionLock);
           }
       );
 
