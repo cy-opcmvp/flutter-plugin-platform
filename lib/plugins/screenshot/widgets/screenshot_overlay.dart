@@ -211,33 +211,91 @@ class _ScreenshotOverlayState extends State<ScreenshotOverlay> {
 
   /// 构建工具栏
   Widget _buildToolbar() {
+    // 如果没有选择区域，显示在屏幕底部
+    if (_startPosition == null || _currentPosition == null) {
+      return Positioned(
+        bottom: 40,
+        left: 0,
+        right: 0,
+        child: Center(child: _buildToolbarContent()),
+      );
+    }
+
+    final rect = _calculateRect(_startPosition!, _currentPosition!);
+    // 如果选择区域太小，显示在屏幕底部
+    if (rect.width < _minimumSize || rect.height < _minimumSize) {
+      return Positioned(
+        bottom: 40,
+        left: 0,
+        right: 0,
+        child: Center(child: _buildToolbarContent()),
+      );
+    }
+
+    // 工具栏紧贴在选择框下方
+    final toolbarTop = rect.bottom + 10;
+
     return Positioned(
-      bottom: 40,
+      top: toolbarTop,
       left: 0,
       right: 0,
-      child: Center(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: Colors.black87,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.close, color: Colors.white),
-                onPressed: widget.onCancel,
-                tooltip: '取消',
+      child: Center(child: _buildToolbarContent()),
+    );
+  }
+
+  /// 构建工具栏内容
+  Widget _buildToolbarContent() {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.black87,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 取消按钮（×）
+            InkWell(
+              onTap: widget.onCancel,
+              borderRadius: BorderRadius.circular(4),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                child: const Text(
+                  '×',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
-              const SizedBox(width: 16),
-              IconButton(
-                icon: const Icon(Icons.check, color: Colors.white),
-                onPressed: _canConfirmSelection() ? _confirmSelection : null,
-                tooltip: '确认',
+            ),
+            const SizedBox(width: 2),
+            // 确认按钮（√）
+            InkWell(
+              onTap: _canConfirmSelection() ? _confirmSelection : null,
+              borderRadius: BorderRadius.circular(4),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                child: Text(
+                  '√',
+                  style: TextStyle(
+                    color: _canConfirmSelection() ? Colors.white : Colors.grey,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

@@ -153,7 +153,9 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
                     icon: Icons.crop_square,
                     title: l10n.screenshot_main_region_capture,
                     subtitle: l10n.screenshot_shortcut_region,
-                    onTap: widget.plugin.isAvailable ? _startRegionCapture : null,
+                    onTap: widget.plugin.isAvailable
+                        ? _startRegionCapture
+                        : null,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -162,7 +164,9 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
                     icon: Icons.fullscreen,
                     title: l10n.screenshot_main_fullscreen_capture,
                     subtitle: l10n.screenshot_shortcut_fullscreen,
-                    onTap: widget.plugin.isAvailable ? _captureFullScreen : null,
+                    onTap: widget.plugin.isAvailable
+                        ? _captureFullScreen
+                        : null,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -170,6 +174,7 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
                   child: _QuickActionTile(
                     icon: Icons.window,
                     title: l10n.screenshot_main_window_capture,
+                    subtitle: '', // 空字符串，保持高度一致
                     onTap: widget.plugin.isAvailable ? _showWindowList : null,
                   ),
                 ),
@@ -215,7 +220,9 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
                 ),
                 IconButton(
                   icon: const Icon(Icons.folder_open),
-                  onPressed: widget.plugin.isAvailable ? _openScreenshotFolder : null,
+                  onPressed: widget.plugin.isAvailable
+                      ? _openScreenshotFolder
+                      : null,
                   tooltip: l10n.screenshot_open_folder,
                 ),
               ],
@@ -394,18 +401,11 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
     const maxPolls = 300; // 最多轮询 30 秒（每 100ms 一次）
     int polls = 0;
 
-    debugPrint('开始轮询，最多 $maxPolls 次...');
-
     while (polls < maxPolls) {
       await Future.delayed(const Duration(milliseconds: 100));
 
       final result = await widget.plugin.getRegionSelectionResult();
       polls++;
-
-      // 每 10 次轮询打印一次日志
-      if (polls % 10 == 0) {
-        debugPrint('轮询第 $polls 次，result = $result');
-      }
 
       if (result != null) {
         debugPrint(
@@ -426,7 +426,7 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
     }
 
     // 超时，假设用户取消了
-    debugPrint('===== 区域截图超时，假设用户取消 =====');
+    debugPrint('区域截图超时，用户取消');
   }
 
   /// 捕获全屏截图
@@ -956,7 +956,10 @@ class _ScreenshotPreviewScreenState extends State<_ScreenshotPreviewScreen> {
           children: [
             const CircularProgressIndicator(color: Colors.white),
             const SizedBox(height: 16),
-            Text(l10n.screenshot_main_loading, style: const TextStyle(color: Colors.white, fontSize: 16)),
+            Text(
+              l10n.screenshot_main_loading,
+              style: const TextStyle(color: Colors.white, fontSize: 16),
+            ),
           ],
         ),
       );
@@ -969,7 +972,10 @@ class _ScreenshotPreviewScreenState extends State<_ScreenshotPreviewScreen> {
           children: [
             const Icon(Icons.broken_image, size: 80, color: Colors.grey),
             const SizedBox(height: 16),
-            Text(l10n.screenshot_main_load_failed, style: const TextStyle(color: Colors.grey, fontSize: 18)),
+            Text(
+              l10n.screenshot_main_load_failed,
+              style: const TextStyle(color: Colors.grey, fontSize: 18),
+            ),
           ],
         ),
       );

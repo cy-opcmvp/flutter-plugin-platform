@@ -325,16 +325,38 @@ LRESULT NativeScreenshotWindow::HandleMessage(UINT msg, WPARAM wParam, LPARAM lP
                 if (width >= 10 && height >= 10) {
                     state_ = ScreenshotState::Selected;
 
-                    // 计算按钮位置（紧贴的工具栏样式）
-                    confirmButtonRect_.left = selectionRect_.right + BUTTON_MARGIN;
-                    confirmButtonRect_.top = selectionRect_.bottom + BUTTON_MARGIN;
-                    confirmButtonRect_.right = confirmButtonRect_.left + BUTTON_WIDTH;
-                    confirmButtonRect_.bottom = confirmButtonRect_.top + BUTTON_HEIGHT;
+                    // 工具栏参数
+                    const int BUTTON_SIZE = 32;
+                    const int BUTTON_SPACING = 2;
+                    const int TOOLBAR_PADDING_H = 12;
+                    const int TOOLBAR_PADDING_V = 4;
+                    const int GAP_FROM_SELECTION = 0;
 
-                    cancelButtonRect_.left = confirmButtonRect_.right; // 紧贴确定按钮
+                    // 计算工具栏总宽度
+                    int toolbarWidth = BUTTON_SIZE * 2 + BUTTON_SPACING + TOOLBAR_PADDING_H * 2;
+
+                    // 工具栏位置（右下角，紧贴选择框）
+                    int toolbarRight = selectionRect_.right;
+                    int toolbarLeft = toolbarRight - toolbarWidth;
+                    int toolbarTop = selectionRect_.bottom + GAP_FROM_SELECTION;
+
+                    // 确保工具栏不超出屏幕左边界
+                    if (toolbarLeft < 0) {
+                        toolbarLeft = 0;
+                        toolbarRight = toolbarWidth;
+                    }
+
+                    // 确认按钮（√）
+                    confirmButtonRect_.left = toolbarLeft + TOOLBAR_PADDING_H;
+                    confirmButtonRect_.top = toolbarTop + TOOLBAR_PADDING_V;
+                    confirmButtonRect_.right = confirmButtonRect_.left + BUTTON_SIZE;
+                    confirmButtonRect_.bottom = confirmButtonRect_.top + BUTTON_SIZE;
+
+                    // 取消按钮（×）
+                    cancelButtonRect_.left = confirmButtonRect_.right + BUTTON_SPACING;
                     cancelButtonRect_.top = confirmButtonRect_.top;
-                    cancelButtonRect_.right = cancelButtonRect_.left + BUTTON_WIDTH;
-                    cancelButtonRect_.bottom = cancelButtonRect_.top + BUTTON_HEIGHT;
+                    cancelButtonRect_.right = cancelButtonRect_.left + BUTTON_SIZE;
+                    cancelButtonRect_.bottom = cancelButtonRect_.top + BUTTON_SIZE;
 
                     LOG_DEBUG_FMT("Selection complete: (%d, %d) size: %dx%d",
                                 selectionRect_.left, selectionRect_.top, width, height);
@@ -440,7 +462,7 @@ void NativeScreenshotWindow::DrawSelection(HDC hdc) {
 
             DeleteObject(hHandleBrush);
 
-            // 绘制尺寸文字（左下角）
+            // 绘制尺寸文字（左上角，在选择框外侧上方）
             wchar_t text[64];
             swprintf_s(text, 64, L"%d x %d", right - left, bottom - top);
 
@@ -449,10 +471,15 @@ void NativeScreenshotWindow::DrawSelection(HDC hdc) {
                                     DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, L"Arial");
             HFONT hOldFont = (HFONT)SelectObject(hdcMem, hFont);
 
-            RECT textRect = {left, bottom + 5, left + 150, bottom + 30};
+            // 计算文本宽度
+            SIZE textSize;
+            GetTextExtentPoint32(hdcMem, text, (int)wcslen(text), &textSize);
+
+            // 文本框在左上角外侧上方
+            RECT textRect = {left - textSize.cx - 10, top - 30, left, top};
             SetBkMode(hdcMem, TRANSPARENT);
             SetTextColor(hdcMem, RGB(255, 255, 255));
-            DrawText(hdcMem, text, -1, &textRect, DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+            DrawText(hdcMem, text, -1, &textRect, DT_RIGHT | DT_VCENTER | DT_SINGLELINE);
 
             SelectObject(hdcMem, hOldFont);
             DeleteObject(hFont);
@@ -482,6 +509,38 @@ void NativeScreenshotWindow::DrawMagnifier(HDC hdc, int mouseX, int mouseY) {
         return;
     }
 
+    // 如果已选择，计算工具栏区域并检查是否悬浮
+    if (state_ == ScreenshotState::Selected) {
+        // 工具栏参数（与 DrawButtons 中的相同）
+        const int BUTTON_SIZE = 32;
+        const int BUTTON_SPACING = 2;
+        const int TOOLBAR_PADDING_H = 12;
+        const int TOOLBAR_PADDING_V = 4;
+        const int GAP_FROM_SELECTION = 0;
+        int toolbarWidth = BUTTON_SIZE * 2 + BUTTON_SPACING + TOOLBAR_PADDING_H * 2;
+        int toolbarHeight = BUTTON_SIZE + TOOLBAR_PADDING_V * 2;
+
+        // 计算工具栏位置（右下角，紧贴选择框）
+        int toolbarRight = selectionRect_.right;
+        int toolbarLeft = toolbarRight - toolbarWidth;
+        int toolbarTop = selectionRect_.bottom + GAP_FROM_SELECTION;
+
+        // 确保工具栏不超出屏幕左边界
+        if (toolbarLeft < 0) {
+            toolbarLeft = 0;
+            toolbarRight = toolbarWidth;
+        }
+
+        // 工具栏区域
+        RECT toolbarRect = {toolbarLeft, toolbarTop, toolbarRight, toolbarTop + toolbarHeight};
+
+        // 如果鼠标悬浮在工具栏上，不绘制放大镜
+        if (mouseX >= toolbarRect.left && mouseX <= toolbarRect.right &&
+            mouseY >= toolbarRect.top && mouseY <= toolbarRect.bottom) {
+            return;
+        }
+    }
+
     // 放大镜位置（右上角，偏移20px）
     int magX = mouseX + 20;
     int magY = mouseY + 20;
@@ -492,6 +551,44 @@ void NativeScreenshotWindow::DrawMagnifier(HDC hdc, int mouseX, int mouseY) {
     }
     if (magY + MAGNIFIER_SIZE + 30 > screenHeight_) {
         magY = mouseY - MAGNIFIER_SIZE - 30;
+    }
+
+    // 如果已选择，检查放大镜是否与工具栏冲突
+    if (state_ == ScreenshotState::Selected) {
+        const int BUTTON_SIZE = 32;
+        const int BUTTON_SPACING = 2;
+        const int TOOLBAR_PADDING_H = 12;
+        const int TOOLBAR_PADDING_V = 4;
+        const int GAP_FROM_SELECTION = 0;
+        int toolbarWidth = BUTTON_SIZE * 2 + BUTTON_SPACING + TOOLBAR_PADDING_H * 2;
+        int toolbarHeight = BUTTON_SIZE + TOOLBAR_PADDING_V * 2;
+
+        int toolbarRight = selectionRect_.right;
+        int toolbarLeft = toolbarRight - toolbarWidth;
+        int toolbarTop = selectionRect_.bottom + GAP_FROM_SELECTION;
+
+        if (toolbarLeft < 0) {
+            toolbarLeft = 0;
+            toolbarRight = toolbarWidth;
+        }
+
+        RECT toolbarRect = {toolbarLeft, toolbarTop, toolbarRight, toolbarTop + toolbarHeight};
+
+        // 放大镜区域
+        RECT magnifierRect = {magX, magY, magX + MAGNIFIER_SIZE, magY + MAGNIFIER_SIZE};
+
+        // 检查是否冲突
+        bool conflictX = (magnifierRect.right > toolbarRect.left && magnifierRect.left < toolbarRect.right);
+        bool conflictY = (magnifierRect.bottom > toolbarRect.top && magnifierRect.top < toolbarRect.bottom);
+
+        if (conflictX && conflictY) {
+            // 调整放大镜位置到左侧或上方
+            if (mouseX - MAGNIFIER_SIZE - 20 >= 0) {
+                magX = mouseX - MAGNIFIER_SIZE - 20;
+            } else {
+                magY = mouseY - MAGNIFIER_SIZE - 40;
+            }
+        }
     }
 
     // 放大镜圆角半径（小圆角）
@@ -647,46 +744,71 @@ void NativeScreenshotWindow::DrawMagnifier(HDC hdc, int mouseX, int mouseY) {
 }
 
 void NativeScreenshotWindow::DrawButtons(HDC hdc) {
-    // 绘制确定按钮
-    HBRUSH hConfirmBrush = isHoveringConfirm_ ?
-        CreateSolidBrush(RGB(0, 120, 215)) : CreateSolidBrush(RGB(0, 100, 180));
-    HPEN hPen = CreatePen(PS_SOLID, 2, RGB(255, 255, 255));
-    HPEN hOldPen = (HPEN)SelectObject(hdc, hPen);
-    HBRUSH hOldBrush = (HBRUSH)SelectObject(hdc, hConfirmBrush);
+    // 工具栏参数
+    const int BUTTON_SIZE = 32;
+    const int BUTTON_SPACING = 2;
+    const int TOOLBAR_PADDING_H = 12;
+    const int TOOLBAR_PADDING_V = 4;
+    const int GAP_FROM_SELECTION = 0;
+    int toolbarWidth = BUTTON_SIZE * 2 + BUTTON_SPACING + TOOLBAR_PADDING_H * 2;
 
-    RoundRect(hdc, confirmButtonRect_.left, confirmButtonRect_.top,
-              confirmButtonRect_.right, confirmButtonRect_.bottom, 5, 5);
+    // 计算工具栏区域
+    RECT toolbarRect;
+    toolbarRect.left = confirmButtonRect_.left - TOOLBAR_PADDING_H;
+    toolbarRect.top = confirmButtonRect_.top - TOOLBAR_PADDING_V;
+    toolbarRect.right = cancelButtonRect_.right + TOOLBAR_PADDING_H;
+    toolbarRect.bottom = cancelButtonRect_.bottom + TOOLBAR_PADDING_V;
 
-    SelectObject(hdc, hOldBrush);
-    DeleteObject(hConfirmBrush);
+    // 绘制工具栏背景（黑色半透明，极简风格）
+    const int CORNER_RADIUS = 3; // 更小的圆角
 
+    // 创建半透明背景
+    HDC hdcBg = CreateCompatibleDC(hdc);
+    HBITMAP hbmBg = CreateCompatibleBitmap(hdc, toolbarWidth, toolbarRect.bottom - toolbarRect.top);
+    HBITMAP hbmBgOld = (HBITMAP)SelectObject(hdcBg, hbmBg);
+
+    // 填充黑色背景（根据悬浮状态调整透明度）
+    BYTE bgAlpha = 230; // 默认 90% 不透明度
+    HBRUSH hBgBrush = CreateSolidBrush(RGB(0, 0, 0));
+    RECT fillRect = {0, 0, toolbarWidth, toolbarRect.bottom - toolbarRect.top};
+    FillRect(hdcBg, &fillRect, hBgBrush);
+    DeleteObject(hBgBrush);
+
+    // 创建圆角矩形区域
+    HRGN hRgn = CreateRoundRectRgn(0, 0, toolbarWidth, toolbarRect.bottom - toolbarRect.top, CORNER_RADIUS, CORNER_RADIUS);
+
+    // 使用 AlphaBlend 绘制半透明背景
+    BLENDFUNCTION blend = { AC_SRC_OVER, 0, bgAlpha, 0 };
+    AlphaBlend(hdc, toolbarRect.left, toolbarRect.top, toolbarWidth, toolbarRect.bottom - toolbarRect.top,
+               hdcBg, 0, 0, toolbarWidth, toolbarRect.bottom - toolbarRect.top, blend);
+
+    SelectObject(hdcBg, hbmBgOld);
+    DeleteObject(hbmBg);
+    DeleteDC(hdcBg);
+    DeleteObject(hRgn);
+
+    // 绘制符号（根据悬浮状态调整颜色）
     SetBkMode(hdc, TRANSPARENT);
-    SetTextColor(hdc, RGB(255, 255, 255));
 
-    HFONT hFont = CreateFont(16, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
+    HFONT hFont = CreateFont(22, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,  // 更小的字体
                             DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
                             DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, L"Microsoft YaHei");
     HFONT hOldFont = (HFONT)SelectObject(hdc, hFont);
 
-    DrawText(hdc, L"确定", -1, &confirmButtonRect_, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+    // 绘制确认符号（√）
+    // 悬浮时更亮，默认时白色
+    COLORREF confirmColor = isHoveringConfirm_ ? RGB(200, 230, 255) : RGB(255, 255, 255);
+    SetTextColor(hdc, confirmColor);
+    DrawText(hdc, L"√", -1, &confirmButtonRect_, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 
-    // 绘制取消按钮
-    HBRUSH hCancelBrush = isHoveringCancel_ ?
-        CreateSolidBrush(RGB(200, 50, 50)) : CreateSolidBrush(RGB(180, 40, 40));
-    SelectObject(hdc, hCancelBrush);
-
-    RoundRect(hdc, cancelButtonRect_.left, cancelButtonRect_.top,
-              cancelButtonRect_.right, cancelButtonRect_.bottom, 5, 5);
-
-    SelectObject(hdc, hOldBrush);
-    DeleteObject(hCancelBrush);
-
-    DrawText(hdc, L"取消", -1, &cancelButtonRect_, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+    // 绘制取消符号（×）
+    // 悬浮时更亮，默认时白色
+    COLORREF cancelColor = isHoveringCancel_ ? RGB(255, 200, 200) : RGB(255, 255, 255);
+    SetTextColor(hdc, cancelColor);
+    DrawText(hdc, L"×", -1, &cancelButtonRect_, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 
     SelectObject(hdc, hOldFont);
     DeleteObject(hFont);
-    SelectObject(hdc, hOldPen);
-    DeleteObject(hPen);
 }
 
 void NativeScreenshotWindow::DrawDimmedMask(HDC hdc, const RECT& excludeRect) {

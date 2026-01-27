@@ -255,53 +255,91 @@ class _ScreenshotRegionDialogState extends State<_ScreenshotRegionDialog> {
 
   /// 构建工具栏
   Widget _buildToolbar() {
+    // 如果没有选择区域，显示在屏幕底部
+    if (_startPosition == null || _currentPosition == null) {
+      return Positioned(
+        bottom: 40,
+        left: 0,
+        right: 0,
+        child: Center(child: _buildToolbarContent()),
+      );
+    }
+
+    final rect = _calculateRect(_startPosition!, _currentPosition!);
+    // 如果选择区域太小，显示在屏幕底部
+    if (rect.width < _minimumSize || rect.height < _minimumSize) {
+      return Positioned(
+        bottom: 40,
+        left: 0,
+        right: 0,
+        child: Center(child: _buildToolbarContent()),
+      );
+    }
+
+    // 工具栏紧贴在选择框下方
+    final toolbarTop = rect.bottom + 10;
+
     return Positioned(
-      bottom: 40,
+      top: toolbarTop,
       left: 0,
       right: 0,
-      child: Center(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.9),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextButton.icon(
-                onPressed: widget.onCancel,
-                icon: const Icon(Icons.close, color: Colors.white, size: 20),
-                label: const Text(
-                  'Cancel',
-                  style: TextStyle(color: Colors.white, fontSize: 16),
+      child: Center(child: _buildToolbarContent()),
+    );
+  }
+
+  /// 构建工具栏内容
+  Widget _buildToolbarContent() {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 取消按钮（×）
+            InkWell(
+              onTap: widget.onCancel,
+              borderRadius: BorderRadius.circular(4),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
                 ),
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
+                child: const Text(
+                  '×',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
-              const SizedBox(width: 20),
-              ElevatedButton.icon(
-                onPressed: _canConfirmSelection() ? _confirmSelection : null,
-                icon: const Icon(Icons.check, color: Colors.white, size: 20),
-                label: const Text(
-                  'Confirm',
-                  style: TextStyle(color: Colors.white, fontSize: 16),
+            ),
+            const SizedBox(width: 2),
+            // 确认按钮（√）
+            InkWell(
+              onTap: _canConfirmSelection() ? _confirmSelection : null,
+              borderRadius: BorderRadius.circular(4),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
                 ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  disabledBackgroundColor: Colors.grey,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
+                child: Text(
+                  '√',
+                  style: TextStyle(
+                    color: _canConfirmSelection() ? Colors.white : Colors.grey,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
