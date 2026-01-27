@@ -1,6 +1,5 @@
 library;
 
-import 'dart:typed_data';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -46,11 +45,11 @@ abstract class ScreenshotPlatformInterface {
     if (Platform.isWindows) {
       return WindowsScreenshotService();
     } else if (Platform.isMacOS) {
-      return MacOSScreenshotService();
+      return const MacOSScreenshotService();
     } else if (Platform.isLinux) {
-      return LinuxScreenshotService();
+      return const LinuxScreenshotService();
     } else {
-      return FallbackScreenshotService();
+      return const FallbackScreenshotService();
     }
   }
 

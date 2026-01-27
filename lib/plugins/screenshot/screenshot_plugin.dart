@@ -475,10 +475,7 @@ class ScreenshotPlugin extends PlatformPluginBase {
   Future<void> _saveConfig() async {
     try {
       // 保存设置到单一配置键
-      await _context.dataStorage.store(
-        'screenshot_config',
-        _settings.toJson(),
-      );
+      await _context.dataStorage.store('screenshot_config', _settings.toJson());
 
       // 只保存最近 100 条记录的元数据到 dataStorage
       final screenshotsToSave = _screenshots

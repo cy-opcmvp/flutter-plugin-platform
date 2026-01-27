@@ -165,7 +165,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   title: Text(l10n.settings_autoStart),
                   subtitle: Text(l10n.settings_autoStart_description),
                   value: PlatformServiceManager.autoStart.isEnabled,
-                  onChanged: (value) => _showAutoStartConfirmDialog(context, value),
+                  onChanged: (value) =>
+                      _showAutoStartConfirmDialog(context, value),
                 ),
               ],
             ),
@@ -233,18 +234,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                         ],
                         selected: {_globalConfig!.services.notification.mode},
-                        onSelectionChanged: (Set<NotificationMode> selection) async {
-                          final newMode = selection.first;
-                          await _updateNotificationMode(newMode);
-                        },
+                        onSelectionChanged:
+                            (Set<NotificationMode> selection) async {
+                              final newMode = selection.first;
+                              await _updateNotificationMode(newMode);
+                            },
                       ),
                       const SizedBox(height: 8),
                       Text(
                         l10n.settings_notificationMode_desc,
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodySmall
-                            ?.copyWith(color: Colors.grey),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: Colors.grey),
                       ),
                     ],
                   ),
@@ -604,7 +605,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         const SizedBox(width: 8),
                         Text(
                           '⚠️ 开发模式警告',
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
                                 color: Colors.red.shade700,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -620,8 +622,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       '2. 直接运行：build\\windows\\x64\\runner\\Release\\plugin_platform.exe\n'
                       '3. 在发布版本中启用开机自启',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.red.shade900,
-                          ),
+                        color: Colors.red.shade900,
+                      ),
                     ),
                   ],
                 ),
@@ -629,9 +631,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ] else if (enabled) ...[
               Text(
                 '注意：每次重新编译后需要重新设置，因为可执行文件路径会变化。',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.orange,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.orange),
               ),
             ],
           ],
@@ -672,11 +674,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
   /// Set auto start
   Future<void> _setAutoStart(bool enabled) async {
     try {
-      final success = await PlatformServiceManager.autoStart.setEnabled(enabled);
+      final success = await PlatformServiceManager.autoStart.setEnabled(
+        enabled,
+      );
       if (success) {
         // Update autoStart status in config
         if (_globalConfig != null) {
-          final newFeatures = _globalConfig!.features.copyWith(autoStart: enabled);
+          final newFeatures = _globalConfig!.features.copyWith(
+            autoStart: enabled,
+          );
           final newConfig = _globalConfig!.copyWith(features: newFeatures);
           await ConfigManager.instance.updateGlobalConfig(newConfig);
 

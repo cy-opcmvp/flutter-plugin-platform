@@ -144,16 +144,16 @@ class WindowsPlatformAPI extends PlatformAPI {
   @override
   List<PlatformCapability> getCapabilities() {
     return [
-      PlatformCapability('file_system', true, 'Full file system access'),
-      PlatformCapability('network', true, 'Full network access'),
-      PlatformCapability(
+      const PlatformCapability('file_system', true, 'Full file system access'),
+      const PlatformCapability('network', true, 'Full network access'),
+      const PlatformCapability(
         'process_management',
         true,
         'Process creation and management',
       ),
-      PlatformCapability('clipboard', true, 'System clipboard access'),
-      PlatformCapability('notifications', true, 'System notifications'),
-      PlatformCapability('window_management', true, 'Window management'),
+      const PlatformCapability('clipboard', true, 'System clipboard access'),
+      const PlatformCapability('notifications', true, 'System notifications'),
+      const PlatformCapability('window_management', true, 'Window management'),
     ];
   }
 
@@ -183,7 +183,7 @@ class WindowsPlatformAPI extends PlatformAPI {
 
   @override
   PlatformUIConfig getUIConfig() {
-    return PlatformUIConfig(
+    return const PlatformUIConfig(
       supportsWindowing: true,
       supportsFullscreen: true,
       supportsSystemTray: true,
@@ -195,7 +195,7 @@ class WindowsPlatformAPI extends PlatformAPI {
 
   @override
   PlatformSecurityConfig getSecurityConfig() {
-    return PlatformSecurityConfig(
+    return const PlatformSecurityConfig(
       supportsCodeSigning: true,
       requiresElevation: false,
       supportsAppContainer: true,
@@ -206,7 +206,7 @@ class WindowsPlatformAPI extends PlatformAPI {
 
   @override
   PlatformNetworkConfig getNetworkConfig() {
-    return PlatformNetworkConfig(
+    return const PlatformNetworkConfig(
       supportsServerSockets: true,
       supportsClientSockets: true,
       supportsWebSockets: true,
@@ -304,16 +304,16 @@ class LinuxPlatformAPI extends PlatformAPI {
   @override
   List<PlatformCapability> getCapabilities() {
     return [
-      PlatformCapability('file_system', true, 'Full file system access'),
-      PlatformCapability('network', true, 'Full network access'),
-      PlatformCapability(
+      const PlatformCapability('file_system', true, 'Full file system access'),
+      const PlatformCapability('network', true, 'Full network access'),
+      const PlatformCapability(
         'process_management',
         true,
         'Process creation and management',
       ),
-      PlatformCapability('clipboard', true, 'System clipboard access'),
-      PlatformCapability('notifications', true, 'System notifications'),
-      PlatformCapability('window_management', true, 'Window management'),
+      const PlatformCapability('clipboard', true, 'System clipboard access'),
+      const PlatformCapability('notifications', true, 'System notifications'),
+      const PlatformCapability('window_management', true, 'Window management'),
     ];
   }
 
@@ -337,7 +337,7 @@ class LinuxPlatformAPI extends PlatformAPI {
 
   @override
   PlatformUIConfig getUIConfig() {
-    return PlatformUIConfig(
+    return const PlatformUIConfig(
       supportsWindowing: true,
       supportsFullscreen: true,
       supportsSystemTray: true,
@@ -349,7 +349,7 @@ class LinuxPlatformAPI extends PlatformAPI {
 
   @override
   PlatformSecurityConfig getSecurityConfig() {
-    return PlatformSecurityConfig(
+    return const PlatformSecurityConfig(
       supportsCodeSigning: false,
       requiresElevation: false,
       supportsAppContainer: false,
@@ -360,7 +360,7 @@ class LinuxPlatformAPI extends PlatformAPI {
 
   @override
   PlatformNetworkConfig getNetworkConfig() {
-    return PlatformNetworkConfig(
+    return const PlatformNetworkConfig(
       supportsServerSockets: true,
       supportsClientSockets: true,
       supportsWebSockets: true,
@@ -457,18 +457,18 @@ class MacOSPlatformAPI extends PlatformAPI {
   @override
   List<PlatformCapability> getCapabilities() {
     return [
-      PlatformCapability('file_system', true, 'Full file system access'),
-      PlatformCapability('network', true, 'Full network access'),
-      PlatformCapability(
+      const PlatformCapability('file_system', true, 'Full file system access'),
+      const PlatformCapability('network', true, 'Full network access'),
+      const PlatformCapability(
         'process_management',
         true,
         'Process creation and management',
       ),
-      PlatformCapability('clipboard', true, 'System clipboard access'),
-      PlatformCapability('notifications', true, 'System notifications'),
-      PlatformCapability('window_management', true, 'Window management'),
-      PlatformCapability('camera', true, 'Camera access'),
-      PlatformCapability('microphone', true, 'Microphone access'),
+      const PlatformCapability('clipboard', true, 'System clipboard access'),
+      const PlatformCapability('notifications', true, 'System notifications'),
+      const PlatformCapability('window_management', true, 'Window management'),
+      const PlatformCapability('camera', true, 'Camera access'),
+      const PlatformCapability('microphone', true, 'Microphone access'),
     ];
   }
 
@@ -489,7 +489,7 @@ class MacOSPlatformAPI extends PlatformAPI {
 
   @override
   PlatformUIConfig getUIConfig() {
-    return PlatformUIConfig(
+    return const PlatformUIConfig(
       supportsWindowing: true,
       supportsFullscreen: true,
       supportsSystemTray: true,
@@ -501,7 +501,7 @@ class MacOSPlatformAPI extends PlatformAPI {
 
   @override
   PlatformSecurityConfig getSecurityConfig() {
-    return PlatformSecurityConfig(
+    return const PlatformSecurityConfig(
       supportsCodeSigning: true,
       requiresElevation: false,
       supportsAppContainer: true,
@@ -512,7 +512,7 @@ class MacOSPlatformAPI extends PlatformAPI {
 
   @override
   PlatformNetworkConfig getNetworkConfig() {
-    return PlatformNetworkConfig(
+    return const PlatformNetworkConfig(
       supportsServerSockets: true,
       supportsClientSockets: true,
       supportsWebSockets: true,
@@ -572,7 +572,7 @@ class AndroidPlatformAPI extends PlatformAPI {
   @override
   Future<PlatformCommandResult> executeCommand(PlatformCommand command) async {
     // Android has limited command execution capabilities
-    return PlatformCommandResult(
+    return const PlatformCommandResult(
       exitCode: -1,
       stdout: '',
       stderr: 'Command execution not supported on Android',
@@ -583,20 +583,24 @@ class AndroidPlatformAPI extends PlatformAPI {
   @override
   List<PlatformCapability> getCapabilities() {
     return [
-      PlatformCapability('file_system', true, 'Limited file system access'),
-      PlatformCapability('network', true, 'Full network access'),
-      PlatformCapability('camera', true, 'Camera access'),
-      PlatformCapability('microphone', true, 'Microphone access'),
-      PlatformCapability('gps', true, 'GPS location access'),
-      PlatformCapability('accelerometer', true, 'Accelerometer access'),
-      PlatformCapability('gyroscope', true, 'Gyroscope access'),
-      PlatformCapability('notifications', true, 'Push notifications'),
+      const PlatformCapability(
+        'file_system',
+        true,
+        'Limited file system access',
+      ),
+      const PlatformCapability('network', true, 'Full network access'),
+      const PlatformCapability('camera', true, 'Camera access'),
+      const PlatformCapability('microphone', true, 'Microphone access'),
+      const PlatformCapability('gps', true, 'GPS location access'),
+      const PlatformCapability('accelerometer', true, 'Accelerometer access'),
+      const PlatformCapability('gyroscope', true, 'Gyroscope access'),
+      const PlatformCapability('notifications', true, 'Push notifications'),
     ];
   }
 
   @override
   PlatformPaths getPaths() {
-    return PlatformPaths(
+    return const PlatformPaths(
       home: '/data/data/app',
       documents: '/storage/emulated/0/Documents',
       downloads: '/storage/emulated/0/Download',
@@ -608,7 +612,7 @@ class AndroidPlatformAPI extends PlatformAPI {
 
   @override
   PlatformUIConfig getUIConfig() {
-    return PlatformUIConfig(
+    return const PlatformUIConfig(
       supportsWindowing: false,
       supportsFullscreen: true,
       supportsSystemTray: false,
@@ -620,7 +624,7 @@ class AndroidPlatformAPI extends PlatformAPI {
 
   @override
   PlatformSecurityConfig getSecurityConfig() {
-    return PlatformSecurityConfig(
+    return const PlatformSecurityConfig(
       supportsCodeSigning: true,
       requiresElevation: false,
       supportsAppContainer: true,
@@ -631,7 +635,7 @@ class AndroidPlatformAPI extends PlatformAPI {
 
   @override
   PlatformNetworkConfig getNetworkConfig() {
-    return PlatformNetworkConfig(
+    return const PlatformNetworkConfig(
       supportsServerSockets: false,
       supportsClientSockets: true,
       supportsWebSockets: true,
@@ -691,7 +695,7 @@ class IOSPlatformAPI extends PlatformAPI {
   @override
   Future<PlatformCommandResult> executeCommand(PlatformCommand command) async {
     // iOS has very limited command execution capabilities
-    return PlatformCommandResult(
+    return const PlatformCommandResult(
       exitCode: -1,
       stdout: '',
       stderr: 'Command execution not supported on iOS',
@@ -702,20 +706,24 @@ class IOSPlatformAPI extends PlatformAPI {
   @override
   List<PlatformCapability> getCapabilities() {
     return [
-      PlatformCapability('file_system', true, 'Sandboxed file system access'),
-      PlatformCapability('network', true, 'Full network access'),
-      PlatformCapability('camera', true, 'Camera access'),
-      PlatformCapability('microphone', true, 'Microphone access'),
-      PlatformCapability('gps', true, 'GPS location access'),
-      PlatformCapability('accelerometer', true, 'Accelerometer access'),
-      PlatformCapability('gyroscope', true, 'Gyroscope access'),
-      PlatformCapability('notifications', true, 'Push notifications'),
+      const PlatformCapability(
+        'file_system',
+        true,
+        'Sandboxed file system access',
+      ),
+      const PlatformCapability('network', true, 'Full network access'),
+      const PlatformCapability('camera', true, 'Camera access'),
+      const PlatformCapability('microphone', true, 'Microphone access'),
+      const PlatformCapability('gps', true, 'GPS location access'),
+      const PlatformCapability('accelerometer', true, 'Accelerometer access'),
+      const PlatformCapability('gyroscope', true, 'Gyroscope access'),
+      const PlatformCapability('notifications', true, 'Push notifications'),
     ];
   }
 
   @override
   PlatformPaths getPaths() {
-    return PlatformPaths(
+    return const PlatformPaths(
       home: '/var/mobile',
       documents: '/var/mobile/Documents',
       downloads: '/var/mobile/Downloads',
@@ -727,7 +735,7 @@ class IOSPlatformAPI extends PlatformAPI {
 
   @override
   PlatformUIConfig getUIConfig() {
-    return PlatformUIConfig(
+    return const PlatformUIConfig(
       supportsWindowing: false,
       supportsFullscreen: true,
       supportsSystemTray: false,
@@ -739,7 +747,7 @@ class IOSPlatformAPI extends PlatformAPI {
 
   @override
   PlatformSecurityConfig getSecurityConfig() {
-    return PlatformSecurityConfig(
+    return const PlatformSecurityConfig(
       supportsCodeSigning: true,
       requiresElevation: false,
       supportsAppContainer: true,
@@ -750,7 +758,7 @@ class IOSPlatformAPI extends PlatformAPI {
 
   @override
   PlatformNetworkConfig getNetworkConfig() {
-    return PlatformNetworkConfig(
+    return const PlatformNetworkConfig(
       supportsServerSockets: false,
       supportsClientSockets: true,
       supportsWebSockets: true,
@@ -811,7 +819,7 @@ class WebPlatformAPI extends PlatformAPI {
   @override
   Future<PlatformCommandResult> executeCommand(PlatformCommand command) async {
     // Web platform cannot execute arbitrary commands
-    return PlatformCommandResult(
+    return const PlatformCommandResult(
       exitCode: -1,
       stdout: '',
       stderr: 'Command execution not supported on Web',
@@ -822,11 +830,11 @@ class WebPlatformAPI extends PlatformAPI {
   @override
   List<PlatformCapability> getCapabilities() {
     return [
-      PlatformCapability('network', true, 'HTTP/HTTPS network access'),
-      PlatformCapability('clipboard', true, 'Clipboard API access'),
-      PlatformCapability('notifications', true, 'Web notifications'),
-      PlatformCapability('camera', true, 'WebRTC camera access'),
-      PlatformCapability('microphone', true, 'WebRTC microphone access'),
+      const PlatformCapability('network', true, 'HTTP/HTTPS network access'),
+      const PlatformCapability('clipboard', true, 'Clipboard API access'),
+      const PlatformCapability('notifications', true, 'Web notifications'),
+      const PlatformCapability('camera', true, 'WebRTC camera access'),
+      const PlatformCapability('microphone', true, 'WebRTC microphone access'),
     ];
   }
 
@@ -847,7 +855,7 @@ class WebPlatformAPI extends PlatformAPI {
 
   @override
   PlatformUIConfig getUIConfig() {
-    return PlatformUIConfig(
+    return const PlatformUIConfig(
       supportsWindowing: false,
       supportsFullscreen: true,
       supportsSystemTray: false,
@@ -859,7 +867,7 @@ class WebPlatformAPI extends PlatformAPI {
 
   @override
   PlatformSecurityConfig getSecurityConfig() {
-    return PlatformSecurityConfig(
+    return const PlatformSecurityConfig(
       supportsCodeSigning: false,
       requiresElevation: false,
       supportsAppContainer: true,
@@ -870,7 +878,7 @@ class WebPlatformAPI extends PlatformAPI {
 
   @override
   PlatformNetworkConfig getNetworkConfig() {
-    return PlatformNetworkConfig(
+    return const PlatformNetworkConfig(
       supportsServerSockets: false,
       supportsClientSockets: true,
       supportsWebSockets: true,

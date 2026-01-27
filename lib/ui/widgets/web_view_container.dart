@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:plugin_platform/l10n/generated/app_localizations.dart';
 import '../../core/interfaces/i_external_plugin.dart';
 import '../../core/models/external_plugin_models.dart';
 import 'plugin_theme_manager.dart';
@@ -253,10 +252,10 @@ class _WebViewContainerState extends State<WebViewContainer> {
   String _getThemeData() {
     final theme = Theme.of(context);
     final themeData = {
-      'primaryColor': theme.primaryColor.value.toRadixString(16),
-      'backgroundColor': theme.scaffoldBackgroundColor.value.toRadixString(16),
+      'primaryColor': theme.primaryColor.toARGB32().toRadixString(16),
+      'backgroundColor': theme.scaffoldBackgroundColor.toARGB32().toRadixString(16),
       'textColor':
-          theme.textTheme.bodyLarge?.color?.value.toRadixString(16) ??
+          theme.textTheme.bodyLarge?.color?.toARGB32().toRadixString(16) ??
           'ff000000',
       'isDark': theme.brightness == Brightness.dark,
     };
@@ -325,7 +324,7 @@ class _WebViewContainerState extends State<WebViewContainer> {
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
         border: Border(
           top: BorderSide(
-            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
           ),
         ),
       ),
@@ -348,7 +347,7 @@ class _WebViewContainerState extends State<WebViewContainer> {
           ),
           Expanded(
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
                 _currentUrl ?? widget.initialUrl,
                 style: Theme.of(context).textTheme.bodySmall,
@@ -403,7 +402,7 @@ class WebViewSecurityConfig {
   factory WebViewSecurityConfig.fromSecurityLevel(SecurityLevel level) {
     switch (level) {
       case SecurityLevel.minimal:
-        return WebViewSecurityConfig(
+        return const WebViewSecurityConfig(
           allowJavaScript: true,
           allowLocalStorage: true,
           allowGeolocation: true,
@@ -412,7 +411,7 @@ class WebViewSecurityConfig {
           allowNotifications: true,
         );
       case SecurityLevel.standard:
-        return WebViewSecurityConfig(
+        return const WebViewSecurityConfig(
           allowJavaScript: true,
           allowLocalStorage: true,
           allowGeolocation: false,
@@ -421,7 +420,7 @@ class WebViewSecurityConfig {
           allowNotifications: true,
         );
       case SecurityLevel.strict:
-        return WebViewSecurityConfig(
+        return const WebViewSecurityConfig(
           allowJavaScript: true,
           allowLocalStorage: false,
           allowGeolocation: false,
@@ -430,7 +429,7 @@ class WebViewSecurityConfig {
           allowNotifications: false,
         );
       case SecurityLevel.isolated:
-        return WebViewSecurityConfig(
+        return const WebViewSecurityConfig(
           allowJavaScript: false,
           allowLocalStorage: false,
           allowGeolocation: false,

@@ -40,7 +40,8 @@ class WorldClockPlugin extends PlatformPluginBase {
   List<WorldClockItem> get worldClocks => List.unmodifiable(_worldClocks);
 
   /// 获取倒计时列表（只读）
-  List<CountdownTimer> get countdownTimers => List.unmodifiable(_countdownTimers);
+  List<CountdownTimer> get countdownTimers =>
+      List.unmodifiable(_countdownTimers);
 
   // 用于触发UI更新的回调
   VoidCallback? _onStateChanged;
@@ -104,7 +105,9 @@ class WorldClockPlugin extends PlatformPluginBase {
         final defaultTz = _settings.defaultTimeZone;
         // 从 TimeZoneInfo 查找中文城市名，如果没有找到则使用时区ID提取的名称
         final timeZoneInfo = TimeZoneInfo.findByTimeZoneId(defaultTz);
-        final cityName = timeZoneInfo?.displayName ?? defaultTz.split('/').last.replaceAll('_', ' ');
+        final cityName =
+            timeZoneInfo?.displayName ??
+            defaultTz.split('/').last.replaceAll('_', ' ');
         _worldClocks.add(
           WorldClockItem(
             id: 'default',
@@ -171,12 +174,22 @@ class WorldClockPlugin extends PlatformPluginBase {
       // 如果默认时区改变，更新默认时钟的时区
       if (defaultClock.timeZone != settings.defaultTimeZone) {
         // 如果新时区在列表中已存在（非默认时钟），先删除
-        if (_worldClocks.any((clock) => clock.timeZone == settings.defaultTimeZone && !clock.isDefault)) {
-          _worldClocks.removeWhere((clock) => clock.timeZone == settings.defaultTimeZone && !clock.isDefault);
+        if (_worldClocks.any(
+          (clock) =>
+              clock.timeZone == settings.defaultTimeZone && !clock.isDefault,
+        )) {
+          _worldClocks.removeWhere(
+            (clock) =>
+                clock.timeZone == settings.defaultTimeZone && !clock.isDefault,
+          );
         }
 
-        final timeZoneInfo = TimeZoneInfo.findByTimeZoneId(settings.defaultTimeZone);
-        final cityName = timeZoneInfo?.displayName ?? settings.defaultTimeZone.split('/').last.replaceAll('_', ' ');
+        final timeZoneInfo = TimeZoneInfo.findByTimeZoneId(
+          settings.defaultTimeZone,
+        );
+        final cityName =
+            timeZoneInfo?.displayName ??
+            settings.defaultTimeZone.split('/').last.replaceAll('_', ' ');
 
         // 更新默认时钟
         final index = _worldClocks.indexOf(defaultClock);
@@ -244,10 +257,7 @@ class WorldClockPlugin extends PlatformPluginBase {
       );
 
       // 保存单一配置 JSON
-      await _context.dataStorage.store(
-        'world_clock_config',
-        config.toJson(),
-      );
+      await _context.dataStorage.store('world_clock_config', config.toJson());
     } catch (e) {
       debugPrint('Failed to save config: $e');
     }
@@ -310,7 +320,9 @@ class WorldClockPlugin extends PlatformPluginBase {
 
     // 从 TimeZoneInfo 查找中文城市名
     final timeZoneInfo = TimeZoneInfo.findByTimeZoneId(timeZone);
-    final cityName = timeZoneInfo?.displayName ?? timeZone.split('/').last.replaceAll('_', ' ');
+    final cityName =
+        timeZoneInfo?.displayName ??
+        timeZone.split('/').last.replaceAll('_', ' ');
 
     // 创建新时钟（使用唯一 ID）
     final newClock = WorldClockItem(
@@ -349,8 +361,7 @@ class WorldClockPlugin extends PlatformPluginBase {
         _settings.notificationType == NotificationType.system) {
       try {
         // 请求通知权限
-        final hasPermission =
-            await _notificationService.checkPermissions();
+        final hasPermission = await _notificationService.checkPermissions();
         if (!hasPermission) {
           await _notificationService.requestPermissions();
         }
@@ -709,7 +720,7 @@ class _AddClockDialogState extends State<_AddClockDialog> {
     return AlertDialog(
       title: Text(l10n.worldClock_addClock),
       content: DropdownButtonFormField<String>(
-        value: _selectedTimeZone,
+        initialValue: _selectedTimeZone,
         decoration: InputDecoration(
           labelText: l10n.world_clock_time_zone,
           border: const OutlineInputBorder(),
@@ -755,10 +766,7 @@ class _AddCountdownDialog extends StatefulWidget {
   final Function(String title, Duration duration) onAdd;
   final WorldClockPlugin plugin;
 
-  const _AddCountdownDialog({
-    required this.onAdd,
-    required this.plugin,
-  });
+  const _AddCountdownDialog({required this.onAdd, required this.plugin});
 
   @override
   State<_AddCountdownDialog> createState() => _AddCountdownDialogState();
@@ -934,9 +942,9 @@ class _AddCountdownDialogState extends State<_AddCountdownDialog> {
               // 快速模板
               Text(
                 '快速模板',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 8),
               Wrap(
@@ -949,7 +957,9 @@ class _AddCountdownDialogState extends State<_AddCountdownDialog> {
                   return InputChip(
                     label: Text(name),
                     onDeleted: isDefault ? null : () => _deleteTemplate(name),
-                    deleteIcon: isDefault ? null : const Icon(Icons.close, size: 18),
+                    deleteIcon: isDefault
+                        ? null
+                        : const Icon(Icons.close, size: 18),
                     onPressed: () => _applyTemplate(template),
                   );
                 }).toList(),
@@ -973,7 +983,10 @@ class _AddCountdownDialogState extends State<_AddCountdownDialog> {
                       decoration: const InputDecoration(
                         labelText: '小时',
                         border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 16,
+                        ),
                       ),
                       onChanged: (value) => setState(() {}),
                     ),
@@ -986,7 +999,10 @@ class _AddCountdownDialogState extends State<_AddCountdownDialog> {
                       decoration: const InputDecoration(
                         labelText: '分钟',
                         border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 16,
+                        ),
                       ),
                       onChanged: (value) => setState(() {}),
                     ),
@@ -999,7 +1015,10 @@ class _AddCountdownDialogState extends State<_AddCountdownDialog> {
                       decoration: const InputDecoration(
                         labelText: '秒',
                         border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 16,
+                        ),
                       ),
                       onChanged: (value) => setState(() {}),
                     ),
@@ -1017,7 +1036,10 @@ class _AddCountdownDialogState extends State<_AddCountdownDialog> {
                     icon: const Icon(Icons.add, size: 18),
                     label: const Text('新增模板', style: TextStyle(fontSize: 13)),
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 16,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),

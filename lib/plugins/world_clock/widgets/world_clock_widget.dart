@@ -11,12 +11,12 @@ class WorldClockWidget extends StatefulWidget {
   final String timeFormat;
 
   const WorldClockWidget({
-    Key? key,
+    super.key,
     required this.worldClock,
     this.onDelete,
     this.showSeconds = true,
     this.timeFormat = '24h',
-  }) : super(key: key);
+  });
 
   @override
   State<WorldClockWidget> createState() => _WorldClockWidgetState();
@@ -62,22 +62,22 @@ class _WorldClockWidgetState extends State<WorldClockWidget> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  theme.colorScheme.primary.withOpacity(0.15),
-                  theme.colorScheme.primary.withOpacity(0.05),
+                  theme.colorScheme.primary.withValues(alpha: 0.15),
+                  theme.colorScheme.primary.withValues(alpha: 0.05),
                 ],
               )
             : null,
         boxShadow: isDefault
             ? [
                 BoxShadow(
-                  color: theme.colorScheme.primary.withOpacity(0.3),
+                  color: theme.colorScheme.primary.withValues(alpha: 0.3),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
               ]
             : [
                 BoxShadow(
-                  color: theme.shadowColor.withOpacity(0.1),
+                  color: theme.shadowColor.withValues(alpha: 0.1),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -88,11 +88,11 @@ class _WorldClockWidgetState extends State<WorldClockWidget> {
           borderRadius: BorderRadius.circular(16),
           border: isDefault
               ? Border.all(
-                  color: theme.colorScheme.primary.withOpacity(0.3),
+                  color: theme.colorScheme.primary.withValues(alpha: 0.3),
                   width: 1.5,
                 )
               : Border.all(
-                  color: theme.dividerColor.withOpacity(0.3),
+                  color: theme.dividerColor.withValues(alpha: 0.3),
                   width: 1,
                 ),
           color: isDefault ? null : theme.cardColor,
@@ -112,23 +112,27 @@ class _WorldClockWidgetState extends State<WorldClockWidget> {
                     colors: isDefault
                         ? [
                             theme.colorScheme.primary,
-                            theme.colorScheme.primary.withOpacity(0.7),
+                            theme.colorScheme.primary.withValues(alpha: 0.7),
                           ]
                         : [
-                            theme.colorScheme.primary.withOpacity(0.6),
-                            theme.colorScheme.secondary.withOpacity(0.4),
+                            theme.colorScheme.primary.withValues(alpha: 0.6),
+                            theme.colorScheme.secondary.withValues(alpha: 0.4),
                           ],
                   ),
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
-                      color: theme.colorScheme.primary.withOpacity(0.3),
+                      color: theme.colorScheme.primary.withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
                   ],
                 ),
-                child: Icon(Icons.location_city, color: Colors.white, size: 28),
+                child: const Icon(
+                  Icons.location_city,
+                  color: Colors.white,
+                  size: 28,
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -160,7 +164,7 @@ class _WorldClockWidgetState extends State<WorldClockWidget> {
                               gradient: LinearGradient(
                                 colors: [
                                   theme.colorScheme.primary,
-                                  theme.colorScheme.primary.withOpacity(0.8),
+                                  theme.colorScheme.primary.withValues(alpha: 0.8),
                                 ],
                               ),
                               borderRadius: BorderRadius.circular(12),
@@ -203,13 +207,13 @@ class _WorldClockWidgetState extends State<WorldClockWidget> {
                         Icon(
                           Icons.schedule,
                           size: 14,
-                          color: theme.colorScheme.onSurface.withOpacity(0.5),
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                         ),
                         const SizedBox(width: 4),
                         Text(
                           widget.worldClock.displayName,
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurface.withOpacity(0.7),
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                             fontSize: 13,
                           ),
                         ),
@@ -246,7 +250,7 @@ class _WorldClockWidgetState extends State<WorldClockWidget> {
                             (isDefault
                                     ? theme.colorScheme.primary
                                     : theme.colorScheme.secondary)
-                                .withOpacity(0.1),
+                                .withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
@@ -256,7 +260,7 @@ class _WorldClockWidgetState extends State<WorldClockWidget> {
                               (isDefault
                                       ? theme.colorScheme.primary
                                       : theme.colorScheme.secondary)
-                                  .withOpacity(0.8),
+                                  .withValues(alpha: 0.8),
                           fontWeight: FontWeight.w500,
                           fontSize: 12,
                         ),
@@ -278,7 +282,7 @@ class _WorldClockWidgetState extends State<WorldClockWidget> {
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.error.withOpacity(0.1),
+                          color: theme.colorScheme.error.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
@@ -334,10 +338,10 @@ class CompactWorldClockWidget extends StatefulWidget {
   final VoidCallback? onTap;
 
   const CompactWorldClockWidget({
-    Key? key,
+    super.key,
     required this.worldClock,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   State<CompactWorldClockWidget> createState() =>
@@ -386,7 +390,7 @@ class _CompactWorldClockWidgetState extends State<CompactWorldClockWidget> {
                 Text(
                   widget.worldClock.timeZone,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.textTheme.bodySmall?.color?.withOpacity(0.6),
+                    color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.6),
                   ),
                 ),
               ],
@@ -411,10 +415,10 @@ class LargeClockWidget extends StatefulWidget {
   final bool showSeconds;
 
   const LargeClockWidget({
-    Key? key,
+    super.key,
     required this.worldClock,
     this.showSeconds = true,
-  }) : super(key: key);
+  });
 
   @override
   State<LargeClockWidget> createState() => _LargeClockWidgetState();
@@ -451,13 +455,13 @@ class _LargeClockWidgetState extends State<LargeClockWidget> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            theme.primaryColor.withOpacity(0.1),
-            theme.primaryColor.withOpacity(0.05),
+            theme.primaryColor.withValues(alpha: 0.1),
+            theme.primaryColor.withValues(alpha: 0.05),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: theme.primaryColor.withOpacity(0.2),
+          color: theme.primaryColor.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -478,7 +482,7 @@ class _LargeClockWidgetState extends State<LargeClockWidget> {
           Text(
             widget.worldClock.timeZone,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
             ),
           ),
 
@@ -504,7 +508,7 @@ class _LargeClockWidgetState extends State<LargeClockWidget> {
                   style: theme.textTheme.headlineMedium?.copyWith(
                     fontFamily: 'monospace',
                     fontWeight: FontWeight.normal,
-                    color: theme.primaryColor.withOpacity(0.7),
+                    color: theme.primaryColor.withValues(alpha: 0.7),
                   ),
                 ),
               ],
@@ -517,7 +521,7 @@ class _LargeClockWidgetState extends State<LargeClockWidget> {
           Text(
             widget.worldClock.formattedDate,
             style: theme.textTheme.titleMedium?.copyWith(
-              color: theme.textTheme.titleMedium?.color?.withOpacity(0.8),
+              color: theme.textTheme.titleMedium?.color?.withValues(alpha: 0.8),
             ),
           ),
         ],

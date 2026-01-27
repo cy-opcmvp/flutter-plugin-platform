@@ -17,8 +17,8 @@ class PluginStateChangedEvent extends PlatformEvent {
     required this.pluginId,
     required this.oldState,
     required this.newState,
-    required DateTime timestamp,
-  }) : super(timestamp: timestamp);
+    required super.timestamp,
+  });
 }
 
 /// Event fired when network connectivity changes
@@ -27,8 +27,8 @@ class NetworkConnectivityEvent extends PlatformEvent {
 
   const NetworkConnectivityEvent({
     required this.isConnected,
-    required DateTime timestamp,
-  }) : super(timestamp: timestamp);
+    required super.timestamp,
+  });
 }
 
 /// Event fired when operation mode changes
@@ -39,8 +39,8 @@ class OperationModeChangedEvent extends PlatformEvent {
   const OperationModeChangedEvent({
     required this.oldMode,
     required this.newMode,
-    required DateTime timestamp,
-  }) : super(timestamp: timestamp);
+    required super.timestamp,
+  });
 }
 
 /// User profile information
@@ -261,9 +261,9 @@ class PluginEvent extends PlatformEvent {
   const PluginEvent({
     required this.type,
     required this.pluginId,
-    required DateTime timestamp,
+    required super.timestamp,
     this.data,
-  }) : super(timestamp: timestamp);
+  });
 }
 
 /// Types of plugin events
@@ -288,8 +288,7 @@ enum PluginEventType {
 class NotificationEvent extends PlatformEvent {
   final String message;
 
-  const NotificationEvent({required this.message, required DateTime timestamp})
-    : super(timestamp: timestamp);
+  const NotificationEvent({required this.message, required super.timestamp});
 }
 
 /// Event fired when a permission is requested
@@ -300,16 +299,15 @@ class PermissionEvent extends PlatformEvent {
   const PermissionEvent({
     required this.permission,
     required this.granted,
-    required DateTime timestamp,
-  }) : super(timestamp: timestamp);
+    required super.timestamp,
+  });
 }
 
 /// Event fired when an external URL is opened
 class UrlOpenedEvent extends PlatformEvent {
   final String url;
 
-  const UrlOpenedEvent({required this.url, required DateTime timestamp})
-    : super(timestamp: timestamp);
+  const UrlOpenedEvent({required this.url, required super.timestamp});
 }
 
 /// Represents an environment variable with its value and availability status

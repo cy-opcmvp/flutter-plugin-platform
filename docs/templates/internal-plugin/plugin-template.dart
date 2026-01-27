@@ -4,7 +4,7 @@ import '../../core/models/plugin_models.dart';
 
 /// {{PLUGIN_DESCRIPTION}}
 class {{PLUGIN_CLASS}}Plugin implements IPlugin {
-  late PluginContext _context;
+  late PluginContext context;
 
   @override
   String get id => '{{PLUGIN_ID}}';
@@ -20,36 +20,36 @@ class {{PLUGIN_CLASS}}Plugin implements IPlugin {
 
   @override
   Future<void> initialize(PluginContext context) async {
-    _context = context;
+    context = context;
     
     // 加载保存的状态
-    final savedState = await _context.dataStorage.retrieve<Map<String, dynamic>>('{{PLUGIN_FILE_NAME}}_state');
+    final savedState = await context.dataStorage.retrieve<Map<String, dynamic>>('{{PLUGIN_FILE_NAME}}_state');
     if (savedState != null) {
       // 恢复状态
     }
 
-    await _context.platformServices.showNotification('{{PLUGIN_NAME}} initialized');
+    await context.platformServices.showNotification('{{PLUGIN_NAME}} initialized');
   }
 
   @override
   Future<void> dispose() async {
-    await _saveState();
-    await _context.platformServices.showNotification('{{PLUGIN_NAME}} disposed');
+    await saveState();
+    await context.platformServices.showNotification('{{PLUGIN_NAME}} disposed');
   }
 
   @override
   Widget buildUI(BuildContext context) {
     return {{PLUGIN_CLASS}}Widget(
-      onStateChanged: _saveState,
+      onStateChanged: saveState,
     );
   }
 
-  Future<void> _saveState() async {
+  Future<void> saveState() async {
     final state = {
       'version': version,
       'lastUpdated': DateTime.now().toIso8601String(),
     };
-    await _context.dataStorage.store('{{PLUGIN_FILE_NAME}}_state', state);
+    await context.dataStorage.store('{{PLUGIN_FILE_NAME}}_state', state);
   }
 
   @override
@@ -59,7 +59,7 @@ class {{PLUGIN_CLASS}}Plugin implements IPlugin {
         break;
       case PluginState.paused:
       case PluginState.inactive:
-        await _saveState();
+        await saveState();
         break;
       case PluginState.error:
         break;

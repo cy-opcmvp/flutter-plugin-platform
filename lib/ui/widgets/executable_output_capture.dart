@@ -225,7 +225,7 @@ class _ExecutableOutputCaptureState extends State<ExecutableOutputCapture> {
     if (_scrollController.hasClients) {
       _scrollController.animateTo(
         _scrollController.position.maxScrollExtent,
-        duration: Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 200),
         curve: Curves.easeOut,
       );
     }
@@ -282,12 +282,12 @@ class _ExecutableOutputCaptureState extends State<ExecutableOutputCapture> {
 
     return Container(
       height: 40,
-      padding: EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
         border: Border(
           bottom: BorderSide(
-            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
           ),
         ),
       ),
@@ -320,7 +320,9 @@ class _ExecutableOutputCaptureState extends State<ExecutableOutputCapture> {
                   : Icons.vertical_align_center,
               size: 18,
             ),
-            tooltip: _autoScroll ? l10n.executable_disableAutoScroll : l10n.executable_enableAutoScroll,
+            tooltip: _autoScroll
+                ? l10n.executable_disableAutoScroll
+                : l10n.executable_enableAutoScroll,
           ),
           IconButton(
             onPressed: _scrollToBottom,
@@ -341,13 +343,13 @@ class _ExecutableOutputCaptureState extends State<ExecutableOutputCapture> {
             Icon(
               Icons.terminal,
               size: 48,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
               'Waiting for plugin output...',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
           ],
@@ -359,7 +361,7 @@ class _ExecutableOutputCaptureState extends State<ExecutableOutputCapture> {
       color: Theme.of(context).colorScheme.surface,
       child: ListView.builder(
         controller: _scrollController,
-        padding: EdgeInsets.all(8),
+        padding: const EdgeInsets.all(8),
         itemCount: _outputLines.length,
         itemBuilder: (context, index) {
           return _buildOutputLine(_outputLines[index]);
@@ -400,18 +402,18 @@ class _ExecutableOutputCaptureState extends State<ExecutableOutputCapture> {
     }
 
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 1),
+      padding: const EdgeInsets.symmetric(vertical: 1),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Timestamp
           if (widget.showTimestamps)
-            Container(
+            SizedBox(
               width: 80,
               child: Text(
                 _formatTimestamp(line.timestamp),
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.5),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                   fontFamily: 'monospace',
                 ),
               ),
@@ -420,8 +422,8 @@ class _ExecutableOutputCaptureState extends State<ExecutableOutputCapture> {
           // Icon
           if (icon != null)
             Padding(
-              padding: EdgeInsets.only(right: 4, top: 2),
-              child: Icon(icon, size: 14, color: textColor.withOpacity(0.7)),
+              padding: const EdgeInsets.only(right: 4, top: 2),
+              child: Icon(icon, size: 14, color: textColor.withValues(alpha: 0.7)),
             ),
 
           // Content
@@ -448,7 +450,7 @@ class _ExecutableOutputCaptureState extends State<ExecutableOutputCapture> {
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
         border: Border(
           top: BorderSide(
-            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
           ),
         ),
       ),

@@ -193,7 +193,7 @@ class PluginRegistryService {
   /// Get plugin statistics summary
   PluginRegistryStatistics getRegistryStatistics() {
     if (_registry.isEmpty) {
-      return PluginRegistryStatistics(
+      return const PluginRegistryStatistics(
         totalPlugins: 0,
         totalDownloads: 0,
         averageRating: 0.0,
@@ -304,7 +304,7 @@ class PluginRegistryService {
     final resolved = <String, PluginRegistryEntry>{};
     final visiting = <String>{};
 
-    void _resolveDependenciesRecursive(String currentPluginId) {
+    void resolveDependenciesRecursive(String currentPluginId) {
       if (resolved.containsKey(currentPluginId)) {
         return; // Already resolved
       }
@@ -332,7 +332,7 @@ class PluginRegistryService {
 
       // Resolve each dependency first
       for (final depId in dependencies) {
-        _resolveDependenciesRecursive(depId);
+        resolveDependenciesRecursive(depId);
       }
 
       // Add current plugin to resolved list
@@ -340,7 +340,7 @@ class PluginRegistryService {
       visiting.remove(currentPluginId);
     }
 
-    _resolveDependenciesRecursive(pluginId);
+    resolveDependenciesRecursive(pluginId);
 
     // Return dependencies in resolution order (excluding the main plugin)
     final result = resolved.values.toList();
@@ -764,7 +764,7 @@ class PluginRegistryService {
     final tree = <String, List<String>>{};
     final visited = <String>{};
 
-    void _buildTree(String currentPluginId) {
+    void buildTree(String currentPluginId) {
       if (visited.contains(currentPluginId)) {
         return;
       }
@@ -787,11 +787,11 @@ class PluginRegistryService {
 
       // Recursively build tree for dependencies
       for (final depId in dependencies) {
-        _buildTree(depId);
+        buildTree(depId);
       }
     }
 
-    _buildTree(pluginId);
+    buildTree(pluginId);
     return tree;
   }
 
@@ -834,8 +834,12 @@ class PluginRegistryService {
     final v2Parts = version2.split('.').map(int.parse).toList();
 
     // Pad with zeros if needed
-    while (v1Parts.length < 3) v1Parts.add(0);
-    while (v2Parts.length < 3) v2Parts.add(0);
+    while (v1Parts.length < 3) {
+      v1Parts.add(0);
+    }
+    while (v2Parts.length < 3) {
+      v2Parts.add(0);
+    }
 
     for (int i = 0; i < 3; i++) {
       if (v1Parts[i] < v2Parts[i]) return -1;

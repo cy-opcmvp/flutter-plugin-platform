@@ -5,12 +5,12 @@ import '{{PLUGIN_FILE_NAME}}_plugin.dart';
 /// Factory class for creating {{PLUGIN_NAME}} plugin instances
 class {{PLUGIN_CLASS}}PluginFactory {
   /// Creates a new instance of the plugin
-  static IPlugin createPlugin() {
+  IPlugin createPlugin() {
     return {{PLUGIN_CLASS}}Plugin();
   }
 
   /// Gets the plugin descriptor
-  static PluginDescriptor getDescriptor() {
+  PluginDescriptor getDescriptor() {
     return const PluginDescriptor(
       id: '{{PLUGIN_ID}}',
       name: '{{PLUGIN_NAME}}',

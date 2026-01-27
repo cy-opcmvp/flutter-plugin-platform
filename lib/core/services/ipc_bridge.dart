@@ -435,8 +435,9 @@ class IPCBridge {
   /// Check if an error is recoverable
   bool _isRecoverableError(dynamic error) {
     if (error is TimeoutException) return true;
-    if (error is StateError && error.message.contains('connection'))
+    if (error is StateError && error.message.contains('connection')) {
       return true;
+    }
     if (error is IPCException && error.code == 'CONNECTION_LOST') return true;
 
     // Add more recoverable error conditions as needed

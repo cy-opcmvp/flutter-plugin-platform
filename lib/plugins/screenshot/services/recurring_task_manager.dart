@@ -29,17 +29,19 @@ class RecurringTaskManager {
   List<RecurringScreenshotTask> get tasks => List.unmodifiable(_tasks);
 
   /// 获取运行中的任务数量
-  int get runningCount => _tasks.where((t) => t.status == TaskStatus.running).length;
+  int get runningCount =>
+      _tasks.where((t) => t.status == TaskStatus.running).length;
 
   /// 获取暂停的任务数量
-  int get pausedCount => _tasks.where((t) => t.status == TaskStatus.paused).length;
+  int get pausedCount =>
+      _tasks.where((t) => t.status == TaskStatus.paused).length;
 
   /// 构造函数
   RecurringTaskManager({
     required ScreenshotPlugin plugin,
     VoidCallback? onTasksChanged,
-  })  : _plugin = plugin,
-      _onTasksChanged = onTasksChanged;
+  }) : _plugin = plugin,
+       _onTasksChanged = onTasksChanged;
 
   /// 设置任务状态变化回调
   void setOnTasksChanged(VoidCallback? callback) {
@@ -82,53 +84,54 @@ class RecurringTaskManager {
     // 如果已有定时器，先取消
     _timers[task.id]?.cancel();
 
-    final timer = Timer.periodic(
-      Duration(seconds: task.intervalSeconds),
-      (timer) async {
-        debugPrint('TaskManager: Executing task ${task.id} (${task.name})');
+    final timer = Timer.periodic(Duration(seconds: task.intervalSeconds), (
+      timer,
+    ) async {
+      debugPrint('TaskManager: Executing task ${task.id} (${task.name})');
 
-        // 获取最新的任务状态
-        final currentTask = _getTask(task.id);
-        if (currentTask == null) {
-          debugPrint('TaskManager: Task ${task.id} not found, stopping');
-          timer.cancel();
-          return;
+      // 获取最新的任务状态
+      final currentTask = _getTask(task.id);
+      if (currentTask == null) {
+        debugPrint('TaskManager: Task ${task.id} not found, stopping');
+        timer.cancel();
+        return;
+      }
+
+      // 执行截图
+      try {
+        if (currentTask.windowId != null && currentTask.windowId!.isNotEmpty) {
+          await _plugin.captureWindow(currentTask.windowId!);
+        } else {
+          await _plugin.captureFullScreen();
         }
 
-        // 执行截图
-        try {
-          if (currentTask.windowId != null && currentTask.windowId!.isNotEmpty) {
-            await _plugin.captureWindow(currentTask.windowId!);
-          } else {
-            await _plugin.captureFullScreen();
-          }
+        // 使用最新任务状态更新计数
+        _updateTaskState(
+          task.id,
+          currentTask.copyWith(
+            completedShots: currentTask.completedShots + 1,
+            lastShotTime: DateTime.now(),
+          ),
+        );
 
-          // 使用最新任务状态更新计数
+        // 再次获取最新状态检查是否完成
+        final updatedTask = _getTask(task.id);
+        if (updatedTask != null && updatedTask.isCompleted) {
+          debugPrint(
+            'TaskManager: Task ${task.id} completed (${updatedTask.completedShots}/${updatedTask.totalShots})',
+          );
+          _stopTask(task.id);
           _updateTaskState(
             task.id,
-            currentTask.copyWith(
-              completedShots: currentTask.completedShots + 1,
-              lastShotTime: DateTime.now(),
-            ),
+            updatedTask.copyWith(status: TaskStatus.completed),
           );
-
-          // 再次获取最新状态检查是否完成
-          final updatedTask = _getTask(task.id);
-          if (updatedTask != null && updatedTask.isCompleted) {
-            debugPrint('TaskManager: Task ${task.id} completed (${updatedTask.completedShots}/${updatedTask.totalShots})');
-            _stopTask(task.id);
-            _updateTaskState(
-              task.id,
-              updatedTask.copyWith(status: TaskStatus.completed),
-            );
-          }
-        } catch (e) {
-          debugPrint('TaskManager: Error executing task ${task.id}: $e');
-          // 出错时暂停任务
-          pauseTask(task.id);
         }
-      },
-    );
+      } catch (e) {
+        debugPrint('TaskManager: Error executing task ${task.id}: $e');
+        // 出错时暂停任务
+        pauseTask(task.id);
+      }
+    });
 
     _timers[task.id] = timer;
     debugPrint('TaskManager: Started task ${task.id}');
@@ -226,7 +229,9 @@ class RecurringTaskManager {
 
           // 如果任务是运行中状态，改为暂停（因为刚启动）
           if (task.status == TaskStatus.running) {
-            _tasks[_tasks.length - 1] = task.copyWith(status: TaskStatus.paused);
+            _tasks[_tasks.length - 1] = task.copyWith(
+              status: TaskStatus.paused,
+            );
           }
         } catch (e) {
           debugPrint('TaskManager: Failed to load task: $e');

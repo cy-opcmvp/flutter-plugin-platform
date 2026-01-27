@@ -261,7 +261,7 @@ class EnvironmentSupportSystem {
 
   /// Create development environment configuration
   EnvironmentConfig _createDevelopmentConfig() {
-    return EnvironmentConfig(
+    return const EnvironmentConfig(
       name: 'Development',
       debugMode: true,
       loggingLevel: LoggingLevel.debug,
@@ -278,7 +278,7 @@ class EnvironmentSupportSystem {
         maxCpuPercent: 80.0,
         maxNetworkKbps: 10000,
         maxFileHandles: 1000,
-        maxExecutionTime: const Duration(minutes: 30),
+        maxExecutionTime: Duration(minutes: 30),
       ),
       defaultPluginSettings: {
         'debug': true,
@@ -294,7 +294,7 @@ class EnvironmentSupportSystem {
 
   /// Create staging environment configuration
   EnvironmentConfig _createStagingConfig() {
-    return EnvironmentConfig(
+    return const EnvironmentConfig(
       name: 'Staging',
       debugMode: false,
       loggingLevel: LoggingLevel.info,
@@ -309,7 +309,7 @@ class EnvironmentSupportSystem {
         maxCpuPercent: 60.0,
         maxNetworkKbps: 5000,
         maxFileHandles: 500,
-        maxExecutionTime: const Duration(minutes: 15),
+        maxExecutionTime: Duration(minutes: 15),
       ),
       defaultPluginSettings: {
         'debug': false,
@@ -325,7 +325,7 @@ class EnvironmentSupportSystem {
 
   /// Create production environment configuration
   EnvironmentConfig _createProductionConfig() {
-    return EnvironmentConfig(
+    return const EnvironmentConfig(
       name: 'Production',
       debugMode: false,
       loggingLevel: LoggingLevel.warning,
@@ -341,7 +341,7 @@ class EnvironmentSupportSystem {
         maxCpuPercent: 40.0,
         maxNetworkKbps: 2000,
         maxFileHandles: 200,
-        maxExecutionTime: const Duration(minutes: 10),
+        maxExecutionTime: Duration(minutes: 10),
       ),
       defaultPluginSettings: {
         'debug': false,
@@ -497,12 +497,12 @@ class EnvironmentSupportSystem {
 
   /// Get default resource limits
   ResourceLimits _getDefaultResourceLimits() {
-    return ResourceLimits(
+    return const ResourceLimits(
       maxMemoryMB: 128,
       maxCpuPercent: 25.0,
       maxNetworkKbps: 1000,
       maxFileHandles: 100,
-      maxExecutionTime: const Duration(minutes: 5),
+      maxExecutionTime: Duration(minutes: 5),
     );
   }
 }

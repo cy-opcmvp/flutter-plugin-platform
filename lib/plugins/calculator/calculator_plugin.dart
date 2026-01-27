@@ -96,10 +96,7 @@ class CalculatorPlugin extends PlatformPluginBase {
 
   /// 保存配置
   Future<void> _saveConfig() async {
-    await _context.dataStorage.store(
-      'calculator_config',
-      _settings.toJson(),
-    );
+    await _context.dataStorage.store('calculator_config', _settings.toJson());
   }
 
   @override
@@ -229,8 +226,7 @@ class _CalculatorWidgetState extends State<CalculatorWidget> {
                   // Show operation indicator
                   if (_state.previousValue.isNotEmpty)
                     Text(
-                      _formatNumber(_state.previousValue) +
-                          ' ${_state.operation}',
+                      '${_formatNumber(_state.previousValue)} ${_state.operation}',
                       style: TextStyle(color: Colors.grey[400], fontSize: 20),
                     ),
                   const SizedBox(height: 8),

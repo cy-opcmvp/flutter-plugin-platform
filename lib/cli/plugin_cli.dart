@@ -362,11 +362,11 @@ For detailed help on a command, use: plugin-cli <command> --help
       configuration: {},
       providedAPIs: [],
       dependencies: [],
-      security: SecurityRequirements(
+      security: const SecurityRequirements(
         level: SecurityLevel.standard,
         allowedDomains: [],
         blockedDomains: [],
-        resourceLimits: const ResourceLimits(
+        resourceLimits: ResourceLimits(
           maxMemoryMB: 512,
           maxCpuPercent: 50.0,
           maxNetworkKbps: 1024,
@@ -542,7 +542,7 @@ class _MyPluginHomePageState extends State<MyPluginHomePage> {
     String name,
   ) async {
     // Create requirements.txt
-    final requirementsContent = '''
+    const requirementsContent = '''
 # Plugin SDK (when available)
 # plugin-sdk>=1.0.0
 
@@ -821,7 +821,7 @@ main().catch(console.error);
 
     if (language == 'typescript') {
       // Create tsconfig.json
-      final tsconfigContent = '''
+      const tsconfigContent = '''
 {
   "compilerOptions": {
     "target": "ES2020",

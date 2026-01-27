@@ -220,14 +220,14 @@ class _PluginUIContainerState extends State<PluginUIContainer> {
   }
 
   Widget _buildLoadingState() {
-    return Container(
+    return SizedBox(
       height: 400,
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
             Text(
               'Loading ${widget.plugin.name}...',
               style: Theme.of(context).textTheme.bodyMedium,
@@ -239,7 +239,7 @@ class _PluginUIContainerState extends State<PluginUIContainer> {
   }
 
   Widget _buildErrorState() {
-    return Container(
+    return SizedBox(
       height: 400,
       child: Center(
         child: Column(
@@ -250,32 +250,35 @@ class _PluginUIContainerState extends State<PluginUIContainer> {
               size: 48,
               color: Theme.of(context).colorScheme.error,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
               'Plugin Error',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 color: Theme.of(context).colorScheme.error,
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 32),
+              padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Text(
                 _error!,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 TextButton(
                   onPressed: _initializePluginUI,
-                  child: Text('Retry'),
+                  child: const Text('Retry'),
                 ),
-                SizedBox(width: 16),
-                TextButton(onPressed: widget.onClose, child: Text('Close')),
+                const SizedBox(width: 16),
+                TextButton(
+                  onPressed: widget.onClose,
+                  child: const Text('Close'),
+                ),
               ],
             ),
           ],
@@ -285,7 +288,7 @@ class _PluginUIContainerState extends State<PluginUIContainer> {
   }
 
   Widget _buildEmptyState() {
-    return Container(
+    return SizedBox(
       height: 400,
       child: Center(
         child: Column(
@@ -294,13 +297,13 @@ class _PluginUIContainerState extends State<PluginUIContainer> {
             Icon(
               Icons.extension,
               size: 48,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
               'Plugin UI Not Available',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
           ],

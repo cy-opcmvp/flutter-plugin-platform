@@ -256,12 +256,13 @@ class _TagManagementScreenState extends State<TagManagementScreen> {
                       : Padding(
                           padding: const EdgeInsets.all(16),
                           child: GridView.builder(
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 5,
-                              mainAxisSpacing: 8,
-                              crossAxisSpacing: 8,
-                              childAspectRatio: 4 / 3,
-                            ),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 5,
+                                  mainAxisSpacing: 8,
+                                  crossAxisSpacing: 8,
+                                  childAspectRatio: 4 / 3,
+                                ),
                             itemCount: _filteredTags.length,
                             itemBuilder: (context, index) {
                               final tag = _filteredTags[index];
@@ -284,24 +285,28 @@ class _TagManagementScreenState extends State<TagManagementScreen> {
           Icon(
             Icons.tag,
             size: 64,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.3),
           ),
           const SizedBox(height: 16),
           Text(
-            _searchQuery.isNotEmpty
-                ? l10n.hint_noResults
-                : l10n.tag_no_tags,
+            _searchQuery.isNotEmpty ? l10n.hint_noResults : l10n.tag_no_tags,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                ),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
           ),
           if (_searchQuery.isEmpty) ...[
             const SizedBox(height: 8),
             Text(
               l10n.tag_create_hint,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-                  ),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
             ),
             const SizedBox(height: 24),
             FilledButton.icon(
@@ -309,7 +314,10 @@ class _TagManagementScreenState extends State<TagManagementScreen> {
               icon: const Icon(Icons.add),
               label: Text(l10n.tag_add),
               style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
               ),
             ),
           ],
@@ -374,7 +382,9 @@ class _TagManagementScreenState extends State<TagManagementScreen> {
                             tag.description,
                             style: TextStyle(
                               fontSize: 10,
-                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.6),
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -454,7 +464,9 @@ class _TagEditDialogState extends State<_TagEditDialog> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.tag?.name ?? '');
-    _descriptionController = TextEditingController(text: widget.tag?.description ?? '');
+    _descriptionController = TextEditingController(
+      text: widget.tag?.description ?? '',
+    );
     _iconController = TextEditingController(text: widget.tag?.icon ?? '');
     _selectedColor = widget.tag?.color ?? TagColor.blue;
   }
@@ -526,15 +538,13 @@ class _TagEditDialogState extends State<_TagEditDialog> {
                   Text(
                     '或选择预设图标',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: _getPresetIcons(),
-                  ),
+                  Wrap(spacing: 8, runSpacing: 8, children: _getPresetIcons()),
                 ],
               ),
               const SizedBox(height: 16),
@@ -572,7 +582,9 @@ class _TagEditDialogState extends State<_TagEditDialog> {
                             boxShadow: isSelected
                                 ? [
                                     BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.3),
+                                      color: Colors.black.withValues(
+                                        alpha: 0.3,
+                                      ),
                                       blurRadius: 8,
                                       offset: const Offset(0, 2),
                                     ),
@@ -609,7 +621,9 @@ class _TagEditDialogState extends State<_TagEditDialog> {
                 name: _nameController.text.trim(),
                 description: _descriptionController.text.trim(),
                 color: _selectedColor,
-                icon: _iconController.text.trim().isEmpty ? null : _iconController.text.trim(),
+                icon: _iconController.text.trim().isEmpty
+                    ? null
+                    : _iconController.text.trim(),
                 createdAt: widget.tag?.createdAt,
                 isSystem: widget.tag?.isSystem ?? false,
                 sortOrder: widget.tag?.sortOrder ?? 0,
@@ -670,10 +684,7 @@ class _TagEditDialogState extends State<_TagEditDialog> {
             borderRadius: BorderRadius.circular(8),
           ),
           child: Center(
-            child: Text(
-              icon,
-              style: const TextStyle(fontSize: 20),
-            ),
+            child: Text(icon, style: const TextStyle(fontSize: 20)),
           ),
         ),
       );

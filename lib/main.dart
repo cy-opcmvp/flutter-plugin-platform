@@ -52,10 +52,12 @@ void main() async {
   final themeProvider = ThemeProvider();
   await themeProvider.loadSavedThemeMode();
 
-  runApp(PluginPlatformApp(
-    localeProvider: localeProvider,
-    themeProvider: themeProvider,
-  ));
+  runApp(
+    PluginPlatformApp(
+      localeProvider: localeProvider,
+      themeProvider: themeProvider,
+    ),
+  );
 }
 
 class PluginPlatformApp extends StatefulWidget {
@@ -86,7 +88,7 @@ class PluginPlatformApp extends StatefulWidget {
 
 class _PluginPlatformAppState extends State<PluginPlatformApp>
     with WindowListener {
-  GlobalKey<NavigatorState> _navigatorKey = GlobalKey();
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey();
 
   @override
   void initState() {
@@ -142,27 +144,28 @@ class _PluginPlatformAppState extends State<PluginPlatformApp>
         useMaterial3: true,
       ),
       darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
-          brightness: Brightness.dark,
-        ).copyWith(
-          // 调整黑暗模式的背景色，使用更深的颜色
-          surface: Color(0xFF121212),
-          onSurface: Color(0xFFE1E1E1),
-          surfaceContainer: Color(0xFF1E1E1E),
-          surfaceContainerHigh: Color(0xFF2A2A2A),
-          surfaceContainerHighest: Color(0xFF333333),
-        ),
-        scaffoldBackgroundColor: Color(0xFF121212),
+        colorScheme:
+            ColorScheme.fromSeed(
+              seedColor: Colors.deepPurple,
+              brightness: Brightness.dark,
+            ).copyWith(
+              // 调整黑暗模式的背景色，使用更深的颜色
+              surface: const Color(0xFF121212),
+              onSurface: const Color(0xFFE1E1E1),
+              surfaceContainer: const Color(0xFF1E1E1E),
+              surfaceContainerHigh: const Color(0xFF2A2A2A),
+              surfaceContainerHighest: const Color(0xFF333333),
+            ),
+        scaffoldBackgroundColor: const Color(0xFF121212),
         useMaterial3: true,
         // 自定义深色模式下的填充按钮样式，使用更柔和的紫色
         filledButtonTheme: FilledButtonThemeData(
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(
-              Color(0xFFBB86FC).withValues(alpha: 0.7), // 更柔和、更暗的紫色
+            backgroundColor: WidgetStateProperty.all<Color>(
+              const Color(0xFFBB86FC).withValues(alpha: 0.7), // 更柔和、更暗的紫色
             ),
-            foregroundColor: MaterialStateProperty.all<Color>(
-              Color(0xFFFFFFFF),
+            foregroundColor: WidgetStateProperty.all<Color>(
+              const Color(0xFFFFFFFF),
             ),
           ),
         ),

@@ -79,30 +79,37 @@ class WorldClockSettings extends BasePluginSettings {
   factory WorldClockSettings.fromJson(Map<String, dynamic> json) {
     // 解析世界时钟列表
     final worldClocksList = json['worldClocks'] as List?;
-    final worldClocks = worldClocksList
-            ?.map((data) => WorldClockItem.fromJson(data as Map<String, dynamic>))
+    final worldClocks =
+        worldClocksList
+            ?.map(
+              (data) => WorldClockItem.fromJson(data as Map<String, dynamic>),
+            )
             .toList() ??
         [];
 
     // 解析倒计时列表
     final countdownTimersList = json['countdownTimers'] as List?;
-    final countdownTimers = countdownTimersList
-            ?.map((data) => CountdownTimer.fromJson(data as Map<String, dynamic>))
+    final countdownTimers =
+        countdownTimersList
+            ?.map(
+              (data) => CountdownTimer.fromJson(data as Map<String, dynamic>),
+            )
             .toList() ??
         [];
 
     // 解析倒计时模板列表
     final templatesList = json['countdownTemplates'] as List?;
-    final countdownTemplates = templatesList
+    final countdownTemplates =
+        templatesList
             ?.map((item) => Map<String, dynamic>.from(item as Map))
             .toList() ??
         [
-      {'name': '番茄时钟', 'hours': 0, 'minutes': 15, 'seconds': 0},
-      {'name': '午休', 'hours': 1, 'minutes': 0, 'seconds': 0},
-      {'name': '短休息', 'hours': 0, 'minutes': 5, 'seconds': 0},
-      {'name': '长休息', 'hours': 0, 'minutes': 30, 'seconds': 0},
-      {'name': '专注时段', 'hours': 2, 'minutes': 0, 'seconds': 0},
-    ];
+          {'name': '番茄时钟', 'hours': 0, 'minutes': 15, 'seconds': 0},
+          {'name': '午休', 'hours': 1, 'minutes': 0, 'seconds': 0},
+          {'name': '短休息', 'hours': 0, 'minutes': 5, 'seconds': 0},
+          {'name': '长休息', 'hours': 0, 'minutes': 30, 'seconds': 0},
+          {'name': '专注时段', 'hours': 2, 'minutes': 0, 'seconds': 0},
+        ];
 
     return WorldClockSettings(
       version: json['version'] as String? ?? '1.0.0',
@@ -113,8 +120,8 @@ class WorldClockSettings extends BasePluginSettings {
       notificationType: json['notificationType'] == 'inApp'
           ? NotificationType.inApp
           : (json['notificationType'] == 'system'
-              ? NotificationType.system
-              : NotificationType.system),
+                ? NotificationType.system
+                : NotificationType.system),
       worldClocks: worldClocks,
       countdownTimers: countdownTimers,
       countdownTemplates: countdownTemplates,
@@ -132,8 +139,9 @@ class WorldClockSettings extends BasePluginSettings {
       'enableNotifications': enableNotifications,
       'notificationType': notificationType.name,
       'worldClocks': worldClocks.map((clock) => clock.toJson()).toList(),
-      'countdownTimers':
-          countdownTimers.map((timer) => timer.toJson()).toList(),
+      'countdownTimers': countdownTimers
+          .map((timer) => timer.toJson())
+          .toList(),
       'countdownTemplates': countdownTemplates,
     };
   }

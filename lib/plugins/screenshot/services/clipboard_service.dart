@@ -1,6 +1,5 @@
 library;
 
-import 'dart:typed_data';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -8,7 +7,9 @@ import 'package:path/path.dart' as path;
 import '../models/screenshot_settings.dart';
 
 /// Windows 剪贴板方法通道
-const _clipboardMethodChannel = MethodChannel('com.example.screenshot/clipboard');
+const _clipboardMethodChannel = MethodChannel(
+  'com.example.screenshot/clipboard',
+);
 
 /// 剪贴板服务
 ///
@@ -25,14 +26,18 @@ class ClipboardService {
     Uint8List? imageBytes,
   }) async {
     try {
-      debugPrint('ClipboardService: Copying to clipboard, contentType=$contentType, hasImageBytes=${imageBytes != null}');
+      debugPrint(
+        'ClipboardService: Copying to clipboard, contentType=$contentType, hasImageBytes=${imageBytes != null}',
+      );
 
       switch (contentType) {
         case ClipboardContentType.image:
           if (imageBytes != null) {
             return await copyImage(imageBytes, filePath);
           }
-          debugPrint('ClipboardService: ERROR - contentType is image but imageBytes is null!');
+          debugPrint(
+            'ClipboardService: ERROR - contentType is image but imageBytes is null!',
+          );
           return false;
 
         case ClipboardContentType.filename:
@@ -149,7 +154,9 @@ class ClipboardService {
   Future<Uint8List?> _getImageFromClipboardWindows() async {
     // 使用平台通道调用 Windows 原生代码
     try {
-      final result = await _clipboardMethodChannel.invokeMethod('getImageFromClipboard');
+      final result = await _clipboardMethodChannel.invokeMethod(
+        'getImageFromClipboard',
+      );
 
       if (result is Uint8List) {
         return result;
@@ -164,7 +171,9 @@ class ClipboardService {
   /// Windows: 检查剪贴板是否有图片
   Future<bool> _hasImageWindows() async {
     try {
-      final result = await _clipboardMethodChannel.invokeMethod<bool>('hasImage');
+      final result = await _clipboardMethodChannel.invokeMethod<bool>(
+        'hasImage',
+      );
 
       return result ?? false;
     } catch (e) {
@@ -202,7 +211,10 @@ class ClipboardService {
   }
 
   /// 在桌面平台复制图片
-  Future<bool> _copyImageOnDesktop(Uint8List imageBytes, String filePath) async {
+  Future<bool> _copyImageOnDesktop(
+    Uint8List imageBytes,
+    String filePath,
+  ) async {
     try {
       if (Platform.isWindows) {
         // Windows: 使用原生方法将图片复制到剪贴板
@@ -218,7 +230,9 @@ class ClipboardService {
         await Clipboard.setData(ClipboardData(text: tempFile.path));
 
         debugPrint('Image saved to: ${tempFile.path}');
-        debugPrint('For full clipboard support, platform-specific code is needed');
+        debugPrint(
+          'For full clipboard support, platform-specific code is needed',
+        );
 
         return true;
       }
@@ -231,8 +245,12 @@ class ClipboardService {
   /// 在 Windows 上复制图片到剪贴板（原生实现）
   Future<bool> _copyImageWindows(Uint8List imageBytes, String filePath) async {
     try {
-      debugPrint('ClipboardService: Calling Windows native method setImageToClipboard');
-      debugPrint('ClipboardService: imageBytes.length=${imageBytes.length}, first 20 bytes: ${imageBytes.take(20).toList()}');
+      debugPrint(
+        'ClipboardService: Calling Windows native method setImageToClipboard',
+      );
+      debugPrint(
+        'ClipboardService: imageBytes.length=${imageBytes.length}, first 20 bytes: ${imageBytes.take(20).toList()}',
+      );
 
       // 从文件重新读取图片数据（确保数据完整）
       final file = File(filePath);
@@ -246,13 +264,15 @@ class ClipboardService {
 
       final result = await _clipboardMethodChannel.invokeMethod<bool>(
         'setImageToClipboard',
-        fileBytes,  // 直接传递 Uint8List，不包装在列表中
+        fileBytes, // 直接传递 Uint8List，不包装在列表中
       );
 
       debugPrint('ClipboardService: Windows native method returned: $result');
       return result ?? false;
     } catch (e) {
-      debugPrint('ClipboardService: Failed to copy image to clipboard (Windows): $e');
+      debugPrint(
+        'ClipboardService: Failed to copy image to clipboard (Windows): $e',
+      );
       return false;
     }
   }
@@ -286,7 +306,9 @@ class ClipboardService {
   /// 在 Windows 上复制文本到剪贴板（原生实现）
   Future<bool> _setTextToClipboardWindows(String text) async {
     try {
-      debugPrint('ClipboardService: Calling Windows native method setTextToClipboard');
+      debugPrint(
+        'ClipboardService: Calling Windows native method setTextToClipboard',
+      );
       debugPrint('ClipboardService: text=$text');
 
       final result = await _clipboardMethodChannel.invokeMethod<bool>(
@@ -297,7 +319,9 @@ class ClipboardService {
       debugPrint('ClipboardService: Windows native method returned: $result');
       return result ?? false;
     } catch (e) {
-      debugPrint('ClipboardService: Failed to copy text to clipboard (Windows): $e');
+      debugPrint(
+        'ClipboardService: Failed to copy text to clipboard (Windows): $e',
+      );
       return false;
     }
   }

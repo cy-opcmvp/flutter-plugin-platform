@@ -88,7 +88,9 @@ class _WorldClockSettingsScreenState extends State<WorldClockSettingsScreen> {
 
   Widget _buildTimeZoneTile(AppLocalizations l10n) {
     // 查找时区对应的中文名称
-    final timeZoneInfo = TimeZoneInfo.findByTimeZoneId(_settings.defaultTimeZone);
+    final timeZoneInfo = TimeZoneInfo.findByTimeZoneId(
+      _settings.defaultTimeZone,
+    );
     final displayName = timeZoneInfo?.displayName ?? _settings.defaultTimeZone;
 
     return Card(
@@ -108,8 +110,8 @@ class _WorldClockSettingsScreenState extends State<WorldClockSettingsScreen> {
         subtitle: Text(l10n.world_clock_time_format_desc),
         trailing: SegmentedButton<String>(
           segments: [
-            ButtonSegment(value: '12h', label: Text('12')),
-            ButtonSegment(value: '24h', label: Text('24')),
+            const ButtonSegment(value: '12h', label: Text('12')),
+            const ButtonSegment(value: '24h', label: Text('24')),
           ],
           selected: {_settings.timeFormat},
           onSelectionChanged: (Set<String> selection) async {
@@ -167,15 +169,15 @@ class _WorldClockSettingsScreenState extends State<WorldClockSettingsScreen> {
           children: [
             Text(
               l10n.world_clock_notification_type,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             Text(
               l10n.world_clock_notification_type_desc,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
             const SizedBox(height: 16),
@@ -197,7 +199,9 @@ class _WorldClockSettingsScreenState extends State<WorldClockSettingsScreen> {
                   onChanged: _settings.enableNotifications
                       ? (NotificationType? newValue) async {
                           if (newValue != null) {
-                            final newSettings = _settings.copyWith(notificationType: newValue);
+                            final newSettings = _settings.copyWith(
+                              notificationType: newValue,
+                            );
                             if (await _saveSettings(newSettings, context)) {
                               setState(() {
                                 _settings = newSettings;
@@ -251,9 +255,8 @@ class _WorldClockSettingsScreenState extends State<WorldClockSettingsScreen> {
   Future<void> _selectTimeZone() async {
     final selected = await showDialog<String>(
       context: context,
-      builder: (context) => _TimeZoneSelectionDialog(
-        currentTimeZone: _settings.defaultTimeZone,
-      ),
+      builder: (context) =>
+          _TimeZoneSelectionDialog(currentTimeZone: _settings.defaultTimeZone),
     );
 
     if (selected != null && selected != _settings.defaultTimeZone) {
@@ -318,7 +321,10 @@ class _WorldClockSettingsScreenState extends State<WorldClockSettingsScreen> {
     }
   }
 
-  Future<bool> _saveSettings(WorldClockSettings settings, BuildContext context) async {
+  Future<bool> _saveSettings(
+    WorldClockSettings settings,
+    BuildContext context,
+  ) async {
     try {
       widget.plugin.updateSettings(settings);
 
@@ -366,9 +372,7 @@ class _WorldClockSettingsScreenState extends State<WorldClockSettingsScreen> {
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.orange,
-            ),
+            style: FilledButton.styleFrom(backgroundColor: Colors.orange),
             child: Text(l10n.common_confirm),
           ),
         ],
@@ -384,8 +388,9 @@ class _WorldClockSettingsScreenState extends State<WorldClockSettingsScreen> {
   Future<void> _resetToDefaults() async {
     try {
       // 从默认配置中解析设置
-      final defaultData = jsonDecode(WorldClockConfigDefaults.defaultConfig)
-          as Map<String, dynamic>;
+      final defaultData =
+          jsonDecode(WorldClockConfigDefaults.defaultConfig)
+              as Map<String, dynamic>;
       final defaultSettings = WorldClockSettings.fromJson(defaultData);
 
       // 保存默认设置
@@ -409,7 +414,9 @@ class _WorldClockSettingsScreenState extends State<WorldClockSettingsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.settings_configSaveFailed),
+            content: Text(
+              AppLocalizations.of(context)!.settings_configSaveFailed,
+            ),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 2),
           ),
@@ -426,7 +433,8 @@ class _TimeZoneSelectionDialog extends StatefulWidget {
   const _TimeZoneSelectionDialog({required this.currentTimeZone});
 
   @override
-  State<_TimeZoneSelectionDialog> createState() => _TimeZoneSelectionDialogState();
+  State<_TimeZoneSelectionDialog> createState() =>
+      _TimeZoneSelectionDialogState();
 }
 
 class _TimeZoneSelectionDialogState extends State<_TimeZoneSelectionDialog> {
@@ -454,7 +462,7 @@ class _TimeZoneSelectionDialogState extends State<_TimeZoneSelectionDialog> {
               subtitle: Text(
                 timeZone.timeZoneId,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
               value: timeZone.timeZoneId,

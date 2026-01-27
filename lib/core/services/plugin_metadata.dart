@@ -2,7 +2,6 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:plugin_platform/l10n/generated/app_localizations.dart';
-import '../models/plugin_models.dart';
 
 /// 插件元数据服务
 ///

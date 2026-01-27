@@ -109,7 +109,9 @@ class PlatformServiceManager {
     // Initialize auto start service
     final autoStartInitialized = await _autoStartService.initialize();
     if (kDebugMode) {
-      debugPrint('$_tag: Auto start service initialized: $autoStartInitialized');
+      debugPrint(
+        '$_tag: Auto start service initialized: $autoStartInitialized',
+      );
     }
   }
 

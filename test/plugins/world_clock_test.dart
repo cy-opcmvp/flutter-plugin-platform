@@ -149,7 +149,7 @@ void main() {
 
   group('WorldClockItem Tests', () {
     test('WorldClockItem should create correctly', () {
-      final clock = WorldClockItem(
+      const clock = WorldClockItem(
         id: 'test',
         cityName: '北京',
         timeZone: 'Asia/Shanghai',
@@ -163,7 +163,7 @@ void main() {
     });
 
     test('WorldClockItem should format time correctly', () {
-      final clock = WorldClockItem(
+      const clock = WorldClockItem(
         id: 'test',
         cityName: '北京',
         timeZone: 'Asia/Shanghai',
@@ -176,7 +176,7 @@ void main() {
     });
 
     test('WorldClockItem should serialize/deserialize correctly', () {
-      final original = WorldClockItem(
+      const original = WorldClockItem(
         id: 'test',
         cityName: '北京',
         timeZone: 'Asia/Shanghai',

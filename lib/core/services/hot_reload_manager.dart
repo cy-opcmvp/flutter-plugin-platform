@@ -324,6 +324,7 @@ class HotReloadManager implements IHotReloadManager {
   Duration get updateCheckInterval => _updateCheckInterval;
 
   /// Dispose the hot-reload manager
+  @override
   Future<void> dispose() async {
     await shutdown();
   }

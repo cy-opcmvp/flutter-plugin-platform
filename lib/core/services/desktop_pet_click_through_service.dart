@@ -41,7 +41,9 @@ class DesktopPetClickThroughService {
     if (Platform.isLinux || Platform.isWindows || Platform.isMacOS) {
       // 桌面平台支持
       _isInitialized = true;
-      PlatformLogger.instance.logInfo('Desktop Pet Click Through Service initialized');
+      PlatformLogger.instance.logInfo(
+        'Desktop Pet Click Through Service initialized',
+      );
       return;
     }
 

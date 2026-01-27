@@ -12,9 +12,7 @@ class PathPlaceholdersInfoScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.path_placeholders_title),
-      ),
+      appBar: AppBar(title: Text(l10n.path_placeholders_title)),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
@@ -27,7 +25,10 @@ class PathPlaceholdersInfoScreen extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.info_outline, color: Theme.of(context).colorScheme.primary),
+                      Icon(
+                        Icons.info_outline,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -147,7 +148,9 @@ class PathPlaceholdersInfoScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(12.0),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Text('{documents}/Screenshots'),
@@ -164,7 +167,9 @@ class PathPlaceholdersInfoScreen extends StatelessWidget {
                       color: Theme.of(context).colorScheme.primaryContainer,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Text('C:/Users/Username/Documents/Screenshots'),
+                    child: const Text(
+                      'C:/Users/Username/Documents/Screenshots',
+                    ),
                   ),
                 ],
               ),

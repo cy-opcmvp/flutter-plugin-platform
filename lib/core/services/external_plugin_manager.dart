@@ -496,12 +496,12 @@ class ExternalPluginManager {
           ),
           allowedDomains: [],
           blockedDomains: [],
-          resourceLimits: ResourceLimits(
+          resourceLimits: const ResourceLimits(
             maxMemoryMB: 256,
             maxCpuPercent: 50.0,
             maxNetworkKbps: 1000,
             maxFileHandles: 100,
-            maxExecutionTime: const Duration(minutes: 5),
+            maxExecutionTime: Duration(minutes: 5),
           ),
           requiresSignature: registryEntry.securityStatus.requiresSignature,
         ),

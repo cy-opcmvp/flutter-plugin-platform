@@ -82,6 +82,8 @@ dependencies:
   # Screenshot plugin dependencies
   image: ^4.1.7
 
+  ffi: any
+  timezone: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

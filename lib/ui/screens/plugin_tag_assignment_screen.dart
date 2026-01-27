@@ -258,7 +258,10 @@ class _PluginTagAssignmentScreenState extends State<PluginTagAssignmentScreen> {
         .toList();
 
     final l10n = AppLocalizations.of(context)!;
-    final pluginName = PluginMetadata.instance.getPluginName(plugin.id, context);
+    final pluginName = PluginMetadata.instance.getPluginName(
+      plugin.id,
+      context,
+    );
     final pluginIcon = PluginMetadata.instance.getPluginIcon(plugin.id);
 
     return Card(
@@ -269,10 +272,7 @@ class _PluginTagAssignmentScreenState extends State<PluginTagAssignmentScreen> {
           vertical: 8.0,
         ),
         leading: CircleAvatar(
-          child: Icon(
-            pluginIcon,
-            color: Theme.of(context).colorScheme.primary,
-          ),
+          child: Icon(pluginIcon, color: Theme.of(context).colorScheme.primary),
         ),
         title: Text(
           pluginName,

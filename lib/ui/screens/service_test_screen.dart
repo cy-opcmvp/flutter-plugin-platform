@@ -20,7 +20,7 @@ import 'package:plugin_platform/l10n/generated/app_localizations.dart';
 /// - Audio playback
 /// - Task scheduling
 class ServiceTestScreen extends StatefulWidget {
-  const ServiceTestScreen({Key? key}) : super(key: key);
+  const ServiceTestScreen({super.key});
 
   @override
   State<ServiceTestScreen> createState() => _ServiceTestScreenState();
@@ -695,7 +695,7 @@ class _ServiceTestScreenState extends State<ServiceTestScreen> {
           const SizedBox(height: 16),
           // 去掉 Card 的白色背景，使用 Container 替代
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Colors.transparent, // 透明背景
             ),
             child: Padding(

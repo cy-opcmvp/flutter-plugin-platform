@@ -249,7 +249,7 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
           color: Theme.of(context).colorScheme.primary,
         ),
         title: Text(l10n.tag_plugin_assignment_title),
-        subtitle: Text('为每个插件设置标签分类'),
+        subtitle: const Text('为每个插件设置标签分类'),
         trailing: const Icon(Icons.chevron_right),
         onTap: () {
           Navigator.push(

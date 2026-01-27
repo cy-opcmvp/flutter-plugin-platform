@@ -146,7 +146,7 @@ class BackendConfigManager {
   BackendConfig createDefaultConfig(Environment environment) {
     switch (environment) {
       case Environment.development:
-        return BackendConfig(
+        return const BackendConfig(
           baseUrl: 'http://localhost:3000',
           apiVersion: 'v1',
           endpoints: {
@@ -157,11 +157,11 @@ class BackendConfigManager {
             'sync': '/sync',
             'health': '/health',
           },
-          auth: const AuthenticationConfig(type: 'none', credentials: {}),
+          auth: AuthenticationConfig(type: 'none', credentials: {}),
           timeoutSeconds: 30,
         );
       case Environment.staging:
-        return BackendConfig(
+        return const BackendConfig(
           baseUrl: 'https://staging-api.example.com',
           apiVersion: 'v1',
           endpoints: {
@@ -172,14 +172,14 @@ class BackendConfigManager {
             'sync': '/sync',
             'health': '/health',
           },
-          auth: const AuthenticationConfig(
+          auth: AuthenticationConfig(
             type: 'bearer',
             credentials: {'token': 'staging-token'},
           ),
           timeoutSeconds: 60,
         );
       case Environment.production:
-        return BackendConfig(
+        return const BackendConfig(
           baseUrl: 'https://api.example.com',
           apiVersion: 'v1',
           endpoints: {
@@ -190,14 +190,14 @@ class BackendConfigManager {
             'sync': '/sync',
             'health': '/health',
           },
-          auth: const AuthenticationConfig(
+          auth: AuthenticationConfig(
             type: 'bearer',
             credentials: {'token': 'production-token'},
           ),
           timeoutSeconds: 30,
         );
       case Environment.testing:
-        return BackendConfig(
+        return const BackendConfig(
           baseUrl: 'https://test-api.example.com',
           apiVersion: 'v1',
           endpoints: {
@@ -208,7 +208,7 @@ class BackendConfigManager {
             'sync': '/sync',
             'health': '/health',
           },
-          auth: const AuthenticationConfig(type: 'none', credentials: {}),
+          auth: AuthenticationConfig(type: 'none', credentials: {}),
           timeoutSeconds: 10,
         );
     }

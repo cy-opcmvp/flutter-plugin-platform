@@ -91,9 +91,7 @@ class PluginCard extends StatelessWidget {
                     descriptor.metadata['description'] as String,
                     style: theme.textTheme.bodySmall?.copyWith(
                       fontSize: 11,
-                      color: theme.colorScheme.onSurface.withValues(
-                        alpha: 0.7,
-                      ),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,

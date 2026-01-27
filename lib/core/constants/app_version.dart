@@ -39,8 +39,7 @@ class AppVersion {
   /// 构建时间（编译时常量）
   ///
   /// 格式: yyyy-MM-dd HH:mm:ss
-  static const String buildDate =
-      '2026-01-24'; // 手动更新为实际发布日期
+  static const String buildDate = '2026-01-24'; // 手动更新为实际发布日期
 
   /// 检查版本是否有效
   ///

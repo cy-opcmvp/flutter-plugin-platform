@@ -149,7 +149,7 @@
 /// await PluginSDK.logDebug('Debug information');
 /// ```
 
-library plugin_sdk;
+library;
 
 // Core SDK
 export 'plugin_sdk.dart';

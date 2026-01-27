@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 
 import '../interfaces/i_platform_services.dart';
 import '../interfaces/i_plugin.dart';
-import '../interfaces/i_plugin_i18n.dart';
 import '../models/platform_models.dart';
 import '../models/plugin_models.dart';
 
@@ -21,6 +20,7 @@ class PlatformServices implements IPlatformServices {
   }
 
   /// Initialize the platform services
+  @override
   Future<void> initialize() async {
     // Platform services initialization logic
     // This could include setting up platform-specific services
@@ -293,18 +293,12 @@ class EnhancedPluginContext extends PluginContext {
 
   EnhancedPluginContext({
     required this.pluginId,
-    required IPlatformServices platformServices,
-    required IDataStorage dataStorage,
-    required INetworkAccess networkAccess,
-    required IPluginI18n i18n,
-    required Map<String, dynamic> configuration,
-  }) : super(
-         platformServices: platformServices,
-         dataStorage: dataStorage,
-         networkAccess: networkAccess,
-         i18n: i18n,
-         configuration: configuration,
-       );
+    required super.platformServices,
+    required super.dataStorage,
+    required super.networkAccess,
+    required super.i18n,
+    required super.configuration,
+  });
 
   /// Store plugin-specific data
   void setPluginData(String key, dynamic value) {

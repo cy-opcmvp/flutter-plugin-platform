@@ -52,7 +52,7 @@ class GlobalConfig {
   }
 
   /// 获取默认配置
-  static GlobalConfig get defaultConfig => GlobalConfig(
+  static GlobalConfig get defaultConfig => const GlobalConfig(
     app: AppConfig.defaultConfig,
     features: FeatureConfig.defaultConfig,
     services: ServiceConfig.defaultConfig,
@@ -393,16 +393,10 @@ class NotificationServiceConfig {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'enabled': enabled,
-      'mode': mode.name,
-    };
+    return {'enabled': enabled, 'mode': mode.name};
   }
 
-  NotificationServiceConfig copyWith({
-    bool? enabled,
-    NotificationMode? mode,
-  }) {
+  NotificationServiceConfig copyWith({bool? enabled, NotificationMode? mode}) {
     return NotificationServiceConfig(
       enabled: enabled ?? this.enabled,
       mode: mode ?? this.mode,

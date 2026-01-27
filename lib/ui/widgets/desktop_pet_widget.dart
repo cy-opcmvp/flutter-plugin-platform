@@ -39,7 +39,8 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
   final ValueNotifier<bool> _isWaitingForDrag = ValueNotifier<bool>(false);
 
   /// 是否启用调试模式
-  bool get _isDebugMode => ConfigManager.instance.globalConfig.advanced.debugMode;
+  bool get _isDebugMode =>
+      ConfigManager.instance.globalConfig.advanced.debugMode;
 
   /// 是否应该输出日志
   bool get _shouldLog => _isDebugMode;
@@ -137,7 +138,7 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
     }
 
     return SizedBox(
-      width: 120,  // 完整窗口大小
+      width: 120, // 完整窗口大小
       height: 120,
       child: Opacity(
         opacity: _opacity,
@@ -184,9 +185,9 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
                                         ? _breathingAnimation!.value
                                         : 1.0,
                                     child: _buildPetContainer(
-                                        isHovered,
-                                        isDragging,
-                                        isWaiting,
+                                      isHovered,
+                                      isDragging,
+                                      isWaiting,
                                     ),
                                   );
                                 },
@@ -217,8 +218,16 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
         shape: BoxShape.circle,
         gradient: RadialGradient(
           colors: [
-            _getMainColor(isHovered, isDragging, isWaiting).withValues(alpha: 0.9),
-            _getSecondaryColor(isHovered, isDragging, isWaiting).withValues(alpha: 0.7),
+            _getMainColor(
+              isHovered,
+              isDragging,
+              isWaiting,
+            ).withValues(alpha: 0.9),
+            _getSecondaryColor(
+              isHovered,
+              isDragging,
+              isWaiting,
+            ).withValues(alpha: 0.7),
           ],
         ),
       ),
@@ -567,8 +576,10 @@ class _DesktopPetWidgetState extends State<DesktopPetWidget>
     super.didUpdateWidget(oldWidget);
 
     // 检查动画配置是否变化
-    final oldAnimationsEnabled = oldWidget.preferences['animations_enabled'] ?? true;
-    final newAnimationsEnabled = widget.preferences['animations_enabled'] ?? true;
+    final oldAnimationsEnabled =
+        oldWidget.preferences['animations_enabled'] ?? true;
+    final newAnimationsEnabled =
+        widget.preferences['animations_enabled'] ?? true;
 
     if (oldAnimationsEnabled != newAnimationsEnabled) {
       if (newAnimationsEnabled) {

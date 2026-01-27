@@ -103,6 +103,7 @@ class PluginManager implements IPluginManager {
   }
 
   /// Initialize the plugin manager
+  @override
   Future<void> initialize() async {
     if (_isInitialized) return;
 
@@ -117,6 +118,7 @@ class PluginManager implements IPluginManager {
   }
 
   /// Shutdown the plugin manager
+  @override
   Future<void> shutdown() async {
     if (!_isInitialized) return;
 
@@ -139,6 +141,7 @@ class PluginManager implements IPluginManager {
   }
 
   /// Stream of plugin events
+  @override
   Stream<PluginEvent> get eventStream => _eventController.stream;
 
   @override
@@ -277,7 +280,9 @@ class PluginManager implements IPluginManager {
     final runtimeInfo = _pluginRuntimeInfo[pluginId];
     if (runtimeInfo == null) {
       // 如果运行时信息不存在，说明已经被清理了，直接返回（幂等操作）
-      debugPrint('Plugin runtime info not found for $pluginId, skipping unload');
+      debugPrint(
+        'Plugin runtime info not found for $pluginId, skipping unload',
+      );
       return;
     }
 

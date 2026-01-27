@@ -66,7 +66,9 @@ class ConfigService {
 
     try {
       // 从 assets 加载 example 配置
-      final exampleConfigString = await rootBundle.loadString('assets/config/global_config.example.json');
+      final exampleConfigString = await rootBundle.loadString(
+        'assets/config/global_config.example.json',
+      );
       await exampleFile.writeAsString(exampleConfigString);
       debugPrint('Example config file created from assets');
     } catch (e) {
@@ -114,7 +116,7 @@ class ConfigService {
     final file = File('${_configDir.path}/global_config.json');
 
     try {
-      final jsonString = JsonEncoder.withIndent('  ').convert(config);
+      final jsonString = const JsonEncoder.withIndent('  ').convert(config);
       await file.writeAsString(jsonString);
       debugPrint('Global config saved');
     } catch (e) {
@@ -150,7 +152,7 @@ class ConfigService {
     final file = File('${_configDir.path}/plugin_$pluginId.json');
 
     try {
-      final jsonString = JsonEncoder.withIndent('  ').convert(config);
+      final jsonString = const JsonEncoder.withIndent('  ').convert(config);
       await file.writeAsString(jsonString);
       debugPrint('Plugin config saved for $pluginId');
     } catch (e) {
@@ -207,7 +209,7 @@ class ConfigService {
       'version': '1.0.0',
     };
 
-    return JsonEncoder.withIndent('  ').convert(exportData);
+    return const JsonEncoder.withIndent('  ').convert(exportData);
   }
 
   /// 从字符串导入配置
@@ -293,7 +295,7 @@ class ConfigService {
     final file = File('${_configDir.path}/${configName}_config.json');
 
     try {
-      final jsonString = JsonEncoder.withIndent('  ').convert(config);
+      final jsonString = const JsonEncoder.withIndent('  ').convert(config);
       await file.writeAsString(jsonString);
       debugPrint('Custom config saved: $configName');
     } catch (e) {

@@ -72,10 +72,7 @@ class PluginI18nHelper implements IPluginI18n {
       final mainLocale = locale.split('_').first;
       final mainTranslations = _translations[mainLocale];
       if (mainTranslations != null && mainTranslations.containsKey(key)) {
-        return _replacePlaceholders(
-          mainTranslations[key]!,
-          args,
-        );
+        return _replacePlaceholders(mainTranslations[key]!, args);
       }
       // 最终回退：返回键本身
       return key;

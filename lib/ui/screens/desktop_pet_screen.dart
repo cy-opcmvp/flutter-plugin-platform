@@ -52,7 +52,8 @@ class _DesktopPetScreenState extends State<DesktopPetScreen>
   Map<String, dynamic> _currentPetPreferences = {};
 
   /// 是否启用调试模式
-  bool get _isDebugMode => ConfigManager.instance.globalConfig.advanced.debugMode;
+  bool get _isDebugMode =>
+      ConfigManager.instance.globalConfig.advanced.debugMode;
 
   /// 是否应该输出日志
   bool get _shouldLog => _isDebugMode;
@@ -60,7 +61,7 @@ class _DesktopPetScreenState extends State<DesktopPetScreen>
   // 窗口和宠物位置信息
   Size _windowSize = Size.zero;
   Offset _windowPosition = Offset.zero;
-  
+
   // 原始宠物窗口大小（用于恢复）
   static const Size _petWindowSize = Size(120.0, 120.0);
 
@@ -85,7 +86,9 @@ class _DesktopPetScreenState extends State<DesktopPetScreen>
 
     // 监听宠物偏好设置变化
     _currentPetPreferences = widget.petManager.petPreferences;
-    widget.petManager.petPreferencesNotifier.addListener(_onPetPreferencesChanged);
+    widget.petManager.petPreferencesNotifier.addListener(
+      _onPetPreferencesChanged,
+    );
 
     // 延迟显示内容，确保窗口透明设置完成
     _initializeWindow();
@@ -186,7 +189,9 @@ class _DesktopPetScreenState extends State<DesktopPetScreen>
   @override
   void dispose() {
     windowManager.removeListener(this);
-    widget.petManager.petPreferencesNotifier.removeListener(_onPetPreferencesChanged);
+    widget.petManager.petPreferencesNotifier.removeListener(
+      _onPetPreferencesChanged,
+    );
     _fadeController.dispose();
     super.dispose();
   }
@@ -268,7 +273,7 @@ class _DesktopPetScreenState extends State<DesktopPetScreen>
     try {
       // ✅ 简化方案：直接扩大窗口到足够显示菜单的大小
       // 菜单宽度 160，高度约 200，加上宠物 120x120，再加上边距
-      const expandedWidth = 300.0;  // 足够显示宠物和菜单
+      const expandedWidth = 300.0; // 足够显示宠物和菜单
       const expandedHeight = 250.0; // 足够显示宠物和菜单
 
       if (_shouldLog) {
@@ -346,10 +351,10 @@ class _DesktopPetScreenState extends State<DesktopPetScreen>
     }
 
     // ✅ 简化：菜单固定显示在宠物右侧
-    const petLeft = 0.0;     // 宠物固定在左上角
+    const petLeft = 0.0; // 宠物固定在左上角
     const petTop = 0.0;
-    const menuLeft = 130.0;  // 菜单在宠物右侧（宠物120 + 间距10）
-    const menuTop = 10.0;    // 顶部留一点边距
+    const menuLeft = 130.0; // 菜单在宠物右侧（宠物120 + 间距10）
+    const menuTop = 10.0; // 顶部留一点边距
 
     return FadeTransition(
       opacity: _fadeAnimation,
@@ -358,9 +363,7 @@ class _DesktopPetScreenState extends State<DesktopPetScreen>
           // 背景层 - 完全不接收鼠标事件，让其穿透到桌面
           // 使用 IgnorePointer 让所有鼠标事件穿透
           Positioned.fill(
-            child: IgnorePointer(
-              child: Container(color: Colors.transparent),
-            ),
+            child: IgnorePointer(child: Container(color: Colors.transparent)),
           ),
 
           // 宠物组件 - 固定在左上角，不使用 Center
@@ -378,12 +381,16 @@ class _DesktopPetScreenState extends State<DesktopPetScreen>
                 }
                 if (_showContextMenu) {
                   if (_shouldLog) {
-                    PlatformLogger.instance.logInfo('🍔 菜单已显示，调用 _closeContextMenu');
+                    PlatformLogger.instance.logInfo(
+                      '🍔 菜单已显示，调用 _closeContextMenu',
+                    );
                   }
                   _closeContextMenu();
                 } else {
                   if (_shouldLog) {
-                    PlatformLogger.instance.logInfo('🍔 菜单未显示，调用 _openContextMenu');
+                    PlatformLogger.instance.logInfo(
+                      '🍔 菜单未显示，调用 _openContextMenu',
+                    );
                   }
                   _openContextMenu();
                 }
@@ -410,9 +417,7 @@ class _DesktopPetScreenState extends State<DesktopPetScreen>
                 borderRadius: BorderRadius.circular(8),
                 color: Colors.transparent,
                 child: DesktopPetContextMenu(
-                  quickActions: _availablePlugins
-                      .map((p) => p.name)
-                      .toList(),
+                  quickActions: _availablePlugins.map((p) => p.name).toList(),
                   onActionSelected: _launchPlugin,
                   onOpenFullApp: _returnToFullApp,
                   onSettings: _toggleSettings,
@@ -428,7 +433,7 @@ class _DesktopPetScreenState extends State<DesktopPetScreen>
 
   /// Build UI for unsupported platforms (web, mobile)
   Widget _buildUnsupportedPlatformUI(BuildContext context) {
-    final platformName = kIsWeb ? 'Web' : 'Mobile';
+    const platformName = kIsWeb ? 'Web' : 'Mobile';
     final l10n = context.l10n;
 
     return Scaffold(

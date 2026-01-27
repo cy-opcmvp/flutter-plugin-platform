@@ -1,7 +1,5 @@
 library;
 
-import 'dart:typed_data';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/screenshot_models.dart';
@@ -129,12 +127,12 @@ class _ScreenshotRegionDialogState extends State<_ScreenshotRegionDialog> {
   /// 构建半透明蒙版
   Widget _buildDimOverlay() {
     if (_startPosition == null || _currentPosition == null) {
-      return Container(color: Colors.black.withOpacity(0.3));
+      return Container(color: Colors.black.withValues(alpha: 0.3));
     }
 
     final rect = _calculateRect(_startPosition!, _currentPosition!);
     if (rect.width < _minimumSize || rect.height < _minimumSize) {
-      return Container(color: Colors.black.withOpacity(0.3));
+      return Container(color: Colors.black.withValues(alpha: 0.3));
     }
 
     return Stack(
@@ -145,7 +143,7 @@ class _ScreenshotRegionDialogState extends State<_ScreenshotRegionDialog> {
           top: 0,
           right: 0,
           height: rect.top,
-          child: Container(color: Colors.black.withOpacity(0.5)),
+          child: Container(color: Colors.black.withValues(alpha: 0.5)),
         ),
         // 下方区域
         Positioned(
@@ -153,7 +151,7 @@ class _ScreenshotRegionDialogState extends State<_ScreenshotRegionDialog> {
           top: rect.bottom,
           right: 0,
           bottom: 0,
-          child: Container(color: Colors.black.withOpacity(0.5)),
+          child: Container(color: Colors.black.withValues(alpha: 0.5)),
         ),
         // 左侧区域
         Positioned(
@@ -161,7 +159,7 @@ class _ScreenshotRegionDialogState extends State<_ScreenshotRegionDialog> {
           top: rect.top,
           width: rect.left,
           height: rect.height,
-          child: Container(color: Colors.black.withOpacity(0.5)),
+          child: Container(color: Colors.black.withValues(alpha: 0.5)),
         ),
         // 右侧区域
         Positioned(
@@ -169,7 +167,7 @@ class _ScreenshotRegionDialogState extends State<_ScreenshotRegionDialog> {
           top: rect.top,
           right: 0,
           height: rect.height,
-          child: Container(color: Colors.black.withOpacity(0.5)),
+          child: Container(color: Colors.black.withValues(alpha: 0.5)),
         ),
       ],
     );
@@ -294,7 +292,7 @@ class _ScreenshotRegionDialogState extends State<_ScreenshotRegionDialog> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.9),
+          color: Colors.black.withValues(alpha: 0.9),
           borderRadius: BorderRadius.circular(4),
         ),
         child: Row(

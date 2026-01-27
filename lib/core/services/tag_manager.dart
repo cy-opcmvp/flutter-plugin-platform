@@ -86,7 +86,7 @@ class TagManager {
         _pluginTagMap.clear();
         mapData.forEach((pluginId, tagIds) {
           if (tagIds is List) {
-            _pluginTagMap[pluginId] = (tagIds as List).cast<String>().toSet();
+            _pluginTagMap[pluginId] = (tagIds).cast<String>().toSet();
           }
         });
       }

@@ -275,10 +275,8 @@ Future<void> _pkg(ArgResults a) async {
       .toString();
   arc.addFile(ArchiveFile('signature.txt', h.length, utf8.encode(h)));
   final z = ZipEncoder().encode(arc);
-  if (z != null) {
-    await File(o).writeAsBytes(z);
-    print('Done: $o (${(z.length / 1024).toStringAsFixed(1)} KB)');
-  }
+  await File(o).writeAsBytes(z);
+  print('Done: $o (${(z.length / 1024).toStringAsFixed(1)} KB)');
 }
 
 Future<void> _val(ArgResults a) async {

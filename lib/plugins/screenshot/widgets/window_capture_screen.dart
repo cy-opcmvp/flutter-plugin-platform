@@ -71,9 +71,9 @@ class _WindowCaptureScreenState extends State<WindowCaptureScreen> {
         setState(() {
           _isLoading = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('加载窗口列表失败: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('加载窗口列表失败: $e')));
       }
     }
   }
@@ -122,21 +122,22 @@ class _WindowCaptureScreenState extends State<WindowCaptureScreen> {
     } catch (e) {
       debugPrint('Failed to capture window: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('截图失败: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('截图失败: $e')));
       }
     }
   }
 
   /// 创建循环任务
-  Future<void> _createRecurringTask(String? windowId, String? windowTitle) async {
+  Future<void> _createRecurringTask(
+    String? windowId,
+    String? windowTitle,
+  ) async {
     final result = await Navigator.of(context).push<RecurringScreenshotTask>(
       MaterialPageRoute(
-        builder: (context) => _CreateTaskDialog(
-          windowId: windowId,
-          windowTitle: windowTitle,
-        ),
+        builder: (context) =>
+            _CreateTaskDialog(windowId: windowId, windowTitle: windowTitle),
       ),
     );
 
@@ -240,74 +241,85 @@ class _WindowCaptureScreenState extends State<WindowCaptureScreen> {
                     child: _isLoading
                         ? const Center(child: CircularProgressIndicator())
                         : _windows.isEmpty
-                            ? Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(32),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
+                        ? Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(32),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.window,
+                                    size: 64,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.outline,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    l10n.screenshot_no_windows,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.outline,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        : ListView.builder(
+                            itemCount: _windows.length,
+                            itemBuilder: (context, index) {
+                              final window = _windows[index];
+                              return ListTile(
+                                leading: _buildWindowIcon(window),
+                                title: Text(
+                                  window.title,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                subtitle: window.appName != null
+                                    ? Text(
+                                        window.appName!,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onSurfaceVariant,
+                                        ),
+                                      )
+                                    : null,
+                                trailing: SizedBox(
+                                  width: 80,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(
-                                        Icons.window,
-                                        size: 64,
-                                        color: Theme.of(context).colorScheme.outline,
+                                      IconButton(
+                                        icon: const Icon(Icons.photo_camera),
+                                        tooltip: l10n.screenshot_capture,
+                                        onPressed: () =>
+                                            _captureWindow(window.id),
                                       ),
-                                      const SizedBox(height: 16),
-                                      Text(
-                                        l10n.screenshot_no_windows,
-                                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                          color: Theme.of(context).colorScheme.outline,
+                                      IconButton(
+                                        icon: const Icon(Icons.timer),
+                                        tooltip: l10n
+                                            .screenshot_create_recurring_task,
+                                        onPressed: () => _createRecurringTask(
+                                          window.id,
+                                          window.title,
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
-                              )
-                            : ListView.builder(
-                                itemCount: _windows.length,
-                                itemBuilder: (context, index) {
-                                  final window = _windows[index];
-                                  return ListTile(
-                                    leading: _buildWindowIcon(window),
-                                    title: Text(
-                                      window.title,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    subtitle: window.appName != null
-                                        ? Text(
-                                            window.appName!,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                            ),
-                                          )
-                                        : null,
-                                    trailing: SizedBox(
-                                      width: 80,
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          IconButton(
-                                            icon: const Icon(Icons.photo_camera),
-                                            tooltip: l10n.screenshot_capture,
-                                            onPressed: () => _captureWindow(window.id),
-                                          ),
-                                          IconButton(
-                                            icon: const Icon(Icons.timer),
-                                            tooltip: l10n.screenshot_create_recurring_task,
-                                            onPressed: () => _createRecurringTask(
-                                              window.id,
-                                              window.title,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
+                              );
+                            },
+                          ),
                   ),
                 ],
               ),
@@ -342,21 +354,31 @@ class _WindowCaptureScreenState extends State<WindowCaptureScreen> {
                                   Icon(
                                     Icons.timer_outlined,
                                     size: 64,
-                                    color: Theme.of(context).colorScheme.outline,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.outline,
                                   ),
                                   const SizedBox(height: 16),
                                   Text(
                                     l10n.screenshot_no_tasks,
-                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                      color: Theme.of(context).colorScheme.outline,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.outline,
+                                        ),
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
                                     l10n.screenshot_create_task_hint,
-                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: Theme.of(context).colorScheme.outline,
-                                    ),
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.outline,
+                                        ),
                                   ),
                                 ],
                               ),
@@ -410,7 +432,6 @@ class _TaskListTile extends StatelessWidget {
   final VoidCallback onDelete;
 
   const _TaskListTile({
-    super.key,
     required this.task,
     required this.onToggle,
     required this.onDelete,
@@ -436,9 +457,8 @@ class _TaskListTile extends StatelessWidget {
                     children: [
                       Text(
                         task.name,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -454,24 +474,24 @@ class _TaskListTile extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // 播放/暂停按钮
-                IconButton(
-                  icon: Icon(
-                    task.status == TaskStatus.running
-                        ? Icons.pause
-                        : Icons.play_arrow,
-                  ),
-                  onPressed: onToggle,
-                  tooltip: task.status == TaskStatus.running
-                      ? l10n.screenshot_pause_task
-                      : l10n.screenshot_resume_task,
-                ),
-                // 删除按钮
-                IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: onDelete,
-                  tooltip: l10n.screenshot_delete_task,
-                ),
-              ],
+                    IconButton(
+                      icon: Icon(
+                        task.status == TaskStatus.running
+                            ? Icons.pause
+                            : Icons.play_arrow,
+                      ),
+                      onPressed: onToggle,
+                      tooltip: task.status == TaskStatus.running
+                          ? l10n.screenshot_pause_task
+                          : l10n.screenshot_resume_task,
+                    ),
+                    // 删除按钮
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: onDelete,
+                      tooltip: l10n.screenshot_delete_task,
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -499,7 +519,9 @@ class _TaskListTile extends StatelessWidget {
                       if (!task.isInfinite)
                         LinearProgressIndicator(
                           value: task.progress,
-                          backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.surfaceContainerHighest,
                         ),
                     ],
                   ),
@@ -518,11 +540,7 @@ class _CreateTaskDialog extends StatefulWidget {
   final String? windowId;
   final String? windowTitle;
 
-  const _CreateTaskDialog({
-    super.key,
-    this.windowId,
-    this.windowTitle,
-  });
+  const _CreateTaskDialog({this.windowId, this.windowTitle});
 
   @override
   State<_CreateTaskDialog> createState() => _CreateTaskDialogState();
@@ -744,9 +762,9 @@ class _CreateTaskDialogState extends State<_CreateTaskDialog> {
 
     // 验证间隔范围（1秒到24小时）
     if (intervalSeconds < 1 || intervalSeconds > 86400) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('间隔必须在1秒到24小时之间')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('间隔必须在1秒到24小时之间')));
       return;
     }
 

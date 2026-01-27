@@ -231,7 +231,7 @@ class TextAnnotation extends Annotation {
       'fontFamily': fontFamily,
       'bold': bold,
       'italic': italic,
-      'backgroundColor': backgroundColor?.value,
+      'backgroundColor': backgroundColor?.toARGB32(),
     };
   }
 

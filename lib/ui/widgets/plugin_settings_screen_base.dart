@@ -34,10 +34,7 @@ abstract class PluginSettingsScreen<T extends Object, S extends Object>
   /// 插件实例
   final T plugin;
 
-  const PluginSettingsScreen({
-    super.key,
-    required this.plugin,
-  });
+  const PluginSettingsScreen({super.key, required this.plugin});
 
   /// 配置对象 getter
   S get settings;
@@ -280,7 +277,7 @@ class _PluginSettingsScreenState<T extends Object, S extends Object>
           icon: const Icon(Icons.edit, size: 16),
           label: Text(
             l10n.json_editor_edit_json,
-            style: TextStyle(fontSize: 13),
+            style: const TextStyle(fontSize: 13),
             overflow: TextOverflow.ellipsis,
           ),
           style: OutlinedButton.styleFrom(

@@ -85,8 +85,11 @@ class _ScreenshotHistoryScreenState extends State<ScreenshotHistoryScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline,
-                      size: 64, color: Theme.of(context).colorScheme.error),
+                  Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     l10n.screenshot_history_load_failed,
@@ -170,7 +173,7 @@ class _ScreenshotHistoryScreenState extends State<ScreenshotHistoryScreen> {
           Icon(
             Icons.screenshot_outlined,
             size: 80,
-            color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -306,8 +309,7 @@ class _HistoryGroupSectionState extends State<_HistoryGroupSection> {
   }
 
   /// 是否还有更多可加载
-  bool get _hasMore =>
-      _visibleRecords.length < widget.allRecords.length;
+  bool get _hasMore => _visibleRecords.length < widget.allRecords.length;
 
   /// 加载更多记录
   Future<void> _loadMore() async {
@@ -352,15 +354,14 @@ class _HistoryGroupSectionState extends State<_HistoryGroupSection> {
           ListTile(
             title: Text(
               widget.groupName,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             subtitle: Text(
-              '${widget.allRecords.length} ${l10n.screenshot_history_items}'),
-            trailing: Icon(
-              _isExpanded ? Icons.expand_less : Icons.expand_more,
+              '${widget.allRecords.length} ${l10n.screenshot_history_items}',
             ),
+            trailing: Icon(_isExpanded ? Icons.expand_less : Icons.expand_more),
             onTap: _toggleExpanded,
           ),
 
@@ -377,8 +378,7 @@ class _HistoryGroupSectionState extends State<_HistoryGroupSection> {
                   mainAxisSpacing: 8,
                   childAspectRatio: 16 / 9,
                 ),
-                itemCount: _visibleRecords.length +
-                    (_hasMore ? 1 : 0),
+                itemCount: _visibleRecords.length + (_hasMore ? 1 : 0),
                 itemBuilder: (context, index) {
                   // 加载更多指示器
                   if (index == _visibleRecords.length && _hasMore) {
@@ -482,10 +482,7 @@ class _ScreenshotThumbnail extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.bottomCenter,
           end: Alignment.topCenter,
-          colors: [
-            Colors.black.withOpacity(0.7),
-            Colors.transparent,
-          ],
+          colors: [Colors.black.withValues(alpha: 0.7), Colors.transparent],
         ),
       ),
       padding: const EdgeInsets.all(8),
@@ -555,7 +552,7 @@ class _ScreenshotPreviewScreenState extends State<_ScreenshotPreviewScreen> {
         leading: Container(
           margin: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
+            color: Colors.white.withValues(alpha: 0.2),
             shape: BoxShape.circle,
           ),
           child: IconButton(
@@ -653,11 +650,23 @@ class _ScreenshotPreviewScreenState extends State<_ScreenshotPreviewScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildInfoRow(l10n.screenshot_info_path, widget.record.filePath),
-            _buildInfoRow(l10n.screenshot_info_size, widget.record.formattedFileSize),
-            _buildInfoRow(l10n.screenshot_info_type, _getTypeName(widget.record.type)),
-            _buildInfoRow(l10n.screenshot_info_created, widget.record.createdAt.toString()),
+            _buildInfoRow(
+              l10n.screenshot_info_size,
+              widget.record.formattedFileSize,
+            ),
+            _buildInfoRow(
+              l10n.screenshot_info_type,
+              _getTypeName(widget.record.type),
+            ),
+            _buildInfoRow(
+              l10n.screenshot_info_created,
+              widget.record.createdAt.toString(),
+            ),
             if (widget.record.dimensions != null)
-              _buildInfoRow(l10n.screenshot_info_dimensions, widget.record.dimensions!),
+              _buildInfoRow(
+                l10n.screenshot_info_dimensions,
+                widget.record.dimensions!,
+              ),
           ],
         ),
         actions: [
@@ -727,7 +736,9 @@ class _ScreenshotPreviewScreenState extends State<_ScreenshotPreviewScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              success ? l10n.screenshot_image_copied : '${l10n.screenshot_copy_failed}',
+              success
+                  ? l10n.screenshot_image_copied
+                  : l10n.screenshot_copy_failed,
             ),
             duration: const Duration(seconds: 2),
           ),

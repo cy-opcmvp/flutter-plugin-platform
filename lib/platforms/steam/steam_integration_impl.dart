@@ -12,7 +12,7 @@ class SteamIntegrationImpl implements ISteamIntegration {
   bool _isAlwaysOnTop = false;
 
   // Desktop pet preferences
-  Map<String, dynamic> _petPreferences = {
+  final Map<String, dynamic> _petPreferences = {
     'position': {'x': 100.0, 'y': 100.0},
     'size': {'width': 200.0, 'height': 200.0},
     'opacity': 1.0,

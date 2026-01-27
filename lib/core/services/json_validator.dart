@@ -111,8 +111,9 @@ class JsonSchema {
       );
     }
     if (items != null) json['items'] = items!.toJson();
-    if (additionalProperties != null)
+    if (additionalProperties != null) {
       json['additionalProperties'] = additionalProperties;
+    }
     if (defaultValue != null) json['default'] = defaultValue;
     if (enumValues != null) json['enum'] = enumValues;
     if (minimum != null) json['minimum'] = minimum;
@@ -251,7 +252,7 @@ class JsonValidator {
         final result = validateSchema(
           data[i],
           schema.items!,
-          path: '${path}[$i]',
+          path: '$path[$i]',
         );
         if (!result.isValid) return result;
       }

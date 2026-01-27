@@ -142,95 +142,97 @@ class PermissionManager {
   /// Initialize default permission policies
   void _initializeDefaultPolicies() {
     // File system permissions
-    _permissionPolicies[Permission.fileSystemRead] = PermissionPolicy(
+    _permissionPolicies[Permission.fileSystemRead] = const PermissionPolicy(
       requiresUserConsent: false,
       allowedSecurityLevels: SecurityLevel.values,
       restrictions: ['sandbox/*', 'temp/*', 'data/*'],
     );
 
-    _permissionPolicies[Permission.fileSystemWrite] = PermissionPolicy(
+    _permissionPolicies[Permission.fileSystemWrite] = const PermissionPolicy(
       requiresUserConsent: true,
       allowedSecurityLevels: [SecurityLevel.minimal, SecurityLevel.standard],
       restrictions: ['sandbox/*', 'temp/*', 'data/*'],
     );
 
-    _permissionPolicies[Permission.fileSystemExecute] = PermissionPolicy(
+    _permissionPolicies[Permission.fileSystemExecute] = const PermissionPolicy(
       requiresUserConsent: true,
       allowedSecurityLevels: [SecurityLevel.minimal],
       restrictions: ['sandbox/*'],
     );
 
     // Network permissions
-    _permissionPolicies[Permission.networkAccess] = PermissionPolicy(
+    _permissionPolicies[Permission.networkAccess] = const PermissionPolicy(
       requiresUserConsent: false,
       allowedSecurityLevels: [SecurityLevel.minimal, SecurityLevel.standard],
       restrictions: [],
     );
 
-    _permissionPolicies[Permission.networkServer] = PermissionPolicy(
+    _permissionPolicies[Permission.networkServer] = const PermissionPolicy(
       requiresUserConsent: true,
       allowedSecurityLevels: [SecurityLevel.minimal, SecurityLevel.standard],
       restrictions: [],
     );
 
-    _permissionPolicies[Permission.networkClient] = PermissionPolicy(
+    _permissionPolicies[Permission.networkClient] = const PermissionPolicy(
       requiresUserConsent: false,
       allowedSecurityLevels: [SecurityLevel.minimal, SecurityLevel.standard],
       restrictions: [],
     );
 
     // System permissions
-    _permissionPolicies[Permission.systemNotifications] = PermissionPolicy(
-      requiresUserConsent: true,
-      allowedSecurityLevels: SecurityLevel.values,
-      restrictions: [],
-    );
+    _permissionPolicies[Permission.systemNotifications] =
+        const PermissionPolicy(
+          requiresUserConsent: true,
+          allowedSecurityLevels: SecurityLevel.values,
+          restrictions: [],
+        );
 
-    _permissionPolicies[Permission.systemClipboard] = PermissionPolicy(
-      requiresUserConsent: true,
-      allowedSecurityLevels: [SecurityLevel.minimal, SecurityLevel.standard],
-      restrictions: [],
-    );
-
-    _permissionPolicies[Permission.systemCamera] = PermissionPolicy(
+    _permissionPolicies[Permission.systemClipboard] = const PermissionPolicy(
       requiresUserConsent: true,
       allowedSecurityLevels: [SecurityLevel.minimal, SecurityLevel.standard],
       restrictions: [],
     );
 
-    _permissionPolicies[Permission.systemMicrophone] = PermissionPolicy(
+    _permissionPolicies[Permission.systemCamera] = const PermissionPolicy(
+      requiresUserConsent: true,
+      allowedSecurityLevels: [SecurityLevel.minimal, SecurityLevel.standard],
+      restrictions: [],
+    );
+
+    _permissionPolicies[Permission.systemMicrophone] = const PermissionPolicy(
       requiresUserConsent: true,
       allowedSecurityLevels: [SecurityLevel.minimal, SecurityLevel.standard],
       restrictions: [],
     );
 
     // Platform permissions
-    _permissionPolicies[Permission.platformServices] = PermissionPolicy(
+    _permissionPolicies[Permission.platformServices] = const PermissionPolicy(
       requiresUserConsent: false,
       allowedSecurityLevels: SecurityLevel.values,
       restrictions: [],
     );
 
-    _permissionPolicies[Permission.platformUI] = PermissionPolicy(
+    _permissionPolicies[Permission.platformUI] = const PermissionPolicy(
       requiresUserConsent: false,
       allowedSecurityLevels: SecurityLevel.values,
       restrictions: [],
     );
 
-    _permissionPolicies[Permission.platformStorage] = PermissionPolicy(
+    _permissionPolicies[Permission.platformStorage] = const PermissionPolicy(
       requiresUserConsent: true,
       allowedSecurityLevels: [SecurityLevel.minimal, SecurityLevel.standard],
       restrictions: [],
     );
 
     // Inter-plugin permissions
-    _permissionPolicies[Permission.pluginCommunication] = PermissionPolicy(
-      requiresUserConsent: false,
-      allowedSecurityLevels: SecurityLevel.values,
-      restrictions: [],
-    );
+    _permissionPolicies[Permission.pluginCommunication] =
+        const PermissionPolicy(
+          requiresUserConsent: false,
+          allowedSecurityLevels: SecurityLevel.values,
+          restrictions: [],
+        );
 
-    _permissionPolicies[Permission.pluginDataSharing] = PermissionPolicy(
+    _permissionPolicies[Permission.pluginDataSharing] = const PermissionPolicy(
       requiresUserConsent: true,
       allowedSecurityLevels: [SecurityLevel.minimal, SecurityLevel.standard],
       restrictions: [],

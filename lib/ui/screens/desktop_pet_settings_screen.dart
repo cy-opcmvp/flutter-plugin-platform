@@ -58,9 +58,7 @@ class _DesktopPetSettingsScreenState extends State<DesktopPetSettingsScreen> {
 
     if (_isLoading || _globalConfig == null) {
       return Scaffold(
-        appBar: AppBar(
-          title: Text(l10n.desktopPet_settings_title),
-        ),
+        appBar: AppBar(title: Text(l10n.desktopPet_settings_title)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -224,7 +222,9 @@ class _DesktopPetSettingsScreenState extends State<DesktopPetSettingsScreen> {
   Future<void> _updateOpacity(double value) async {
     if (_globalConfig == null) return;
 
-    final newPetConfig = _globalConfig!.features.desktopPet.copyWith(opacity: value);
+    final newPetConfig = _globalConfig!.features.desktopPet.copyWith(
+      opacity: value,
+    );
     await _updatePetConfig(newPetConfig);
 
     // 实时更新桌面宠物窗口透明度
@@ -239,12 +239,16 @@ class _DesktopPetSettingsScreenState extends State<DesktopPetSettingsScreen> {
   Future<void> _updateAnimationsEnabled(bool value) async {
     if (_globalConfig == null) return;
 
-    final newPetConfig = _globalConfig!.features.desktopPet.copyWith(animationsEnabled: value);
+    final newPetConfig = _globalConfig!.features.desktopPet.copyWith(
+      animationsEnabled: value,
+    );
     await _updatePetConfig(newPetConfig);
 
     // 实时更新桌面宠物动画设置
     try {
-      await _desktopPetManager.updatePetPreferences({'animations_enabled': value});
+      await _desktopPetManager.updatePetPreferences({
+        'animations_enabled': value,
+      });
     } catch (e) {
       debugPrint('Failed to update pet animations: $e');
     }
@@ -254,12 +258,16 @@ class _DesktopPetSettingsScreenState extends State<DesktopPetSettingsScreen> {
   Future<void> _updateInteractionsEnabled(bool value) async {
     if (_globalConfig == null) return;
 
-    final newPetConfig = _globalConfig!.features.desktopPet.copyWith(interactionsEnabled: value);
+    final newPetConfig = _globalConfig!.features.desktopPet.copyWith(
+      interactionsEnabled: value,
+    );
     await _updatePetConfig(newPetConfig);
 
     // 实时更新桌面宠物交互设置
     try {
-      await _desktopPetManager.updatePetPreferences({'interactions_enabled': value});
+      await _desktopPetManager.updatePetPreferences({
+        'interactions_enabled': value,
+      });
     } catch (e) {
       debugPrint('Failed to update pet interactions: $e');
     }
@@ -269,7 +277,9 @@ class _DesktopPetSettingsScreenState extends State<DesktopPetSettingsScreen> {
   Future<void> _updatePetConfig(DesktopPetConfig newPetConfig) async {
     if (_globalConfig == null) return;
 
-    final newFeatures = _globalConfig!.features.copyWith(desktopPet: newPetConfig);
+    final newFeatures = _globalConfig!.features.copyWith(
+      desktopPet: newPetConfig,
+    );
     final newConfig = _globalConfig!.copyWith(features: newFeatures);
 
     try {
@@ -288,7 +298,7 @@ class _DesktopPetSettingsScreenState extends State<DesktopPetSettingsScreen> {
   Future<void> _resetToDefaults() async {
     if (_globalConfig == null) return;
 
-    final newPetConfig = DesktopPetConfig.defaultConfig;
+    const newPetConfig = DesktopPetConfig.defaultConfig;
     await _updatePetConfig(newPetConfig);
   }
 
@@ -330,9 +340,7 @@ class _DesktopPetSettingsScreenState extends State<DesktopPetSettingsScreen> {
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.orange,
-            ),
+            style: FilledButton.styleFrom(backgroundColor: Colors.orange),
             child: Text(l10n.common_confirm),
           ),
         ],

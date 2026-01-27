@@ -31,7 +31,7 @@
 /// plugin-cli publish --plugin my-plugin.pkg --registry official
 /// ```
 
-library plugin_cli;
+library;
 
 // Core CLI functionality
 export 'plugin_cli.dart';

@@ -24,7 +24,7 @@ class _ExternalPluginManagementScreenState
   PluginState? _filterState;
   Set<String> _selectedPlugins = {};
   bool _isMultiSelectMode = false;
-  Map<String, bool> _operationInProgress = {};
+  final Map<String, bool> _operationInProgress = {};
 
   @override
   void initState() {
@@ -669,7 +669,7 @@ class _ExternalPluginManagementScreenState
                               vertical: 8,
                             ),
                           ),
-                          value: _filterType,
+                          initialValue: _filterType,
                           onChanged: (value) {
                             setState(() {
                               _filterType = value;
@@ -702,7 +702,7 @@ class _ExternalPluginManagementScreenState
                               vertical: 8,
                             ),
                           ),
-                          value: _filterState,
+                          initialValue: _filterState,
                           onChanged: (value) {
                             setState(() {
                               _filterState = value;
@@ -932,7 +932,7 @@ class _ExternalPluginCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       color: isSelected
-          ? theme.colorScheme.primaryContainer.withOpacity(0.3)
+          ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
           : null,
       child: InkWell(
         onTap: onTap,
@@ -958,7 +958,7 @@ class _ExternalPluginCard extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: _getPluginTypeColor(
                         descriptor.type,
-                      ).withOpacity(0.1),
+                      ).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Stack(
@@ -974,7 +974,7 @@ class _ExternalPluginCard extends StatelessWidget {
                             width: 48,
                             height: 48,
                             decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.5),
+                              color: Colors.black.withValues(alpha: 0.5),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: const SizedBox(
@@ -1015,7 +1015,7 @@ class _ExternalPluginCard extends StatelessWidget {
                         Text(
                           'v${descriptor.version} • ${descriptor.type.name.toUpperCase()}',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurface.withOpacity(0.6),
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                           ),
                         ),
                         if (descriptor.metadata.containsKey('description')) ...[
@@ -1119,27 +1119,27 @@ class _ExternalPluginCard extends StatelessWidget {
                     Icon(
                       Icons.security,
                       size: 16,
-                      color: theme.colorScheme.onSurface.withOpacity(0.6),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                     const SizedBox(width: 4),
                     Text(
                       'Security: ${descriptor.metadata['securityLevel'] ?? 'Unknown'}',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                     ),
                     const SizedBox(width: 16),
                     Icon(
                       Icons.devices,
                       size: 16,
-                      color: theme.colorScheme.onSurface.withOpacity(0.6),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
                         'Platforms: ${(descriptor.metadata['supportedPlatforms'] as List<String>?)?.join(', ') ?? 'Unknown'}',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withOpacity(0.6),
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -1185,9 +1185,9 @@ class _ExternalPluginCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: chipColor.withOpacity(0.1),
+        color: chipColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: chipColor.withOpacity(0.3)),
+        border: Border.all(color: chipColor.withValues(alpha: 0.3)),
       ),
       child: Text(
         statusText,
@@ -1387,11 +1387,11 @@ class _ExternalPluginDetailsDialog extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         if (onRollback != null) ...[
-          Row(
+          const Row(
             children: [
-              const Icon(Icons.backup, size: 16, color: Colors.orange),
-              const SizedBox(width: 4),
-              const Text(
+              Icon(Icons.backup, size: 16, color: Colors.orange),
+              SizedBox(width: 4),
+              Text(
                 'Backup available for rollback',
                 style: TextStyle(color: Colors.orange),
               ),

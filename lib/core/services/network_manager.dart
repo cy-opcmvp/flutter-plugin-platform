@@ -277,7 +277,7 @@ class NetworkManager implements INetworkManager {
         '${method}_${url.toString()}_${DateTime.now().millisecondsSinceEpoch}';
 
     // Monitor this request
-    _monitoredRequests[requestId] = '${method} ${url}';
+    _monitoredRequests[requestId] = '$method $url';
 
     try {
       final requestHeaders = {
@@ -424,6 +424,7 @@ class NetworkManager implements INetworkManager {
   }
 
   /// Initialize the network manager
+  @override
   Future<void> initialize() async {
     // Only load configuration if not using mock storage
     if (_storage is! MockStorage) {
@@ -433,11 +434,13 @@ class NetworkManager implements INetworkManager {
   }
 
   /// Shutdown the network manager
+  @override
   Future<void> shutdown() async {
     dispose();
   }
 
   /// Set offline mode
+  @override
   Future<void> setOfflineMode(bool offline) async {
     _isOnline = !offline;
     if (offline) {
@@ -450,6 +453,7 @@ class NetworkManager implements INetworkManager {
   }
 
   /// Check if connected to network
+  @override
   Future<bool> isConnected() async {
     return _isOnline;
   }

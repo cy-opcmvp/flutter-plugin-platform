@@ -148,7 +148,7 @@ class PluginSandbox {
   /// Monitor current resource usage
   Future<ResourceUsage> getResourceUsage() async {
     if (!_isActive || _resourceMonitor == null) {
-      throw SandboxException(
+      throw const SandboxException(
         'Sandbox not active or resource monitor not initialized',
       );
     }

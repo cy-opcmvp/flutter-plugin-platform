@@ -14,7 +14,8 @@ class DesktopPetMenuManager {
   DesktopPetMenuManager._();
 
   bool _isMenuVisible = false;
-  Offset? _menuPosition;
+  // ignore: unused_field
+  Offset? _menuPosition; // 预留字段，用于未来功能
 
   /// 菜单是否可见
   bool get isMenuVisible => _isMenuVisible;

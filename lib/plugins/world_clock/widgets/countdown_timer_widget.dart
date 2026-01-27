@@ -11,12 +11,12 @@ class CountdownTimerWidget extends StatefulWidget {
   final bool enableAnimations;
 
   const CountdownTimerWidget({
-    Key? key,
+    super.key,
     required this.countdownTimer,
     this.onDelete,
     this.onComplete,
     this.enableAnimations = true,
-  }) : super(key: key);
+  });
 
   @override
   State<CountdownTimerWidget> createState() => _CountdownTimerWidgetState();
@@ -103,7 +103,7 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
                     theme,
                     isCompleted,
                     isAlmostComplete,
-                  ).withOpacity(0.2),
+                  ).withValues(alpha: 0.2),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -116,7 +116,7 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
                   color: _getBorderColor(theme, isCompleted, isAlmostComplete),
                   width: 1.5,
                 ),
-                color: theme.cardColor.withOpacity(0.95),
+                color: theme.cardColor.withValues(alpha: 0.95),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
@@ -144,7 +144,7 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
                                   theme,
                                   isCompleted,
                                   isAlmostComplete,
-                                )[0].withOpacity(0.3),
+                                )[0].withValues(alpha: 0.3),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2),
                               ),
@@ -163,7 +163,7 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
                             style: theme.textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: isCompleted
-                                  ? theme.colorScheme.onSurface.withOpacity(0.5)
+                                  ? theme.colorScheme.onSurface.withValues(alpha: 0.5)
                                   : _getTimeColor(
                                       theme,
                                       isCompleted,
@@ -191,7 +191,7 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
                               borderRadius: BorderRadius.circular(20),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.green.withOpacity(0.3),
+                                  color: Colors.green.withValues(alpha: 0.3),
                                   blurRadius: 8,
                                   offset: const Offset(0, 2),
                                 ),
@@ -200,7 +200,7 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(
+                                const Icon(
                                   Icons.check_circle,
                                   color: Colors.white,
                                   size: 14,
@@ -277,7 +277,7 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
                                     theme,
                                     isCompleted,
                                     isAlmostComplete,
-                                  ).withOpacity(0.1),
+                                  ).withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
@@ -309,7 +309,7 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
                                 height: 70,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: theme.dividerColor.withOpacity(0.1),
+                                  color: theme.dividerColor.withValues(alpha: 0.1),
                                 ),
                               ),
                               // 进度圆
@@ -381,7 +381,7 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
     } else if (isAlmostComplete) {
       return Colors.orange;
     }
-    return theme.textTheme.bodySmall?.color?.withOpacity(0.7) ?? Colors.grey;
+    return theme.textTheme.bodySmall?.color?.withValues(alpha: 0.7) ?? Colors.grey;
   }
 
   Color _getProgressColor(
@@ -429,15 +429,15 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
       return LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
-        colors: [Colors.green.withOpacity(0.1), Colors.green.withOpacity(0.05)],
+        colors: [Colors.green.withValues(alpha: 0.1), Colors.green.withValues(alpha: 0.05)],
       );
     } else if (isAlmostComplete) {
       return LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [
-          Colors.orange.withOpacity(0.15),
-          Colors.orange.withOpacity(0.05),
+          Colors.orange.withValues(alpha: 0.15),
+          Colors.orange.withValues(alpha: 0.05),
         ],
       );
     }
@@ -445,8 +445,8 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
       colors: [
-        theme.primaryColor.withOpacity(0.1),
-        theme.primaryColor.withOpacity(0.02),
+        theme.primaryColor.withValues(alpha: 0.1),
+        theme.primaryColor.withValues(alpha: 0.02),
       ],
     );
   }
@@ -466,9 +466,9 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
     bool isCompleted,
     bool isAlmostComplete,
   ) {
-    if (isCompleted) return Colors.green.withOpacity(0.5);
-    if (isAlmostComplete) return Colors.orange.withOpacity(0.5);
-    return theme.primaryColor.withOpacity(0.3);
+    if (isCompleted) return Colors.green.withValues(alpha: 0.5);
+    if (isAlmostComplete) return Colors.orange.withValues(alpha: 0.5);
+    return theme.primaryColor.withValues(alpha: 0.3);
   }
 
   List<Color> _getIconGradientColors(
@@ -481,7 +481,7 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget>
     } else if (isAlmostComplete) {
       return [Colors.orange.shade400, Colors.orange.shade600];
     }
-    return [theme.primaryColor, theme.primaryColor.withOpacity(0.7)];
+    return [theme.primaryColor, theme.primaryColor.withValues(alpha: 0.7)];
   }
 
   IconData _getTimerIcon(bool isCompleted, bool isAlmostComplete) {
@@ -547,10 +547,10 @@ class CompactCountdownWidget extends StatefulWidget {
   final VoidCallback? onTap;
 
   const CompactCountdownWidget({
-    Key? key,
+    super.key,
     required this.countdownTimer,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   State<CompactCountdownWidget> createState() => _CompactCountdownWidgetState();

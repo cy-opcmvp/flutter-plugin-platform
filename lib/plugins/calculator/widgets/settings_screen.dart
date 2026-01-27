@@ -459,9 +459,7 @@ class _CalculatorSettingsScreenState extends State<CalculatorSettingsScreen> {
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.orange,
-            ),
+            style: FilledButton.styleFrom(backgroundColor: Colors.orange),
             child: Text(l10n.common_confirm),
           ),
         ],
@@ -477,8 +475,9 @@ class _CalculatorSettingsScreenState extends State<CalculatorSettingsScreen> {
   Future<void> _resetToDefaults() async {
     try {
       // 从默认配置中解析设置
-      final defaultData = jsonDecode(CalculatorConfigDefaults.defaultConfig)
-          as Map<String, dynamic>;
+      final defaultData =
+          jsonDecode(CalculatorConfigDefaults.defaultConfig)
+              as Map<String, dynamic>;
       final defaultSettings = CalculatorSettings.fromJson(defaultData);
 
       // 保存默认设置
@@ -502,7 +501,9 @@ class _CalculatorSettingsScreenState extends State<CalculatorSettingsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.settings_configSaveFailed),
+            content: Text(
+              AppLocalizations.of(context)!.settings_configSaveFailed,
+            ),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 2),
           ),

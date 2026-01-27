@@ -19,9 +19,7 @@ import '../../core/interfaces/i_plugin.dart';
 import '../../core/interfaces/i_platform_services.dart';
 import 'desktop_pet_screen.dart';
 import 'desktop_pet_settings_screen.dart';
-import 'service_test_screen.dart';
 import 'settings_screen.dart';
-import 'tag_management_screen.dart';
 
 /// Main platform interface that displays plugins and manages navigation
 /// Implements requirements 1.1, 1.2, 1.5, 7.5
@@ -860,10 +858,7 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
           Expanded(
             child: TabBarView(
               controller: _tabController,
-              children: [
-                _buildPluginGrid(),
-                _buildActivePluginsView(),
-              ],
+              children: [_buildPluginGrid(), _buildActivePluginsView()],
             ),
           ),
         ],
@@ -892,7 +887,9 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
           color: (isOnline ? Colors.green : Colors.blue).withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: (isOnline ? Colors.green : Colors.blue).withValues(alpha: 0.3),
+            color: (isOnline ? Colors.green : Colors.blue).withValues(
+              alpha: 0.3,
+            ),
           ),
         ),
         child: Row(
@@ -915,7 +912,9 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
             Icon(
               Icons.sync_alt,
               size: 14,
-              color: (isOnline ? Colors.green : Colors.blue).withValues(alpha: 0.6),
+              color: (isOnline ? Colors.green : Colors.blue).withValues(
+                alpha: 0.6,
+              ),
             ),
           ],
         ),
@@ -1076,10 +1075,10 @@ class _MainPlatformScreenState extends State<MainPlatformScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: _getStatusColor(status, theme).withOpacity(0.1),
+        color: _getStatusColor(status, theme).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: _getStatusColor(status, theme).withOpacity(0.3),
+          color: _getStatusColor(status, theme).withValues(alpha: 0.3),
         ),
       ),
       child: Row(

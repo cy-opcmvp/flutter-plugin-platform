@@ -184,7 +184,7 @@ class PluginThemeManager {
 
   /// Convert Color to hex string
   String _colorToHex(Color color) {
-    return '#${color.value.toRadixString(16).substring(2).toUpperCase()}';
+    return '#${color.toARGB32().toRadixString(16).substring(2).toUpperCase()}';
   }
 
   /// Convert TextStyle to map
@@ -361,7 +361,7 @@ class PluginThemeManager {
           decoration: BoxDecoration(
             color: effectiveTheme.colorScheme.surface,
             border: Border.all(
-              color: effectiveTheme.colorScheme.outline.withOpacity(0.2),
+              color: effectiveTheme.colorScheme.outline.withValues(alpha: 0.2),
             ),
             borderRadius: BorderRadius.circular(8),
           ),

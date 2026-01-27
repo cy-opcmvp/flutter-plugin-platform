@@ -1,5 +1,6 @@
 /// 开机自启诊断工具
 /// 运行方式: dart tools/check_autostart.dart
+library;
 
 import 'dart:ffi';
 import 'dart:io';
@@ -18,8 +19,8 @@ void main() {
 
   // 1. 检查注册表
   print('[1] 检查注册表中的开机自启项...');
-  final registryPath = r'Software\Microsoft\Windows\CurrentVersion\Run';
-  final appName = 'PluginPlatform';
+  const registryPath = r'Software\Microsoft\Windows\CurrentVersion\Run';
+  const appName = 'PluginPlatform';
 
   final hKeyPtr = calloc<win32.HKEY>();
   final result = win32.RegOpenKeyEx(

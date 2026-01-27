@@ -519,9 +519,7 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
     final l10n = AppLocalizations.of(context)!;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          l10n.screenshot_shortcut_edit_pending(action),
-        ),
+        content: Text(l10n.screenshot_shortcut_edit_pending(action)),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -626,7 +624,7 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
                   icon: const Icon(Icons.edit, size: 16),
                   label: Text(
                     l10n.json_editor_edit_json,
-                    style: TextStyle(fontSize: 13),
+                    style: const TextStyle(fontSize: 13),
                     overflow: TextOverflow.ellipsis,
                   ),
                   style: OutlinedButton.styleFrom(
@@ -641,7 +639,7 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
                   icon: const Icon(Icons.restore, size: 16),
                   label: Text(
                     l10n.json_editor_reset_to_default,
-                    style: TextStyle(fontSize: 13),
+                    style: const TextStyle(fontSize: 13),
                     overflow: TextOverflow.ellipsis,
                   ),
                   style: OutlinedButton.styleFrom(
@@ -755,9 +753,7 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.orange,
-            ),
+            style: FilledButton.styleFrom(backgroundColor: Colors.orange),
             child: Text(l10n.common_confirm),
           ),
         ],
@@ -773,8 +769,9 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
   Future<void> _resetToDefaults() async {
     try {
       // 从默认配置中解析设置
-      final defaultData = jsonDecode(ScreenshotConfigDefaults.defaultConfig)
-          as Map<String, dynamic>;
+      final defaultData =
+          jsonDecode(ScreenshotConfigDefaults.defaultConfig)
+              as Map<String, dynamic>;
       final defaultSettings = ScreenshotSettings.fromJson(defaultData);
 
       // 保存默认设置
@@ -801,7 +798,9 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.settings_configSaveFailed),
+            content: Text(
+              AppLocalizations.of(context)!.settings_configSaveFailed,
+            ),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 2),
           ),

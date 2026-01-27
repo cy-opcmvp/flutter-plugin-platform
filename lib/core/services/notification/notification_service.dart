@@ -4,7 +4,6 @@
 library;
 
 import 'dart:async';
-import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -54,17 +53,19 @@ class NotificationServiceImpl extends platform.INotificationService
       // Windows platform: Setup local_notifier for system notifications
       if (defaultTargetPlatform == TargetPlatform.windows) {
         try {
-          await localNotifier.setup(
-            appName: 'Plugin Platform',
-          );
+          await localNotifier.setup(appName: 'Plugin Platform');
           _isInitialized = true;
           if (kDebugMode) {
-            debugPrint('NotificationService: Windows local_notifier setup complete');
+            debugPrint(
+              'NotificationService: Windows local_notifier setup complete',
+            );
           }
           return true;
         } catch (e) {
           if (kDebugMode) {
-            debugPrint('NotificationService: Failed to setup local_notifier: $e');
+            debugPrint(
+              'NotificationService: Failed to setup local_notifier: $e',
+            );
           }
           _isInitialized = false;
           return false;
@@ -205,23 +206,27 @@ class NotificationServiceImpl extends platform.INotificationService
     }
 
     // Get notification mode from config
-    final useSystemNotification = ConfigManager.instance.globalConfig.services.notification.mode == NotificationMode.system;
+    final useSystemNotification =
+        ConfigManager.instance.globalConfig.services.notification.mode ==
+        NotificationMode.system;
 
     // Windows platform: Use local_notifier for system notifications (if configured)
-    if (defaultTargetPlatform == TargetPlatform.windows && useSystemNotification) {
+    if (defaultTargetPlatform == TargetPlatform.windows &&
+        useSystemNotification) {
       try {
-        final notification = LocalNotification(
-          title: title,
-          body: body,
-        );
+        final notification = LocalNotification(title: title, body: body);
         localNotifier.notify(notification);
         if (kDebugMode) {
-          debugPrint('NotificationService: Showed Windows system notification $id');
+          debugPrint(
+            'NotificationService: Showed Windows system notification $id',
+          );
         }
         return;
       } catch (e) {
         if (kDebugMode) {
-          debugPrint('NotificationService: Error showing Windows notification: $e');
+          debugPrint(
+            'NotificationService: Error showing Windows notification: $e',
+          );
         }
         rethrow;
       }
@@ -271,28 +276,32 @@ class NotificationServiceImpl extends platform.INotificationService
     }
 
     // Get notification mode from config
-    final useSystemNotification = ConfigManager.instance.globalConfig.services.notification.mode == NotificationMode.system;
+    final useSystemNotification =
+        ConfigManager.instance.globalConfig.services.notification.mode ==
+        NotificationMode.system;
 
     // Windows platform: Use Timer for scheduled notifications (if configured)
-    if (defaultTargetPlatform == TargetPlatform.windows && useSystemNotification) {
+    if (defaultTargetPlatform == TargetPlatform.windows &&
+        useSystemNotification) {
       // Cancel existing timer if any
       _scheduledTimers[id]?.cancel();
 
       final delay = scheduledTime.difference(DateTime.now());
       _scheduledTimers[id] = Timer(delay, () async {
         try {
-          final notification = LocalNotification(
-            title: title,
-            body: body,
-          );
+          final notification = LocalNotification(title: title, body: body);
           localNotifier.notify(notification);
           if (kDebugMode) {
-            debugPrint('NotificationService: Scheduled system notification $id shown');
+            debugPrint(
+              'NotificationService: Scheduled system notification $id shown',
+            );
           }
           _scheduledTimers.remove(id);
         } catch (e) {
           if (kDebugMode) {
-            debugPrint('NotificationService: Error showing scheduled notification: $e');
+            debugPrint(
+              'NotificationService: Error showing scheduled notification: $e',
+            );
           }
         }
       });
@@ -375,7 +384,9 @@ class NotificationServiceImpl extends platform.INotificationService
       }
       _scheduledTimers.clear();
       if (kDebugMode) {
-        debugPrint('NotificationService: Cancelled all scheduled notifications');
+        debugPrint(
+          'NotificationService: Cancelled all scheduled notifications',
+        );
       }
       return;
     }
@@ -441,7 +452,7 @@ class NotificationServiceImpl extends platform.INotificationService
     );
 
     // Linux details
-    final linuxDetails = LinuxNotificationDetails();
+    const linuxDetails = LinuxNotificationDetails();
 
     return NotificationDetails(
       android: androidDetails,

@@ -100,7 +100,9 @@ class PluginDataStorage implements IDataStorage {
             final decoded = jsonDecode(value) as List<dynamic>;
             return decoded as T;
           } catch (e) {
-            debugPrint('PluginDataStorage: Failed to parse JSON list for $key: $e');
+            debugPrint(
+              'PluginDataStorage: Failed to parse JSON list for $key: $e',
+            );
             return null;
           }
         }

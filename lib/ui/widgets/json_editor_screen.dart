@@ -2,7 +2,6 @@ library;
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../core/services/json_validator.dart';
 
@@ -74,8 +73,34 @@ class _JsonEditorScreenState extends State<JsonEditorScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: !_hasChanges,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+
+        final l10n = AppLocalizations.of(context)!;
+        final shouldPop = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(l10n.json_editor_discard_title),
+            content: Text(l10n.json_editor_discard_message),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(l10n.common_cancel),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(l10n.json_editor_discard_confirm),
+              ),
+            ],
+          ),
+        );
+
+        if (shouldPop ?? false && mounted) {
+          Navigator.of(context).pop();
+        }
+      },
       child: Scaffold(
         appBar: AppBar(
           title: Text(l10n.json_editor_title(widget.configName)),
@@ -140,7 +165,7 @@ class _JsonEditorScreenState extends State<JsonEditorScreen> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
-      color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.3),
+      color: Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.3),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -178,7 +203,7 @@ class _JsonEditorScreenState extends State<JsonEditorScreen> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       color: isValid
-          ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5)
+          ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.5)
           : Theme.of(context).colorScheme.errorContainer,
       child: Row(
         children: [
@@ -213,7 +238,7 @@ class _JsonEditorScreenState extends State<JsonEditorScreen> {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
           width: 1,
         ),
         borderRadius: BorderRadius.circular(8),
@@ -246,7 +271,7 @@ class _JsonEditorScreenState extends State<JsonEditorScreen> {
         color: Theme.of(context).colorScheme.surface,
         border: Border(
           top: BorderSide(
-            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
             width: 1,
           ),
         ),
@@ -482,28 +507,4 @@ class _JsonEditorScreenState extends State<JsonEditorScreen> {
   }
 
   /// 返回前确认
-  Future<bool> _onWillPop() async {
-    if (!_hasChanges) return true;
-
-    final l10n = AppLocalizations.of(context)!;
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.json_editor_discard_title),
-        content: Text(l10n.json_editor_discard_message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(l10n.common_cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(l10n.json_editor_discard_confirm),
-          ),
-        ],
-      ),
-    );
-
-    return result ?? false;
-  }
 }

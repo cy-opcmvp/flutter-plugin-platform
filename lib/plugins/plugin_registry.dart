@@ -8,15 +8,15 @@ import 'screenshot/screenshot_plugin_factory.dart';
 /// Registry for example plugins included with the platform
 class ExamplePluginRegistry {
   static final Map<String, PluginFactory> _factories = {
-    'com.example.calculator': PluginFactory(
+    'com.example.calculator': const PluginFactory(
       createPlugin: CalculatorPluginFactory.createPlugin,
       getDescriptor: CalculatorPluginFactory.getDescriptor,
     ),
-    'com.example.worldclock': PluginFactory(
+    'com.example.worldclock': const PluginFactory(
       createPlugin: WorldClockPluginFactory.createPlugin,
       getDescriptor: WorldClockPluginFactory.getDescriptor,
     ),
-    'com.example.screenshot': PluginFactory(
+    'com.example.screenshot': const PluginFactory(
       createPlugin: ScreenshotPluginFactory.createPlugin,
       getDescriptor: ScreenshotPluginFactory.getDescriptor,
     ),
