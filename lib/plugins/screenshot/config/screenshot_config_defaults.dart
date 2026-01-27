@@ -15,15 +15,12 @@ class ScreenshotConfigDefaults {
   "imageQuality": 95,
   "autoCopyToClipboard": true,
   "clipboardContentType": "image",
-  "showPreview": true,
   "saveHistory": true,
   "maxHistoryCount": 100,
   "historyRetentionDays": 30,
   "shortcuts": {
     "regionCapture": "Ctrl+Shift+A",
-    "fullScreenCapture": "Ctrl+Shift+F",
-    "showHistory": "Ctrl+Shift+H",
-    "showSettings": "Ctrl+Shift+S"
+    "fullScreenCapture": "Ctrl+Shift+F"
   },
   "pinSettings": {
     "alwaysOnTop": true,
@@ -52,10 +49,10 @@ class ScreenshotConfigDefaults {
   ],
 
   "imageFormat": "png",
-  "_imageFormat_help": "可选值: png (无损), jpeg (有损，文件小), webp (现代格式)",
+  "_imageFormat_help": "可选值: png (无损), jpeg (有损，文件小)",
 
   "imageQuality": 95,
-  "_imageQuality_help": "图片质量 1-100，仅对 JPEG 和 WebP 有效",
+  "_imageQuality_help": "图片质量 1-100，仅对 JPEG 有效",
 
   "autoCopyToClipboard": true,
   "_autoCopyToClipboard_help": "截图后自动复制到剪贴板",
@@ -69,9 +66,6 @@ class ScreenshotConfigDefaults {
     "directoryPath - 目录路径（不含文件名）"
   ],
 
-  "showPreview": true,
-  "_showPreview_help": "截图后显示预览窗口",
-
   "saveHistory": true,
   "_saveHistory_help": "保存截图历史记录",
 
@@ -84,9 +78,7 @@ class ScreenshotConfigDefaults {
   "shortcuts": {
     "_help": "快捷键设置",
     "regionCapture": "Ctrl+Shift+A",
-    "fullScreenCapture": "Ctrl+Shift+F",
-    "showHistory": "Ctrl+Shift+H",
-    "showSettings": "Ctrl+Shift+S"
+    "fullScreenCapture": "Ctrl+Shift+F"
   },
 
   "pinSettings": {
@@ -154,7 +146,7 @@ class ScreenshotConfigDefaults {
     },
     "imageFormat": {
       "type": "string",
-      "enum": ["png", "jpeg", "webp"],
+      "enum": ["png", "jpeg"],
       "description": "图片格式"
     },
     "imageQuality": {
@@ -171,10 +163,6 @@ class ScreenshotConfigDefaults {
       "type": "string",
       "enum": ["image", "filename", "fullPath", "directoryPath"],
       "description": "剪贴板内容类型"
-    },
-    "showPreview": {
-      "type": "boolean",
-      "description": "显示预览"
     },
     "saveHistory": {
       "type": "boolean",
@@ -197,9 +185,7 @@ class ScreenshotConfigDefaults {
       "description": "快捷键设置",
       "properties": {
         "regionCapture": {"type": "string"},
-        "fullScreenCapture": {"type": "string"},
-        "showHistory": {"type": "string"},
-        "showSettings": {"type": "string"}
+        "fullScreenCapture": {"type": "string"}
       }
     },
     "pinSettings": {

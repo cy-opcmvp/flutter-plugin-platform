@@ -100,6 +100,17 @@ class ScreenshotService {
     return await _flutterCaptureService?.getPrimaryScreenSize();
   }
 
+  /// 更新设置
+  ///
+  /// 将设置传递给平台服务（如果可用）和 Flutter 捕获服务
+  void updateSettings(dynamic settings) {
+    // 更新 Flutter 捕获服务的设置
+    _flutterCaptureService?.updateSettings(settings);
+
+    // 注意：平台服务的设置更新通过平台通道处理
+    // 这里不需要额外调用，因为平台实现会直接读取配置
+  }
+
   /// 设置 Flutter 截图捕获服务的 context
   /// 这需要在有 BuildContext 的地方调用
   void setContext(BuildContext context) {

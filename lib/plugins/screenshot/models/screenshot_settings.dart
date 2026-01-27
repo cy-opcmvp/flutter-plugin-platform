@@ -49,7 +49,7 @@ class ScreenshotSettings extends BasePluginSettings {
   /// 图片格式
   final ImageFormat imageFormat;
 
-  /// 图片质量（1-100，仅对 JPEG 和 WebP 有效）
+  /// 图片质量（1-100，仅对 JPEG 有效）
   final int imageQuality;
 
   /// 是否自动复制到剪贴板
@@ -57,9 +57,6 @@ class ScreenshotSettings extends BasePluginSettings {
 
   /// 剪贴板内容类型
   final ClipboardContentType clipboardContentType;
-
-  /// 是否显示预览窗口
-  final bool showPreview;
 
   /// 是否保存历史记录
   final bool saveHistory;
@@ -84,7 +81,6 @@ class ScreenshotSettings extends BasePluginSettings {
     this.imageQuality = 95,
     this.autoCopyToClipboard = true,
     this.clipboardContentType = ClipboardContentType.image,
-    this.showPreview = true,
     this.saveHistory = true,
     this.maxHistoryCount = 100,
     this.historyRetentionPeriod = const Duration(days: 30),
@@ -101,8 +97,6 @@ class ScreenshotSettings extends BasePluginSettings {
       shortcuts: {
         'regionCapture': 'Ctrl+Shift+A',
         'fullScreenCapture': 'Ctrl+Shift+F',
-        'showHistory': 'Ctrl+Shift+H',
-        'showSettings': 'Ctrl+Shift+S',
       },
       pinSettings: const PinSettings(),
     );
@@ -127,7 +121,6 @@ class ScreenshotSettings extends BasePluginSettings {
               orElse: () => ClipboardContentType.image,
             )
           : ClipboardContentType.image,
-      showPreview: json['showPreview'] as bool? ?? true,
       saveHistory: json['saveHistory'] as bool? ?? true,
       maxHistoryCount: json['maxHistoryCount'] as int? ?? 100,
       historyRetentionPeriod: Duration(
@@ -151,7 +144,6 @@ class ScreenshotSettings extends BasePluginSettings {
       'imageQuality': imageQuality,
       'autoCopyToClipboard': autoCopyToClipboard,
       'clipboardContentType': clipboardContentType.name,
-      'showPreview': showPreview,
       'saveHistory': saveHistory,
       'maxHistoryCount': maxHistoryCount,
       'historyRetentionDays': historyRetentionPeriod.inDays,
@@ -170,7 +162,6 @@ class ScreenshotSettings extends BasePluginSettings {
     int? imageQuality,
     bool? autoCopyToClipboard,
     ClipboardContentType? clipboardContentType,
-    bool? showPreview,
     bool? saveHistory,
     int? maxHistoryCount,
     Duration? historyRetentionPeriod,
@@ -185,7 +176,6 @@ class ScreenshotSettings extends BasePluginSettings {
       imageQuality: imageQuality ?? this.imageQuality,
       autoCopyToClipboard: autoCopyToClipboard ?? this.autoCopyToClipboard,
       clipboardContentType: clipboardContentType ?? this.clipboardContentType,
-      showPreview: showPreview ?? this.showPreview,
       saveHistory: saveHistory ?? this.saveHistory,
       maxHistoryCount: maxHistoryCount ?? this.maxHistoryCount,
       historyRetentionPeriod:
@@ -271,7 +261,7 @@ class PinSettings {
 }
 
 /// 图片格式枚举
-enum ImageFormat { png, jpeg, webp }
+enum ImageFormat { png, jpeg }
 
 /// 图片格式扩展
 extension ImageFormatExtension on ImageFormat {
@@ -282,8 +272,6 @@ extension ImageFormatExtension on ImageFormat {
         return 'png';
       case ImageFormat.jpeg:
         return 'jpg';
-      case ImageFormat.webp:
-        return 'webp';
     }
   }
 
@@ -294,8 +282,6 @@ extension ImageFormatExtension on ImageFormat {
         return 'image/png';
       case ImageFormat.jpeg:
         return 'image/jpeg';
-      case ImageFormat.webp:
-        return 'image/webp';
     }
   }
 }

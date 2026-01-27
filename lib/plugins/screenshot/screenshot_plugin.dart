@@ -323,6 +323,7 @@ class ScreenshotPlugin extends PlatformPluginBase {
   Future<void> updateSettings(ss.ScreenshotSettings newSettings) async {
     _settings = newSettings;
     _fileManager.updateSettings(newSettings);
+    _screenshotService.updateSettings(newSettings);
     await _saveConfig();
     _onStateChanged?.call();
   }

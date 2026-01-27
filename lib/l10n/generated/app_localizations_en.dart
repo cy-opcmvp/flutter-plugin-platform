@@ -2358,6 +2358,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screenshot_settings_quality_title => 'Set Image Quality';
 
   @override
+  String get screenshot_quality_jpeg_only => 'JPEG format only';
+
+  @override
   String get screenshot_settings_history_title => 'Set Max History Count';
 
   @override
@@ -2367,13 +2370,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screenshot_settings_items => 'items';
 
   @override
-  String get screenshot_shortcut_region => 'Ctrl+Shift+A';
+  String get screenshot_shortcut_region => 'Region Screenshot';
 
   @override
-  String get screenshot_shortcut_fullscreen => 'Ctrl+Shift+F';
-
-  @override
-  String get screenshot_shortcut_window => 'Ctrl+Shift+W';
+  String get screenshot_shortcut_fullscreen => 'Fullscreen Screenshot';
 
   @override
   String get screenshot_settings_json_editor => 'JSON Configuration Editor';
@@ -2957,6 +2957,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String screenshot_shortcut_edit_pending(Object action) {
     return 'Shortcut edit feature pending: $action';
   }
+
+  @override
+  String get screenshot_shortcut_edit_title => 'Edit Shortcut';
+
+  @override
+  String get screenshot_shortcut_edit_desc =>
+      'Enter new shortcut combination (e.g., Ctrl+Shift+A)';
+
+  @override
+  String get screenshot_shortcut_current => 'Current shortcut';
+
+  @override
+  String get screenshot_shortcut_new => 'New shortcut';
+
+  @override
+  String get screenshot_shortcut_hint =>
+      'Tip: Use Ctrl, Shift, Alt with letters or numbers';
 
   @override
   String get screenshot_editor_title => 'Edit Screenshot';

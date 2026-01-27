@@ -2280,6 +2280,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get screenshot_settings_quality_title => '设置图片质量';
 
   @override
+  String get screenshot_quality_jpeg_only => '仅 JPEG 格式支持';
+
+  @override
   String get screenshot_settings_history_title => '设置最大历史记录数';
 
   @override
@@ -2289,13 +2292,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get screenshot_settings_items => '条';
 
   @override
-  String get screenshot_shortcut_region => 'Ctrl+Shift+A';
+  String get screenshot_shortcut_region => '区域截图';
 
   @override
-  String get screenshot_shortcut_fullscreen => 'Ctrl+Shift+F';
-
-  @override
-  String get screenshot_shortcut_window => 'Ctrl+Shift+W';
+  String get screenshot_shortcut_fullscreen => '全屏截图';
 
   @override
   String get screenshot_settings_json_editor => 'JSON 配置编辑器';
@@ -2857,6 +2857,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String screenshot_shortcut_edit_pending(Object action) {
     return '快捷键编辑功能待实现：$action';
   }
+
+  @override
+  String get screenshot_shortcut_edit_title => '编辑快捷键';
+
+  @override
+  String get screenshot_shortcut_edit_desc => '输入新的快捷键组合（如：Ctrl+Shift+A）';
+
+  @override
+  String get screenshot_shortcut_current => '当前快捷键';
+
+  @override
+  String get screenshot_shortcut_new => '新快捷键';
+
+  @override
+  String get screenshot_shortcut_hint => '提示：使用 Ctrl、Shift、Alt 加上字母或数字键';
 
   @override
   String get screenshot_editor_title => '编辑截图';

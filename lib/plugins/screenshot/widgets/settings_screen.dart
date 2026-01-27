@@ -93,9 +93,6 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
         const SizedBox(height: 8),
         _buildAutoCopyTile(l10n),
         _buildClipboardContentTypeTile(l10n),
-        _buildShowPreviewTile(l10n),
-        _buildSaveHistoryTile(l10n),
-        _buildMaxHistoryCountTile(l10n),
 
         const SizedBox(height: 24),
 
@@ -185,6 +182,8 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
 
   /// 构建图片质量设置
   Widget _buildImageQualityTile(AppLocalizations l10n) {
+    final bool isEnabled = _settings.imageFormat == ImageFormat.jpeg;
+
     return ListTile(
       leading: const Icon(Icons.high_quality),
       title: Text(
@@ -192,11 +191,16 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
         overflow: TextOverflow.ellipsis,
       ),
       subtitle: Text(
-        '${_settings.imageQuality}%',
+        isEnabled
+            ? '${_settings.imageQuality}%'
+            : l10n.screenshot_quality_jpeg_only,
         overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          color: isEnabled ? null : Theme.of(context).disabledColor,
+        ),
       ),
       trailing: const Icon(Icons.chevron_right),
-      onTap: _adjustImageQuality,
+      onTap: isEnabled ? _adjustImageQuality : null,
       contentPadding: EdgeInsets.zero,
     );
   }
@@ -257,74 +261,6 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
       case ClipboardContentType.directoryPath:
         return l10n.screenshot_clipboard_type_directory_path;
     }
-  }
-
-  /// 构建显示预览设置
-  Widget _buildShowPreviewTile(AppLocalizations l10n) {
-    return SwitchListTile(
-      secondary: const Icon(Icons.preview),
-      title: Text(l10n.screenshot_showPreview, overflow: TextOverflow.ellipsis),
-      subtitle: Text(
-        l10n.screenshot_settings_show_preview_desc,
-        overflow: TextOverflow.ellipsis,
-        maxLines: 2,
-      ),
-      value: _settings.showPreview,
-      onChanged: (value) async {
-        final newSettings = _settings.copyWith(showPreview: value);
-        await widget.plugin.updateSettings(newSettings);
-        if (mounted) {
-          setState(() {
-            _settings = newSettings;
-          });
-          _showSuccessMessage();
-        }
-      },
-      contentPadding: EdgeInsets.zero,
-    );
-  }
-
-  /// 构建保存历史设置
-  Widget _buildSaveHistoryTile(AppLocalizations l10n) {
-    return SwitchListTile(
-      secondary: const Icon(Icons.history),
-      title: Text(l10n.screenshot_saveHistory, overflow: TextOverflow.ellipsis),
-      subtitle: Text(
-        l10n.screenshot_settings_save_history_desc,
-        overflow: TextOverflow.ellipsis,
-        maxLines: 2,
-      ),
-      value: _settings.saveHistory,
-      onChanged: (value) async {
-        final newSettings = _settings.copyWith(saveHistory: value);
-        await widget.plugin.updateSettings(newSettings);
-        if (mounted) {
-          setState(() {
-            _settings = newSettings;
-          });
-          _showSuccessMessage();
-        }
-      },
-      contentPadding: EdgeInsets.zero,
-    );
-  }
-
-  /// 构建最大历史记录数设置
-  Widget _buildMaxHistoryCountTile(AppLocalizations l10n) {
-    return ListTile(
-      leading: const Icon(Icons.format_list_numbered),
-      title: Text(
-        l10n.screenshot_maxHistoryCount,
-        overflow: TextOverflow.ellipsis,
-      ),
-      subtitle: Text(
-        '${_settings.maxHistoryCount} ${l10n.screenshot_settings_items}',
-        overflow: TextOverflow.ellipsis,
-      ),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: _adjustMaxHistoryCount,
-      contentPadding: EdgeInsets.zero,
-    );
   }
 
   /// 构建快捷键设置
@@ -494,16 +430,23 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
     }
   }
 
-  /// 调整最大历史记录数
-  void _adjustMaxHistoryCount() async {
-    final count = await showDialog<int>(
+  /// 编辑快捷键
+  void _editShortcut(String action, String currentShortcut) async {
+    final l10n = AppLocalizations.of(context)!;
+    final newShortcut = await showDialog<String>(
       context: context,
-      builder: (context) =>
-          _MaxHistoryCountDialog(currentCount: _settings.maxHistoryCount),
+      builder: (context) => _ShortcutEditDialog(
+        action: action,
+        actionName: _getShortcutDisplayName(action, l10n),
+        currentShortcut: currentShortcut,
+      ),
     );
 
-    if (count != null) {
-      final newSettings = _settings.copyWith(maxHistoryCount: count);
+    if (newShortcut != null && newShortcut.isNotEmpty) {
+      final newShortcuts = Map<String, String>.from(_settings.shortcuts);
+      newShortcuts[action] = newShortcut;
+
+      final newSettings = _settings.copyWith(shortcuts: newShortcuts);
       await widget.plugin.updateSettings(newSettings);
       if (mounted) {
         setState(() {
@@ -512,17 +455,6 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
         _showSuccessMessage();
       }
     }
-  }
-
-  /// 编辑快捷键
-  void _editShortcut(String action, String currentShortcut) {
-    final l10n = AppLocalizations.of(context)!;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(l10n.screenshot_shortcut_edit_pending(action)),
-        duration: const Duration(seconds: 2),
-      ),
-    );
   }
 
   /// 调整透明度
@@ -565,8 +497,6 @@ class _ScreenshotSettingsScreenState extends State<ScreenshotSettingsScreen> {
         return 'PNG';
       case ImageFormat.jpeg:
         return 'JPEG';
-      case ImageFormat.webp:
-        return 'WebP';
     }
   }
 
@@ -1057,8 +987,6 @@ class _ImageFormatDialog extends StatelessWidget {
         return 'PNG';
       case ImageFormat.jpeg:
         return 'JPEG';
-      case ImageFormat.webp:
-        return 'WebP';
     }
   }
 
@@ -1068,8 +996,6 @@ class _ImageFormatDialog extends StatelessWidget {
         return 'Lossless';
       case ImageFormat.jpeg:
         return 'Lossy, smaller';
-      case ImageFormat.webp:
-        return 'Modern format';
     }
   }
 }
@@ -1128,67 +1054,6 @@ class _ImageQualityDialogState extends State<_ImageQualityDialog> {
         ),
         FilledButton(
           onPressed: () => Navigator.of(context).pop(_quality),
-          child: Text(l10n.common_ok),
-        ),
-      ],
-    );
-  }
-}
-
-/// 最大历史记录数对话框
-class _MaxHistoryCountDialog extends StatefulWidget {
-  final int currentCount;
-
-  const _MaxHistoryCountDialog({required this.currentCount});
-
-  @override
-  State<_MaxHistoryCountDialog> createState() => _MaxHistoryCountDialogState();
-}
-
-class _MaxHistoryCountDialogState extends State<_MaxHistoryCountDialog> {
-  late int _count;
-
-  @override
-  void initState() {
-    super.initState();
-    _count = widget.currentCount;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return AlertDialog(
-      title: Text(l10n.screenshot_settings_history_title),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Slider(
-            value: _count.toDouble(),
-            min: 10,
-            max: 500,
-            divisions: 49,
-            label: '$_count ${l10n.screenshot_settings_items}',
-            onChanged: (value) {
-              setState(() {
-                _count = value.toInt();
-              });
-            },
-          ),
-          Center(
-            child: Text(
-              '$_count ${l10n.screenshot_settings_items}',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(l10n.common_cancel),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.of(context).pop(_count),
           child: Text(l10n.common_ok),
         ),
       ],
@@ -1316,5 +1181,90 @@ class _ClipboardContentTypeDialog extends StatelessWidget {
       case ClipboardContentType.directoryPath:
         return l10n.screenshot_clipboard_type_directory_path_desc;
     }
+  }
+}
+
+/// 快捷键编辑对话框
+class _ShortcutEditDialog extends StatefulWidget {
+  final String action;
+  final String actionName;
+  final String currentShortcut;
+
+  const _ShortcutEditDialog({
+    required this.action,
+    required this.actionName,
+    required this.currentShortcut,
+  });
+
+  @override
+  State<_ShortcutEditDialog> createState() => _ShortcutEditDialogState();
+}
+
+class _ShortcutEditDialogState extends State<_ShortcutEditDialog> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.currentShortcut);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return AlertDialog(
+      title: Text(l10n.screenshot_shortcut_edit_title),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.screenshot_shortcut_current),
+          const SizedBox(height: 4),
+          Text(
+            widget.currentShortcut,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(l10n.screenshot_shortcut_new),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _controller,
+            decoration: InputDecoration(
+              hintText: widget.currentShortcut,
+              border: const OutlineInputBorder(),
+              helperText: l10n.screenshot_shortcut_hint,
+            ),
+            textCapitalization: TextCapitalization.characters,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.screenshot_shortcut_edit_desc,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.common_cancel),
+        ),
+        FilledButton(
+          onPressed: () {
+            final shortcut = _controller.text.trim();
+            Navigator.of(context).pop(shortcut);
+          },
+          child: Text(l10n.common_ok),
+        ),
+      ],
+    );
   }
 }

@@ -121,6 +121,10 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
   /// 构建快速操作区
   Widget _buildQuickActions(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    // 从设置中动态获取快捷键
+    final regionShortcut = widget.plugin.settings.shortcuts['regionCapture'] ?? '';
+    final fullscreenShortcut = widget.plugin.settings.shortcuts['fullScreenCapture'] ?? '';
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -152,7 +156,7 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
                   child: _QuickActionTile(
                     icon: Icons.crop_square,
                     title: l10n.screenshot_main_region_capture,
-                    subtitle: l10n.screenshot_shortcut_region,
+                    subtitle: regionShortcut,
                     onTap: widget.plugin.isAvailable
                         ? _startRegionCapture
                         : null,
@@ -163,7 +167,7 @@ class _ScreenshotMainWidgetState extends State<ScreenshotMainWidget> {
                   child: _QuickActionTile(
                     icon: Icons.fullscreen,
                     title: l10n.screenshot_main_fullscreen_capture,
-                    subtitle: l10n.screenshot_shortcut_fullscreen,
+                    subtitle: fullscreenShortcut,
                     onTap: widget.plugin.isAvailable
                         ? _captureFullScreen
                         : null,

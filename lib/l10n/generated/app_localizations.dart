@@ -4370,6 +4370,12 @@ abstract class AppLocalizations {
   /// **'设置图片质量'**
   String get screenshot_settings_quality_title;
 
+  /// No description provided for @screenshot_quality_jpeg_only.
+  ///
+  /// In zh, this message translates to:
+  /// **'仅 JPEG 格式支持'**
+  String get screenshot_quality_jpeg_only;
+
   /// No description provided for @screenshot_settings_history_title.
   ///
   /// In zh, this message translates to:
@@ -4391,20 +4397,14 @@ abstract class AppLocalizations {
   /// No description provided for @screenshot_shortcut_region.
   ///
   /// In zh, this message translates to:
-  /// **'Ctrl+Shift+A'**
+  /// **'区域截图'**
   String get screenshot_shortcut_region;
 
   /// No description provided for @screenshot_shortcut_fullscreen.
   ///
   /// In zh, this message translates to:
-  /// **'Ctrl+Shift+F'**
+  /// **'全屏截图'**
   String get screenshot_shortcut_fullscreen;
-
-  /// No description provided for @screenshot_shortcut_window.
-  ///
-  /// In zh, this message translates to:
-  /// **'Ctrl+Shift+W'**
-  String get screenshot_shortcut_window;
 
   /// No description provided for @screenshot_settings_json_editor.
   ///
@@ -5456,6 +5456,36 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'快捷键编辑功能待实现：{action}'**
   String screenshot_shortcut_edit_pending(Object action);
+
+  /// No description provided for @screenshot_shortcut_edit_title.
+  ///
+  /// In zh, this message translates to:
+  /// **'编辑快捷键'**
+  String get screenshot_shortcut_edit_title;
+
+  /// No description provided for @screenshot_shortcut_edit_desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'输入新的快捷键组合（如：Ctrl+Shift+A）'**
+  String get screenshot_shortcut_edit_desc;
+
+  /// No description provided for @screenshot_shortcut_current.
+  ///
+  /// In zh, this message translates to:
+  /// **'当前快捷键'**
+  String get screenshot_shortcut_current;
+
+  /// No description provided for @screenshot_shortcut_new.
+  ///
+  /// In zh, this message translates to:
+  /// **'新快捷键'**
+  String get screenshot_shortcut_new;
+
+  /// No description provided for @screenshot_shortcut_hint.
+  ///
+  /// In zh, this message translates to:
+  /// **'提示：使用 Ctrl、Shift、Alt 加上字母或数字键'**
+  String get screenshot_shortcut_hint;
 
   /// No description provided for @screenshot_editor_title.
   ///

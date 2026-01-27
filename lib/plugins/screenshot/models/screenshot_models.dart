@@ -15,9 +15,6 @@ enum ScreenshotType {
   window,
 }
 
-/// 图片格式枚举
-enum ImageFormat { png, jpeg, webp }
-
 /// 历史记录时间段分组
 enum HistoryPeriod {
   /// 今日
