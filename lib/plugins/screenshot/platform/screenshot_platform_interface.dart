@@ -11,13 +11,23 @@ class RegionSelectedEvent {
   final int y;
   final int width;
   final int height;
+  final bool cancelled;
 
   const RegionSelectedEvent({
     required this.x,
     required this.y,
     required this.width,
     required this.height,
+    this.cancelled = false,
   });
+
+  /// 创建一个取消事件
+  const RegionSelectedEvent.cancelled()
+      : x = 0,
+        y = 0,
+        width = 0,
+        height = 0,
+        cancelled = true;
 
   Rect toRect() => Rect.fromLTWH(
     x.toDouble(),
@@ -226,11 +236,19 @@ class WindowsScreenshotService implements ScreenshotPlatformInterface {
     try {
       final result = await _channel.invokeMethod('getRegionSelectionResult');
       if (result == null) {
-        // 还未完成或用户取消（无法区分，需要通过多次 null 调用来判断取消）
+        // 还未完成（既未完成也未取消）
         return null;
       }
 
       final Map<dynamic, dynamic> map = result as Map<dynamic, dynamic>;
+
+      // 检查是否是用户取消
+      if (map.containsKey('cancelled') && map['cancelled'] == true) {
+        debugPrint('Region selection was cancelled by user');
+        return RegionSelectedEvent.cancelled();
+      }
+
+      // 用户选择了区域
       return RegionSelectedEvent(
         x: map['x'] as int,
         y: map['y'] as int,

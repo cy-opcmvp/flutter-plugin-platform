@@ -434,39 +434,49 @@ class ScreenshotPlugin extends PlatformPluginBase {
 
   /// 轮询获取区域选择结果（用于快捷键触发）
   Future<void> _pollForResultForHotkey() async {
+    final callId = DateTime.now().millisecondsSinceEpoch;
+    print('📍 [$callId] _pollForResultForHotkey() 开始执行');
+
     // 检查是否已有截图操作进行中
     if (_isScreenshotInProgress) {
-      print('🔒 截图正在进行中，忽略快捷键触发');
+      print('📍 [$callId] 🔒 截图正在进行中，忽略快捷键触发');
       await _context.platformServices.showNotification('截图正在进行中，请稍候');
       return;
     }
 
     // 检查是否有活动的循环任务
     if (_hasActiveRecurringTasks()) {
-      print('⚠️ 检测到活动的循环任务，要求暂停');
+      print('📍 [$callId] ⚠️ 检测到活动的循环任务，要求暂停');
       await _context.platformServices.showNotification('请先暂停定时截图任务');
       return;
     }
 
     _isScreenshotInProgress = true;
-    print('🔒 截图状态：已锁定（区域截图快捷键）');
-
-    // 【关键修复】先显示原生区域选择窗口
-    print('🔑 快捷键：显示原生区域选择窗口...');
-    final windowShown = await showNativeRegionCapture();
-    if (!windowShown) {
-      print('🔑 快捷键：❌ 窗口显示失败');
-      _isScreenshotInProgress = false;
-      print('🔓 截图状态：已解锁');
-      return;
-    }
-    print('🔑 快捷键：✅ 窗口已显示，开始轮询...');
-
-    const maxPolls = 300; // 最多轮询 30 秒（每 100ms 一次）
-    int polls = 0;
-    int nullCount = 0; // 连续 null 次数计数器
+    print('📍 [$callId] 🔒 截图状态：已锁定（区域截图快捷键）');
 
     try {
+      // 【关键修复】先清理上一次的残留结果
+      print('📍 [$callId] 🔑 快捷键：检查并清理上一次的结果...');
+      final oldResult = await getRegionSelectionResult();
+      if (oldResult != null) {
+        print('📍 [$callId] 🔑 快捷键：⚠️ 发现上一次的结果未被处理（${oldResult.x}, ${oldResult.y}）');
+        // 不处理这个旧结果，直接清空
+      }
+
+      print('📍 [$callId] 🔑 快捷键：显示原生区域选择窗口...');
+      final windowShown = await showNativeRegionCapture();
+      if (!windowShown) {
+        print('📍 [$callId] 🔑 快捷键：❌ 窗口显示失败');
+        throw Exception('窗口显示失败');
+      }
+
+      // 等待窗口完全显示（给原生窗口一点初始化时间）
+      await Future.delayed(const Duration(milliseconds: 100));
+      print('📍 [$callId] 🔑 快捷键：✅ 窗口已显示，开始轮询...');
+
+      const maxPolls = 300; // 最多轮询 30 秒（每 100ms 一次）
+      int polls = 0;
+
       while (polls < maxPolls) {
         await Future.delayed(const Duration(milliseconds: 100));
 
@@ -474,37 +484,44 @@ class ScreenshotPlugin extends PlatformPluginBase {
         polls++;
 
         if (result != null) {
+          // 检查是否用户取消
+          if (result.cancelled) {
+            print('📍 [$callId] 🔑 快捷键：❌ 用户取消了截图');
+            // 用户取消，立即退出轮询
+            break;
+          }
+
           print(
-            '🔑 快捷键：✅ 收到选择结果: ${result.x}, ${result.y}, ${result.width}x${result.height}',
+            '📍 [$callId] 🔑 快捷键：✅ 收到选择结果: ${result.x}, ${result.y}, ${result.width}x${result.height}',
           );
           // 用户选择了区域
           final rect = result.toRect();
-          print('🔑 快捷键：开始捕获区域: $rect');
+          print('📍 [$callId] 🔑 快捷键：开始捕获区域: $rect');
           try {
             await captureRegion(rect);
-            print('🔑 快捷键：✅ 区域捕获完成');
+            print('📍 [$callId] 🔑 快捷键：✅ 区域捕获完成');
+            // 成功完成，正常退出（会执行 finally）
+            return;
           } catch (e) {
-            print('🔑 快捷键：❌ 区域捕获失败: $e');
-          }
-          return;
-        } else {
-          // 结果为 null
-          nullCount++;
-          // 【关键修复】如果连续 3 次获取到 null，说明窗口已关闭（用户按了 ESC）
-          if (nullCount >= 3) {
-            print('🔑 快捷键：❌ 检测到窗口已关闭（用户取消，连续 $nullCount 次 null）');
-            // 用户取消了，提前退出轮询
-            break;
+            print('📍 [$callId] 🔑 快捷键：❌ 区域捕获失败: $e');
+            // 捕获失败，抛出异常以执行 finally
+            rethrow;
           }
         }
+        // result == null 的情况：继续轮询
       }
 
       if (polls >= maxPolls) {
-        print('🔑 快捷键：⏰ 轮询超时，用户可能取消了截图');
+        print('📍 [$callId] 🔑 快捷键：⏰ 轮询超时，用户可能取消了截图');
       }
+    } catch (e, stackTrace) {
+      // 捕获所有异常，确保状态被重置
+      print('📍 [$callId] 🔑 快捷键：❌ 轮询过程发生异常: $e');
+      print('📍 [$callId] 🔑 快捷键：堆栈跟踪:\n$stackTrace');
     } finally {
       _isScreenshotInProgress = false;
-      print('🔓 截图状态：已解锁');
+      print('📍 [$callId] 🔓 截图状态：已解锁（finally 块执行）');
+      print('📍 [$callId] _pollForResultForHotkey() 执行结束');
     }
   }
 

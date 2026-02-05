@@ -481,9 +481,11 @@ void FlutterWindow::HandleScreenshotMethodCall(
       LOG_FLUTTER("✅ Result cleared after reading");
 
       if (cancelled) {
-        // 用户取消
-        LOG_FLUTTER("Returning cancelled result");
-        result->Success(flutter::EncodableValue());
+        // 用户取消 - 返回明确的取消标记
+        LOG_FLUTTER("Returning cancelled result with flag");
+        flutter::EncodableMap resultMap;
+        resultMap[flutter::EncodableValue("cancelled")] = flutter::EncodableValue(true);
+        result->Success(flutter::EncodableValue(resultMap));
       } else {
         // 用户选择了区域
         LOG_FLUTTER_FMT("Returning selected region: (%d,%d) %dx%d", x, y, width, height);
