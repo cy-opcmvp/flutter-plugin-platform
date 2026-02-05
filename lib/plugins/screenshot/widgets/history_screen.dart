@@ -342,6 +342,16 @@ class _HistoryGroupSectionState extends State<_HistoryGroupSection> {
     });
   }
 
+  /// 移除记录
+  void _removeRecord(ScreenshotRecord record) {
+    widget.onDelete(record.id);
+    if (mounted) {
+      setState(() {
+        _visibleRecords.remove(record);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -395,7 +405,7 @@ class _HistoryGroupSectionState extends State<_HistoryGroupSection> {
                   return _ScreenshotThumbnail(
                     record: record,
                     onTap: () => widget.onView(record),
-                    onDelete: () => widget.onDelete(record.id),
+                    onDelete: () => _removeRecord(record),
                   );
                 },
               ),
@@ -407,7 +417,7 @@ class _HistoryGroupSectionState extends State<_HistoryGroupSection> {
 }
 
 /// 截图缩略图
-class _ScreenshotThumbnail extends StatelessWidget {
+class _ScreenshotThumbnail extends StatefulWidget {
   final ScreenshotRecord record;
   final VoidCallback onTap;
   final VoidCallback onDelete;
@@ -419,11 +429,19 @@ class _ScreenshotThumbnail extends StatelessWidget {
   });
 
   @override
+  State<_ScreenshotThumbnail> createState() => _ScreenshotThumbnailState();
+}
+
+class _ScreenshotThumbnailState extends State<_ScreenshotThumbnail> {
+  bool _isCopying = false;
+
+  @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: onTap,
+        onTap: widget.onTap,
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -438,18 +456,46 @@ class _ScreenshotThumbnail extends StatelessWidget {
               child: _buildInfoOverlay(context),
             ),
 
-            // 删除按钮
+            // 操作按钮组
             Positioned(
               top: 4,
               right: 4,
-              child: IconButton(
-                icon: const Icon(Icons.delete, color: Colors.white),
-                iconSize: 20,
-                style: IconButton.styleFrom(
-                  backgroundColor: Colors.black54,
-                  padding: const EdgeInsets.all(4),
-                ),
-                onPressed: onDelete,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // 复制按钮
+                  IconButton(
+                    icon: _isCopying
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Icon(Icons.copy_all, color: Colors.white),
+                    iconSize: 20,
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.black54,
+                      padding: const EdgeInsets.all(4),
+                    ),
+                    onPressed: _isCopying ? null : _copyImage,
+                    tooltip: l10n.screenshot_copy_image,
+                  ),
+                  const SizedBox(width: 4),
+                  // 删除按钮
+                  IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.white),
+                    iconSize: 20,
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.black54,
+                      padding: const EdgeInsets.all(4),
+                    ),
+                    onPressed: widget.onDelete,
+                    tooltip: l10n.common_delete,
+                  ),
+                ],
               ),
             ),
           ],
@@ -459,7 +505,7 @@ class _ScreenshotThumbnail extends StatelessWidget {
   }
 
   Widget _buildThumbnail(BuildContext context) {
-    final file = File(record.filePath);
+    final file = File(widget.record.filePath);
 
     // 显示缩略图
     return Image.file(
@@ -492,7 +538,7 @@ class _ScreenshotThumbnail extends StatelessWidget {
         children: [
           // 文件名
           Text(
-            record.fileName,
+            widget.record.fileName,
             style: const TextStyle(color: Colors.white, fontSize: 13),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -500,7 +546,7 @@ class _ScreenshotThumbnail extends StatelessWidget {
           const SizedBox(height: 2),
           // 时间和大小
           Text(
-            '${_formatDate(context, record.createdAt)} • ${record.formattedFileSize}',
+            '${_formatDate(context, widget.record.createdAt)} • ${widget.record.formattedFileSize}',
             style: const TextStyle(color: Colors.white70, fontSize: 11),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -508,6 +554,68 @@ class _ScreenshotThumbnail extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// 复制图片到剪贴板
+  Future<void> _copyImage() async {
+    final l10n = AppLocalizations.of(context)!;
+    setState(() {
+      _isCopying = true;
+    });
+
+    try {
+      final file = File(widget.record.filePath);
+      if (!await file.exists()) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.screenshot_file_not_exists),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+        return;
+      }
+
+      // 读取图片数据
+      final imageBytes = await file.readAsBytes();
+
+      // 使用 ClipboardService 复制图片到剪贴板
+      final clipboardService = ClipboardService();
+      final success = await clipboardService.copyContent(
+        widget.record.filePath,
+        contentType: ClipboardContentType.image,
+        imageBytes: imageBytes,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              success
+                  ? l10n.screenshot_image_copied
+                  : l10n.screenshot_copy_failed,
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${l10n.screenshot_copy_failed}: $e'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCopying = false;
+        });
+      }
+    }
   }
 
   String _formatDate(BuildContext context, DateTime date) {
@@ -541,58 +649,89 @@ class _ScreenshotPreviewScreen extends StatefulWidget {
 }
 
 class _ScreenshotPreviewScreenState extends State<_ScreenshotPreviewScreen> {
+  final FocusNode _focusNode = FocusNode();
+  bool _isExiting = false; // 防止重复触发退出
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.requestFocus();
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black87,
-        foregroundColor: Colors.white,
-        leading: Container(
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.2),
-            shape: BoxShape.circle,
+    return KeyboardListener(
+      focusNode: _focusNode,
+      onKeyEvent: (event) {
+        // 只处理 ESC 键的按下事件
+        if (event is KeyDownEvent &&
+            event.logicalKey == LogicalKeyboardKey.escape &&
+            !_isExiting) {
+          _isExiting = true;
+          Navigator.of(context).pop();
+          // 延迟重置标志，防止快速连续触发
+          Future.delayed(const Duration(milliseconds: 300), () {
+            _isExiting = false;
+          });
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          backgroundColor: Colors.black87,
+          foregroundColor: Colors.white,
+          leading: Container(
+            margin: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              shape: BoxShape.circle,
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Navigator.of(context).pop(),
+              tooltip: l10n.common_back,
+            ),
           ),
-          child: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => Navigator.of(context).pop(),
-            tooltip: l10n.common_back,
+          title: Text(
+            widget.record.fileName,
+            style: const TextStyle(fontSize: 16),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
+          actions: [
+            // 复制路径
+            IconButton(
+              icon: const Icon(Icons.link),
+              onPressed: _copyFilePath,
+              tooltip: l10n.screenshot_copy_path,
+            ),
+            // 复制图片
+            IconButton(
+              icon: const Icon(Icons.copy),
+              onPressed: _copyImage,
+              tooltip: l10n.screenshot_copy_image,
+            ),
+            // 详细信息
+            IconButton(
+              icon: const Icon(Icons.info_outline),
+              onPressed: _showInfo,
+              tooltip: l10n.common_details,
+            ),
+          ],
         ),
-        title: Text(
-          widget.record.fileName,
-          style: const TextStyle(fontSize: 16),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        actions: [
-          // 复制路径
-          IconButton(
-            icon: const Icon(Icons.link),
-            onPressed: _copyFilePath,
-            tooltip: l10n.screenshot_copy_path,
+        body: Center(
+          child: InteractiveViewer(
+            minScale: 0.5,
+            maxScale: 4.0,
+            child: _buildImage(),
           ),
-          // 复制图片
-          IconButton(
-            icon: const Icon(Icons.copy),
-            onPressed: _copyImage,
-            tooltip: l10n.screenshot_copy_image,
-          ),
-          // 详细信息
-          IconButton(
-            icon: const Icon(Icons.info_outline),
-            onPressed: _showInfo,
-            tooltip: l10n.common_details,
-          ),
-        ],
-      ),
-      body: Center(
-        child: InteractiveViewer(
-          minScale: 0.5,
-          maxScale: 4.0,
-          child: _buildImage(),
         ),
       ),
     );
