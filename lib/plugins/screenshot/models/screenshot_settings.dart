@@ -104,6 +104,13 @@ class ScreenshotSettings extends BasePluginSettings {
 
   /// 从 JSON 创建实例
   factory ScreenshotSettings.fromJson(Map<String, dynamic> json) {
+    // 过滤快捷键，只保留允许的快捷键
+    final allowedShortcuts = {'regionCapture', 'fullScreenCapture'};
+    final savedShortcuts = Map<String, String>.from(json['shortcuts'] as Map? ?? {});
+    final filteredShortcuts = Map.fromEntries(
+      savedShortcuts.entries.where((entry) => allowedShortcuts.contains(entry.key)),
+    );
+
     return ScreenshotSettings(
       version: json['version'] as String? ?? '1.0.0',
       savePath: json['savePath'] as String? ?? '{documents}/Screenshots',
@@ -126,7 +133,7 @@ class ScreenshotSettings extends BasePluginSettings {
       historyRetentionPeriod: Duration(
         days: json['historyRetentionDays'] as int? ?? 30,
       ),
-      shortcuts: Map<String, String>.from(json['shortcuts'] as Map? ?? {}),
+      shortcuts: filteredShortcuts,
       pinSettings: json['pinSettings'] != null
           ? PinSettings.fromJson(json['pinSettings'] as Map<String, dynamic>)
           : const PinSettings(),

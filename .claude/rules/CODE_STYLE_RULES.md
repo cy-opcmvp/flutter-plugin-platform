@@ -782,6 +782,54 @@ unawaited(fetchUserData());
 
 ---
 
+### 6. 预留功能的未使用变量
+
+**原则**: 如果变量是为了预留功能而定义但暂时未使用，必须显式标记为故意未使用。
+
+#### Dart 代码
+
+```dart
+// ❌ 错误：未使用的变量没有标记
+const int FUTURE_FEATURE_FLAG = 0;
+final String _reservedField = '';
+
+// ✅ 正确：使用 ignore 注释
+// ignore: unused_element
+const int FUTURE_FEATURE_FLAG = 0;
+
+// ✅ 或使用下划线前缀（私有且未使用）
+const int _futureFeatureFlag = 0;
+
+// ✅ 如果变量需要在未来使用，添加注释说明
+// 预留：未来版本将启用此功能
+const int FUTURE_FEATURE_FLAG = 0;
+// ignore: unused_const
+final unusedFlag = FUTURE_FEATURE_FLAG;
+```
+
+#### C++ 代码（Windows 原生插件）
+
+```cpp
+// ❌ 错误：未使用的变量没有标记
+const int HANDLE_SIZE = 10;
+const int GAP_FROM_SELECTION = 0;
+
+// ✅ 正确：使用 (void) 标记为故意未使用
+const int HANDLE_SIZE = 10;
+(void)HANDLE_SIZE;  // 标记为故意未使用（预留功能）
+
+const int GAP_FROM_SELECTION = 0;
+(void)GAP_FROM_SELECTION;  // 标记为故意未使用（预留功能）
+```
+
+**规范说明**:
+1. **Dart 代码**: 使用 `// ignore: unused_element` 或下划线前缀
+2. **C++ 代码**: 使用 `(void)variableName;` 语句
+3. **添加注释**: 必须说明为什么保留此变量
+4. **定期清理**: 在实现预留功能后，移除 `(void)` 标记
+
+---
+
 ## ✅ 检查清单
 
 ### 代码提交前检查

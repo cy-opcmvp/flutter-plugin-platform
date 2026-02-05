@@ -43,6 +43,9 @@ class FlutterWindow : public Win32Window {
   // Hotkey manager instance
   std::unique_ptr<HotkeyManager> hotkey_manager_;
 
+  // Hotkey method channel for triggering Dart callbacks
+  std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> hotkey_method_channel_;
+
   // Handle screenshot method calls from Flutter
   void HandleScreenshotMethodCall(
       const flutter::MethodCall<flutter::EncodableValue>& call,

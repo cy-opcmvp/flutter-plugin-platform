@@ -33,11 +33,23 @@ bool HotkeyManager::RegisterHotkey(const std::string& actionId,
 
     if (!RegisterHotKey(hwnd, atomId, modifiers, vk)) {
         // 如果失败，尝试使用其他窗口
+        DWORD error = GetLastError();
+        // 简单的日志输出
+        char buffer[256];
+        sprintf_s(buffer, sizeof(buffer), "[HotkeyManager] RegisterHotKey FAILED: %s -> %s, error=%lu",
+                 actionId.c_str(), shortcut.c_str(), error);
+        OutputDebugStringA(buffer);
         return false;
     }
 
     _hotkeyIds[actionId] = atomId;
     _actionIds[atomId] = actionId;
+
+    // 成功日志
+    char buffer[256];
+    sprintf_s(buffer, sizeof(buffer), "[HotkeyManager] ✅ RegisterHotkey SUCCESS: %s -> %s, atomId=%d",
+             actionId.c_str(), shortcut.c_str(), atomId);
+    OutputDebugStringA(buffer);
 
     return true;
 }
@@ -84,8 +96,27 @@ void HotkeyManager::SetCallback(HotkeyCallback callback) {
 void HotkeyManager::HandleHotkeyMessage(WPARAM wParam, LPARAM lParam) {
     int atomId = static_cast<int>(wParam);
     auto it = _actionIds.find(atomId);
+
+    // 日志：热键被触发
+    char buffer[256];
+    sprintf_s(buffer, sizeof(buffer), "[HotkeyManager] 🔥 Hotkey triggered: atomId=%d, actionId=%s, hasCallback=%d",
+             atomId,
+             it != _actionIds.end() ? it->second.c_str() : "unknown",
+             _callback != nullptr);
+    OutputDebugStringA(buffer);
+
     if (it != _actionIds.end() && _callback) {
         _callback(it->second);
+        sprintf_s(buffer, sizeof(buffer), "[HotkeyManager] ✅ Callback executed: %s", it->second.c_str());
+        OutputDebugStringA(buffer);
+    } else {
+        if (it == _actionIds.end()) {
+            sprintf_s(buffer, sizeof(buffer), "[HotkeyManager] ❌ Unknown atomId: %d", atomId);
+            OutputDebugStringA(buffer);
+        } else if (!_callback) {
+            sprintf_s(buffer, sizeof(buffer), "[HotkeyManager] ❌ No callback set for actionId: %s", it->second.c_str());
+            OutputDebugStringA(buffer);
+        }
     }
 }
 

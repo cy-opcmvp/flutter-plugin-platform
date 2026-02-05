@@ -36,6 +36,7 @@ class ScreenshotPlugin extends PlatformPluginBase {
 
   // 插件状态变量
   bool _isInitialized = false;
+  bool _isScreenshotInProgress = false; // 截图操作进行中标志
   final List<ScreenshotRecord> _screenshots = [];
   ss.ScreenshotSettings _settings = ss.ScreenshotSettings.defaultSettings();
 
@@ -133,6 +134,7 @@ class ScreenshotPlugin extends PlatformPluginBase {
 
       // 初始化热键服务
       await _hotkeyService.initialize();
+      _hotkeyService.setScreenshotService(_screenshotService);
 
       // 从单一配置加载设置
       final savedConfig = await _context.dataStorage
@@ -258,11 +260,38 @@ class ScreenshotPlugin extends PlatformPluginBase {
   /// 获取截图历史记录
   List<ScreenshotRecord> get screenshots => List.unmodifiable(_screenshots);
 
+  /// 检查是否有活动的循环任务
+  bool _hasActiveRecurringTasks() {
+    return _taskManager.tasks.any((task) => task.status == TaskStatus.running);
+  }
+
   /// 捕获全屏截图
   Future<void> captureFullScreen() async {
-    final bytes = await _screenshotService.captureFullScreen();
-    if (bytes != null) {
-      await _processScreenshot(bytes, ScreenshotType.fullScreen);
+    // 检查是否已有截图操作进行中
+    if (_isScreenshotInProgress) {
+      print('🔒 截图正在进行中，忽略全屏截图请求');
+      await _context.platformServices.showNotification('截图正在进行中，请稍候');
+      return;
+    }
+
+    // 检查是否有活动的循环任务
+    if (_hasActiveRecurringTasks()) {
+      print('⚠️ 检测到活动的循环任务，要求暂停');
+      await _context.platformServices.showNotification('请先暂停定时截图任务');
+      return;
+    }
+
+    _isScreenshotInProgress = true;
+    print('🔒 截图状态：已锁定（全屏截图）');
+
+    try {
+      final bytes = await _screenshotService.captureFullScreen();
+      if (bytes != null) {
+        await _processScreenshot(bytes, ScreenshotType.fullScreen);
+      }
+    } finally {
+      _isScreenshotInProgress = false;
+      print('🔓 截图状态：已解锁');
     }
   }
 
@@ -273,9 +302,15 @@ class ScreenshotPlugin extends PlatformPluginBase {
 
   /// 捕获区域截图
   Future<void> captureRegion(Rect region) async {
+    print('📸 captureRegion: 开始捕获区域 $region');
     final bytes = await _screenshotService.captureRegion(region);
+    print('📸 captureRegion: 截图数据大小 = ${bytes?.length ?? 'null'}');
     if (bytes != null) {
+      print('📸 captureRegion: 开始处理截图...');
       await _processScreenshot(bytes, ScreenshotType.region);
+      print('📸 captureRegion: 截图处理完成');
+    } else {
+      print('📸 captureRegion: ⚠️ 截图数据为 null，跳过处理');
     }
   }
 
@@ -399,40 +434,80 @@ class ScreenshotPlugin extends PlatformPluginBase {
 
   /// 轮询获取区域选择结果（用于快捷键触发）
   Future<void> _pollForResultForHotkey() async {
+    // 检查是否已有截图操作进行中
+    if (_isScreenshotInProgress) {
+      print('🔒 截图正在进行中，忽略快捷键触发');
+      await _context.platformServices.showNotification('截图正在进行中，请稍候');
+      return;
+    }
+
+    // 检查是否有活动的循环任务
+    if (_hasActiveRecurringTasks()) {
+      print('⚠️ 检测到活动的循环任务，要求暂停');
+      await _context.platformServices.showNotification('请先暂停定时截图任务');
+      return;
+    }
+
+    _isScreenshotInProgress = true;
+    print('🔒 截图状态：已锁定（区域截图快捷键）');
+
+    // 【关键修复】先显示原生区域选择窗口
+    print('🔑 快捷键：显示原生区域选择窗口...');
+    final windowShown = await showNativeRegionCapture();
+    if (!windowShown) {
+      print('🔑 快捷键：❌ 窗口显示失败');
+      _isScreenshotInProgress = false;
+      print('🔓 截图状态：已解锁');
+      return;
+    }
+    print('🔑 快捷键：✅ 窗口已显示，开始轮询...');
+
     const maxPolls = 300; // 最多轮询 30 秒（每 100ms 一次）
     int polls = 0;
 
-    debugPrint('快捷键：开始轮询，最多 $maxPolls 次...');
-
-    while (polls < maxPolls) {
-      await Future.delayed(const Duration(milliseconds: 100));
+    try {
+      while (polls < maxPolls) {
+        await Future.delayed(const Duration(milliseconds: 100));
 
       final result = await getRegionSelectionResult();
       polls++;
 
       if (result != null) {
-        debugPrint(
-          '快捷键：收到选择结果: ${result.x}, ${result.y}, ${result.width}x${result.height}',
+        print(
+          '🔑 快捷键：✅ 收到选择结果: ${result.x}, ${result.y}, ${result.width}x${result.height}',
         );
         // 用户选择了区域
         final rect = result.toRect();
-        debugPrint('快捷键：开始捕获区域: $rect');
-        await captureRegion(rect);
-        debugPrint('快捷键：区域捕获完成');
+        print('🔑 快捷键：开始捕获区域: $rect');
+        try {
+          await captureRegion(rect);
+          print('🔑 快捷键：✅ 区域捕获完成');
+        } catch (e) {
+          print('🔑 快捷键：❌ 区域捕获失败: $e');
+        }
         return;
       }
     }
 
-    debugPrint('快捷键：轮询超时，用户可能取消了截图');
+    print('🔑 快捷键：⏰ 轮询超时，用户可能取消了截图');
+    } finally {
+      _isScreenshotInProgress = false;
+      print('🔓 截图状态：已解锁');
+    }
   }
 
   /// 处理截图
   Future<void> _processScreenshot(Uint8List bytes, ScreenshotType type) async {
     try {
+      print('📸 _processScreenshot: 开始处理截图, 大小: ${bytes.length} bytes');
+
       // 保存到文件（不传入 filename，让 FileManagerService 自动生成唯一的文件名）
+      print('📸 _processScreenshot: 保存到文件...');
       final filePath = await _fileManager.saveScreenshot(bytes);
+      print('📸 _processScreenshot: ✅ 文件已保存: $filePath');
 
       // 创建记录
+      print('📸 _processScreenshot: 创建记录...');
       final record = ScreenshotRecord(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         filePath: filePath,
@@ -442,32 +517,46 @@ class ScreenshotPlugin extends PlatformPluginBase {
       );
 
       _screenshots.insert(0, record);
+      print('📸 _processScreenshot: ✅ 记录已创建，当前历史记录数: ${_screenshots.length}');
 
       // 限制历史记录数量
       if (_screenshots.length > _settings.maxHistoryCount) {
         final removed = _screenshots.removeLast();
         await _fileManager.deleteScreenshot(removed.filePath);
+        print('📸 _processScreenshot: 删除最旧的记录: ${removed.filePath}');
       }
 
       // 复制到剪贴板
       if (_settings.autoCopyToClipboard) {
+        print('📸 _processScreenshot: 复制到剪贴板 (${_settings.clipboardContentType})...');
         await _clipboard.copyContent(
           filePath,
           contentType: _settings.clipboardContentType,
           imageBytes: bytes,
         );
+        print('📸 _processScreenshot: ✅ 已复制到剪贴板');
+      } else {
+        print('📸 _processScreenshot: ⏭️ 跳过复制到剪贴板（未启用）');
       }
 
       // 保存配置和历史
+      print('📸 _processScreenshot: 保存配置...');
       await _saveConfig();
+      print('📸 _processScreenshot: ✅ 配置已保存');
 
       // 通知 UI 更新
+      print('📸 _processScreenshot: 通知 UI 更新...');
       _onStateChanged?.call();
+      print('📸 _processScreenshot: ✅ UI 已通知');
 
       // 显示通知
+      print('📸 _processScreenshot: 显示通知...');
       await _context.platformServices.showNotification('截图已保存');
+      print('📸 _processScreenshot: ✅ 通知已显示');
+
+      print('📸 _processScreenshot: ✅ 截图处理完成');
     } catch (e) {
-      debugPrint('Failed to process screenshot: $e');
+      print('📸 _processScreenshot: ❌ 处理失败: $e');
       await _context.platformServices.showNotification('截图处理失败: $e');
     }
   }
@@ -493,39 +582,56 @@ class ScreenshotPlugin extends PlatformPluginBase {
   Future<void> _registerHotkeys() async {
     final shortcuts = _settings.shortcuts;
 
+    print('🔑 ========== 开始注册快捷键 ==========');
+    print('🔑 当前快捷键配置: $shortcuts');
+
     // 注册区域截图快捷键
     if (shortcuts.containsKey('regionCapture')) {
-      await _hotkeyService.registerHotkey(
+      print('🔑 注册区域截图快捷键: ${shortcuts['regionCapture']}');
+      final success = await _hotkeyService.registerHotkey(
         'regionCapture',
         shortcuts['regionCapture']!,
         () async {
-          debugPrint('Hotkey: Region capture triggered');
-          // 触发区域截图
-          final success = await showNativeRegionCapture();
-          if (!success) {
-            debugPrint('Failed to show native region capture window');
+          print('🔑 🔥 热键回调被调用（区域截图）');
+
+          // 检查是否已有截图操作进行中
+          if (_isScreenshotInProgress) {
+            print('🔒 截图正在进行中，忽略区域截图快捷键');
+            await _context.platformServices.showNotification('截图正在进行中，请稍候');
             return;
           }
 
-          // 轮询获取选择结果
+          // 轮询获取并处理区域选择结果
           await _pollForResultForHotkey();
         },
       );
+      print('🔑 ${success ? "✅" : "❌"} 区域截图快捷键注册${success ? "成功" : "失败"}');
     }
 
     // 注册全屏截图快捷键
     if (shortcuts.containsKey('fullScreenCapture')) {
-      await _hotkeyService.registerHotkey(
+      print('🔑 注册全屏截图快捷键: ${shortcuts['fullScreenCapture']}');
+      final success = await _hotkeyService.registerHotkey(
         'fullScreenCapture',
         shortcuts['fullScreenCapture']!,
         () async {
-          debugPrint('Hotkey: Full screen capture triggered');
+          print('🔑 🔥 热键回调被调用（全屏截图）');
+
+          // 检查是否已有截图操作进行中
+          if (_isScreenshotInProgress) {
+            print('🔒 截图正在进行中，忽略全屏截图快捷键');
+            await _context.platformServices.showNotification('截图正在进行中，请稍候');
+            return;
+          }
+
+          // 执行全屏截图
           await captureFullScreen();
         },
       );
+      print('🔑 ${success ? "✅" : "❌"} 全屏截图快捷键注册${success ? "成功" : "失败"}');
     }
 
-    debugPrint('Hotkeys registered: ${shortcuts.keys.join(", ")}');
+    print('🔑 ========== 热键注册完成 ==========');
   }
 }
 

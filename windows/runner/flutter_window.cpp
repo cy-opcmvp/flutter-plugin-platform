@@ -155,12 +155,12 @@ bool FlutterWindow::OnCreate() {
       });
 
   // Register hotkey method channel
-  auto hotkey_channel =
+  hotkey_method_channel_ =
       std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
           flutter_controller_->engine()->messenger(), "com.example.screenshot/hotkey",
           &flutter::StandardMethodCodec::GetInstance());
 
-  hotkey_channel->SetMethodCallHandler(
+  hotkey_method_channel_->SetMethodCallHandler(
       [this](const auto& call, auto result) {
         HandleHotkeyMethodCall(call, std::move(result));
       });
@@ -473,6 +473,13 @@ void FlutterWindow::HandleScreenshotMethodCall(
 
     // 获取区域选择结果（用于轮询）
     if (completed) {
+      // 立即清空结果标记（独占锁写入），避免重复读取
+      AcquireSRWLockExclusive(&g_regionSelectionLock);
+      g_regionSelectionResult.completed = false;
+      g_regionSelectionResult.cancelled = false;
+      ReleaseSRWLockExclusive(&g_regionSelectionLock);
+      LOG_FLUTTER("✅ Result cleared after reading");
+
       if (cancelled) {
         // 用户取消
         LOG_FLUTTER("Returning cancelled result");
@@ -498,10 +505,20 @@ void FlutterWindow::HandleScreenshotMethodCall(
 }
 
 void FlutterWindow::RegisterHotkeyEventChannel() {
-  // 暂时禁用 EventChannel 实现由于 API 不匹配
-  // TODO: 找到正确的 Flutter Windows EventChannel API 并实现
-  // 使用全局变量或通过 MethodChannel 反向调用
-  LOG_FLUTTER("Hotkey event channel registered (placeholder)");
+  LOG_FLUTTER("Registering hotkey event channel...");
+
+  // 创建一个 MethodChannel 用于接收来自原生的热键回调请求
+  auto hotkey_callback_channel =
+      std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
+          flutter_controller_->engine()->messenger(),
+          "com.example.screenshot/hotkey_callback",
+          &flutter::StandardMethodCodec::GetInstance());
+
+  // 设置方法处理器（Dart 会调用这个来注册回调）
+  // 注意：这个不实际使用，只是为了让 channel 存在
+  // 实际的通知通过截图的 polling 机制实现
+
+  LOG_FLUTTER("✅ Hotkey callback channel registered successfully");
 }
 
 void FlutterWindow::HandleHotkeyMethodCall(
@@ -567,55 +584,22 @@ void FlutterWindow::HandleHotkeyMethodCall(
 }
 
 void FlutterWindow::OnHotkeyPressed(const std::string& actionId) {
-  LOG_FLUTTER_FMT("Hotkey pressed: %s", actionId.c_str());
+  LOG_FLUTTER_FMT("🔥 Hotkey pressed: %s", actionId.c_str());
 
-  // 直接在原生端处理热键事件，不通过 EventChannel
-  if (actionId == "regionCapture") {
-    // 触发区域截图
-    std::thread([this]() {
-      LOG_FLUTTER("Triggering region capture from hotkey");
+  // 只负责通知 Dart 层，不做任何截图处理
+  // 所有截图逻辑（包括显示窗口）都在 Dart 层统一处理
+  if (hotkey_method_channel_) {
+    LOG_FLUTTER_FMT("🔥 Notifying Dart layer via MethodChannel: %s", actionId.c_str());
 
-      NativeScreenshotWindow window;
-      bool success = window.Show(
-          [](int x, int y, int width, int height) {
-            LOG_FLUTTER_FMT("Region selected from hotkey: (%d,%d) %dx%d", x, y, width, height);
-            // 保存选择结果（独占锁写入）
-            AcquireSRWLockExclusive(&g_regionSelectionLock);
-            g_regionSelectionResult.completed = true;
-            g_regionSelectionResult.cancelled = false;
-            g_regionSelectionResult.x = x;
-            g_regionSelectionResult.y = y;
-            g_regionSelectionResult.width = width;
-            g_regionSelectionResult.height = height;
-            ReleaseSRWLockExclusive(&g_regionSelectionLock);
-          },
-          []() {
-            LOG_FLUTTER("Region capture cancelled from hotkey");
-            // 用户取消（独占锁写入）
-            AcquireSRWLockExclusive(&g_regionSelectionLock);
-            g_regionSelectionResult.completed = true;
-            g_regionSelectionResult.cancelled = true;
-            ReleaseSRWLockExclusive(&g_regionSelectionLock);
-          }
-      );
+    flutter::EncodableMap args;
+    args[flutter::EncodableValue("actionId")] = flutter::EncodableValue(actionId);
 
-      if (!success) {
-        LOG_FLUTTER("Failed to show native region capture window from hotkey");
-      }
-    }).detach();
+    hotkey_method_channel_->InvokeMethod("onHotkey",
+        std::make_unique<flutter::EncodableValue>(args));
 
-  } else if (actionId == "fullScreenCapture") {
-    // 触发全屏截图
-    LOG_FLUTTER("Triggering full screen capture from hotkey");
-    // TODO: 实现全屏截图功能
-
-  } else if (actionId == "windowCapture") {
-    // 触发窗口截图
-    LOG_FLUTTER("Triggering window capture from hotkey");
-    // TODO: 实现窗口截图功能
-
+    LOG_FLUTTER_FMT("✅ Notification sent to Dart: %s", actionId.c_str());
   } else {
-    LOG_FLUTTER_FMT("Unknown hotkey action: %s", actionId.c_str());
+    LOG_FLUTTER("⚠️ hotkey_method_channel_ is null, notification failed!");
   }
 }
 

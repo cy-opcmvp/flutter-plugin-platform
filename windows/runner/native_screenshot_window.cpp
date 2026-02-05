@@ -258,11 +258,17 @@ LRESULT NativeScreenshotWindow::HandleMessage(UINT msg, WPARAM wParam, LPARAM lP
             // 检查按钮点击（仅在选中状态）
             if (state_ == ScreenshotState::Selected) {
                 if (PointInRect({mouseX, mouseY}, confirmButtonRect_)) {
-                    LOG_DEBUG("Confirm button clicked");
+                    LOG_DEBUG("🔥 Confirm button clicked!");
                     int width = selectionRect_.right - selectionRect_.left;
                     int height = selectionRect_.bottom - selectionRect_.top;
+                    LOG_DEBUG_FMT("🔥 Selection size: %dx%d, position: (%d,%d)",
+                                 width, height, selectionRect_.left, selectionRect_.top);
                     if (width >= 10 && height >= 10 && onSelected_) {
+                        LOG_DEBUG("🔥 Calling onSelected_ callback...");
                         onSelected_(selectionRect_.left, selectionRect_.top, width, height);
+                        LOG_DEBUG("🔥 onSelected_ callback completed!");
+                    } else {
+                        LOG_DEBUG("🔥 Selection too small or callback is null!");
                     }
                     Close();
                     return 0;
@@ -750,6 +756,7 @@ void NativeScreenshotWindow::DrawButtons(HDC hdc) {
     const int TOOLBAR_PADDING_H = 12;
     const int TOOLBAR_PADDING_V = 4;
     const int GAP_FROM_SELECTION = 0;
+    (void)GAP_FROM_SELECTION;  // 标记为故意未使用（预留功能）
     int toolbarWidth = BUTTON_SIZE * 2 + BUTTON_SPACING + TOOLBAR_PADDING_H * 2;
 
     // 计算工具栏区域
@@ -901,6 +908,7 @@ HandleType NativeScreenshotWindow::HitTest(int x, int y) {
     }
 
     const int HANDLE_SIZE = 10;
+    (void)HANDLE_SIZE;  // 标记为故意未使用（预留功能）
 
     // 检查控制点
     for (int i = (int)HandleType::TopLeft; i <= (int)HandleType::LeftCenter; i++) {

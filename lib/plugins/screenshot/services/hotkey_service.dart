@@ -4,21 +4,19 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import 'screenshot_service.dart';
+
 /// 热键服务
 ///
-/// 负责管理系统级全局热键的注册和监听
+/// 负责管理系统级全局热键的注册
 class HotkeyService {
   static const MethodChannel _methodChannel = MethodChannel(
     'com.example.screenshot/hotkey',
   );
-  static const EventChannel _eventChannel = EventChannel(
-    'com.example.screenshot/hotkey_events',
-  );
 
-  StreamSubscription<dynamic>? _eventSubscription;
   final Map<String, HotkeyCallback> _callbacks = {};
-
   bool _isInitialized = false;
+  ScreenshotService? _screenshotService;
 
   /// 初始化热键服务
   Future<bool> initialize() async {
@@ -26,23 +24,39 @@ class HotkeyService {
       return true;
     }
 
-    try {
-      // 监听热键事件
-      _eventSubscription = _eventChannel.receiveBroadcastStream().listen(
-        (dynamic event) {
-          _handleHotkeyEvent(event as String);
-        },
-        onError: (dynamic error) {
-          debugPrint('Hotkey event error: $error');
-        },
-      );
+    // 设置 MethodCallHandler 以接收来自原生的热键事件
+    _methodChannel.setMethodCallHandler((call) async {
+      if (call.method == 'onHotkey') {
+        // 接收到来自原生的热键触发事件
+        final args = call.arguments as Map<dynamic, dynamic>;
+        final actionId = args['actionId'] as String?;
 
-      _isInitialized = true;
-      return true;
-    } catch (e) {
-      debugPrint('Failed to initialize hotkey service: $e');
-      return false;
-    }
+        print('🔑 [HotkeyService] 收到原生热键事件: actionId=$actionId');
+
+        if (actionId != null && _callbacks.containsKey(actionId)) {
+          // 执行对应的回调
+          final callback = _callbacks[actionId]!;
+          print('🔑 [HotkeyService] ✅ 执行回调: $actionId');
+          callback();
+          return;
+        }
+
+        if (actionId == null) {
+          print('🔑 [HotkeyService] ❌ actionId 为 null');
+        } else {
+          print('🔑 [HotkeyService] ❌ 未找到回调: $actionId');
+        }
+      }
+      return null;
+    });
+
+    _isInitialized = true;
+    return true;
+  }
+
+  /// 设置截图服务（用于原生区域选择窗口）
+  void setScreenshotService(ScreenshotService service) {
+    _screenshotService = service;
   }
 
   /// 注册热键
@@ -60,17 +74,25 @@ class HotkeyService {
     }
 
     try {
+      print('🔑 [HotkeyService] 正在注册热键: actionId=$actionId, shortcut=$shortcut');
       final result = await _methodChannel.invokeMethod('registerHotkey', {
         'actionId': actionId,
         'shortcut': shortcut,
       });
 
+      print('🔑 [HotkeyService] 原生层返回结果: $result');
+
       if (result == true) {
         _callbacks[actionId] = callback;
+        print('🔑 [HotkeyService] ✅ 热键回调已保存: $actionId');
+        print('🔑 [HotkeyService] ✅ 热键注册成功: $actionId');
         return true;
       }
+
+      print('🔑 [HotkeyService] ❌ 热键注册失败（原生层返回 false）: $actionId');
       return false;
     } catch (e) {
+      print('🔑 [HotkeyService] ❌ 热键注册异常: $actionId, error=$e');
       debugPrint('Failed to register hotkey: $e');
       return false;
     }
@@ -85,10 +107,13 @@ class HotkeyService {
 
       if (result == true) {
         _callbacks.remove(actionId);
+        print('🔑 [HotkeyService] ✅ 热键已注销: $actionId');
         return true;
       }
+      print('🔑 [HotkeyService] ❌ 热键注销失败: $actionId');
       return false;
     } catch (e) {
+      print('🔑 [HotkeyService] ❌ 热键注销异常: $actionId, error=$e');
       debugPrint('Failed to unregister hotkey: $e');
       return false;
     }
@@ -112,18 +137,9 @@ class HotkeyService {
     return await registerHotkey(actionId, newShortcut, callback);
   }
 
-  /// 处理热键事件
-  void _handleHotkeyEvent(String actionId) {
-    final callback = _callbacks[actionId];
-    if (callback != null) {
-      callback();
-    }
-  }
-
   /// 释放资源
   Future<void> dispose() async {
     await unregisterAll();
-    await _eventSubscription?.cancel();
     _isInitialized = false;
   }
 
