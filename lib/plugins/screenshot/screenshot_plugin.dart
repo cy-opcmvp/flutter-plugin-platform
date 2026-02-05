@@ -464,32 +464,44 @@ class ScreenshotPlugin extends PlatformPluginBase {
 
     const maxPolls = 300; // 最多轮询 30 秒（每 100ms 一次）
     int polls = 0;
+    int nullCount = 0; // 连续 null 次数计数器
 
     try {
       while (polls < maxPolls) {
         await Future.delayed(const Duration(milliseconds: 100));
 
-      final result = await getRegionSelectionResult();
-      polls++;
+        final result = await getRegionSelectionResult();
+        polls++;
 
-      if (result != null) {
-        print(
-          '🔑 快捷键：✅ 收到选择结果: ${result.x}, ${result.y}, ${result.width}x${result.height}',
-        );
-        // 用户选择了区域
-        final rect = result.toRect();
-        print('🔑 快捷键：开始捕获区域: $rect');
-        try {
-          await captureRegion(rect);
-          print('🔑 快捷键：✅ 区域捕获完成');
-        } catch (e) {
-          print('🔑 快捷键：❌ 区域捕获失败: $e');
+        if (result != null) {
+          print(
+            '🔑 快捷键：✅ 收到选择结果: ${result.x}, ${result.y}, ${result.width}x${result.height}',
+          );
+          // 用户选择了区域
+          final rect = result.toRect();
+          print('🔑 快捷键：开始捕获区域: $rect');
+          try {
+            await captureRegion(rect);
+            print('🔑 快捷键：✅ 区域捕获完成');
+          } catch (e) {
+            print('🔑 快捷键：❌ 区域捕获失败: $e');
+          }
+          return;
+        } else {
+          // 结果为 null
+          nullCount++;
+          // 【关键修复】如果连续 3 次获取到 null，说明窗口已关闭（用户按了 ESC）
+          if (nullCount >= 3) {
+            print('🔑 快捷键：❌ 检测到窗口已关闭（用户取消，连续 $nullCount 次 null）');
+            // 用户取消了，提前退出轮询
+            break;
+          }
         }
-        return;
       }
-    }
 
-    print('🔑 快捷键：⏰ 轮询超时，用户可能取消了截图');
+      if (polls >= maxPolls) {
+        print('🔑 快捷键：⏰ 轮询超时，用户可能取消了截图');
+      }
     } finally {
       _isScreenshotInProgress = false;
       print('🔓 截图状态：已解锁');
