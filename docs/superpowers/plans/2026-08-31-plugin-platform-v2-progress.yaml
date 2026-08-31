@@ -1,0 +1,149 @@
+schema_version: 1
+project: flutter-plugin-platform-v2
+updated_at: '2026-08-31T17:48:15+08:00'
+goal:
+  enabled: true
+  objective: >-
+    按设计规格和 Master Plan 完成 Flutter Plugin Platform v2；先独立搭建并验收框架，
+    再实现并验收业务插件，最终只在用户再次确认后清理旧代码。
+  stopping_condition: >-
+    M1 至 M4 全部独立验收通过；M5 旧代码删除前必须再次获得用户确认。
+execution_policy:
+  max_concurrent_subagents: 1
+  nested_delegation: false
+  implementation_and_acceptance_separated: true
+  framework_and_business_separated: true
+  ai_git_commands_allowed: false
+execution_state:
+  status: paused_by_user
+  paused_at: '2026-08-31T17:48:15+08:00'
+  reason: user_requested_git_checkpoint_and_restart_prompt
+  resume_from: F1-02-green-implementation
+current_milestone: M1
+current_task: F1-02
+milestones:
+  M0:
+    name: design-and-execution-baseline
+    status: accepted
+  M1:
+    name: core-foundation
+    status: in_progress
+  M2:
+    name: sidecar-framework
+    status: not_started
+  M3:
+    name: flutter-host-platform-cli
+    status: not_started
+  M4:
+    name: mvp-plugins
+    status: not_started
+  M5:
+    name: cutover-and-cleanup
+    status: not_started
+tasks:
+  M0-design:
+    status: accepted
+    implementer: root
+    verification:
+      result: design-approved-in-conversation
+  M0-global-agent-config:
+    status: accepted
+    implementer: root
+    changed_files:
+      - C:\Users\ASUS\.codex\config.toml
+    verification:
+      command: python tomllib parse and value assertions
+      result: AGENTS_CONFIG_OK
+  M0-goal-decision:
+    status: accepted
+    implementer: root
+    verification:
+      result: goal-created-by-explicit-user-request
+  F1-01:
+    status: accepted
+    model: gpt-5.6-sol
+    reasoning_effort: xhigh
+    implementer: /root/f1_01_workspace
+    file_scope:
+      - v2/pubspec.yaml
+      - v2/analysis_options.yaml
+      - v2/packages/plugin_contracts/pubspec.yaml
+      - v2/packages/plugin_contracts/lib/plugin_contracts.dart
+      - v2/packages/plugin_runtime/pubspec.yaml
+      - v2/packages/plugin_runtime/lib/plugin_runtime.dart
+      - v2/packages/plugin_devkit/pubspec.yaml
+      - v2/packages/plugin_devkit/lib/plugin_devkit.dart
+    verification_commands:
+      - dart pub get
+      - dart pub workspace list
+      - dart analyze
+    verification:
+      controller_run: '2026-08-31T17:25:38+08:00'
+      pub_get_offline_exit_code: 0
+      workspace_list_exit_code: 0
+      analyze_exit_code: 0
+      analyze_result: No issues found
+      generated_artifacts_removed: true
+    report: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-01-report.md
+    review_package: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-01-review-package.md
+    acceptance:
+      reviewer: /root/f1_01_review
+      model: gpt-5.6-sol
+      reasoning_effort: xhigh
+      verdict: Approved
+      report: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-01-review.md
+  F1-02:
+    status: paused_red_verified
+    model: gpt-5.6-sol
+    reasoning_effort: xhigh
+    file_scope:
+      - v2/packages/plugin_contracts/lib/src/identity/plugin_id.dart
+      - v2/packages/plugin_contracts/lib/src/errors/plugin_failure.dart
+      - v2/packages/plugin_contracts/test/identity/plugin_id_test.dart
+      - v2/packages/plugin_contracts/lib/plugin_contracts.dart
+    verification_commands:
+      - dart test test/identity/plugin_id_test.dart
+      - dart analyze
+    checkpoint:
+      phase: red_verified
+      authored_files:
+        - v2/packages/plugin_contracts/test/identity/plugin_id_test.dart
+      test_sha256: 1BC3F1840D71FAFD8EB3A99FB7869469E050ED59F876CF19B649F3E9F16E3B44
+      red_command: dart test test/identity/plugin_id_test.dart
+      red_exit_code: 1
+      red_reason: PluginId and PluginFailure are intentionally undefined before implementation
+      production_files_created: false
+      report_created: false
+      interrupted_implementer: /root/f1_02_identity
+  F1-03:
+    status: not_started
+    model: gpt-5.6-sol
+    reasoning_effort: xhigh
+  F1-04:
+    status: not_started
+    model: gpt-5.6-sol
+    reasoning_effort: xhigh
+  F1-05:
+    status: not_started
+    model: gpt-5.6-sol
+    reasoning_effort: high
+  F1-06:
+    status: not_started
+    model: gpt-5.6-sol
+    reasoning_effort: high
+  F1-07:
+    status: not_started
+    model: gpt-5.6-luna
+    reasoning_effort: high
+    acceptance_model: gpt-5.6-sol
+  F1-08:
+    status: not_started
+    implementation_model: gpt-5.6-luna
+    acceptance_model: gpt-5.6-sol
+recovery:
+  last_verified_checkpoint: F1-02-red-verified
+  next_action: >-
+    Do not rewrite or rerun the RED test first. Resume F1-02 by implementing PluginId,
+    PluginFailure and exports, then run GREEN, format and analyze, write the task report,
+    and dispatch an independent Sol xhigh reviewer.
+  blockers: []

@@ -1,0 +1,8 @@
+name: plugin_platform_v2_workspace
+publish_to: none
+environment:
+  sdk: ^3.10.0
+workspace:
+  - packages/plugin_contracts
+  - packages/plugin_runtime
+  - packages/plugin_devkit
