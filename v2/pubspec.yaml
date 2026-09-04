@@ -6,3 +6,4 @@ workspace:
   - packages/plugin_contracts
   - packages/plugin_runtime
   - packages/plugin_devkit
+  - packages/plugin_sidecar
