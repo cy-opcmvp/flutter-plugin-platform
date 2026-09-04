@@ -1,6 +1,6 @@
 schema_version: 1
 project: flutter-plugin-platform-v2
-updated_at: '2026-08-31T17:48:15+08:00'
+updated_at: '2026-08-31T23:00:00+08:00'
 goal:
   enabled: true
   objective: >-
@@ -15,22 +15,22 @@ execution_policy:
   framework_and_business_separated: true
   ai_git_commands_allowed: false
 execution_state:
-  status: paused_by_user
-  paused_at: '2026-08-31T17:48:15+08:00'
-  reason: user_requested_git_checkpoint_and_restart_prompt
+  status: running
+  resumed_at: '2026-08-31T18:55:00+08:00'
+  reason: user_confirmed_resume_on_another_computer
   resume_from: F1-02-green-implementation
-current_milestone: M1
-current_task: F1-02
+current_milestone: M2
+current_task: M2-planning
 milestones:
   M0:
     name: design-and-execution-baseline
     status: accepted
   M1:
     name: core-foundation
-    status: in_progress
+    status: accepted
   M2:
     name: sidecar-framework
-    status: not_started
+    status: in_progress
   M3:
     name: flutter-host-platform-cli
     status: not_started
@@ -93,9 +93,10 @@ tasks:
       verdict: Approved
       report: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-01-review.md
   F1-02:
-    status: paused_red_verified
+    status: accepted
     model: gpt-5.6-sol
     reasoning_effort: xhigh
+    implementer: /root/f1_02_green_impl
     file_scope:
       - v2/packages/plugin_contracts/lib/src/identity/plugin_id.dart
       - v2/packages/plugin_contracts/lib/src/errors/plugin_failure.dart
@@ -104,46 +105,343 @@ tasks:
     verification_commands:
       - dart test test/identity/plugin_id_test.dart
       - dart analyze
+    implementation_report: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-02-report.md
+    review_package: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-02-review-package.md
+    reviewer: /root/f1_02_review
+    review:
+      verdict: Needs fixes
+      critical_findings: 0
+      important_findings: 1
+      finding: full-package format gate exits 1 because the preserved test requires formatter reflow
+      report: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-02-review.md
+    fix_round: 1
+    fix_review_package: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-02-fix-1-review-package.md
+    fix_controller_verification:
+      focused_test_exit_code: 0
+      focused_test_result: 15 tests passed
+      full_format_exit_code: 0
+      full_format_result: 4 files checked, 0 changed
+      analyze_exit_code: 0
+      analyze_result: No issues found
+    acceptance:
+      reviewer: /root/f1_02_review
+      model: gpt-5.6-sol
+      reasoning_effort: xhigh
+      initial_verdict: Needs fixes
+      fix_rounds: 1
+      final_verdict: Approved
+      review_report: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-02-review.md
+      re_review_report: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-02-re-review-1.md
+      suggested_commit: 'feat(core): add validated plugin identity'
+    controller_verification:
+      focused_test_exit_code: 0
+      focused_test_result: 15 tests passed
+      full_format_exit_code: 1
+      full_format_result: existing read-only test requires formatter reflow
+      lib_format_exit_code: 0
+      analyze_exit_code: 0
+      analyze_result: No issues found
     checkpoint:
       phase: red_verified
       authored_files:
         - v2/packages/plugin_contracts/test/identity/plugin_id_test.dart
       test_sha256: 1BC3F1840D71FAFD8EB3A99FB7869469E050ED59F876CF19B649F3E9F16E3B44
+      current_raw_test_sha256: 0B97EA8D43B76E472C29BC21530BB4DA3AC0A7152DF36FBC50BB408BA07201E0
+      normalized_lf_hash_matches: true
       red_command: dart test test/identity/plugin_id_test.dart
       red_exit_code: 1
       red_reason: PluginId and PluginFailure are intentionally undefined before implementation
       production_files_created: false
       report_created: false
       interrupted_implementer: /root/f1_02_identity
+      resumed_implementer: /root/f1_02_green_impl
   F1-03:
-    status: not_started
+    status: accepted
     model: gpt-5.6-sol
     reasoning_effort: xhigh
+    implementer: /root/f1_03_manifest_impl
+    file_scope:
+      - v2/packages/plugin_contracts/lib/src/manifest/plugin_target.dart
+      - v2/packages/plugin_contracts/lib/src/manifest/plugin_manifest.dart
+      - v2/packages/plugin_contracts/lib/src/manifest/plugin_manifest_codec.dart
+      - v2/packages/plugin_contracts/lib/src/capability/capability_descriptor.dart
+      - v2/packages/plugin_contracts/test/manifest/plugin_manifest_codec_test.dart
+      - v2/packages/plugin_contracts/test/capability/capability_descriptor_test.dart
+      - v2/packages/plugin_contracts/lib/plugin_contracts.dart
+    verification_commands:
+      - dart test test/manifest test/capability
+      - dart test
+      - dart format --output=none --set-exit-if-changed .
+      - dart analyze
+    brief: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-03-brief.md
+    baseline: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-03-baseline.md
+    implementation_report: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-03-report.md
+    review_package: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-03-review-package.md
+    reviewer: /root/f1_03_review
+    review:
+      verdict: Needs fixes
+      critical_findings: 0
+      important_findings: 1
+      finding: unsafe unknown top-level keys are echoed verbatim in FormatException messages
+      report: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-03-review.md
+    fix_round: 2
+    fix_round_1_re_review:
+      verdict: Findings remain open
+      finding_status: NOT ADDRESSED
+      report: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-03-re-review-1.md
+    fix_review_package: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-03-fix-1-review-package.md
+    fix_round_2_review_package: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-03-fix-2-review-package.md
+    fix_round_2_controller_verification:
+      manifest_test_exit_code: 0
+      manifest_test_result: 27 tests passed
+      focused_test_exit_code: 0
+      focused_test_result: 33 tests passed
+      full_test_exit_code: 0
+      full_test_result: 48 tests passed
+      format_exit_code: 0
+      analyze_exit_code: 0
+    fix_round_2_re_review:
+      verdict: All findings addressed, no new Critical/Important breakage
+      finding_status: ADDRESSED
+      report: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-03-re-review-2.md
+    acceptance:
+      reviewer: /root/f1_03_review
+      model: gpt-5.6-sol
+      reasoning_effort: xhigh
+      initial_verdict: Needs fixes
+      fix_rounds: 2
+      final_verdict: Approved
+      review_report: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-03-review.md
+      final_re_review_report: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-03-re-review-2.md
+      suggested_commit: 'feat(core): define strict plugin manifest contract'
+    fix_controller_verification:
+      manifest_test_exit_code: 0
+      manifest_test_result: 26 tests passed
+      focused_test_exit_code: 0
+      focused_test_result: 32 tests passed
+      full_test_exit_code: 0
+      full_test_result: 47 tests passed
+      format_exit_code: 0
+      analyze_exit_code: 0
+    controller_verification:
+      focused_test_exit_code: 0
+      focused_test_result: 31 tests passed
+      full_test_exit_code: 0
+      full_test_result: 46 tests passed
+      format_exit_code: 0
+      format_result: 10 files checked, 0 changed
+      analyze_exit_code: 0
+      analyze_result: No issues found
+      forbidden_dependency_matches: 0
   F1-04:
-    status: not_started
+    status: accepted
     model: gpt-5.6-sol
     reasoning_effort: xhigh
+    implementer: /root/f1_04_lifecycle_impl
+    file_scope:
+      - v2/packages/plugin_contracts/lib/src/lifecycle/plugin_lifecycle.dart
+      - v2/packages/plugin_runtime/lib/src/lifecycle/lifecycle_machine.dart
+      - v2/packages/plugin_runtime/test/lifecycle/lifecycle_machine_test.dart
+      - v2/packages/plugin_contracts/lib/plugin_contracts.dart
+      - v2/packages/plugin_runtime/lib/plugin_runtime.dart
+    verification_commands:
+      - dart test test/lifecycle/lifecycle_machine_test.dart
+      - dart test
+      - dart format --output=none --set-exit-if-changed .
+      - dart analyze
+    brief: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-04-brief.md
+    baseline: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-04-baseline.md
+    context_resolution:
+      blocker: workspace formatter requires normalization of pre-existing zero-byte plugin_devkit export
+      ruling: allow original implementer to add only the formatter-equivalent LF to the empty stub as baseline maintenance
+      semantic_change: false
+    implementation_report: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-04-report.md
+    review_package: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-04-review-package.md
+    reviewer: /root/f1_04_review
+    review:
+      verdict: Needs fixes
+      critical_findings: 0
+      important_findings: 1
+      minor_findings: 1
+      important: detached lifecycle fixture cannot detect machine callback coupling
+      minor: runtime isA assertion cannot independently detect interface drift
+      report: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-04-review.md
+    fix_round: 1
+    ruling:
+      decision: remove tautological callback/API tests and verify zero plugin coupling through independent structural review
+      reason: machine is forbidden to accept or retain a plugin, so a real causal unit test would require the prohibited coupling
+    fix_review_package: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-04-fix-1-review-package.md
+    fix_controller_verification:
+      runtime_focused_exit_code: 0
+      runtime_focused_result: 13 tests passed
+      runtime_full_exit_code: 0
+      runtime_full_result: 13 tests passed
+      contracts_full_exit_code: 0
+      contracts_full_result: 48 tests passed
+      format_exit_code: 0
+      analyze_exit_code: 0
+    acceptance:
+      reviewer: /root/f1_04_review
+      model: gpt-5.6-sol
+      reasoning_effort: xhigh
+      initial_verdict: Needs fixes
+      fix_rounds: 1
+      final_verdict: Approved
+      review_report: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-04-review.md
+      re_review_report: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-04-re-review-1.md
+      suggested_commit: 'feat(runtime): add deterministic plugin lifecycle'
+    controller_verification:
+      runtime_focused_exit_code: 0
+      runtime_focused_result: 15 tests passed
+      runtime_full_exit_code: 0
+      runtime_full_result: 15 tests passed
+      contracts_full_exit_code: 0
+      contracts_full_result: 48 tests passed
+      workspace_format_exit_code: 0
+      workspace_analyze_exit_code: 0
+      baseline_maintenance_byte: 10
   F1-05:
-    status: not_started
+    status: accepted
     model: gpt-5.6-sol
     reasoning_effort: high
+    implementer: /root/f1_05_registry_impl
+    file_scope:
+      - v2/packages/plugin_runtime/lib/src/registry/plugin_registration.dart
+      - v2/packages/plugin_runtime/lib/src/registry/plugin_registry.dart
+      - v2/packages/plugin_runtime/lib/src/capability/capability_catalog.dart
+      - v2/packages/plugin_runtime/test/registry/plugin_registry_test.dart
+      - v2/packages/plugin_runtime/test/capability/capability_catalog_test.dart
+      - v2/packages/plugin_runtime/lib/plugin_runtime.dart
+    brief: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-05-brief.md
+    baseline: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-05-baseline.md
+    implementation_report: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-05-report.md
+    review_package: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-05-review-package.md
+    reviewer: /root/f1_05_review
+    acceptance:
+      reviewer: /root/f1_05_review
+      model: gpt-5.6-sol
+      reasoning_effort: xhigh
+      verdict: Approved
+      report: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-05-review.md
+      suggested_commit: 'feat(runtime): add plugin registry and capability catalog'
+    controller_verification:
+      focused_exit_code: 0
+      focused_result: 8 tests passed
+      runtime_full_exit_code: 0
+      runtime_full_result: 21 tests passed
+      contracts_full_exit_code: 0
+      contracts_full_result: 48 tests passed
+      format_exit_code: 0
+      analyze_exit_code: 0
+      forbidden_matches: 0
   F1-06:
-    status: not_started
+    status: accepted
     model: gpt-5.6-sol
     reasoning_effort: high
+    implementer: /root/f1_06_resolver_impl
+    file_scope:
+      - v2/packages/plugin_runtime/lib/src/resolution/plugin_resolver.dart
+      - v2/packages/plugin_runtime/test/resolution/plugin_resolver_test.dart
+      - v2/packages/plugin_runtime/lib/plugin_runtime.dart
+    brief: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-06-brief.md
+    baseline: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-06-baseline.md
+    implementation_report: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-06-report.md
+    review_package: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-06-review-package.md
+    reviewer: /root/f1_06_review
+    acceptance:
+      reviewer: /root/f1_06_review
+      model: gpt-5.6-sol
+      reasoning_effort: xhigh
+      verdict: Approved
+      report: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-06-review.md
+      suggested_commit: 'feat(runtime): resolve plugins by platform and capability'
+    controller_verification:
+      focused_exit_code: 0
+      focused_result: 5 tests passed
+      runtime_full_exit_code: 0
+      runtime_full_result: 26 tests passed
+      contracts_full_exit_code: 0
+      contracts_full_result: 48 tests passed
+      format_exit_code: 0
+      analyze_exit_code: 0
+      forbidden_matches: 0
   F1-07:
-    status: not_started
+    status: accepted
     model: gpt-5.6-luna
     reasoning_effort: high
     acceptance_model: gpt-5.6-sol
+    implementer: /root/f1_07_devkit_impl
+    file_scope:
+      - v2/packages/plugin_devkit/lib/src/fakes/fake_plugin.dart
+      - v2/packages/plugin_devkit/lib/src/matchers/plugin_failure_matcher.dart
+      - v2/packages/plugin_devkit/test/fakes/fake_plugin_test.dart
+      - v2/packages/plugin_devkit/lib/plugin_devkit.dart
+      - v2/packages/plugin_devkit/pubspec.yaml
+    brief: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-07-brief.md
+    baseline: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-07-baseline.md
+    implementation_report: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-07-report.md
+    review_package: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-07-review-package.md
+    reviewer: /root/f1_07_review
+    acceptance:
+      reviewer: /root/f1_07_review
+      model: gpt-5.6-sol
+      reasoning_effort: high
+      verdict: Approved
+      report: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-07-review.md
+      minor: implementation report says contracts 49/49; fresh controller evidence is 48/48
+      suggested_commit: 'test(core): add deterministic plugin devkit'
+    controller_verification:
+      focused_exit_code: 0
+      focused_result: 8 tests passed
+      devkit_full_exit_code: 0
+      devkit_full_result: 8 tests passed
+      runtime_full_exit_code: 0
+      runtime_full_result: 26 tests passed
+      contracts_full_exit_code: 0
+      contracts_full_result: 48 tests passed
+      report_contracts_count: 49
+      report_count_discrepancy: true
+      format_exit_code: 0
+      analyze_exit_code: 0
   F1-08:
-    status: not_started
+    status: accepted
     implementation_model: gpt-5.6-luna
     acceptance_model: gpt-5.6-sol
+    implementer: /root/f1_08_docs_impl
+    file_scope:
+      - v2/README.md
+      - v2/packages/plugin_contracts/README.md
+      - v2/packages/plugin_runtime/README.md
+    reserved_acceptance_report: docs/superpowers/acceptance/v2-core-foundation-acceptance.md
+    brief: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-08-brief.md
+    baseline: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-08-baseline.md
+    implementation_report: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-08-report.md
+    g1_review_package: .superpowers/sdd/2026-08-31-plugin-platform-v2-core-foundation/task-F1-08-g1-review-package.md
+    reviewer: /root/g1_core_acceptance
+    acceptance:
+      reviewer: /root/g1_core_acceptance
+      model: gpt-5.6-sol
+      reasoning_effort: xhigh
+      verdict: Approved
+      critical_findings: 0
+      important_findings: 0
+      minor_findings: 1
+      report: docs/superpowers/acceptance/v2-core-foundation-acceptance.md
+      suggested_commit: 'feat(core): complete plugin platform v2 core foundation'
+    controller_verification:
+      pub_get_exit_code: 0
+      workspace_list_exit_code: 0
+      contracts_tests: 48
+      runtime_tests: 26
+      devkit_tests: 8
+      format_exit_code: 0
+      analyze_exit_code: 0
+      dependency_check_exit_code: 0
+      forbidden_boundary_matches: 0
+      readme_commands_verified: true
 recovery:
-  last_verified_checkpoint: F1-02-red-verified
+  last_verified_checkpoint: M1-G1-accepted
   next_action: >-
-    Do not rewrite or rerun the RED test first. Resume F1-02 by implementing PluginId,
-    PluginFailure and exports, then run GREEN, format and analyze, write the task report,
-    and dispatch an independent Sol xhigh reviewer.
+    Use the accepted design and G1 boundaries to freeze a detailed M2 Sidecar framework plan
+    covering safe package installation, framed JSON-RPC, process supervision and Windows Python fixtures.
   blockers: []

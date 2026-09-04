@@ -5,6 +5,7 @@ environment:
   sdk: ^3.10.0
 
 dependencies:
+  matcher: ^0.12.20
   plugin_contracts:
     path: ../plugin_contracts
   plugin_runtime:

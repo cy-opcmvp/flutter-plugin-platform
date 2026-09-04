@@ -12,10 +12,7 @@ void main() {
     });
 
     test('catches uppercase characters bypassing validation', () {
-      expect(
-        () => PluginId.parse('Tools.Calculator'),
-        throwsFormatException,
-      );
+      expect(() => PluginId.parse('Tools.Calculator'), throwsFormatException);
     });
 
     test('catches a single segment being accepted as an ID', () {
@@ -82,18 +79,18 @@ void main() {
       expect(
         () => PluginFailure('plugin.invalid', '\t'),
         throwsA(
-          isA<ArgumentError>().having(
-            (error) => error.name,
-            'name',
-            'message',
-          ),
+          isA<ArgumentError>().having((error) => error.name, 'name', 'message'),
         ),
       );
     });
 
     test('catches later input-map mutation changing failure details', () {
       final input = <String, Object?>{'attempt': 1};
-      final failure = PluginFailure('plugin.invalid', 'Plugin is invalid', input);
+      final failure = PluginFailure(
+        'plugin.invalid',
+        'Plugin is invalid',
+        input,
+      );
 
       input['attempt'] = 2;
       input['new'] = true;
