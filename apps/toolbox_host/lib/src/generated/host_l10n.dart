@@ -607,47 +607,191 @@ abstract class HostL10n {
   /// **'截图设置'**
   String get shotSettingsFormTitle;
 
-  /// No description provided for @shotSettingsFilenamePrefix.
+  /// No description provided for @shotSettingsSaveDir.
   ///
   /// In zh, this message translates to:
-  /// **'文件名前缀'**
-  String get shotSettingsFilenamePrefix;
+  /// **'保存目录'**
+  String get shotSettingsSaveDir;
 
-  /// No description provided for @shotSettingsFilenamePrefixPlaceholder.
+  /// No description provided for @shotSaveDirPictures.
   ///
   /// In zh, this message translates to:
-  /// **'shot'**
-  String get shotSettingsFilenamePrefixPlaceholder;
+  /// **'图片目录'**
+  String get shotSaveDirPictures;
 
-  /// No description provided for @shotSettingsQuality.
+  /// No description provided for @shotSaveDirDocuments.
   ///
   /// In zh, this message translates to:
-  /// **'保存质量'**
-  String get shotSettingsQuality;
+  /// **'文档目录'**
+  String get shotSaveDirDocuments;
 
-  /// No description provided for @shotQualityLossless.
+  /// No description provided for @shotSaveDirPluginData.
   ///
   /// In zh, this message translates to:
-  /// **'无损（PNG）'**
-  String get shotQualityLossless;
+  /// **'插件数据目录'**
+  String get shotSaveDirPluginData;
 
-  /// No description provided for @shotQualityHigh.
+  /// No description provided for @shotSettingsFilenameTemplate.
   ///
   /// In zh, this message translates to:
-  /// **'高'**
-  String get shotQualityHigh;
+  /// **'文件名模板'**
+  String get shotSettingsFilenameTemplate;
 
-  /// No description provided for @shotQualityStandard.
+  /// No description provided for @shotSettingsFilenameTemplatePlaceholder.
   ///
   /// In zh, this message translates to:
-  /// **'标准'**
-  String get shotQualityStandard;
+  /// **'screenshot-20260101-120000'**
+  String get shotSettingsFilenameTemplatePlaceholder;
 
-  /// No description provided for @shotQualityNote.
+  /// No description provided for @shotSettingsFormat.
   ///
   /// In zh, this message translates to:
-  /// **'PNG 为无损格式，质量选项暂以原图保存。'**
-  String get shotQualityNote;
+  /// **'保存格式'**
+  String get shotSettingsFormat;
+
+  /// No description provided for @shotFormatPng.
+  ///
+  /// In zh, this message translates to:
+  /// **'PNG（无损）'**
+  String get shotFormatPng;
+
+  /// No description provided for @shotFormatJpeg.
+  ///
+  /// In zh, this message translates to:
+  /// **'JPEG（压缩）'**
+  String get shotFormatJpeg;
+
+  /// No description provided for @shotSettingsJpegQuality.
+  ///
+  /// In zh, this message translates to:
+  /// **'JPEG 质量（1-100）'**
+  String get shotSettingsJpegQuality;
+
+  /// No description provided for @shotSettingsAutoCopy.
+  ///
+  /// In zh, this message translates to:
+  /// **'自动复制'**
+  String get shotSettingsAutoCopy;
+
+  /// No description provided for @shotAutoCopyNone.
+  ///
+  /// In zh, this message translates to:
+  /// **'不复制'**
+  String get shotAutoCopyNone;
+
+  /// No description provided for @shotAutoCopyImage.
+  ///
+  /// In zh, this message translates to:
+  /// **'复制图像'**
+  String get shotAutoCopyImage;
+
+  /// No description provided for @shotAutoCopyPath.
+  ///
+  /// In zh, this message translates to:
+  /// **'复制文件路径'**
+  String get shotAutoCopyPath;
+
+  /// No description provided for @shotFormatNote.
+  ///
+  /// In zh, this message translates to:
+  /// **'文件名模板支持日期、时间与同秒序号变量；系统目录不可用时自动回退插件数据目录。'**
+  String get shotFormatNote;
+
+  /// No description provided for @shotFieldPath.
+  ///
+  /// In zh, this message translates to:
+  /// **'保存路径'**
+  String get shotFieldPath;
+
+  /// No description provided for @shotFieldSize.
+  ///
+  /// In zh, this message translates to:
+  /// **'图像尺寸'**
+  String get shotFieldSize;
+
+  /// No description provided for @shotFieldCopied.
+  ///
+  /// In zh, this message translates to:
+  /// **'自动复制'**
+  String get shotFieldCopied;
+
+  /// No description provided for @shotCopiedNone.
+  ///
+  /// In zh, this message translates to:
+  /// **'未复制'**
+  String get shotCopiedNone;
+
+  /// No description provided for @shotCopiedImage.
+  ///
+  /// In zh, this message translates to:
+  /// **'已复制图像'**
+  String get shotCopiedImage;
+
+  /// No description provided for @shotCopiedPath.
+  ///
+  /// In zh, this message translates to:
+  /// **'已复制文件路径'**
+  String get shotCopiedPath;
+
+  /// No description provided for @shotCopiedFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'复制失败'**
+  String get shotCopiedFailed;
+
+  /// No description provided for @shotRegionButton.
+  ///
+  /// In zh, this message translates to:
+  /// **'区域截图'**
+  String get shotRegionButton;
+
+  /// No description provided for @shotSettingsHotkey.
+  ///
+  /// In zh, this message translates to:
+  /// **'全局热键'**
+  String get shotSettingsHotkey;
+
+  /// No description provided for @shotHotkeyNote.
+  ///
+  /// In zh, this message translates to:
+  /// **'热键在应用运行期间全局生效；修改后自动重新注册。'**
+  String get shotHotkeyNote;
+
+  /// No description provided for @shotHotkeyFailedHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'热键注册失败：'**
+  String get shotHotkeyFailedHint;
+
+  /// No description provided for @shotRegionCopiedHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'选区已复制到剪贴板'**
+  String get shotRegionCopiedHint;
+
+  /// No description provided for @regionSelectorSave.
+  ///
+  /// In zh, this message translates to:
+  /// **'保存'**
+  String get regionSelectorSave;
+
+  /// No description provided for @regionSelectorCopy.
+  ///
+  /// In zh, this message translates to:
+  /// **'复制'**
+  String get regionSelectorCopy;
+
+  /// No description provided for @regionSelectorDiscard.
+  ///
+  /// In zh, this message translates to:
+  /// **'放弃'**
+  String get regionSelectorDiscard;
+
+  /// No description provided for @regionSelectorHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'拖拽框选区域，Enter 确认保存，Esc 取消'**
+  String get regionSelectorHint;
 }
 
 class _HostL10nDelegate extends LocalizationsDelegate<HostL10n> {

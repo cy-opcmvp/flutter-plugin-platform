@@ -16,8 +16,11 @@
 ///   截图捕获注入 Windows GDI 真实现（F4-04）。
 library;
 
+import 'dart:async';
+
 import 'package:calculator/calculator.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart' show GlobalKey, NavigatorState;
 import 'package:platform_capabilities/platform_capabilities.dart';
 import 'package:plugin_contracts/plugin_contracts.dart';
 import 'package:plugin_flutter/plugin_flutter.dart';
@@ -26,13 +29,18 @@ import 'package:plugin_sidecar/plugin_sidecar.dart';
 import 'package:screenshot/screenshot.dart';
 
 import 'host_bytes_loader.dart';
+import 'host_clipboard.dart';
 import 'host_data_root.dart';
 import 'host_file_saver.dart';
+import 'host_hotkeys.dart';
 import 'host_screen_capture.dart';
+import 'host_storage.dart';
+import 'host_window.dart';
 import 'plugins/calculator_plugin.dart';
 import 'plugins/hash_tool_plugin.dart';
 import 'plugins/screenshot_plugin.dart';
 import 'plugins/welcome_plugin.dart';
+import 'region_selection/region_selection_coordinator.dart';
 import 'sidecar_command_bridge.dart';
 import 'sidecar_session_factory.dart';
 
@@ -81,9 +89,24 @@ final class HostCompositionRoot {
     Future<void> Function(AppThemePreset preset)? themePersist,
   }) {
     systemPaths = ResolvedSystemPaths(hostDataRoot: hostDataRoot);
+    // 插件 KV 存储（缺口②接线）：io 目标为 JSON 文件实现（每插件单文件，
+    // 落 hostDataRoot/plugin-data/<pluginId>/kv.json），web 目标为内存实现。
+    pluginStorage = createHostPluginStorage(hostDataRoot);
     // 屏幕捕获经条件导出接线（F4-07）：io 目标注入 Windows GDI 真实现
     // （F4-04），web 目标注入 unsupported stub，保证 web 编译图零 ffi。
     screenCapture = hostScreenCapture;
+    // 全局热键经条件导出接线（S1 批C）：io 目标注入 Windows 实现，
+    // web 目标注入 unsupported stub。
+    globalHotkeys = createHostGlobalHotkeys();
+    // 区域选择闭环接线（S1 批C）：窗口形态切换（io 目标经 window_manager，
+    // web 目标零操作）+ overlay 协调器 + 截图热键绑定；appNavigatorKey
+    // 须挂到 MaterialApp 的 navigatorKey（app.dart）。
+    windowOps = createHostWindowOps();
+    regionCoordinator = HostRegionSelectionCoordinator(
+      navigatorKey: appNavigatorKey,
+      windowOps: windowOps,
+    );
+    regionHotkeys = RegionHotkeyBinding(hotkeys: globalHotkeys);
     sidecarInstaller = SidecarInstaller(
       fs: const IoPackageFileSystem(),
       rootDir: '$hostDataRoot/sidecar-packages',
@@ -116,21 +139,30 @@ final class HostCompositionRoot {
     );
     // 字节加载器先于页面提供方赋值（截图页面构造注入该函数引用）。
     bytesLoader = loadHostImageBytes;
-    // 计算器插件（F4-03）：共享模型 + 宿主文案解析器，页面与设置共用。
-    final CalculatorModel calculatorModel = CalculatorModel();
+    // 计算器插件（F4-03）：共享模型 + 宿主文案解析器，页面与设置共用；
+    // 模型注入插件存储（缺口②），设置变更即写回、构造后异步恢复。
+    final CalculatorModel calculatorModel = CalculatorModel(
+      storage: pluginStorage,
+    );
     final CalculatorStringsResolver calculatorResolver =
         hostCalculatorStringsResolver();
     // 截图插件（F4-05）：捕获能力注入 Windows GDI 真实现（F4-04），
-    // 写文件缝落盘到插件数据目录；包内零 dart:io。
-    final ScreenshotModel screenshotModel = ScreenshotModel();
+    // 写文件缝按控制器解析的目录落盘（系统图片/文档目录经已知目录
+    // 能力解析，回退插件数据目录）；剪贴板能力支撑自动复制；包内
+    // 零 dart:io/零 ffi。模型同注入插件存储。
+    final ScreenshotModel screenshotModel = ScreenshotModel(
+      storage: pluginStorage,
+    );
     final CaptureController screenshotController = CaptureController(
       screenCapture: screenCapture,
-      saveFile: (Uint8List bytes, String filename) => saveHostScreenshotFile(
-        rootDir: systemPaths.pluginDataDir(PluginId.parse(kScreenshotPluginId)),
-        bytes: bytes,
-        filename: filename,
-      ),
+      saveFile: (Uint8List bytes, String dir, String filename) =>
+          saveHostScreenshotFile(dir: dir, bytes: bytes, filename: filename),
       model: screenshotModel,
+      clipboard: createHostClipboard(),
+      knownFolders: createHostKnownFolders(),
+      pluginDataDir: systemPaths.pluginDataDir(
+        PluginId.parse(kScreenshotPluginId),
+      ),
     );
     final ScreenshotStringsResolver screenshotResolver =
         hostScreenshotStringsResolver();
@@ -144,6 +176,9 @@ final class HostCompositionRoot {
         controller: screenshotController,
         stringsResolver: screenshotResolver,
         bytesLoader: bytesLoader,
+        regionSelector: regionCoordinator.select,
+        hotkeyBinder: regionHotkeys.bind,
+        hotkeyUnbinder: regionHotkeys.unbind,
       ),
     ];
     settingsProviders = <String, PluginSettingsProvider>{
@@ -156,6 +191,11 @@ final class HostCompositionRoot {
         stringsResolver: screenshotResolver,
       ),
     };
+
+    // 设置持久化恢复（缺口②）：构造保持同步，恢复异步进行；UI 先以默认
+    // 值呈现，恢复完成后模型经 notifyListeners 刷新。失败由模型静默降级。
+    unawaited(calculatorModel.loadFromStorage());
+    unawaited(screenshotModel.loadFromStorage());
 
     // 呈现面程序化校验：清单声明 page/settings 但宿主未注册对应提供方时，
     // 经 surfaceUnsupported 产生结构化失败（G3-A minor 2 的正式接线）。
@@ -194,6 +234,22 @@ final class HostCompositionRoot {
   /// 屏幕捕获能力（Windows GDI 真实现，F4-04；其他目标为 stub）。
   late final ScreenCapture screenCapture;
 
+  /// 全局热键能力（Windows RegisterHotKey 实现，S1 批C；其他目标为
+  /// unsupported stub）。
+  late final GlobalHotkeys globalHotkeys;
+
+  /// 应用级导航键（挂 MaterialApp；区域选择 overlay 经此推入路由）。
+  final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
+
+  /// 窗口形态切换缝（io 目标经 window_manager；web 目标零操作，S1 批C）。
+  late final HostWindowOps windowOps;
+
+  /// 区域选择 overlay 协调器（S1 批C）。
+  late final HostRegionSelectionCoordinator regionCoordinator;
+
+  /// 截图全局热键绑定（固定能力 id，S1 批C）。
+  late final RegionHotkeyBinding regionHotkeys;
+
   /// Sidecar 包安装器（构造不触发 I/O）。
   late final SidecarInstaller sidecarInstaller;
 
@@ -218,6 +274,13 @@ final class HostCompositionRoot {
   ///
   /// 供宿主内全部 ResultRenderer 使用点注入，真实解码 image 类结果。
   late final Future<Uint8List?> Function(String path) bytesLoader;
+
+  /// 插件 KV 存储（缺口②接线，按条件导出接线：io 目标为 JSON 文件实现，
+  /// web 目标为内存实现）。
+  ///
+  /// 注入计算器/截图共享模型，承担插件设置（单一 `settings` 键）的写回与
+  /// 恢复；错误模型见能力接口包 `storage.io_error`。
+  late final PluginStorage pluginStorage;
 
   /// 声明了宿主未实现呈现面的插件（键为插件 ID 字符串）。
   ///

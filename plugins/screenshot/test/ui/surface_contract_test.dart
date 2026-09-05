@@ -8,6 +8,7 @@
 library;
 
 import 'dart:typed_data';
+import 'dart:ui' as ui show Rect;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -21,9 +22,18 @@ import 'test_harness.dart';
 Future<Uint8List?> _fakeBytesLoader(String path) async =>
     Uint8List.fromList(<int>[1, 2, 3]);
 
-/// 恒定成功的 fake：写文件缝返回固定路径。
-Future<String> _fakeFileSaver(Uint8List bytes, String filename) async =>
-    '/data/$filename';
+/// fake 区域选择缝：恒取消（契约走查不触发区域闭环）。
+Future<ScreenRegion?> _fakeRegionSelector(
+  Uint8List image,
+  ui.Rect size,
+) async => null;
+
+/// 恒定成功的 fake：写文件缝忽略注入目录，返回固定路径。
+Future<String> _fakeFileSaver(
+  Uint8List bytes,
+  String dir,
+  String filename,
+) async => '/data/$filename';
 
 void main() {
   group('SurfaceContractChecks 走查（截图）', () {
@@ -48,6 +58,7 @@ void main() {
         ),
         stringsResolver: kTestResolver,
         bytesLoader: _fakeBytesLoader,
+        regionSelector: _fakeRegionSelector,
       );
       SurfaceContractChecks.checkPageProviderBuilds(captured!, provider);
     });

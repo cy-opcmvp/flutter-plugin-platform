@@ -8,7 +8,7 @@ import 'dart:typed_data';
 
 /// 恒返回空串（无文件系统能力）。
 Future<String> saveHostScreenshotFile({
-  required String rootDir,
+  required String dir,
   required Uint8List bytes,
   required String filename,
 }) async => '';

@@ -5,6 +5,9 @@
 library;
 
 export 'src/capture_controller.dart';
+export 'src/filename_template.dart';
+export 'src/region_selection.dart';
+export 'src/screenshot_codec.dart';
 export 'src/screenshot_manifest.dart';
 export 'src/screenshot_model.dart';
 export 'src/screenshot_page.dart';

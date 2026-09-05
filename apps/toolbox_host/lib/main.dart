@@ -2,7 +2,8 @@
 ///
 /// 按计划约定，本文件只做引导：经异步工厂 [HostCompositionRoot.create]
 /// 组装组装根（数据根由 path_provider 解析、web 分支使用占位常量），随后
-/// 运行 [ToolboxApp]。全部依赖组装都在 [HostCompositionRoot] 内完成。
+/// 读取宿主偏好（缺口①：插件停用集合，失败静默返回空集合）并作为初始
+/// 状态传入 [ToolboxApp]。全部依赖组装都在 [HostCompositionRoot] 内完成。
 library;
 
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import 'package:plugin_contracts/plugin_contracts.dart';
 
 import 'src/app.dart';
 import 'src/host_composition_root.dart';
+import 'src/host_preferences.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,5 +19,14 @@ Future<void> main() async {
     // 解析目标平台由 main 显式传入（计划 F3-06 要求）。
     target: PluginTarget.windows,
   );
-  runApp(ToolboxApp(root: root));
+  // 缺口①：启动时恢复插件停用集合；加载失败静默降级为全部启用。
+  final HostPreferences preferences = await loadHostPreferences(
+    root.systemPaths.hostDataRoot(),
+  );
+  runApp(
+    ToolboxApp(
+      root: root,
+      initialDisabledPluginIds: preferences.disabledPlugins,
+    ),
+  );
 }

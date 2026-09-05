@@ -278,23 +278,96 @@ class HostL10nZh extends HostL10n {
   String get shotSettingsFormTitle => '截图设置';
 
   @override
-  String get shotSettingsFilenamePrefix => '文件名前缀';
+  String get shotSettingsSaveDir => '保存目录';
 
   @override
-  String get shotSettingsFilenamePrefixPlaceholder => 'shot';
+  String get shotSaveDirPictures => '图片目录';
 
   @override
-  String get shotSettingsQuality => '保存质量';
+  String get shotSaveDirDocuments => '文档目录';
 
   @override
-  String get shotQualityLossless => '无损（PNG）';
+  String get shotSaveDirPluginData => '插件数据目录';
 
   @override
-  String get shotQualityHigh => '高';
+  String get shotSettingsFilenameTemplate => '文件名模板';
 
   @override
-  String get shotQualityStandard => '标准';
+  String get shotSettingsFilenameTemplatePlaceholder =>
+      'screenshot-20260101-120000';
 
   @override
-  String get shotQualityNote => 'PNG 为无损格式，质量选项暂以原图保存。';
+  String get shotSettingsFormat => '保存格式';
+
+  @override
+  String get shotFormatPng => 'PNG（无损）';
+
+  @override
+  String get shotFormatJpeg => 'JPEG（压缩）';
+
+  @override
+  String get shotSettingsJpegQuality => 'JPEG 质量（1-100）';
+
+  @override
+  String get shotSettingsAutoCopy => '自动复制';
+
+  @override
+  String get shotAutoCopyNone => '不复制';
+
+  @override
+  String get shotAutoCopyImage => '复制图像';
+
+  @override
+  String get shotAutoCopyPath => '复制文件路径';
+
+  @override
+  String get shotFormatNote => '文件名模板支持日期、时间与同秒序号变量；系统目录不可用时自动回退插件数据目录。';
+
+  @override
+  String get shotFieldPath => '保存路径';
+
+  @override
+  String get shotFieldSize => '图像尺寸';
+
+  @override
+  String get shotFieldCopied => '自动复制';
+
+  @override
+  String get shotCopiedNone => '未复制';
+
+  @override
+  String get shotCopiedImage => '已复制图像';
+
+  @override
+  String get shotCopiedPath => '已复制文件路径';
+
+  @override
+  String get shotCopiedFailed => '复制失败';
+
+  @override
+  String get shotRegionButton => '区域截图';
+
+  @override
+  String get shotSettingsHotkey => '全局热键';
+
+  @override
+  String get shotHotkeyNote => '热键在应用运行期间全局生效；修改后自动重新注册。';
+
+  @override
+  String get shotHotkeyFailedHint => '热键注册失败：';
+
+  @override
+  String get shotRegionCopiedHint => '选区已复制到剪贴板';
+
+  @override
+  String get regionSelectorSave => '保存';
+
+  @override
+  String get regionSelectorCopy => '复制';
+
+  @override
+  String get regionSelectorDiscard => '放弃';
+
+  @override
+  String get regionSelectorHint => '拖拽框选区域，Enter 确认保存，Esc 取消';
 }

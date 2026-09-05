@@ -29,6 +29,7 @@ dependencies:
   screenshot:
     path: ../../plugins/screenshot
   path_provider: ^2.1.5
+  window_manager: ^0.5.2
 
 dev_dependencies:
   flutter_test:

@@ -283,24 +283,99 @@ class HostL10nEn extends HostL10n {
   String get shotSettingsFormTitle => 'Screenshot settings';
 
   @override
-  String get shotSettingsFilenamePrefix => 'Filename prefix';
+  String get shotSettingsSaveDir => 'Save directory';
 
   @override
-  String get shotSettingsFilenamePrefixPlaceholder => 'shot';
+  String get shotSaveDirPictures => 'Pictures folder';
 
   @override
-  String get shotSettingsQuality => 'Save quality';
+  String get shotSaveDirDocuments => 'Documents folder';
 
   @override
-  String get shotQualityLossless => 'Lossless (PNG)';
+  String get shotSaveDirPluginData => 'Plugin data folder';
 
   @override
-  String get shotQualityHigh => 'High';
+  String get shotSettingsFilenameTemplate => 'Filename template';
 
   @override
-  String get shotQualityStandard => 'Standard';
+  String get shotSettingsFilenameTemplatePlaceholder =>
+      'screenshot-20260101-120000';
 
   @override
-  String get shotQualityNote =>
-      'PNG is lossless; quality options currently save the original image.';
+  String get shotSettingsFormat => 'Save format';
+
+  @override
+  String get shotFormatPng => 'PNG (lossless)';
+
+  @override
+  String get shotFormatJpeg => 'JPEG (compressed)';
+
+  @override
+  String get shotSettingsJpegQuality => 'JPEG quality (1-100)';
+
+  @override
+  String get shotSettingsAutoCopy => 'Auto copy';
+
+  @override
+  String get shotAutoCopyNone => 'Do not copy';
+
+  @override
+  String get shotAutoCopyImage => 'Copy image';
+
+  @override
+  String get shotAutoCopyPath => 'Copy file path';
+
+  @override
+  String get shotFormatNote =>
+      'The filename template supports date, time and same-second sequence variables; when a system folder is unavailable the plugin data folder is used as fallback.';
+
+  @override
+  String get shotFieldPath => 'Saved path';
+
+  @override
+  String get shotFieldSize => 'Image size';
+
+  @override
+  String get shotFieldCopied => 'Auto copy';
+
+  @override
+  String get shotCopiedNone => 'Not copied';
+
+  @override
+  String get shotCopiedImage => 'Image copied';
+
+  @override
+  String get shotCopiedPath => 'File path copied';
+
+  @override
+  String get shotCopiedFailed => 'Copy failed';
+
+  @override
+  String get shotRegionButton => 'Region capture';
+
+  @override
+  String get shotSettingsHotkey => 'Global hotkey';
+
+  @override
+  String get shotHotkeyNote =>
+      'The hotkey works globally while the app runs; changing it re-registers automatically.';
+
+  @override
+  String get shotHotkeyFailedHint => 'Hotkey registration failed: ';
+
+  @override
+  String get shotRegionCopiedHint => 'Region copied to clipboard';
+
+  @override
+  String get regionSelectorSave => 'Save';
+
+  @override
+  String get regionSelectorCopy => 'Copy';
+
+  @override
+  String get regionSelectorDiscard => 'Discard';
+
+  @override
+  String get regionSelectorHint =>
+      'Drag to select a region; Enter to save, Esc to cancel';
 }

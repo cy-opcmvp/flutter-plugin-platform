@@ -36,7 +36,9 @@ Future<HostCompositionRoot> pumpApp(
 }) async {
   final HostCompositionRoot root = HostCompositionRoot(
     target: PluginTarget.windows,
-    hostDataRoot: '%TESTDATA%/host',
+    // 缺口①：路径含 NUL 在所有平台都无法创建目录/文件，使 toggle 触发的
+    // 宿主偏好保存与插件设置恢复在「不可写」路径上静默降级，测试零落盘。
+    hostDataRoot: '\u0000unwritable-test-root/host',
     extraManifests: extraManifests,
     themePersist: themePersist,
   );
