@@ -26,7 +26,8 @@ packages/
   plugin_flutter/         UI Surface 契约 + 三 preset 主题 + 基础组件
   plugin_sidecar/         SCP1 安装包、帧 JSON-RPC、进程监督、SidecarSession
   plugin_devkit/          契约测试夹具与检查（依赖 Flutter）
-  platform_capabilities/  能力接口（ScreenCapture/SystemPaths）+ 六端 stub
+  platform_capabilities/  能力接口（ScreenCapture/SystemPaths）
+  platform_capabilities_{windows,macos,linux,android,ios,web}/  六端实现包（windows 真实现，余 stub）
   plugin_cli/             插件 create / validate / pack
 plugins/                  builtin 插件（calculator、screenshot）
 sidecars/python_sample/   Python Sidecar 样本（hash_tool）
@@ -37,8 +38,8 @@ sidecars/python_sample/   Python Sidecar 样本（hash_tool）
 ## 常用命令
 
 ```powershell
-dart test     packages/plugin_contracts     # 纯 Dart 包逐包测试
-flutter test  apps/toolbox_host             # Flutter 包测试
+cd apps/toolbox_host && flutter test               # 宿主测试（fixture 路径依赖包目录 CWD）
+cd ../../ && dart test packages/plugin_contracts    # 纯 Dart 包逐包测试
 dart run plugin_cli validate plugins/calculator
 powershell -File scripts/build-matrix.ps1   # 构建矩阵（windows/web/android 实构建）
 ```

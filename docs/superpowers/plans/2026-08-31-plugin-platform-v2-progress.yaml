@@ -235,7 +235,15 @@ milestones:
         suggested_commit: 'feat(plugins): complete MVP plugin set'
   M5:
     name: cutover-and-cleanup
-    status: in_progress
+    status: accepted
+    g5:
+      verdict: Approved
+      report: docs/superpowers/acceptance/v2-cutover-acceptance.md
+    note: kiro 归档实际路径 docs/archive/v1/kiro/（全量含 settings/steering，较计划字面更完整，良性偏差）
+goal_completed:
+  completed_at: '2026-09-05'
+  milestones_accepted: [M0, M1, M2, M3, M4, M5]
+  final_state: v2 上移为仓库根；307 测试；三端实构建；五门独立验收全 Approved
     m5_plan:
       drafted_at: '2026-09-05'
       document: docs/superpowers/plans/2026-09-05-plugin-platform-v2-cutover-cleanup.md
@@ -278,7 +286,7 @@ milestones:
             - 根级 171 analyze 错误为 docs/archive/v1 模板，已排除归档目录
         leftover_unapproved: [LICENSE, setup-cli.bat, setup-cli.sh, test-screenshot-hotkey.ps1]  # 旧根文件，不在批复清单，待用户补充裁定
       F5-05:
-        status: verified_pending_acceptance
+        status: accepted
         implementer: batch2-agent
         controller_verification:
           full_tests: 307 全绿（15 包；Python e2e 真跑 2/2；真机 GDI 烟囱）
@@ -286,7 +294,15 @@ milestones:
           walkdoc_commands: 新根路径全实跑有效
         deliverables: rules 9 归档 8 保留索引重写 / docs/roadmap.md（22 项含五项裁定）
         leftover_unapproved: 遗留待裁定累计 8 项（LICENSE、setup-cli.bat/.sh、test-screenshot-hotkey.ps1、.claude/rules/temp_readme.txt、scripts/ v1 脚本组）
-      G5: { status: not_started }
+      G5:
+        status: accepted
+        verdict: Approved（四节通过；S3 有条件通过）
+        critical: 0
+        important: 1
+        minor: 4
+        report: docs/superpowers/acceptance/v2-cutover-acceptance.md
+        important_resolution: README 命令口径已对齐（G5 后即时修复）；测试 fixture CWD 敏感登记 roadmap
+        minor_resolution: 空 v2/ 已删；kiro 归档路径备注；README 目录树补六端包；temp_readme 并入遗留裁定
 tasks:
   M0-design:
     status: accepted
