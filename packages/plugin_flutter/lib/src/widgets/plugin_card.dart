@@ -74,15 +74,16 @@ class PluginCard extends StatelessWidget {
           width: shape.strokeHairline,
         ),
       ),
+      // 文档：方向 C 签名 = 1px 均匀描边 + 左缘 2px gutter 状态线。
+      // gutter 不能作为 Border 侧实现（非均匀边框遇 borderRadius 会触发
+      // 绘制断言「A borderRadius can only be given on borders with uniform
+      // colors」），改为圆角裁剪的左缘色条，视觉等价。
       AppThemePreset.darkPro => BoxDecoration(
         color: colors.surface,
         borderRadius: radius,
-        border: Border(
-          top: _hairline(tokens),
-          right: _hairline(tokens),
-          bottom: _hairline(tokens),
-          // 文档：左缘 2px gutter 状态线（方向 C 签名）。
-          left: BorderSide(color: _gutterColor(tokens), width: 2),
+        border: Border.all(
+          color: colors.outlineVariant,
+          width: shape.strokeHairline,
         ),
       ),
     };
@@ -93,51 +94,62 @@ class PluginCard extends StatelessWidget {
         borderRadius: radius,
         child: Container(
           decoration: decoration,
-          padding: EdgeInsets.all(tokens.spacing.space4),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
+          clipBehavior: Clip.antiAlias,
+          child: Stack(
             children: <Widget>[
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: Theme.of(context).textTheme.titleMedium,
+              // dark_pro 左缘 2px gutter 状态线（圆角裁剪保证贴合）。
+              if (tokens.preset == AppThemePreset.darkPro)
+                Positioned.fill(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: SizedBox(
+                      width: 2,
+                      child: ColoredBox(color: _gutterColor(tokens)),
                     ),
                   ),
-                  SizedBox(width: tokens.spacing.space2),
-                  StatusBadge(
-                    state: state,
-                    reasonCode: reasonCode,
-                    reasonText: reasonText,
-                    onViewReason: onViewReason,
-                  ),
-                ],
-              ),
-              SizedBox(height: tokens.spacing.space1),
-              _buildVersion(context, tokens),
-              SizedBox(height: tokens.spacing.space2),
-              Text(
-                description,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: colors.onSurfaceVariant,
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+              Padding(
+                padding: EdgeInsets.all(tokens.spacing.space4),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                        ),
+                        SizedBox(width: tokens.spacing.space2),
+                        StatusBadge(
+                          state: state,
+                          reasonCode: reasonCode,
+                          reasonText: reasonText,
+                          onViewReason: onViewReason,
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: tokens.spacing.space1),
+                    _buildVersion(context, tokens),
+                    SizedBox(height: tokens.spacing.space2),
+                    Text(
+                      description,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: colors.onSurfaceVariant,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  BorderSide _hairline(ThemeTokens tokens) {
-    return BorderSide(
-      color: tokens.color.outlineVariant,
-      width: tokens.shape.strokeHairline,
     );
   }
 

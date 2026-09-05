@@ -10,12 +10,13 @@ Widget buildHarness(
   Widget child, {
   Locale locale = const Locale('zh'),
   AppThemePreset preset = AppThemePreset.warmLife,
+  Brightness brightness = Brightness.light,
 }) {
   return MaterialApp(
     locale: locale,
     supportedLocales: PluginFlutterL10n.supportedLocales,
     localizationsDelegates: PluginFlutterL10n.localizationsDelegates,
-    theme: AppTheme.build(preset, Brightness.light),
+    theme: AppTheme.build(preset, brightness),
     home: Scaffold(body: SingleChildScrollView(child: child)),
   );
 }
