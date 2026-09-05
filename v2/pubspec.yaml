@@ -7,3 +7,13 @@ workspace:
   - packages/plugin_runtime
   - packages/plugin_devkit
   - packages/plugin_sidecar
+  - packages/plugin_flutter
+  - packages/platform_capabilities
+  - packages/platform_capabilities_windows
+  - packages/platform_capabilities_macos
+  - packages/platform_capabilities_linux
+  - packages/platform_capabilities_android
+  - packages/platform_capabilities_ios
+  - packages/platform_capabilities_web
+  - apps/toolbox_host
+  - packages/plugin_cli

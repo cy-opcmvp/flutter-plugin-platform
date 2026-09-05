@@ -16,11 +16,11 @@ execution_policy:
   ai_git_commands_allowed: false
 execution_state:
   status: running
-  resumed_at: '2026-09-04T00:00:00+08:00'
-  reason: M2-G2-accepted
-  resume_from: M3-planning
-current_milestone: M3
-current_task: M3-planning
+  resumed_at: '2026-09-05T00:00:00+08:00'
+  reason: M3-G3-accepted
+  resume_from: M4-planning
+current_milestone: M4
+current_task: M4-planning
 m2_plan:
   frozen_at: '2026-09-04'
   document: docs/superpowers/plans/2026-09-04-plugin-platform-v2-sidecar-framework.md
@@ -58,7 +58,100 @@ milestones:
       - 就绪帧为纯字符串帧且必须先于通道订阅发出（夹具约定，M3 宿主侧需同样遵守）
   M3:
     name: flutter-host-platform-cli
-    status: not_started
+    status: accepted
+    g3:
+      verdict: Approved (A/B 双门一致)
+      minor_total: 4
+      report: docs/superpowers/acceptance/v2-host-platform-cli-acceptance.md
+    m4_planning_inputs:
+      - devkit pubspec 死依赖 plugin_runtime（G3-A minor 1，直接删除）
+      - surface.unsupported 工厂接入程序化 surface 解析路径（G3-A minor 2）
+      - 设置页语言自名加豁免注释（G3-A minor 3）
+      - 自绘 Rect → ui.Rect 转换发生在 windows 适配层（F3-04 偏差，M4 截图插件时处理）
+      - image ResultRenderer 真实解码（F3-06 偏差，截图插件结果展示时处理）
+      - 宿主数据根真实路径解析（F3-06 偏差）
+    m3_plan:
+      drafted_at: '2026-09-04'
+      document: docs/superpowers/plans/2026-09-04-plugin-platform-v2-host-platform-cli.md
+      status: frozen
+      amendment: 三风格全部保留为可切换 preset（用户 2026-09-04 指示）
+      hard_gate: F3-01 艺术风格方向经用户确认前，F3-05/06 UI 编码不得启动
+    m3_tasks_registered:
+      F3-01:
+        status: accepted
+        implementer: art-direction-agent
+        user_gate:
+          confirmed_at: '2026-09-05'
+          inclusion: 三方向全部纳入 preset 集，无修改
+          default_preset: warm_life（方向 B 温暖生活风）
+        deliverable: docs/superpowers/design/m3-art-direction.md（已冻结）
+        hard_gate_released: true   # F3-05/06 UI 编码解锁
+      F3-02:
+        status: accepted
+        implementer: batch2-agent
+        controller_verification:
+          sidecar_full: 93/93 passed（含 14 新用例与会话层回归）
+          report: .superpowers/sdd/2026-09-04-plugin-platform-v2-host-platform-cli/batch2-F3-02-to-F3-04-report.md
+      F3-03:
+        status: accepted
+        implementer: batch2-agent
+        controller_verification:
+          plugin_flutter: 12/12; devkit: 14/14（flutter test）
+        accepted_deviations:
+          - devkit 依赖 Flutter（计划 F3-03 任务细节明示允许；M1 边界演进，G3-A 复核）
+          - SurfaceContractChecks 以 StateError 表达失败（lib 不可依赖 test_api）
+      F3-04:
+        status: accepted
+        implementer: batch2-agent
+        controller_verification:
+          capabilities: 17/17（主包 5 + 六端各 2）
+          dart_io_imports: 0（grep 命中为文档注释文字，已精确复核）
+        accepted_deviations:
+          - 自绘纯 Dart Rect 值类（M4 windows 适配时转 ui.Rect，登记 M4 输入）
+          - UnsupportedSystemPaths 以抛 PluginFailure 表达（签名返回 String 所致）
+      F3-05:
+        status: accepted
+        implementer: batch3-agent
+        controller_verification:
+          plugin_flutter: 35/35; root_analyze: No issues
+          token_fidelity: 三 preset 主色抽查与冻结文档逐值一致
+          hardcoded_scan: 静态扫描测试固化字面量仅存 presets/
+        accepted_deviations:
+          - ThemeTokens 排版访问器 type→typography（ThemeExtension.type 键冲突）
+          - onSuccess/onWarning 恒 null（冻结文档未定义，不造值）
+      F3-06:
+        status: accepted
+        implementer: batch3-agent
+        controller_verification:
+          toolbox_host: 9/9; windows_debug_build: exit 0
+          exe: apps/toolbox_host/build/windows/x64/runner/Debug/toolbox_host.exe
+          boundary: lib 无 dart:io/ffi/win32/window_manager
+        accepted_deviations:
+          - image 结果为占位框（真实解码留宿主/M4）
+          - 宿主数据根为占位字符串（真实路径解析留后续）
+        pending_user_visual_check: 用户 flutter run -d windows 三风格切换人工验收
+      F3-07:
+        status: accepted
+        implementer: batch4-agent
+        controller_verification:
+          cli: 8/8; format 131 files 0 changed; analyze No issues
+      F3-08:
+        status: accepted
+        implementer: batch4-agent
+        controller_verification:
+          full_validation: 250 tests 0 fail（dart 202 + flutter 58）
+          build_matrix: SUCCESS（windows/web/android 实构建；macos/linux/ios 如实 SKIPPED-LOCAL-UNAVAILABLE）
+          artifacts: exe + web/index.html + app-debug.apk 三产物复核落盘
+        accepted_deviations:
+          - toolbox_host 补建 web/android 平台目录（flutter create，pubspec/main 未被改动）
+          - plugin_flutter 测试 CWD 定位修复（仅测试文件）
+          - build-matrix.ps1 PowerShell 兼容性三轮修复（脚本自身）
+      G3:
+        status: accepted
+        gate_a: { verdict: Approved, critical: 0, important: 0, minor: 3 }
+        gate_b: { verdict: Approved, critical: 0, important: 0, minor: 1 }
+        report: docs/superpowers/acceptance/v2-host-platform-cli-acceptance.md
+        suggested_commit: 'feat(platform): complete host and platform adapters'
   M4:
     name: mvp-plugins
     status: not_started

@@ -1,0 +1,112 @@
+/// F3-06 宿主应用层焦点测试：目录页呈现、详情联动、语言与主题切换。
+library;
+
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:plugin_contracts/plugin_contracts.dart';
+import 'package:plugin_flutter/plugin_flutter.dart' show AppThemePreset;
+
+import 'package:toolbox_host/src/app.dart';
+import 'package:toolbox_host/src/host_composition_root.dart';
+
+/// 构造仅支持 android 的注入清单（用于呈现不可用原因）。
+PluginManifest mobileOnlyManifest() {
+  return PluginManifest(
+    id: PluginId.parse('com.test.mobileonly'),
+    name: 'MobileOnly',
+    version: '0.1.0',
+    apiVersion: 1,
+    kind: PluginKind.builtin,
+    targets: const <PluginTarget>[PluginTarget.android],
+    entrypoint: 'builtin://com.test.mobileonly',
+    provides: <CapabilityDescriptor>[
+      CapabilityDescriptor('test.mobile.page', 1),
+    ],
+    requires: const <CapabilityRequirement>[],
+    surfaces: const <String>['directory'],
+    configSchemaVersion: 1,
+    dataSchemaVersion: 1,
+  );
+}
+
+Future<HostCompositionRoot> pumpApp(
+  WidgetTester tester, {
+  List<PluginManifest> extraManifests = const <PluginManifest>[],
+  Future<void> Function(AppThemePreset preset)? themePersist,
+}) async {
+  final HostCompositionRoot root = HostCompositionRoot(
+    target: PluginTarget.windows,
+    hostDataRoot: '%TESTDATA%/host',
+    extraManifests: extraManifests,
+    themePersist: themePersist,
+  );
+  await tester.pumpWidget(ToolboxApp(root: root));
+  await tester.pumpAndSettle();
+  return root;
+}
+
+Future<void> openSettings(WidgetTester tester) async {
+  await tester.tap(find.byIcon(Icons.settings_outlined));
+  await tester.pumpAndSettle();
+}
+
+void main() {
+  testWidgets('目录页展示可用徽章，注入的不可用插件展示原因文案', (WidgetTester tester) async {
+    await pumpApp(
+      tester,
+      extraManifests: <PluginManifest>[mobileOnlyManifest()],
+    );
+
+    expect(find.text('Welcome'), findsOneWidget);
+    expect(find.text('MobileOnly'), findsOneWidget);
+    // 徽章文案来自 plugin_flutter 包内 l10n（zh 模板）。
+    expect(find.text('可用'), findsOneWidget);
+    expect(find.text('不可用'), findsOneWidget);
+    expect(find.text('该插件不支持当前平台'), findsOneWidget);
+  });
+
+  testWidgets('详情页停用插件后目录徽章联动为已停用', (WidgetTester tester) async {
+    await pumpApp(tester);
+
+    await tester.tap(find.text('Welcome'));
+    await tester.pumpAndSettle();
+    expect(find.text('打开插件页面'), findsOneWidget);
+
+    await tester.tap(find.text('启用插件'));
+    await tester.pumpAndSettle();
+    // 返回目录（Material AppBar 返回按钮）。
+    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.pumpAndSettle();
+
+    expect(find.text('已停用'), findsOneWidget);
+    expect(find.text('可用'), findsNothing);
+  });
+
+  testWidgets('设置页切换语言后宿主文案切换为英文', (WidgetTester tester) async {
+    await pumpApp(tester);
+    await openSettings(tester);
+
+    // rail 标签 + AppBar 标题各一份。
+    expect(find.text('设置'), findsNWidgets(2));
+    await tester.tap(find.text('English'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Settings'), findsNWidgets(2));
+    expect(find.text('设置'), findsNothing);
+  });
+
+  testWidgets('设置页切换主题方向触发控制器与持久化注入点', (WidgetTester tester) async {
+    final List<AppThemePreset> persisted = <AppThemePreset>[];
+    final HostCompositionRoot root = await pumpApp(
+      tester,
+      themePersist: (preset) async => persisted.add(preset),
+    );
+    await openSettings(tester);
+
+    await tester.tap(find.text('极简暗色'));
+    await tester.pumpAndSettle();
+
+    expect(root.themeController.value, AppThemePreset.darkPro);
+    expect(persisted, <AppThemePreset>[AppThemePreset.darkPro]);
+  });
+}

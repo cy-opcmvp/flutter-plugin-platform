@@ -1,6 +1,6 @@
 import 'package:plugin_contracts/plugin_contracts.dart';
 import 'package:plugin_devkit/plugin_devkit.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('success operations', () {

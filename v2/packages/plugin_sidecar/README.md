@@ -5,6 +5,7 @@
 - `PackageBuilder` / `PackageReader`：SCP1 安装包的构建与严格解析（纯内存，不触碰文件系统）。
 - `SidecarInstaller` + `IoPackageFileSystem`：把安装包原子落盘到插件根目录，支持卸载与重装。
 - `SidecarSupervisor` + `IoProcessLauncher` + `SidecarSpawn`：启动 sidecar 子进程，以 stdout 首字节为就绪信号，报告意外退出。
+- `SidecarSession`：统一编排「进程 + 就绪 + 通道」的会话层，宿主无需手动拼装。
 - `StdioRpcTransport` + `RpcChannel`：在 stdio 上承载带超时的请求/响应 RPC。
 - `RpcFrameCodec` / `RpcMessageCodec`：帧与 JSON-RPC 消息的编解码。
 
@@ -43,7 +44,18 @@
 - 接收：订阅子进程 stdout，解出的 payload 依序投递到 `incoming`；stdout 错误、帧协议违规与 stdin 写入失败均以 error 事件投递，由 `RpcChannel` 统一映射为 `rpc.channel_closed(transportError)`；stdout 关闭后 `incoming` 完成。
 - `dispose` 幂等，取消订阅并关闭 `incoming`。
 
-注意：`SidecarProcess.stdout` 是单订阅流，而监督器的就绪探测（`stdout.first`）与传输层订阅会竞争同一流。真实宿主组合两者时需广播化 stdout（用 `asBroadcastStream` 包装或自定义 launcher 注入），e2e 测试中的 `_BroadcastingLauncher` 是参考实现。
+注意：`SidecarProcess.stdout` 是单订阅流，监督器与传输层各自订阅会竞争同一流。宿主**推荐直接使用 `SidecarSession`**：会话内部单订阅 stdout 完成就绪探测（首字节）与帧解码（首帧 `"ready"` 由会话吞掉），数据直接进入通道，无需广播化。
+
+直接组合 `SidecarSupervisor` + `StdioRpcTransport` 仍然可行，但需自行广播化 stdout（用 `asBroadcastStream` 包装或自定义 launcher 注入）。
+
+## 会话层（SidecarSession）
+
+`SidecarSession.start` 的编排流程与失败语义：
+
+- 启动失败统一报 `session.start_failed`，details.reason 透传底层原码（`process.start_timeout` / `process.start_failed` / `rpc.frame_invalid`）；
+- 就绪信号 = stdout 首字节；首个完整帧按约定是就绪帧（纯字符串 `"ready"`），由会话吞掉，不进入通道；
+- 非主动 stop 引发的进程退出触发 `onUnexpectedExit`（`process.unexpected_exit`，details 含 exitCode）；stop 成功引发的退出不报意外；
+- `stop` 关闭通道并复用监督器 kill + 宽限竞速语义停止进程，幂等（重复调用返回首次结果）。
 
 ## 安装目录布局与原子切换
 

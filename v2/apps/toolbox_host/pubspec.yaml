@@ -1,0 +1,34 @@
+name: toolbox_host
+description: "Toolbox 桌面宿主应用：M3 阶段 F3-06 的宿主组装参考实现。"
+publish_to: "none"
+version: 0.1.0
+resolution: workspace
+
+environment:
+  sdk: ^3.10.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  plugin_contracts:
+    path: ../../packages/plugin_contracts
+  plugin_runtime:
+    path: ../../packages/plugin_runtime
+  plugin_sidecar:
+    path: ../../packages/plugin_sidecar
+  platform_capabilities:
+    path: ../../packages/platform_capabilities
+  platform_capabilities_windows:
+    path: ../../packages/platform_capabilities_windows
+  plugin_flutter:
+    path: ../../packages/plugin_flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  generate: true

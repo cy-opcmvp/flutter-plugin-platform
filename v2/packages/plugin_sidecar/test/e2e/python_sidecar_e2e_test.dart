@@ -1,12 +1,12 @@
 // 覆盖场景清单（计划 F2-09 场景矩阵 1-10，语义相近断言合并为 6 个用例）：
 // 1. install 构建的包 → installed，安装目录含 plugin.json 与 echo_sidecar.py。
-// 2. supervisor 启动 python 脚本 → stdout 首字节就绪。
+// 2. SidecarSession 启动 python 脚本 → 就绪（stdout 首字节 + 首帧被吞）。
 // 3. call('ping') → 'pong'。
 // 4. call('echo', params) → params 原样回显。
 // 5. call('stderrNoise') → 'ok'（stderr 噪声不影响 RPC）。
 // 6. call('hang') → rpc.timeout(methodName=hang)，通道随之关闭。
 // 7. call('crash') → onUnexpectedExit 收到 process.unexpected_exit(exitCode=1)。
-// 8. stop → 优雅退出回收退出码；uninstall + 重装成功。
+// 8. session.stop → 通道关闭 + 进程优雅退出回收；uninstall + 重装成功。
 // 9. 篡改包 → package.bad_format(digestMismatch)，原安装不受影响。
 // 10. uninstall → 目录消失、isInstalled == false。
 //
@@ -70,71 +70,20 @@ void _requirePython() {
   return null;
 }
 
-/// 包装真实进程：把单订阅 stdout 广播化，使 supervisor 的就绪探测
-/// 与 StdioRpcTransport 可以同时订阅同一输出流。
-final class _SharedStdoutProcess implements SidecarProcess {
-  _SharedStdoutProcess(SidecarProcess inner)
-    : _inner = inner,
-      stdout = inner.stdout.asBroadcastStream();
-
-  final SidecarProcess _inner;
-
-  @override
-  final Stream<List<int>> stdout;
-
-  @override
-  Stream<List<int>> get stderr => _inner.stderr;
-
-  @override
-  Future<int> get exitCode => _inner.exitCode;
-
-  @override
-  Future<void> kill() => _inner.kill();
-
-  @override
-  Future<void> writeStdin(List<int> bytes) => _inner.writeStdin(bytes);
-
-  @override
-  Future<void> closeStdin() => _inner.closeStdin();
-}
-
-final class _BroadcastingLauncher implements SidecarProcessLauncher {
-  const _BroadcastingLauncher();
-
-  @override
-  Future<SidecarProcess> start(SidecarSpawn spawn) async {
-    final inner = await const IoProcessLauncher().start(spawn);
-    return _SharedStdoutProcess(inner);
-  }
-}
-
-final class _Connection {
-  _Connection(this.process, this.transport, this.channel);
-
-  final SidecarProcess process;
-  final StdioRpcTransport transport;
-  final RpcChannel channel;
-}
-
-final class _Session {
-  _Session._(this.root, this.installer, this.supervisor);
+/// 用例环境：独立临时安装根 + 安装器（进程编排全部交给 SidecarSession）。
+final class _Env {
+  _Env._(this.root, this.installer);
 
   final Directory root;
   final SidecarInstaller installer;
-  final SidecarSupervisor supervisor;
 
-  static Future<_Session> create() async {
+  static Future<_Env> create() async {
     final root = await Directory.systemTemp.createTemp('py_sidecar_e2e_');
     final installer = SidecarInstaller(
       fs: const IoPackageFileSystem(),
       rootDir: root.path,
     );
-    final supervisor = SidecarSupervisor(
-      launcher: const _BroadcastingLauncher(),
-      delayer: Future<void>.delayed,
-      startupTimeout: const Duration(seconds: 15),
-    );
-    return _Session._(root, installer, supervisor);
+    return _Env._(root, installer);
   }
 
   String get installDir => '${root.path}/$_pluginIdValue';
@@ -147,21 +96,16 @@ void main() {
 
   setUp(_requirePython);
 
-  Future<_Session> newSession() async {
-    final session = await _Session.create();
+  Future<_Env> newEnv() async {
+    final env = await _Env.create();
     addTearDown(() async {
       try {
-        await _guard(session.supervisor.disposeAll());
-      } on Object {
-        // 兜底清理失败不掩盖测试结果。
-      }
-      try {
-        await session.root.delete(recursive: true);
+        await env.root.delete(recursive: true);
       } on Object {
         // Windows 上句柄偶发未释放时容忍临时目录残留。
       }
     });
-    return session;
+    return env;
   }
 
   Future<Uint8List> buildPackage() async {
@@ -188,15 +132,15 @@ void main() {
         .build();
   }
 
-  Future<InstallOutcome> installGood(_Session session) async {
+  Future<InstallOutcome> installGood(_Env env) async {
     final bytes = await buildPackage();
     final package = PackageReader.fromBytes(bytes).read();
-    final outcome = await _guard(session.installer.install(package));
+    final outcome = await _guard(env.installer.install(package));
     return outcome;
   }
 
-  Future<_Connection> startAndConnect(
-    _Session session, {
+  Future<SidecarSession> startAndConnect(
+    _Env env, {
     Duration requestTimeout = const Duration(seconds: 3),
     void Function(PluginFailure failure)? onUnexpectedExit,
   }) async {
@@ -205,45 +149,39 @@ void main() {
       fail('python 3 not available');
     }
     final result = await _guard(
-      session.supervisor.start(
-        SidecarSpawn(
+      SidecarSession.start(
+        launcher: const IoProcessLauncher(),
+        spawn: SidecarSpawn(
           executable: command.$1,
-          arguments: <String>[...command.$2, session.scriptPath],
+          arguments: <String>[...command.$2, env.scriptPath],
         ),
+        delayer: Future<void>.delayed,
+        startupTimeout: const Duration(seconds: 15),
+        requestTimeout: requestTimeout,
         onUnexpectedExit: onUnexpectedExit,
       ),
     );
     expect(result.succeeded, isTrue, reason: result.failure?.toString());
-    final process = result.process!;
-    final transport = StdioRpcTransport(process);
-    final channel = RpcChannel(
-      transport: transport,
-      delayer: Future<void>.delayed,
-      requestTimeout: requestTimeout,
-    );
-    return _Connection(process, transport, channel);
+    return result.session!;
   }
 
   test('场景 1-5: 安装落盘、启动就绪、ping/echo/stderrNoise 往返', () async {
     _requirePython();
-    final session = await newSession();
+    final env = await newEnv();
 
     // 场景 1：安装成功且目录内容齐全。
-    final outcome = await installGood(session);
+    final outcome = await installGood(env);
     expect(outcome.succeeded, isTrue, reason: outcome.failure?.toString());
     expect(outcome.state, SidecarInstallState.installed);
-    expect(File('${session.installDir}/plugin.json').existsSync(), isTrue);
-    expect(File(session.scriptPath).existsSync(), isTrue);
+    expect(File('${env.installDir}/plugin.json').existsSync(), isTrue);
+    expect(File(env.scriptPath).existsSync(), isTrue);
 
-    // 场景 2：supervisor 就绪（stdout 首字节）。
-    final connection = await startAndConnect(session);
-    addTearDown(() async {
-      connection.channel.close();
-      await connection.transport.dispose();
-    });
+    // 场景 2：SidecarSession 就绪（stdout 首字节；就绪帧由会话吞掉）。
+    final session = await startAndConnect(env);
+    addTearDown(session.stop);
 
     // 场景 3：ping → pong。
-    final ping = await connection.channel.call('ping');
+    final ping = await session.channel!.call('ping');
     expect(ping.failure, isNull);
     expect(ping.value, 'pong');
 
@@ -252,56 +190,50 @@ void main() {
       'text': '你好 sidecar',
       'nested': <String, Object?>{'n': 1},
     };
-    final echo = await connection.channel.call('echo', params);
+    final echo = await session.channel!.call('echo', params);
     expect(echo.failure, isNull);
     expect(echo.value, params);
 
     // 场景 5：stderr 噪声不影响请求响应。
-    final noisy = await connection.channel.call('stderrNoise');
+    final noisy = await session.channel!.call('stderrNoise');
     expect(noisy.failure, isNull);
     expect(noisy.value, 'ok');
   });
 
   test('场景 6: hang 请求以 rpc.timeout 完成且通道关闭', () async {
     _requirePython();
-    final session = await newSession();
-    final outcome = await installGood(session);
+    final env = await newEnv();
+    final outcome = await installGood(env);
     expect(outcome.succeeded, isTrue, reason: outcome.failure?.toString());
 
-    final connection = await startAndConnect(session);
-    addTearDown(() async {
-      connection.channel.close();
-      await connection.transport.dispose();
-    });
+    final session = await startAndConnect(env);
+    addTearDown(session.stop);
 
-    final result = await connection.channel.call('hang');
+    final result = await session.channel!.call('hang');
     expect(result.failure?.code, 'rpc.timeout');
     expect(result.failure?.details['methodName'], 'hang');
     expect(result.failure?.details['elapsedMs'], 3000);
-    expect(connection.channel.isClosed, isTrue);
+    expect(session.channel!.isClosed, isTrue);
   });
 
   test('场景 7: crash 后 onUnexpectedExit 收到 unexpected_exit', () async {
     _requirePython();
-    final session = await newSession();
-    final outcome = await installGood(session);
+    final env = await newEnv();
+    final outcome = await installGood(env);
     expect(outcome.succeeded, isTrue, reason: outcome.failure?.toString());
 
     final unexpected = Completer<PluginFailure>();
-    final connection = await startAndConnect(
-      session,
+    final session = await startAndConnect(
+      env,
       onUnexpectedExit: unexpected.complete,
     );
-    addTearDown(() async {
-      connection.channel.close();
-      await connection.transport.dispose();
-    });
+    addTearDown(session.stop);
 
     // 先确认通道可用，再触发崩溃。
-    final ping = await connection.channel.call('ping');
+    final ping = await session.channel!.call('ping');
     expect(ping.value, 'pong');
 
-    final crash = await connection.channel.call('crash');
+    final crash = await session.channel!.call('crash');
     expect(crash.failure?.code, 'rpc.timeout');
 
     final failure = await unexpected.future.timeout(
@@ -313,21 +245,20 @@ void main() {
 
   test('场景 8: stop 优雅退出；uninstall 后重装成功', () async {
     _requirePython();
-    final session = await newSession();
-    final outcome = await installGood(session);
+    final env = await newEnv();
+    final outcome = await installGood(env);
     expect(outcome.succeeded, isTrue, reason: outcome.failure?.toString());
 
-    final connection = await startAndConnect(session);
-    connection.channel.close();
-    await connection.transport.dispose();
+    final session = await startAndConnect(env);
 
-    final stop = await _guard(session.supervisor.stop(connection.process));
+    final stop = await _guard(session.stop());
     expect(stop.succeeded, isTrue, reason: stop.failure?.toString());
+    expect(session.channel!.isClosed, isTrue);
 
-    final uninstall = await _guard(session.installer.uninstall(pluginId));
+    final uninstall = await _guard(env.installer.uninstall(pluginId));
     expect(uninstall.succeeded, isTrue, reason: uninstall.failure?.toString());
 
-    final reinstalled = await installGood(session);
+    final reinstalled = await installGood(env);
     expect(
       reinstalled.succeeded,
       isTrue,
@@ -338,10 +269,10 @@ void main() {
 
   test('场景 9: 篡改包报 digestMismatch，原安装不受影响', () async {
     _requirePython();
-    final session = await newSession();
+    final env = await newEnv();
     final bytes = await buildPackage();
     final outcome = await _guard(
-      session.installer.install(PackageReader.fromBytes(bytes).read()),
+      env.installer.install(PackageReader.fromBytes(bytes).read()),
     );
     expect(outcome.succeeded, isTrue, reason: outcome.failure?.toString());
 
@@ -357,7 +288,7 @@ void main() {
 
     Object? caught;
     try {
-      await _guard(session.installer.installBytes(tampered));
+      await _guard(env.installer.installBytes(tampered));
     } on PackageException catch (error) {
       caught = error;
     }
@@ -367,22 +298,22 @@ void main() {
     expect(failure.details['reason'], 'digestMismatch');
 
     // 原安装完好：状态与文件内容均未被触碰。
-    expect(await _guard(session.installer.isInstalled(pluginId)), isTrue);
-    final installed = File(session.scriptPath).readAsStringSync();
+    expect(await _guard(env.installer.isInstalled(pluginId)), isTrue);
+    final installed = File(env.scriptPath).readAsStringSync();
     expect(installed, startsWith('"""Echo sidecar fixture'));
   });
 
   test('场景 10: uninstall 后目录消失且 isInstalled 为 false', () async {
     _requirePython();
-    final session = await newSession();
-    final outcome = await installGood(session);
+    final env = await newEnv();
+    final outcome = await installGood(env);
     expect(outcome.succeeded, isTrue, reason: outcome.failure?.toString());
-    expect(Directory(session.installDir).existsSync(), isTrue);
+    expect(Directory(env.installDir).existsSync(), isTrue);
 
-    final uninstall = await _guard(session.installer.uninstall(pluginId));
+    final uninstall = await _guard(env.installer.uninstall(pluginId));
     expect(uninstall.succeeded, isTrue, reason: uninstall.failure?.toString());
 
-    expect(Directory(session.installDir).existsSync(), isFalse);
-    expect(await _guard(session.installer.isInstalled(pluginId)), isFalse);
+    expect(Directory(env.installDir).existsSync(), isFalse);
+    expect(await _guard(env.installer.isInstalled(pluginId)), isFalse);
   });
 }

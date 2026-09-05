@@ -47,3 +47,7 @@ app.*.map.json
 # User configuration (personal settings should not be committed)
 /config/global_config.json
 /config/plugin_*.json
+
+# v2 build artifacts
+v2/build/
+v2/**/build/

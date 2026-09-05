@@ -1,0 +1,44 @@
+{
+  "@@locale": "zh",
+  "statusAvailable": "可用",
+  "statusDisabled": "已停用",
+  "statusUnavailable": "不可用",
+  "statusReasonLabel": "原因",
+  "statusViewReason": "查看原因",
+  "statusReasonUnsupportedTarget": "该插件不支持当前平台",
+  "statusReasonMissingCapability": "缺少插件所需的平台能力",
+  "statusReasonCapabilityVersionTooLow": "平台能力版本过低，无法满足插件要求",
+  "statusReasonProviderUnavailable": "所需能力提供方不可用",
+  "statusReasonDependencyCycle": "插件依赖存在循环，无法解析",
+  "statusReasonUnknown": "未知原因",
+  "formRequiredMark": "必填",
+  "formRequiredError": "请填写必填项",
+  "formInvalidNumber": "请输入有效数字",
+  "formNumberRange": "请输入 {min} 到 {max} 之间的数值",
+  "@formNumberRange": {
+    "placeholders": {
+      "min": { "type": "String" },
+      "max": { "type": "String" }
+    }
+  },
+  "formNumberMin": "不能小于 {min}",
+  "@formNumberMin": {
+    "placeholders": {
+      "min": { "type": "String" }
+    }
+  },
+  "formNumberMax": "不能大于 {max}",
+  "@formNumberMax": {
+    "placeholders": {
+      "max": { "type": "String" }
+    }
+  },
+  "formSubmit": "提交",
+  "resultTableEmpty": "暂无数据",
+  "resultImageUnavailable": "图片路径：{path}（宿主暂未提供文件读取能力）",
+  "@resultImageUnavailable": {
+    "placeholders": {
+      "path": { "type": "String" }
+    }
+  }
+}

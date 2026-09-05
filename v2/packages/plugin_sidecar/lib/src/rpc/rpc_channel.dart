@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:plugin_contracts/plugin_contracts.dart';
 
-import 'rpc_frame_codec.dart';
 import 'rpc_message_codec.dart';
 
 /// 受控延时注入点：所有超时经此触发；测试中受控推进，不真实等待。
@@ -40,10 +39,8 @@ final class RpcChannel {
     required RpcTransport transport,
     required Delayer delayer,
     required this.requestTimeout,
-    RpcFrameDecoder? decoder,
   }) : _transport = transport,
-       _delayer = delayer,
-       decoder = decoder ?? RpcFrameDecoder() {
+       _delayer = delayer {
     _subscription = _transport.incoming.listen(
       _onIncoming,
       onError: (Object _) {
@@ -55,10 +52,6 @@ final class RpcChannel {
 
   /// 单个请求的超时上限。
   final Duration requestTimeout;
-
-  /// 帧解码器注入点（接口契约保留；[RpcTransport.incoming] 已是解码后的
-  /// payload 流，通道不重复做帧解码）。
-  final RpcFrameDecoder decoder;
 
   final RpcTransport _transport;
   final Delayer _delayer;

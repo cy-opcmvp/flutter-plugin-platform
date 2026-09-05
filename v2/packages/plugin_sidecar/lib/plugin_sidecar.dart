@@ -18,3 +18,4 @@ export 'src/process/stdio_rpc_transport.dart';
 export 'src/rpc/rpc_channel.dart';
 export 'src/rpc/rpc_frame_codec.dart';
 export 'src/rpc/rpc_message_codec.dart';
+export 'src/session/sidecar_session.dart';

@@ -1,0 +1,14 @@
+name: platform_capabilities
+description: Capability interfaces (screen capture, system paths) with unsupported defaults for plugin hosts.
+publish_to: none
+resolution: workspace
+environment:
+  sdk: ^3.10.0
+
+dependencies:
+  plugin_contracts:
+    path: ../plugin_contracts
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.26.0

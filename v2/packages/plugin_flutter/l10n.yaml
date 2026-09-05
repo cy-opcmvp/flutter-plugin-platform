@@ -1,0 +1,7 @@
+# plugin_flutter 包内固定文案的本地化配置（zh 为模板语言）。
+arb-dir: lib/l10n
+template-arb-file: plugin_flutter_zh.arb
+output-localization-file: plugin_flutter_l10n.dart
+output-class: PluginFlutterL10n
+output-dir: lib/src/generated
+nullable-getter: false

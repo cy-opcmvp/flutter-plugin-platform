@@ -1,0 +1,44 @@
+{
+  "@@locale": "en",
+  "statusAvailable": "Available",
+  "statusDisabled": "Disabled",
+  "statusUnavailable": "Unavailable",
+  "statusReasonLabel": "Reason",
+  "statusViewReason": "View reason",
+  "statusReasonUnsupportedTarget": "This plugin does not support the current platform",
+  "statusReasonMissingCapability": "A required platform capability is missing",
+  "statusReasonCapabilityVersionTooLow": "Platform capability version is too low for this plugin",
+  "statusReasonProviderUnavailable": "The required capability provider is unavailable",
+  "statusReasonDependencyCycle": "Plugin dependencies form a cycle and cannot be resolved",
+  "statusReasonUnknown": "Unknown reason",
+  "formRequiredMark": "Required",
+  "formRequiredError": "This field is required",
+  "formInvalidNumber": "Enter a valid number",
+  "formNumberRange": "Enter a value between {min} and {max}",
+  "@formNumberRange": {
+    "placeholders": {
+      "min": { "type": "String" },
+      "max": { "type": "String" }
+    }
+  },
+  "formNumberMin": "Must be at least {min}",
+  "@formNumberMin": {
+    "placeholders": {
+      "min": { "type": "String" }
+    }
+  },
+  "formNumberMax": "Must be at most {max}",
+  "@formNumberMax": {
+    "placeholders": {
+      "max": { "type": "String" }
+    }
+  },
+  "formSubmit": "Submit",
+  "resultTableEmpty": "No data",
+  "resultImageUnavailable": "Image path: {path} (host does not expose file access yet)",
+  "@resultImageUnavailable": {
+    "placeholders": {
+      "path": { "type": "String" }
+    }
+  }
+}
