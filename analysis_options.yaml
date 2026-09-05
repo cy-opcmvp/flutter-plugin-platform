@@ -1,6 +1,8 @@
 include: package:lints/recommended.yaml
 
 analyzer:
+  exclude:
+    - docs/**          # 归档/文档中的示例与模板不参与分析
   language:
     strict-casts: true
     strict-inference: true

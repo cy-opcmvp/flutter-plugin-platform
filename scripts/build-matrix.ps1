@@ -13,8 +13,8 @@
     runner（macos/linux）上跳过端可改为实构建。
 
 .NOTES
-  用法：pwsh / powershell -File scripts/v2/build-matrix.ps1
-  可选参数 -V2Root 指定 v2 workspace 根目录（默认仓库内 v2/）。
+  用法：pwsh / powershell -File scripts/build-matrix.ps1
+  可选参数 -V2Root 指定 workspace 根目录（默认仓库根）。
 #>
 
 param(
@@ -23,10 +23,10 @@ param(
 
 if (-not $V2Root) {
   $repoRoot = (Resolve-Path (Join-Path (Join-Path $PSScriptRoot '..') '..')).Path
-  $V2Root = Join-Path $repoRoot 'v2'
+  $V2Root = $repoRoot
 }
 if (-not (Test-Path $V2Root)) {
-  Write-Host "FATAL: v2 root not found: $V2Root"
+  Write-Host "FATAL: workspace root not found: $V2Root"
   exit 1
 }
 
@@ -150,7 +150,7 @@ function Get-AndroidSdkDir {
   return $null
 }
 
-Write-Host "=== v2 build matrix (toolbox_host) ==="
+Write-Host "=== build matrix (toolbox_host) ==="
 Write-Host "V2Root: $V2Root"
 Write-Host ''
 

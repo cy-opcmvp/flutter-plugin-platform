@@ -2,14 +2,14 @@
 
 > 面向 v2 插件平台新开发者的端到端走查：从环境准备到内置插件、Sidecar
 > 插件、契约检查与常见错误码。全部示例取自仓库真实产物：
-> `v2/plugins/calculator`（builtin）、`v2/plugins/screenshot`（builtin）、
-> `v2/sidecars/python_sample`（sidecar）。
+> `plugins/calculator`（builtin）、`plugins/screenshot`（builtin）、
+> `sidecars/python_sample`（sidecar）。
 
 ## 1. 前置条件
 
 | 依赖 | 用途 | 说明 |
 |------|------|------|
-| Flutter SDK（stable） | 宿主与全部 Flutter 包的构建/测试 | 版本以 `v2/pubspec.lock` 解析为准 |
+| Flutter SDK（stable） | 宿主与全部 Flutter 包的构建/测试 | 版本以 `pubspec.lock` 解析为准 |
 | Python 3（可选） | 运行 Sidecar Python 样本 | 样本仅用标准库（hashlib），零 pip 依赖；无 Python 时相关测试自动跳过 |
 
 确认解释器可用（任一即可，CLI 依次探测 `python`、`python3`、`py -3`）：
@@ -21,7 +21,7 @@ python --version   # 或 python3 --version / py -3 --version
 ## 2. 仓库布局速览
 
 ```
-v2/
+（仓库根）
 ├── packages/                 # 框架包
 │   ├── plugin_contracts/     # 契约：清单/能力/失败/表单/结果描述符（零 IO、零 Flutter）
 │   ├── plugin_runtime/       # 会话与 RPC（SidecarSession/RpcChannel）
@@ -36,17 +36,17 @@ v2/
 └── apps/toolbox_host/        # 宿主应用（组装根 + 目录/详情页 + 桥）
 ```
 
-最小验证命令（在 `v2/` 下）：
+最小验证命令（仓库根）：
 
 ```bash
-cd v2/packages/plugin_contracts && dart test          # 纯 Dart 包示例
-cd v2/apps/toolbox_host && flutter test               # Flutter 包示例
-dart format --output=none --set-exit-if-changed .     # 格式检查（v2/ 下）
+cd packages/plugin_contracts && dart test          # 纯 Dart 包示例
+cd apps/toolbox_host && flutter test               # Flutter 包示例
+dart format --output=none --set-exit-if-changed .     # 格式检查（仓库根）
 ```
 
 ## 3. 内置（builtin）插件路径
 
-以 `v2/plugins/calculator` 为实例。
+以 `plugins/calculator` 为实例。
 
 ### 3.1 包结构
 
@@ -97,8 +97,8 @@ plugins/calculator/
 ### 3.4 验证
 
 ```bash
-cd v2/plugins/calculator && flutter test        # 插件包自测
-cd v2/packages/plugin_cli && dart run plugin_cli validate ../../plugins/calculator
+cd plugins/calculator && flutter test        # 插件包自测
+cd packages/plugin_cli && dart run plugin_cli validate ../../plugins/calculator
 ```
 
 `validate` 校验清单结构、ID 格式、语义版本、surface 合法值等；退出码
@@ -106,7 +106,7 @@ cd v2/packages/plugin_cli && dart run plugin_cli validate ../../plugins/calculat
 
 ## 4. Sidecar 插件路径
 
-以 `v2/sidecars/python_sample` 为实例。
+以 `sidecars/python_sample` 为实例。
 
 ### 4.1 清单要点
 
@@ -139,7 +139,7 @@ cd v2/packages/plugin_cli && dart run plugin_cli validate ../../plugins/calculat
 ### 4.3 打包与分发
 
 ```bash
-cd v2/packages/plugin_cli
+cd packages/plugin_cli
 dart run plugin_cli validate ../../sidecars/python_sample
 dart run plugin_cli pack ../../sidecars/python_sample -o ../../sidecars/python_sample/hash-tool.scp
 ```
@@ -164,7 +164,7 @@ dart run plugin_cli pack ../../sidecars/python_sample -o ../../sidecars/python_s
 e2e 测试（真实 Python 全链）：
 
 ```bash
-cd v2/apps/toolbox_host && flutter test test/sidecar_hash_e2e_test.dart
+cd apps/toolbox_host && flutter test test/sidecar_hash_e2e_test.dart
 ```
 
 无 Python 环境时该测试自动跳过（不失败）；未安装分支无需 Python，
@@ -173,8 +173,8 @@ cd v2/apps/toolbox_host && flutter test test/sidecar_hash_e2e_test.dart
 ### 4.5 验证
 
 ```bash
-cd v2/sidecars/python_sample && python hash_tool.py   # 手动帧调试可选
-cd v2/packages/plugin_cli && dart run plugin_cli validate ../../sidecars/python_sample
+cd sidecars/python_sample && python hash_tool.py   # 手动帧调试可选
+cd packages/plugin_cli && dart run plugin_cli validate ../../sidecars/python_sample
 ```
 
 ## 5. 契约检查（plugin_devkit）
