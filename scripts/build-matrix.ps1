@@ -22,7 +22,8 @@ param(
 )
 
 if (-not $V2Root) {
-  $repoRoot = (Resolve-Path (Join-Path (Join-Path $PSScriptRoot '..') '..')).Path
+  # v2 上移后脚本位于 scripts/（一层深）；默认仓库根 = 脚本目录上一级。
+  $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
   $V2Root = $repoRoot
 }
 if (-not (Test-Path $V2Root)) {

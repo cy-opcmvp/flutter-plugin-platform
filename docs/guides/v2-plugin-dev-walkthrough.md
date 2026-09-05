@@ -41,7 +41,7 @@ python --version   # 或 python3 --version / py -3 --version
 ```bash
 cd packages/plugin_contracts && dart test          # 纯 Dart 包示例
 cd apps/toolbox_host && flutter test               # Flutter 包示例
-dart format --output=none --set-exit-if-changed .     # 格式检查（仓库根）
+dart format --output=none --set-exit-if-changed apps packages plugins   # 格式检查（限定代码目录，跳过 docs 归档）
 ```
 
 ## 3. 内置（builtin）插件路径

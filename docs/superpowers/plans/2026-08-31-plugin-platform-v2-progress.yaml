@@ -265,8 +265,27 @@ milestones:
           layout: 方案A 上移为根
           git_execution: 授权 AI 两段提交
         note: 批复原文见对话记录，材料清单见 cutover 计划与本任务卡
-      F5-04: { status: not_started }
-      F5-05: { status: not_started }
+      F5-04:
+        status: verified_pending_acceptance
+        implementer: controller
+        commits: [f8c021d 发布材料, fbd4bfd 旧工程移除, 2445f3e v2 上移切换]
+        controller_verification:
+          workspace_at_root: 17 成员解析成功
+          root_analyze: No issues（docs/** 排除归档模板后）
+          host_tests: 26/26
+          switch_incidents:
+            - v2/apps 重命名被持久化 cwd 句柄锁定致 rm -rf 误删，git restore 秒级恢复（教训入记忆）
+            - 根级 171 analyze 错误为 docs/archive/v1 模板，已排除归档目录
+        leftover_unapproved: [LICENSE, setup-cli.bat, setup-cli.sh, test-screenshot-hotkey.ps1]  # 旧根文件，不在批复清单，待用户补充裁定
+      F5-05:
+        status: verified_pending_acceptance
+        implementer: batch2-agent
+        controller_verification:
+          full_tests: 307 全绿（15 包；Python e2e 真跑 2/2；真机 GDI 烟囱）
+          build_matrix: SUCCESS 三端实构建（V2Root 一行根修复后复跑）
+          walkdoc_commands: 新根路径全实跑有效
+        deliverables: rules 9 归档 8 保留索引重写 / docs/roadmap.md（22 项含五项裁定）
+        leftover_unapproved: 遗留待裁定累计 8 项（LICENSE、setup-cli.bat/.sh、test-screenshot-hotkey.ps1、.claude/rules/temp_readme.txt、scripts/ v1 脚本组）
       G5: { status: not_started }
 tasks:
   M0-design:
