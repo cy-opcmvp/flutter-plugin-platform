@@ -16,6 +16,20 @@ import 'package:screenshot/screenshot.dart';
 import 'package:toolbox_host/src/host_composition_root.dart';
 import 'package:toolbox_host/src/plugins/welcome_plugin.dart';
 
+/// 仓库根绝对路径（CWD 无关）：从当前目录逐级向上找「workspace 根 + 宿主
+/// 目录」同时存在的祖先——测试可在仓库内任意目录作为 CWD 运行（G5 Important
+/// 修复；不使用 Isolate.resolvePackageUri，它在根 CWD 的 flutter test 下不受
+/// 支持）。
+String _repoRoot() {
+  for (Directory d = Directory.current; d.parent.path != d.path; d = d.parent) {
+    if (File('${d.path}/pubspec.yaml').existsSync() &&
+        Directory('${d.path}/apps/toolbox_host').existsSync()) {
+      return d.path;
+    }
+  }
+  fail('未能在 ${Directory.current.path} 及其祖先中定位仓库根');
+}
+
 void main() {
   const String hostDataRoot = '%TESTDATA%/host';
   final PluginId welcomeId = PluginId.parse(kWelcomePluginId);
@@ -126,10 +140,13 @@ void main() {
       expect(root.surfaceFailures, isNot(contains(calculatorId.value)));
     });
 
-    test('calculatorManifest 与 plugin.json 声明一致', () {
+    test('calculatorManifest 与 plugin.json 声明一致', () async {
+      final String repoRoot = _repoRoot();
       final Map<String, Object?> json =
           jsonDecode(
-                File('../../plugins/calculator/plugin.json').readAsStringSync(),
+                File(
+                  '$repoRoot/plugins/calculator/plugin.json',
+                ).readAsStringSync(),
               )
               as Map<String, Object?>;
       final PluginManifest manifest = calculatorManifest();
@@ -167,10 +184,13 @@ void main() {
       );
     });
 
-    test('screenshotManifest 与 plugin.json 声明一致', () {
+    test('screenshotManifest 与 plugin.json 声明一致', () async {
+      final String repoRoot = _repoRoot();
       final Map<String, Object?> json =
           jsonDecode(
-                File('../../plugins/screenshot/plugin.json').readAsStringSync(),
+                File(
+                  '$repoRoot/plugins/screenshot/plugin.json',
+                ).readAsStringSync(),
               )
               as Map<String, Object?>;
       final PluginManifest manifest = screenshotManifest();

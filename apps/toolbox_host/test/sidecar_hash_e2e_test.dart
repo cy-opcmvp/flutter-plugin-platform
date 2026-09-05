@@ -37,8 +37,23 @@ void main() {
     }
     final Directory temp = await Directory.systemTemp.createTemp('hash_e2e_');
     addTearDown(() => temp.delete(recursive: true));
+    // CWD 无关的样本包路径：向上寻找 workspace 根标记（G5 Important 修复，
+    // 不使用 Isolate.resolvePackageUri——根 CWD 的 flutter test 下不受支持）。
+    String repoRoot = '';
+    for (
+      Directory d = Directory.current;
+      d.parent.path != d.path;
+      d = d.parent
+    ) {
+      if (File('${d.path}/pubspec.yaml').existsSync() &&
+          Directory('${d.path}/apps/toolbox_host').existsSync()) {
+        repoRoot = d.path;
+        break;
+      }
+    }
+    expect(repoRoot, isNotEmpty, reason: '未能在 CWD 祖先中定位仓库根');
     final Uint8List bytes = await File(
-      '../../sidecars/python_sample/hash-tool.scp',
+      '$repoRoot/sidecars/python_sample/hash-tool.scp',
     ).readAsBytes();
 
     final SidecarCommandBridge bridge = SidecarCommandBridge(

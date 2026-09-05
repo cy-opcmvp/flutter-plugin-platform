@@ -52,9 +52,8 @@ final class TokenTypeSpec {
 /// success/warning 不进入 [ColorScheme]（M3 无对应角色），随 [ThemeTokens]
 /// 主题扩展下发；组件经 [ThemeTokens.color] 或 [ThemeTokens.semantic] 取用。
 ///
-/// [TokenColors.onSuccess] 与 [TokenColors.onWarning] 为可空：冻结文档从未
-/// 为这两个角色定义取值（三方向语义表仅提供「文字级/容器级」对与容器内文字
-/// 色），组件呈现语义状态时一律使用容器对（container + onXxxContainer）。
+/// onSuccess/onWarning 已于 2026-09-05 补充定义（m3-art-direction.md
+/// 补充定义节），三 preset 统一取值并经 WCAG 实测 ≥4.5。
 final class TokenColors {
   /// 创建色彩令牌组；全部字段均为冻结文档中的必填角色。
   const TokenColors({
@@ -133,13 +132,13 @@ final class TokenColors {
   final Color success;
 
   /// 语义色上的文字色（文档未定义，恒为 null，见类注释）。
-  final Color? onSuccess;
+  final Color onSuccess;
   final Color successContainer;
   final Color onSuccessContainer;
   final Color warning;
 
   /// 语义色上的文字色（文档未定义，恒为 null，见类注释）。
-  final Color? onWarning;
+  final Color onWarning;
   final Color warningContainer;
   final Color onWarningContainer;
 
@@ -260,13 +259,13 @@ final class SemanticColors {
   final Color success;
 
   /// 语义色上的文字色（文档未定义，恒为 null，见 [TokenColors] 注释）。
-  final Color? onSuccess;
+  final Color onSuccess;
   final Color successContainer;
   final Color onSuccessContainer;
   final Color warning;
 
   /// 语义色上的文字色（文档未定义，恒为 null，见 [TokenColors] 注释）。
-  final Color? onWarning;
+  final Color onWarning;
   final Color warningContainer;
   final Color onWarningContainer;
 
@@ -886,8 +885,6 @@ TokenColors _lerpColors(TokenColors a, TokenColors b, double t) {
   Color l(Color x, Color y) => Color.lerp(x, y, t)!;
 
   // 可空角色（onSuccess/onWarning）任一侧为 null 时不插值，按进度切换。
-  Color? lq(Color? x, Color? y) =>
-      x == null || y == null ? (t < 0.5 ? x : y) : Color.lerp(x, y, t)!;
   return TokenColors(
     primary: l(a.primary, b.primary),
     onPrimary: l(a.onPrimary, b.onPrimary),
@@ -927,11 +924,11 @@ TokenColors _lerpColors(TokenColors a, TokenColors b, double t) {
     scrim: l(a.scrim, b.scrim),
     shadow: l(a.shadow, b.shadow),
     success: l(a.success, b.success),
-    onSuccess: lq(a.onSuccess, b.onSuccess),
+    onSuccess: l(a.onSuccess, b.onSuccess),
     successContainer: l(a.successContainer, b.successContainer),
     onSuccessContainer: l(a.onSuccessContainer, b.onSuccessContainer),
     warning: l(a.warning, b.warning),
-    onWarning: lq(a.onWarning, b.onWarning),
+    onWarning: l(a.onWarning, b.onWarning),
     warningContainer: l(a.warningContainer, b.warningContainer),
     onWarningContainer: l(a.onWarningContainer, b.onWarningContainer),
   );
