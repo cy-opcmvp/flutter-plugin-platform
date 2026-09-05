@@ -64,16 +64,10 @@ class HostL10nEn extends HostL10n {
   String get detailEnableToggle => 'Enable plugin';
 
   @override
+  String get detailPluginSection => 'Plugin page';
+
+  @override
   String get detailOpenPage => 'Open plugin page';
-
-  @override
-  String get detailNoPage => 'This plugin provides no page';
-
-  @override
-  String get detailFormDemo => 'Form Demo';
-
-  @override
-  String get formDemoResultTitle => 'Submitted form values';
 
   @override
   String get detailSidecarPanel => 'Sidecar Install Panel';
@@ -173,6 +167,9 @@ class HostL10nEn extends HostL10n {
 
   @override
   String get settingsLanguage => 'Language';
+
+  @override
+  String get formDemoResultTitle => 'Form Result';
 
   @override
   String get welcomePageTitle => 'Welcome to Toolbox';

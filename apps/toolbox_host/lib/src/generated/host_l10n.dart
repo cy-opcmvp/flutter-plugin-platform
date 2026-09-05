@@ -199,29 +199,17 @@ abstract class HostL10n {
   /// **'启用插件'**
   String get detailEnableToggle;
 
+  /// No description provided for @detailPluginSection.
+  ///
+  /// In zh, this message translates to:
+  /// **'插件页面'**
+  String get detailPluginSection;
+
   /// No description provided for @detailOpenPage.
   ///
   /// In zh, this message translates to:
   /// **'打开插件页面'**
   String get detailOpenPage;
-
-  /// No description provided for @detailNoPage.
-  ///
-  /// In zh, this message translates to:
-  /// **'该插件未提供页面'**
-  String get detailNoPage;
-
-  /// No description provided for @detailFormDemo.
-  ///
-  /// In zh, this message translates to:
-  /// **'表单演示'**
-  String get detailFormDemo;
-
-  /// No description provided for @formDemoResultTitle.
-  ///
-  /// In zh, this message translates to:
-  /// **'表单回填结果'**
-  String get formDemoResultTitle;
 
   /// No description provided for @detailSidecarPanel.
   ///
@@ -408,6 +396,12 @@ abstract class HostL10n {
   /// In zh, this message translates to:
   /// **'语言'**
   String get settingsLanguage;
+
+  /// No description provided for @formDemoResultTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'表单回填结果'**
+  String get formDemoResultTitle;
 
   /// No description provided for @welcomePageTitle.
   ///

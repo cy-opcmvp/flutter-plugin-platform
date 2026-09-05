@@ -10,6 +10,9 @@ import 'package:flutter/widgets.dart';
 import 'package:plugin_contracts/plugin_contracts.dart';
 
 /// 页面 surface 提供者：插件主界面。
+/// 布局契约：页面会在宿主内嵌画布（有界高度 360–640 逻辑像素、宽度随视口）
+/// 或全屏两种上下文中构建——页面内部可安全使用 Expanded/AspectRatio，
+/// 但不得假设固定可用高度。
 abstract interface class PluginPageProvider {
   /// 所属插件标识。
   PluginId get pluginId;

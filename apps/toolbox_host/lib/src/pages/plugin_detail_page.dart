@@ -1,4 +1,4 @@
-/// 插件详情页：基本信息 / 启用开关 / 页面入口 / 表单演示 / Sidecar 命令面板。
+/// 插件详情页：基本信息 / 启用开关 / 内嵌插件页面 / 设置区 / Sidecar 面板。
 library;
 
 import 'dart:typed_data';
@@ -11,7 +11,6 @@ import '../generated/host_l10n.dart';
 import '../host_bytes_loader.dart';
 import '../host_composition_root.dart';
 import '../plugins/hash_tool_plugin.dart';
-import '../plugins/welcome_plugin.dart';
 import '../sidecar_command_bridge.dart';
 
 /// 插件详情页。
@@ -42,9 +41,6 @@ final class PluginDetailPage extends StatefulWidget {
 }
 
 class _PluginDetailPageState extends State<PluginDetailPage> {
-  /// 最近一次表单演示的提交值（用于结果回填）。
-  Map<String, Object?>? _submittedValues;
-
   /// .scp 包路径输入控制器。
   final TextEditingController _scpPathController = TextEditingController();
 
@@ -209,6 +205,44 @@ class _PluginDetailPageState extends State<PluginDetailPage> {
     );
   }
 
+  /// 内嵌插件页面区：标题行（含全屏打开入口）+ 卡片承载插件场景本体。
+  Widget _pluginPageSection(
+    BuildContext context,
+    HostL10n l10n,
+    PluginPageProvider provider,
+    TokenSpacingSet spacing,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Row(
+          children: <Widget>[
+            Expanded(child: _sectionTitle(context, l10n.detailPluginSection)),
+            Tooltip(
+              message: l10n.detailOpenPage,
+              child: IconButton(
+                icon: const Icon(Icons.open_in_new),
+                onPressed: () => _openPluginPage(context),
+              ),
+            ),
+          ],
+        ),
+        Card(
+          child: Padding(
+            padding: EdgeInsets.all(spacing.space4),
+            child: ConstrainedBox(
+              // 内嵌画布契约：页面在有界高度（360–640 逻辑像素）内布局——
+              // 插件页面里的 Expanded/AspectRatio 依赖有界约束，无界 ListView
+              // 会直接炸布局异常。
+              constraints: const BoxConstraints(minHeight: 360, maxHeight: 640),
+              child: provider.buildPage(context),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final HostL10n l10n = HostL10n.of(context);
@@ -220,6 +254,7 @@ class _PluginDetailPageState extends State<PluginDetailPage> {
     return Scaffold(
       appBar: AppBar(title: Text(manifest.name)),
       body: ListView(
+        key: const ValueKey<String>('plugin-detail-list'),
         padding: EdgeInsets.all(spacing.space5),
         children: <Widget>[
           _sectionTitle(context, l10n.detailBasicInfo),
@@ -261,13 +296,11 @@ class _PluginDetailPageState extends State<PluginDetailPage> {
                 widget.onToggleEnabled(manifest.id.value, value),
           ),
           SizedBox(height: spacing.space5),
-          OutlinedButton.icon(
-            onPressed: provider == null ? null : () => _openPluginPage(context),
-            icon: const Icon(Icons.open_in_new),
-            label: Text(
-              provider == null ? l10n.detailNoPage : l10n.detailOpenPage,
-            ),
-          ),
+          // 插件页面内嵌（两次点击体验修复，2026-09-06）：有页面提供方时
+          // 场景直接嵌入详情页，点卡片一次即达；右上角保留全屏打开。
+          if (provider != null) ...<Widget>[
+            _pluginPageSection(context, l10n, provider, spacing),
+          ],
           // 设置区（F4-03）：清单声明 settings 时内嵌宿主设置提供方。
           if (manifest.surfaces.contains('settings')) ...<Widget>[
             SizedBox(height: spacing.space7),
@@ -277,24 +310,6 @@ class _PluginDetailPageState extends State<PluginDetailPage> {
                 padding: EdgeInsets.all(spacing.space4),
                 child: _settingsBody(context, manifest),
               ),
-            ),
-          ],
-          SizedBox(height: spacing.space7),
-          _sectionTitle(context, l10n.detailFormDemo),
-          FormRenderer(
-            descriptor: welcomeDemoForm(l10n),
-            onSubmit: (Map<String, Object?> values) =>
-                setState(() => _submittedValues = values),
-          ),
-          if (_submittedValues != null) ...<Widget>[
-            SizedBox(height: spacing.space5),
-            _sectionTitle(context, l10n.formDemoResultTitle),
-            ResultRenderer(
-              descriptor: FieldsResultDescriptor(
-                fields: welcomeFormResultFields(l10n, _submittedValues!),
-              ),
-              // F4-02：注入宿主图片字节加载器，image 类结果真实解码。
-              bytesLoader: widget.root.bytesLoader,
             ),
           ],
           // Sidecar 命令面板（F4-06）：sidecar 插件显示安装/启动/停止与

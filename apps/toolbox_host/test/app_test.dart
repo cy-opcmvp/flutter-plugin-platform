@@ -76,7 +76,9 @@ void main() {
 
     await tester.tap(find.text('Welcome'));
     await tester.pumpAndSettle();
-    expect(find.text('打开插件页面'), findsOneWidget);
+    // 两次点击修复：插件页面直接内嵌详情页，一次点击即达场景。
+    expect(find.text('插件页面'), findsOneWidget);
+    expect(find.text('欢迎使用工具箱'), findsOneWidget);
 
     await tester.tap(find.text('启用插件'));
     await tester.pumpAndSettle();
@@ -97,6 +99,12 @@ void main() {
     await tester.tap(find.text('计算器'));
     await tester.pumpAndSettle();
 
+    // 两次点击修复：计算器场景内嵌可见（表达式输入提示随页面出现）。
+    expect(find.text('输入表达式'), findsOneWidget);
+    // 设置区在内嵌画布之下：从外层列表的基础信息区发起一次大幅拖动
+    // （内嵌画布区域会拦截手势，拖动起点须在宿主列表自身元素上）。
+    await tester.drag(find.text('基本信息'), const Offset(0, -900));
+    await tester.pumpAndSettle();
     expect(find.text('插件设置'), findsOneWidget);
     expect(find.text('小数位数'), findsOneWidget);
     expect(find.text('显示历史记录'), findsOneWidget);

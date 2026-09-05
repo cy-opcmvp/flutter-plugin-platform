@@ -62,16 +62,10 @@ class HostL10nZh extends HostL10n {
   String get detailEnableToggle => '启用插件';
 
   @override
+  String get detailPluginSection => '插件页面';
+
+  @override
   String get detailOpenPage => '打开插件页面';
-
-  @override
-  String get detailNoPage => '该插件未提供页面';
-
-  @override
-  String get detailFormDemo => '表单演示';
-
-  @override
-  String get formDemoResultTitle => '表单回填结果';
 
   @override
   String get detailSidecarPanel => 'Sidecar 安装面板';
@@ -169,6 +163,9 @@ class HostL10nZh extends HostL10n {
 
   @override
   String get settingsLanguage => '语言';
+
+  @override
+  String get formDemoResultTitle => '表单回填结果';
 
   @override
   String get welcomePageTitle => '欢迎使用工具箱';
