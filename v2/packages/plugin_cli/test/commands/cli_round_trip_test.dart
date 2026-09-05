@@ -78,6 +78,12 @@ void main() {
     expect(File('$pluginDir/plugin.json').existsSync(), isTrue);
     expect(File('$pluginDir/tools_demo_plugin.dart').existsSync(), isTrue);
 
+    // builtin 入口必须为带 scheme 的完整 URI 形式（builtin://tools.demo）。
+    final Map<String, Object?> manifest =
+        jsonDecode(File('$pluginDir/plugin.json').readAsStringSync())!
+            as Map<String, Object?>;
+    expect(manifest['entrypoint'], 'builtin://tools.demo');
+
     final StringBuffer out = StringBuffer();
     final StringBuffer err = StringBuffer();
     expect(

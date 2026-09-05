@@ -47,6 +47,22 @@ Windows-first 交付下，仓库根 `scripts/v2/build-matrix.ps1` 对 toolbox_ho
 - `macos` / `linux` / `ios`：非对应宿主操作系统无法本地构建，如实输出 `SKIPPED-LOCAL-UNAVAILABLE`，以「六端编译图静态检查（平台专属插件依赖零混入 + 纯 Dart 包零 `dart:io`/Flutter 导入）+ `flutter analyze`」作为替代证据；
 - 脚本对本机状态无写死假设，CI 可直接引用；在对应 runner 上跳过端可改为实构建。
 
+## M4 边界
+
+M4 交付首批真实插件与端到端链路：
+
+- `plugins/calculator`：六端 builtin 计算器。表达式求值与历史记录在纯 Dart 模型层（`dart test` 可测），UI 由宿主以声明式表单/结果组件接线；宿主内 `calculatorManifest()` 镜像 `plugin.json`，devkit `SurfaceContractChecks` 在测试中拦截清单与实现漂移。
+- `plugins/screenshot`：Windows builtin 截图。屏幕捕获经 `platform_capabilities` 接口注入，实现落在本机 `platform_capabilities_windows`（GDI 捕获，`dart:ffi` 仅限其 `gdi_capture.dart`）；产物走声明式结果渲染。
+- `sidecars/python_sample`：Python sidecar 样本 `hash_tool.py`（仅标准库 hashlib，零 pip）。实现 4 字节大端长度前缀帧 + 启动先发 `ready` 帧的 JSON-RPC 2.0 协议；目录内 `hash-tool.scp` 为 `plugin_cli pack` 现成产物。
+- `apps/toolbox_host`：目录页四张插件卡（calculator / screenshot / hash_tool「可安装」等）；详情页为 kind=sidecar 插件提供安装（.scp 路径）→ 启动 → 命令表单 → 结果渲染面板；`SidecarCommandBridge` 收敛「安装/启动/命令/停止/卸载」并把远端失败透传为 `bridge.command_failed`（details.cause 为原码）。
+- 错误码沿用 M4 词汇表（`calc.invalid_expression`、`capture.failed`、`bridge.not_installed`、`bridge.command_failed`、`package.bad_format`、`sidecar.install_failed`、`sidecar.uninstall_failed`、`session.start_failed`、`rpc.*`、`cli.*`、`surface.unsupported`），逐字对齐各包实现。
+
+M4 边界约束：宿主以**静态清单常量**注册插件（组装根 `manifests` 列表），sidecar 动态发现与扫描目录留 M5；sidecar e2e（`test/sidecar_hash_e2e_test.dart`）需要真 Python 解释器，缺失时自动跳过不失败；未安装分支无需 Python 恒常运行。开发者端到端走查见仓库根 `docs/guides/v2-plugin-dev-walkthrough.md`。
+
+### 六端编译图的 M4 规则演进
+
+宿主 app 层接入真实系统能力（path_provider 数据根、Windows GDI 截图）后，平台专属引用经**条件导出**隔离在 io 分支文件（`host_data_root_io.dart`、`host_screen_capture_io.dart`、`host_bytes_loader_io.dart`、`host_file_saver_io.dart`）：web/无 io 目标一律取 stub 分支，`dart:ffi` 与平台插件零混入 web 编译图。`build-matrix.ps1` 的 compile-graph 检查相应演进：宿主 `*_io.dart` 分支文件豁免平台专属插件 import 检查，其余 lib 源码仍零平台插件 import。
+
 ## 最小验证命令
 
 在本目录执行：
@@ -60,12 +76,18 @@ dart test packages/plugin_contracts
 dart test packages/plugin_runtime
 dart test packages/plugin_sidecar
 dart test packages/platform_capabilities
+dart test packages/platform_capabilities_windows
 dart test packages/plugin_cli
 
 # Flutter 包与宿主应用
 flutter test packages/plugin_flutter
 flutter test packages/plugin_devkit
 flutter test apps/toolbox_host
+flutter test plugins/calculator
+flutter test plugins/screenshot
+
+# Sidecar e2e（需真 Python，缺失时自动跳过）
+flutter test apps/toolbox_host/test/sidecar_hash_e2e_test.dart
 
 # 全 workspace 静态检查
 dart format --output=none --set-exit-if-changed .

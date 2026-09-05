@@ -127,6 +127,12 @@ abstract class HostL10n {
   /// **'该插件不支持当前平台'**
   String get reasonUnsupportedTarget;
 
+  /// No description provided for @reasonUnsupportedSurface.
+  ///
+  /// In zh, this message translates to:
+  /// **'该插件声明的呈现面在此宿主未实现'**
+  String get reasonUnsupportedSurface;
+
   /// No description provided for @reasonGeneric.
   ///
   /// In zh, this message translates to:
@@ -144,6 +150,12 @@ abstract class HostL10n {
   /// In zh, this message translates to:
   /// **'Sidecar 插件'**
   String get kindSidecar;
+
+  /// No description provided for @kindSidecarInstallable.
+  ///
+  /// In zh, this message translates to:
+  /// **'Sidecar 插件（需安装后运行）'**
+  String get kindSidecarInstallable;
 
   /// No description provided for @detailBasicInfo.
   ///
@@ -217,17 +229,125 @@ abstract class HostL10n {
   /// **'Sidecar 安装面板'**
   String get detailSidecarPanel;
 
-  /// No description provided for @sidecarPlaceholder.
-  ///
-  /// In zh, this message translates to:
-  /// **'Sidecar 包安装与解析将在后续阶段接入，当前为面板占位。'**
-  String get sidecarPlaceholder;
-
   /// No description provided for @sidecarRootDir.
   ///
   /// In zh, this message translates to:
   /// **'包目录'**
   String get sidecarRootDir;
+
+  /// No description provided for @hashPanelTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'Hash 工具（Sidecar）'**
+  String get hashPanelTitle;
+
+  /// No description provided for @hashInstallPathLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'包文件路径（.scp）'**
+  String get hashInstallPathLabel;
+
+  /// No description provided for @hashInstallPathPlaceholder.
+  ///
+  /// In zh, this message translates to:
+  /// **'例如 D:/dist/hash-tool.scp'**
+  String get hashInstallPathPlaceholder;
+
+  /// No description provided for @hashInstallButton.
+  ///
+  /// In zh, this message translates to:
+  /// **'安装'**
+  String get hashInstallButton;
+
+  /// No description provided for @hashInstallSuccess.
+  ///
+  /// In zh, this message translates to:
+  /// **'安装成功'**
+  String get hashInstallSuccess;
+
+  /// No description provided for @hashInstallFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'安装失败（{code}）'**
+  String hashInstallFailed(String code);
+
+  /// No description provided for @hashStartButton.
+  ///
+  /// In zh, this message translates to:
+  /// **'启动'**
+  String get hashStartButton;
+
+  /// No description provided for @hashStopButton.
+  ///
+  /// In zh, this message translates to:
+  /// **'停止'**
+  String get hashStopButton;
+
+  /// No description provided for @hashNotInstalled.
+  ///
+  /// In zh, this message translates to:
+  /// **'未安装：请先安装 .scp 包'**
+  String get hashNotInstalled;
+
+  /// No description provided for @hashInstalled.
+  ///
+  /// In zh, this message translates to:
+  /// **'已安装'**
+  String get hashInstalled;
+
+  /// No description provided for @hashFormTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'Hash 计算'**
+  String get hashFormTitle;
+
+  /// No description provided for @hashTextLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'文本'**
+  String get hashTextLabel;
+
+  /// No description provided for @hashTextPlaceholder.
+  ///
+  /// In zh, this message translates to:
+  /// **'输入要计算摘要的文本'**
+  String get hashTextPlaceholder;
+
+  /// No description provided for @hashResultTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'计算结果'**
+  String get hashResultTitle;
+
+  /// No description provided for @hashMd5Label.
+  ///
+  /// In zh, this message translates to:
+  /// **'MD5'**
+  String get hashMd5Label;
+
+  /// No description provided for @hashSha1Label.
+  ///
+  /// In zh, this message translates to:
+  /// **'SHA-1'**
+  String get hashSha1Label;
+
+  /// No description provided for @hashSha256Label.
+  ///
+  /// In zh, this message translates to:
+  /// **'SHA-256'**
+  String get hashSha256Label;
+
+  /// No description provided for @hashPanelUnsupported.
+  ///
+  /// In zh, this message translates to:
+  /// **'此宿主暂未提供该 Sidecar 的命令面板'**
+  String get hashPanelUnsupported;
+
+  /// No description provided for @hashCommandFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'命令失败（{cause}）'**
+  String hashCommandFailed(String cause);
 
   /// No description provided for @settingsTitle.
   ///
@@ -372,6 +492,168 @@ abstract class HostL10n {
   /// In zh, this message translates to:
   /// **'必填'**
   String get formFieldRequired;
+
+  /// No description provided for @detailSettings.
+  ///
+  /// In zh, this message translates to:
+  /// **'插件设置'**
+  String get detailSettings;
+
+  /// No description provided for @detailNoSettings.
+  ///
+  /// In zh, this message translates to:
+  /// **'该插件未提供设置项'**
+  String get detailNoSettings;
+
+  /// No description provided for @calcDisplayHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'输入表达式'**
+  String get calcDisplayHint;
+
+  /// No description provided for @calcHistoryTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'历史记录'**
+  String get calcHistoryTitle;
+
+  /// No description provided for @calcClearHistory.
+  ///
+  /// In zh, this message translates to:
+  /// **'清空'**
+  String get calcClearHistory;
+
+  /// No description provided for @calcHistoryEmpty.
+  ///
+  /// In zh, this message translates to:
+  /// **'暂无历史记录'**
+  String get calcHistoryEmpty;
+
+  /// No description provided for @calcErrorEmpty.
+  ///
+  /// In zh, this message translates to:
+  /// **'表达式为空（位置：0）'**
+  String get calcErrorEmpty;
+
+  /// No description provided for @calcErrorUnexpectedToken.
+  ///
+  /// In zh, this message translates to:
+  /// **'存在无法识别的符号（位置：{position}）'**
+  String calcErrorUnexpectedToken(int position);
+
+  /// No description provided for @calcErrorUnbalancedParens.
+  ///
+  /// In zh, this message translates to:
+  /// **'括号未闭合（位置：{position}）'**
+  String calcErrorUnbalancedParens(int position);
+
+  /// No description provided for @calcErrorDivideByZero.
+  ///
+  /// In zh, this message translates to:
+  /// **'除数不能为零'**
+  String get calcErrorDivideByZero;
+
+  /// No description provided for @calcErrorUnknown.
+  ///
+  /// In zh, this message translates to:
+  /// **'表达式无效'**
+  String get calcErrorUnknown;
+
+  /// No description provided for @calcSettingsDecimals.
+  ///
+  /// In zh, this message translates to:
+  /// **'小数位数'**
+  String get calcSettingsDecimals;
+
+  /// No description provided for @calcSettingsDecimalsValue.
+  ///
+  /// In zh, this message translates to:
+  /// **'保留 {value} 位小数'**
+  String calcSettingsDecimalsValue(int value);
+
+  /// No description provided for @calcSettingsHistoryToggle.
+  ///
+  /// In zh, this message translates to:
+  /// **'显示历史记录'**
+  String get calcSettingsHistoryToggle;
+
+  /// No description provided for @shotCaptureButton.
+  ///
+  /// In zh, this message translates to:
+  /// **'截图'**
+  String get shotCaptureButton;
+
+  /// No description provided for @shotCapturing.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在捕获…'**
+  String get shotCapturing;
+
+  /// No description provided for @shotResultTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'最近截图'**
+  String get shotResultTitle;
+
+  /// No description provided for @shotSavedHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'已保存：{path}'**
+  String shotSavedHint(String path);
+
+  /// No description provided for @shotFailureTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'截图失败'**
+  String get shotFailureTitle;
+
+  /// No description provided for @shotSettingsFormTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'截图设置'**
+  String get shotSettingsFormTitle;
+
+  /// No description provided for @shotSettingsFilenamePrefix.
+  ///
+  /// In zh, this message translates to:
+  /// **'文件名前缀'**
+  String get shotSettingsFilenamePrefix;
+
+  /// No description provided for @shotSettingsFilenamePrefixPlaceholder.
+  ///
+  /// In zh, this message translates to:
+  /// **'shot'**
+  String get shotSettingsFilenamePrefixPlaceholder;
+
+  /// No description provided for @shotSettingsQuality.
+  ///
+  /// In zh, this message translates to:
+  /// **'保存质量'**
+  String get shotSettingsQuality;
+
+  /// No description provided for @shotQualityLossless.
+  ///
+  /// In zh, this message translates to:
+  /// **'无损（PNG）'**
+  String get shotQualityLossless;
+
+  /// No description provided for @shotQualityHigh.
+  ///
+  /// In zh, this message translates to:
+  /// **'高'**
+  String get shotQualityHigh;
+
+  /// No description provided for @shotQualityStandard.
+  ///
+  /// In zh, this message translates to:
+  /// **'标准'**
+  String get shotQualityStandard;
+
+  /// No description provided for @shotQualityNote.
+  ///
+  /// In zh, this message translates to:
+  /// **'PNG 为无损格式，质量选项暂以原图保存。'**
+  String get shotQualityNote;
 }
 
 class _HostL10nDelegate extends LocalizationsDelegate<HostL10n> {

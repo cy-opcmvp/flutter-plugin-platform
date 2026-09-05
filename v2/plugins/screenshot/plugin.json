@@ -1,0 +1,24 @@
+{
+  "id": "tools.screenshot",
+  "name": "截图",
+  "version": "1.0.0",
+  "apiVersion": 1,
+  "kind": "builtin",
+  "targets": [
+    "windows"
+  ],
+  "entrypoint": "builtin://tools.screenshot",
+  "provides": [
+    {
+      "id": "image.capture",
+      "version": 1
+    }
+  ],
+  "requires": [],
+  "surfaces": [
+    "page",
+    "settings"
+  ],
+  "configSchemaVersion": 1,
+  "dataSchemaVersion": 1
+}

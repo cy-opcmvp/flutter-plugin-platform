@@ -17,3 +17,5 @@ workspace:
   - packages/platform_capabilities_web
   - apps/toolbox_host
   - packages/plugin_cli
+  - plugins/calculator
+  - plugins/screenshot

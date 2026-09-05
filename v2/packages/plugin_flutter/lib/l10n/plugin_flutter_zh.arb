@@ -40,5 +40,6 @@
     "placeholders": {
       "path": { "type": "String" }
     }
-  }
+  },
+  "resultImageLoadFailed": "图片加载失败"
 }

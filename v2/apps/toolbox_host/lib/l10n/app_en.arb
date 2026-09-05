@@ -5,9 +5,11 @@
   "navSettings": "Settings",
   "directoryTitle": "Plugin Directory",
   "reasonUnsupportedTarget": "This plugin does not support the current platform",
+  "reasonUnsupportedSurface": "A surface declared by this plugin is not implemented by this host",
   "reasonGeneric": "Cannot be enabled on this platform ({code})",
   "kindBuiltin": "Builtin",
   "kindSidecar": "Sidecar",
+  "kindSidecarInstallable": "Sidecar plugin (install to run)",
   "detailBasicInfo": "Basic Info",
   "detailFieldId": "Plugin ID",
   "detailFieldVersion": "Version",
@@ -20,8 +22,40 @@
   "detailFormDemo": "Form Demo",
   "formDemoResultTitle": "Submitted form values",
   "detailSidecarPanel": "Sidecar Install Panel",
-  "sidecarPlaceholder": "Sidecar package installation and resolution arrive in a later phase; this panel is a placeholder.",
   "sidecarRootDir": "Package dir",
+  "hashPanelTitle": "Hash tool (Sidecar)",
+  "hashInstallPathLabel": "Package file path (.scp)",
+  "hashInstallPathPlaceholder": "e.g. D:/dist/hash-tool.scp",
+  "hashInstallButton": "Install",
+  "hashInstallSuccess": "Installed",
+  "hashInstallFailed": "Install failed ({code})",
+  "@hashInstallFailed": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "hashStartButton": "Start",
+  "hashStopButton": "Stop",
+  "hashNotInstalled": "Not installed: install the .scp package first",
+  "hashInstalled": "Installed",
+  "hashFormTitle": "Hash computation",
+  "hashTextLabel": "Text",
+  "hashTextPlaceholder": "Text to hash",
+  "hashResultTitle": "Result",
+  "hashMd5Label": "MD5",
+  "hashSha1Label": "SHA-1",
+  "hashSha256Label": "SHA-256",
+  "hashPanelUnsupported": "No command panel is available for this sidecar yet",
+  "hashCommandFailed": "Command failed ({cause})",
+  "@hashCommandFailed": {
+    "placeholders": {
+      "cause": {
+        "type": "String"
+      }
+    }
+  },
   "settingsTitle": "Settings",
   "settingsTheme": "Theme preset",
   "themePrecisionTools": "Precision",
@@ -45,5 +79,61 @@
   "welcomeFormTopics": "Topics of interest",
   "welcomeFormTopicDesign": "UI design",
   "welcomeFormTopicPlugins": "Plugin development",
-  "formFieldRequired": "required"
+  "formFieldRequired": "required",
+  "detailSettings": "Plugin Settings",
+  "detailNoSettings": "This plugin provides no settings",
+  "calcDisplayHint": "Enter an expression",
+  "calcHistoryTitle": "History",
+  "calcClearHistory": "Clear",
+  "calcHistoryEmpty": "No history yet",
+  "calcErrorEmpty": "Expression is empty (position: 0)",
+  "calcErrorUnexpectedToken": "Unrecognized symbol (position: {position})",
+  "@calcErrorUnexpectedToken": {
+    "placeholders": {
+      "position": {
+        "type": "int"
+      }
+    }
+  },
+  "calcErrorUnbalancedParens": "Unbalanced parentheses (position: {position})",
+  "@calcErrorUnbalancedParens": {
+    "placeholders": {
+      "position": {
+        "type": "int"
+      }
+    }
+  },
+  "calcErrorDivideByZero": "Division by zero",
+  "calcErrorUnknown": "Invalid expression",
+  "calcSettingsDecimals": "Decimal places",
+  "calcSettingsDecimalsValue": "{value} decimal places",
+  "@calcSettingsDecimalsValue": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+    "calcSettingsHistoryToggle": "Show history",
+  "shotCaptureButton": "Screenshot",
+  "shotCapturing": "Capturing…",
+  "shotResultTitle": "Latest capture",
+  "shotSavedHint": "Saved: {path}",
+  "@shotSavedHint": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "shotFailureTitle": "Screenshot failed",
+  "shotSettingsFormTitle": "Screenshot settings",
+  "shotSettingsFilenamePrefix": "Filename prefix",
+  "shotSettingsFilenamePrefixPlaceholder": "shot",
+  "shotSettingsQuality": "Save quality",
+  "shotQualityLossless": "Lossless (PNG)",
+  "shotQualityHigh": "High",
+  "shotQualityStandard": "Standard",
+  "shotQualityNote": "PNG is lossless; quality options currently save the original image."
 }
+

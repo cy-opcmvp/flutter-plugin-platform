@@ -80,4 +80,7 @@ class PluginFlutterL10nEn extends PluginFlutterL10n {
   String resultImageUnavailable(String path) {
     return 'Image path: $path (host does not expose file access yet)';
   }
+
+  @override
+  String get resultImageLoadFailed => 'Failed to load image';
 }

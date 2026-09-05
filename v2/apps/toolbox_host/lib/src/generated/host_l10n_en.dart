@@ -25,6 +25,10 @@ class HostL10nEn extends HostL10n {
       'This plugin does not support the current platform';
 
   @override
+  String get reasonUnsupportedSurface =>
+      'A surface declared by this plugin is not implemented by this host';
+
+  @override
   String reasonGeneric(String code) {
     return 'Cannot be enabled on this platform ($code)';
   }
@@ -34,6 +38,9 @@ class HostL10nEn extends HostL10n {
 
   @override
   String get kindSidecar => 'Sidecar';
+
+  @override
+  String get kindSidecarInstallable => 'Sidecar plugin (install to run)';
 
   @override
   String get detailBasicInfo => 'Basic Info';
@@ -72,11 +79,70 @@ class HostL10nEn extends HostL10n {
   String get detailSidecarPanel => 'Sidecar Install Panel';
 
   @override
-  String get sidecarPlaceholder =>
-      'Sidecar package installation and resolution arrive in a later phase; this panel is a placeholder.';
+  String get sidecarRootDir => 'Package dir';
 
   @override
-  String get sidecarRootDir => 'Package dir';
+  String get hashPanelTitle => 'Hash tool (Sidecar)';
+
+  @override
+  String get hashInstallPathLabel => 'Package file path (.scp)';
+
+  @override
+  String get hashInstallPathPlaceholder => 'e.g. D:/dist/hash-tool.scp';
+
+  @override
+  String get hashInstallButton => 'Install';
+
+  @override
+  String get hashInstallSuccess => 'Installed';
+
+  @override
+  String hashInstallFailed(String code) {
+    return 'Install failed ($code)';
+  }
+
+  @override
+  String get hashStartButton => 'Start';
+
+  @override
+  String get hashStopButton => 'Stop';
+
+  @override
+  String get hashNotInstalled =>
+      'Not installed: install the .scp package first';
+
+  @override
+  String get hashInstalled => 'Installed';
+
+  @override
+  String get hashFormTitle => 'Hash computation';
+
+  @override
+  String get hashTextLabel => 'Text';
+
+  @override
+  String get hashTextPlaceholder => 'Text to hash';
+
+  @override
+  String get hashResultTitle => 'Result';
+
+  @override
+  String get hashMd5Label => 'MD5';
+
+  @override
+  String get hashSha1Label => 'SHA-1';
+
+  @override
+  String get hashSha256Label => 'SHA-256';
+
+  @override
+  String get hashPanelUnsupported =>
+      'No command panel is available for this sidecar yet';
+
+  @override
+  String hashCommandFailed(String cause) {
+    return 'Command failed ($cause)';
+  }
 
   @override
   String get settingsTitle => 'Settings';
@@ -150,4 +216,94 @@ class HostL10nEn extends HostL10n {
 
   @override
   String get formFieldRequired => 'required';
+
+  @override
+  String get detailSettings => 'Plugin Settings';
+
+  @override
+  String get detailNoSettings => 'This plugin provides no settings';
+
+  @override
+  String get calcDisplayHint => 'Enter an expression';
+
+  @override
+  String get calcHistoryTitle => 'History';
+
+  @override
+  String get calcClearHistory => 'Clear';
+
+  @override
+  String get calcHistoryEmpty => 'No history yet';
+
+  @override
+  String get calcErrorEmpty => 'Expression is empty (position: 0)';
+
+  @override
+  String calcErrorUnexpectedToken(int position) {
+    return 'Unrecognized symbol (position: $position)';
+  }
+
+  @override
+  String calcErrorUnbalancedParens(int position) {
+    return 'Unbalanced parentheses (position: $position)';
+  }
+
+  @override
+  String get calcErrorDivideByZero => 'Division by zero';
+
+  @override
+  String get calcErrorUnknown => 'Invalid expression';
+
+  @override
+  String get calcSettingsDecimals => 'Decimal places';
+
+  @override
+  String calcSettingsDecimalsValue(int value) {
+    return '$value decimal places';
+  }
+
+  @override
+  String get calcSettingsHistoryToggle => 'Show history';
+
+  @override
+  String get shotCaptureButton => 'Screenshot';
+
+  @override
+  String get shotCapturing => 'Capturing…';
+
+  @override
+  String get shotResultTitle => 'Latest capture';
+
+  @override
+  String shotSavedHint(String path) {
+    return 'Saved: $path';
+  }
+
+  @override
+  String get shotFailureTitle => 'Screenshot failed';
+
+  @override
+  String get shotSettingsFormTitle => 'Screenshot settings';
+
+  @override
+  String get shotSettingsFilenamePrefix => 'Filename prefix';
+
+  @override
+  String get shotSettingsFilenamePrefixPlaceholder => 'shot';
+
+  @override
+  String get shotSettingsQuality => 'Save quality';
+
+  @override
+  String get shotQualityLossless => 'Lossless (PNG)';
+
+  @override
+  String get shotQualityHigh => 'High';
+
+  @override
+  String get shotQualityStandard => 'Standard';
+
+  @override
+  String get shotQualityNote =>
+      'PNG is lossless; quality options currently save the original image.';
 }

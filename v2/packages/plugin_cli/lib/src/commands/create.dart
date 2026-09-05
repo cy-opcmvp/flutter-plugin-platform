@@ -114,7 +114,7 @@ Map<String, Object?> _buildManifest({
     'targets': isSidecar
         ? <String>['windows']
         : <String>['windows', 'macos', 'linux', 'android', 'ios', 'web'],
-    'entrypoint': isSidecar ? entrypoint : 'builtin:$id',
+    'entrypoint': isSidecar ? entrypoint : 'builtin://$id',
     'provides': <Object?>[],
     'requires': <Object?>[],
     'surfaces': isSidecar ? <String>[sidecarSurface] : <String>[builtinSurface],

@@ -5,6 +5,7 @@
   "navSettings": "设置",
   "directoryTitle": "插件目录",
   "reasonUnsupportedTarget": "该插件不支持当前平台",
+  "reasonUnsupportedSurface": "该插件声明的呈现面在此宿主未实现",
   "reasonGeneric": "无法在当前平台启用（{code}）",
   "@reasonGeneric": {
     "placeholders": {
@@ -15,6 +16,7 @@
   },
   "kindBuiltin": "内置插件",
   "kindSidecar": "Sidecar 插件",
+  "kindSidecarInstallable": "Sidecar 插件（需安装后运行）",
   "detailBasicInfo": "基本信息",
   "detailFieldId": "插件 ID",
   "detailFieldVersion": "版本",
@@ -27,8 +29,40 @@
   "detailFormDemo": "表单演示",
   "formDemoResultTitle": "表单回填结果",
   "detailSidecarPanel": "Sidecar 安装面板",
-  "sidecarPlaceholder": "Sidecar 包安装与解析将在后续阶段接入，当前为面板占位。",
   "sidecarRootDir": "包目录",
+  "hashPanelTitle": "Hash 工具（Sidecar）",
+  "hashInstallPathLabel": "包文件路径（.scp）",
+  "hashInstallPathPlaceholder": "例如 D:/dist/hash-tool.scp",
+  "hashInstallButton": "安装",
+  "hashInstallSuccess": "安装成功",
+  "hashInstallFailed": "安装失败（{code}）",
+  "@hashInstallFailed": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "hashStartButton": "启动",
+  "hashStopButton": "停止",
+  "hashNotInstalled": "未安装：请先安装 .scp 包",
+  "hashInstalled": "已安装",
+  "hashFormTitle": "Hash 计算",
+  "hashTextLabel": "文本",
+  "hashTextPlaceholder": "输入要计算摘要的文本",
+  "hashResultTitle": "计算结果",
+  "hashMd5Label": "MD5",
+  "hashSha1Label": "SHA-1",
+  "hashSha256Label": "SHA-256",
+  "hashPanelUnsupported": "此宿主暂未提供该 Sidecar 的命令面板",
+  "hashCommandFailed": "命令失败（{cause}）",
+  "@hashCommandFailed": {
+    "placeholders": {
+      "cause": {
+        "type": "String"
+      }
+    }
+  },
   "settingsTitle": "设置",
   "settingsTheme": "主题方向",
   "themePrecisionTools": "精密工具",
@@ -52,5 +86,61 @@
   "welcomeFormTopics": "感兴趣的主题",
   "welcomeFormTopicDesign": "界面设计",
   "welcomeFormTopicPlugins": "插件开发",
-  "formFieldRequired": "必填"
+  "formFieldRequired": "必填",
+  "detailSettings": "插件设置",
+  "detailNoSettings": "该插件未提供设置项",
+  "calcDisplayHint": "输入表达式",
+  "calcHistoryTitle": "历史记录",
+  "calcClearHistory": "清空",
+  "calcHistoryEmpty": "暂无历史记录",
+  "calcErrorEmpty": "表达式为空（位置：0）",
+  "calcErrorUnexpectedToken": "存在无法识别的符号（位置：{position}）",
+  "@calcErrorUnexpectedToken": {
+    "placeholders": {
+      "position": {
+        "type": "int"
+      }
+    }
+  },
+  "calcErrorUnbalancedParens": "括号未闭合（位置：{position}）",
+  "@calcErrorUnbalancedParens": {
+    "placeholders": {
+      "position": {
+        "type": "int"
+      }
+    }
+  },
+  "calcErrorDivideByZero": "除数不能为零",
+  "calcErrorUnknown": "表达式无效",
+  "calcSettingsDecimals": "小数位数",
+  "calcSettingsDecimalsValue": "保留 {value} 位小数",
+  "@calcSettingsDecimalsValue": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+    "calcSettingsHistoryToggle": "显示历史记录",
+  "shotCaptureButton": "截图",
+  "shotCapturing": "正在捕获…",
+  "shotResultTitle": "最近截图",
+  "shotSavedHint": "已保存：{path}",
+  "@shotSavedHint": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "shotFailureTitle": "截图失败",
+  "shotSettingsFormTitle": "截图设置",
+  "shotSettingsFilenamePrefix": "文件名前缀",
+  "shotSettingsFilenamePrefixPlaceholder": "shot",
+  "shotSettingsQuality": "保存质量",
+  "shotQualityLossless": "无损（PNG）",
+  "shotQualityHigh": "高",
+  "shotQualityStandard": "标准",
+  "shotQualityNote": "PNG 为无损格式，质量选项暂以原图保存。"
 }
+

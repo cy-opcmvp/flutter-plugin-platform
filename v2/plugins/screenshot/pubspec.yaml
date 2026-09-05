@@ -1,0 +1,26 @@
+name: screenshot
+description: 截图插件（Windows builtin）：主屏捕获、PNG 保存与可配置文件名。
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.10.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  platform_capabilities:
+    path: ../../packages/platform_capabilities
+  plugin_contracts:
+    path: ../../packages/plugin_contracts
+  plugin_flutter:
+    path: ../../packages/plugin_flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  plugin_devkit:
+    path: ../../packages/plugin_devkit
+
+flutter:
+  uses-material-design: true

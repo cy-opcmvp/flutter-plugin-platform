@@ -1,0 +1,25 @@
+name: calculator
+description: "计算器插件（六端 builtin）：表达式求值、历史记录与可配置呈现。"
+publish_to: none
+version: 1.0.0
+resolution: workspace
+
+environment:
+  sdk: ^3.10.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  plugin_contracts:
+    path: ../../packages/plugin_contracts
+  plugin_flutter:
+    path: ../../packages/plugin_flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  plugin_devkit:
+    path: ../../packages/plugin_devkit
+
+flutter:
+  uses-material-design: true

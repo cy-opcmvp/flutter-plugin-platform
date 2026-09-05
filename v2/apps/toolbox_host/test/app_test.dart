@@ -59,8 +59,14 @@ void main() {
 
     expect(find.text('Welcome'), findsOneWidget);
     expect(find.text('MobileOnly'), findsOneWidget);
+    // F4-03：内置计算器插件已注册进目录。
+    expect(find.text('计算器'), findsOneWidget);
+    // F4-05：截图插件（windows 目标）也注册进目录。
+    expect(find.text('截图'), findsOneWidget);
+    // F4-06：hash_tool Sidecar 清单也注册进目录（第 4 张卡，可安装）。
+    expect(find.text('Hash 工具'), findsOneWidget);
     // 徽章文案来自 plugin_flutter 包内 l10n（zh 模板）。
-    expect(find.text('可用'), findsOneWidget);
+    expect(find.text('可用'), findsNWidgets(4));
     expect(find.text('不可用'), findsOneWidget);
     expect(find.text('该插件不支持当前平台'), findsOneWidget);
   });
@@ -79,7 +85,21 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('已停用'), findsOneWidget);
-    expect(find.text('可用'), findsNothing);
+    // F4-03/F4-05/F4-06：计算器、截图与 hash_tool 仍保持可用（停用仅作用于
+    // Welcome）。
+    expect(find.text('可用'), findsNWidgets(3));
+  });
+
+  testWidgets('计算器详情页内嵌插件设置区', (WidgetTester tester) async {
+    // F4-03：清单声明 settings 且宿主注册设置提供方时，详情页内嵌设置 UI。
+    await pumpApp(tester);
+
+    await tester.tap(find.text('计算器'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('插件设置'), findsOneWidget);
+    expect(find.text('小数位数'), findsOneWidget);
+    expect(find.text('显示历史记录'), findsOneWidget);
   });
 
   testWidgets('设置页切换语言后宿主文案切换为英文', (WidgetTester tester) async {

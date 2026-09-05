@@ -75,4 +75,7 @@ class PluginFlutterL10nZh extends PluginFlutterL10n {
   String resultImageUnavailable(String path) {
     return '图片路径：$path（宿主暂未提供文件读取能力）';
   }
+
+  @override
+  String get resultImageLoadFailed => '图片加载失败';
 }

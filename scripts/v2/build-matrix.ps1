@@ -68,6 +68,13 @@ function Test-PlatformOnlyImports {
     六端编译图静态检查：宿主与各包 lib 中不得混入平台专属插件依赖；
     纯 Dart 包（contracts/runtime）不得导入 dart:io 与 package:flutter。
     这是 macos / linux / ios 跳过端的替代证据。
+
+    M4 规则演进（F4-07 集中验证）：宿主 app 层接入真实系统能力
+    （path_provider 数据根、文件读写）必然需要一个平台插件引用点；
+    宿主以条件导出（`*_none.dart` / `*_io.dart`）把平台插件隔离在
+    io 分支文件内，web/stub 分支零平台依赖，六端编译图不受影响。
+    因此对 toolbox_host 中文件名以 `_io.dart` 结尾的条件导出分支
+    文件豁免平台专属插件检查；其余 lib 源码仍保持零平台插件 import。
   #>
   $platformOnly = @(
     'just_audio', 'flutter_local_notifications', 'permission_handler',
@@ -98,8 +105,11 @@ function Test-PlatformOnlyImports {
     foreach ($file in $files) {
       $content = Get-Content $file.FullName -Raw
       if ($null -eq $content) { continue }
+      # M4：宿主条件导出的 io 分支文件（*_io.dart）为平台插件唯一合法
+      # 落点（见函数头注释），豁免平台专属插件检查。
+      $isHostIoBranch = ($item.Name -eq 'toolbox_host') -and ($file.Name -match '_io\.dart$')
       foreach ($pkg in $platformOnly) {
-        if ($content -match "(?m)^\s*(import|export)\s+['`"]package:$pkg/") {
+        if (-not $isHostIoBranch -and $content -match "(?m)^\s*(import|export)\s+['`"]package:$pkg/") {
           $violations.Add("$($item.Name): platform-only import 'package:$pkg/' in $($file.Name)")
         }
       }

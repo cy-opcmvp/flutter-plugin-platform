@@ -217,6 +217,12 @@ abstract class PluginFlutterL10n {
   /// In zh, this message translates to:
   /// **'图片路径：{path}（宿主暂未提供文件读取能力）'**
   String resultImageUnavailable(String path);
+
+  /// No description provided for @resultImageLoadFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'图片加载失败'**
+  String get resultImageLoadFailed;
 }
 
 class _PluginFlutterL10nDelegate

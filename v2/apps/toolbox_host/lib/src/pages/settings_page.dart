@@ -90,6 +90,8 @@ final class SettingsPage extends StatelessWidget {
           SizedBox(height: spacing.space7),
           _sectionTitle(context, l10n.settingsLanguage),
           SegmentedButton<String>(
+            // 语言自名按行业惯例以本名呈现（「中文」/「English」不随界面语言
+            // 翻译），属 i18n 豁免项，勿改为翻译键（G3-A minor 3 注释）。
             segments: <ButtonSegment<String>>[
               const ButtonSegment<String>(value: 'zh', label: Text('中文')),
               const ButtonSegment<String>(value: 'en', label: Text('English')),

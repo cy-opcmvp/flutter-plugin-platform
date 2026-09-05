@@ -82,6 +82,11 @@ final class PluginDirectoryPage extends StatelessWidget {
             ? l10n.reasonUnsupportedTarget
             : l10n.reasonGeneric(failure.code);
       }
+    } else if (root.surfaceFailures.containsKey(manifest.id.value)) {
+      state = StatusBadgeState.unavailable;
+      final PluginFailure failure = root.surfaceFailures[manifest.id.value]!;
+      reasonCode = failure.code;
+      reasonText = l10n.reasonUnsupportedSurface;
     } else {
       state = StatusBadgeState.available;
     }
@@ -89,7 +94,7 @@ final class PluginDirectoryPage extends StatelessWidget {
       title: manifest.name,
       description: manifest.kind == PluginKind.builtin
           ? l10n.kindBuiltin
-          : l10n.kindSidecar,
+          : l10n.kindSidecarInstallable,
       version: manifest.version,
       state: state,
       reasonCode: reasonCode,

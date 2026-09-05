@@ -40,5 +40,6 @@
     "placeholders": {
       "path": { "type": "String" }
     }
-  }
+  },
+  "resultImageLoadFailed": "Failed to load image"
 }

@@ -17,10 +17,10 @@ execution_policy:
 execution_state:
   status: running
   resumed_at: '2026-09-05T00:00:00+08:00'
-  reason: M3-G3-accepted
-  resume_from: M4-planning
-current_milestone: M4
-current_task: M4-planning
+  reason: M4-G4-accepted
+  resume_from: M5-planning
+current_milestone: M5
+current_task: M5-planning
 m2_plan:
   frozen_at: '2026-09-04'
   document: docs/superpowers/plans/2026-09-04-plugin-platform-v2-sidecar-framework.md
@@ -154,7 +154,85 @@ milestones:
         suggested_commit: 'feat(platform): complete host and platform adapters'
   M4:
     name: mvp-plugins
-    status: not_started
+    status: accepted
+    g4:
+      verdict: Approved（四节全过）
+      minor_total: 3
+      report: docs/superpowers/acceptance/v2-mvp-plugins-acceptance.md
+    m5_planning_inputs:
+      - plugin_cli pack 应排除目录内既有 *.scp（G4 T3-M1，防产物自嵌套）
+      - i18n 键前缀约定差异（camelCase vs snake_case）统一决策（G4 T1-M1）
+      - 非 windows 目标的截图不可用展示可用真实截图清单在 CI 矩阵复现（G4 T2-M1）
+      - 区域选择 overlay（M4 冻结决策 2 的 roadmap 项）
+      - sidecar 动态目录发现（F4-06 决策的 M5 留项）
+    m4_plan:
+      drafted_at: '2026-09-05'
+      document: docs/superpowers/plans/2026-09-05-plugin-platform-v2-mvp-plugins.md
+      status: frozen
+    m4_tasks_registered:
+      F4-01:
+        status: accepted
+        implementer: controller
+        controller_verification:
+          host: 10/10（新增 surface.unsupported 焦点用例）; devkit: 14/14（死依赖删除回归）
+          analyze: No issues; format: applied
+        note: 途中一次 pubspec 编辑损坏（Python 替换吞换行致 YAML 合行），已修复并回归
+        suggested_commit: 'chore(m4): digest g3 findings'
+      F4-02:
+        status: accepted
+        implementer: batch2-agent
+        controller_verification:
+          plugin_flutter: 37/37; toolbox_host: 15/15; root_analyze: No issues
+      F4-03:
+        status: accepted
+        implementer: batch2-agent
+        controller_verification:
+          calculator: 23/23（logic 14+contract 4+page 5）; cli_validate: OK tools.calculator
+          boundary: 零 dart:io 实际导入（grep 命中为注释文字）; 零样式字面量
+        accepted_deviations:
+          - plugin_cli create 生成 builtin: 单斜杠 entrypoint（模板 bug，F4-05 前修复）
+          - i18n 键用宿主 camelCase 风格而非 calc_ 前缀
+          - 小数位设置只影响后续求值；历史/设置为内存态（计划无持久化要求）
+      F4-04:
+        status: accepted
+        implementer: batch3-agent
+        controller_verification:
+          windows_cap: 3/3; 真机捕获 2560x1440 PNG 1.75MB（BGRA 14.7MB→8.5%）
+      F4-05:
+        status: accepted
+        implementer: batch3-agent
+        controller_verification:
+          screenshot: 13/13; host: 17/17; cli_validate: OK; 边界干净; FFI 收敛 gdi_capture.dart
+          cli_entrypoint_fix: create.dart builtin://$id（bug 定位于 create 命令而非模板）
+        accepted_deviations:
+          - saveError 为插件层新增 reason（能力成功但落盘失败）
+          - quality 为预留键，MVP 存 PNG 原图
+      F4-06:
+        status: accepted
+        implementer: batch4-agent
+        controller_verification:
+          host: 26/26 含真 Python e2e 2/2（三摘要与 hashlib 参考值断言）
+          hash_tool_scp: 3282 bytes 落盘
+      F4-07:
+        status: accepted
+        implementer: batch4-agent
+        controller_verification:
+          full_validation: 306 tests 0 fail（dart 193 + flutter 113）
+          build_matrix: SUCCESS（三端实构建；format 1 文件控制器已修）
+          walkdoc: docs/guides/v2-plugin-dev-walkthrough.md 落盘
+        accepted_deviations:
+          - F4-02/04 跨批次边界修复：组装根直连 path_provider 与 windows 适配包，
+            经 host_data_root/host_screen_capture 条件导出收敛（web 编译图曾实际失败，
+            矩阵抓出后修复；G4 复核裁定）
+          - build-matrix 规则演进：宿主 *_io.dart 条件导出分支豁免平台插件检查
+      G4:
+        status: accepted
+        sections: { T1_calculator: 通过, T2_screenshot: 通过, T3_hash_tool: 通过, final: 通过 }
+        critical: 0
+        important: 0
+        minor: 3
+        report: docs/superpowers/acceptance/v2-mvp-plugins-acceptance.md
+        suggested_commit: 'feat(plugins): complete MVP plugin set'
   M5:
     name: cutover-and-cleanup
     status: not_started
