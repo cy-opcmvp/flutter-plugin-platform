@@ -9,7 +9,8 @@
 /// 5. 篡改清单后 validate → cli.invalid_manifest（含 field 详情）；
 /// 6. pack → PackageReader 往返一致（清单与条目字节）；
 /// 7. pack 缺入口 → cli.pack_failed(entrypointMissing)；
-/// 8. pack 缺 plugin.json → cli.pack_failed(ioError)。
+/// 8. pack 缺 plugin.json → cli.pack_failed(ioError)；
+/// 9. pack 排除目录内既有 `*.scp`（含输出文件），产物条目不含它（防自嵌套）。
 library;
 
 import 'dart:convert';
@@ -239,5 +240,34 @@ void main() {
     final Map<String, Object?> details =
         failure['details']! as Map<String, Object?>;
     expect(details['reason'], 'ioError');
+  });
+
+  test('pack excludes pre-existing .scp files in the plugin directory', () {
+    final String pluginDir = scaffold('sidecar');
+    // 目录内预置旧安装包（例如先前 pack 留下的产物）与输出文件本身。
+    File('${pluginDir}_stale.scp').writeAsBytesSync(<int>[1, 2, 3]);
+    File('$pluginDir/stale.scp').writeAsBytesSync(<int>[1, 2, 3]);
+    final String packagePath = '$pluginDir/out.scp';
+
+    final StringBuffer out = StringBuffer();
+    final StringBuffer err = StringBuffer();
+    expect(
+      runCli(
+        <String>['pack', pluginDir, '-o', packagePath],
+        out: out,
+        err: err,
+      ),
+      exitSuccess,
+    );
+    expect(err.toString(), isEmpty);
+
+    final Uint8List bytes = File(packagePath).readAsBytesSync();
+    final SidecarPackage package = PackageReader.fromBytes(bytes).read();
+    // 仅 plugin.json 与 main.py 两个条目；旧包与新包自身均不自嵌套。
+    expect(package.entries.length, 2);
+    expect(package.entryByPath('stale.scp'), isNull);
+    expect(package.entryByPath('out.scp'), isNull);
+    expect(package.entryByPath('plugin.json'), isNotNull);
+    expect(package.entryByPath('main.py'), isNotNull);
   });
 }

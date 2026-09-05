@@ -1,7 +1,7 @@
 name: toolbox_host
 description: "Toolbox 桌面宿主应用：M3 阶段 F3-06 的宿主组装参考实现。"
 publish_to: "none"
-version: 0.1.0
+version: 2.0.0
 resolution: workspace
 
 environment:

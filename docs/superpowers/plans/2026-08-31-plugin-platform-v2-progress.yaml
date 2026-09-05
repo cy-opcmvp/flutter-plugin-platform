@@ -235,7 +235,39 @@ milestones:
         suggested_commit: 'feat(plugins): complete MVP plugin set'
   M5:
     name: cutover-and-cleanup
-    status: not_started
+    status: in_progress
+    m5_plan:
+      drafted_at: '2026-09-05'
+      document: docs/superpowers/plans/2026-09-05-plugin-platform-v2-cutover-cleanup.md
+      status: frozen
+      layout_decision: 方案A v2 上移为根（按推荐冻结，F5-03 门显式复核）
+      hard_gate: F5-03 用户逐项确认前零删除
+    m5_tasks_registered:
+      F5-01:
+        status: verified_pending_acceptance
+        implementer: batch1-agent
+        controller_verification:
+          cli: 9/9（含 pack 排除 .scp 新用例）
+          deliverables: version 2.0.0 / CHANGELOG 2.0.0 节 / RELEASE_NOTES_v2.0.0.md
+      F5-02:
+        status: accepted
+        implementer: batch1-agent
+        deliverable: docs/superpowers/cutover/v1-v2-feature-diff.md
+        stats: 38 行对照 / 32 条消失能力 / 5 项待用户裁定（标签管理·IPluginI18n·系统托盘·自动启动·CLI publish）
+        note: 拼图游戏为旧 README 失实（代码不存在），已诚实标注
+      F5-03:
+        status: accepted
+        implementer: controller
+        user_gate:
+          confirmed_at: '2026-09-05'
+          scope: 全部批准（归档/删除/重写/上移/保留 五组）
+          pending_rulings: 按推荐（标签管理·IPluginI18n·CLI publish→roadmap；系统托盘·自动启动→彻底消失）
+          layout: 方案A 上移为根
+          git_execution: 授权 AI 两段提交
+        note: 批复原文见对话记录，材料清单见 cutover 计划与本任务卡
+      F5-04: { status: not_started }
+      F5-05: { status: not_started }
+      G5: { status: not_started }
 tasks:
   M0-design:
     status: accepted

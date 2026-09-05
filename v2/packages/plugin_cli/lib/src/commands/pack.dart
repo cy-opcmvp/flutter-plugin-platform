@@ -91,7 +91,10 @@ int runPack({
   return exitSuccess;
 }
 
-/// 递归收集目录下全部文件；相对路径统一正斜杠并排序，跳过输出文件自身。
+/// 递归收集目录下全部文件；相对路径统一正斜杠并排序。
+///
+/// 跳过输出文件自身，以及目录内既有 `*.scp` 安装包（含对插件目录重复执行
+/// `pack` 时先前留下的产物），防止把旧包打进新包造成自嵌套。
 List<({File file, String path})> _collectEntries({
   required Directory root,
   required File outputFile,
@@ -106,6 +109,9 @@ List<({File file, String path})> _collectEntries({
       continue;
     }
     if (samePath(entity.absolute.path, outputFile.absolute.path)) {
+      continue;
+    }
+    if (entity.path.toLowerCase().endsWith('.scp')) {
       continue;
     }
     entries.add((file: entity, path: relativePathOf(entity, root.path)));

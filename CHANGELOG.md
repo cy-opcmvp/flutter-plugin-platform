@@ -5,6 +5,60 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-09-05
+
+> 本条目之后的既有内容（`[Unreleased]` 与 `0.x` 各节）为 v1 时代记录，
+> 全部保留作历史追溯；v1 代码将在切换确认后归档/移除（见 F5-03/F5-04）。
+
+### Added - v2 架构重写（微内核 + 契约 + 能力注入）
+
+- 🧩 **微内核契约层 `plugin_contracts`**：插件身份（反向域 `PluginId`）、失败值、
+  清单（`plugin.json` 严格解码）、目标/种类、能力契约、生命周期接口与 UI Surface
+  描述符；核心零 `dart:io`、零 Flutter。
+- ⚙️ **纯 Dart 运行时 `plugin_runtime`**：生命周期状态机、插件注册表/能力目录、
+  `PluginResolver.resolve(manifests, target)` 按目标与能力依赖静态解析。
+- 🖥️ **Sidecar 外部插件框架 `plugin_sidecar`**：SCP1 安装包构建/解析与原子安装、
+  进程监督（崩溃退出码可观测）、4 字节大端长度前缀 stdio 帧化 JSON-RPC 2.0
+  会话编排；`dart:io` 仅限两个适配器文件。
+- 🎨 **声明式 UI 层 `plugin_flutter`**：设计令牌契约 + 三套预设主题
+  （`precision_tools` / `warm_life` / `dark_pro`）× 明暗两向、插件卡片/状态徽章/
+  表单渲染/结果渲染组件；样式值仅存在于 presets（静态扫描测试守护）。
+- 🔌 **系统能力契约 `platform_capabilities`**：屏幕截图、系统路径等纯 Dart
+  接口 + 六个同构平台 stub 包（`platform_capabilities_{windows,...}`），
+  平台实现经接口注入，Windows 落地 GDI 截图（`dart:ffi` 隔离在实现包内）。
+- 🧰 **开发者 CLI `plugin_cli`**：`create`（builtin/sidecar 骨架）/ `validate`
+  （清单严格校验）/ `pack`（SCP1 打包 + 回读自校验，排除目录内既有 `*.scp`）。
+- 📦 **三插件**：`calculator`（六端 builtin，表达式求值与历史记录纯 Dart 模型层）、
+  `screenshot`（Windows builtin 全屏捕获，能力注入）、`python_sample/hash_tool`
+  （Python Sidecar，仅标准库 hashlib）。
+- 🏠 **宿主 `apps/toolbox_host`**：`HostCompositionRoot` 全应用唯一组装点，
+  目录页/详情页（sidecar 安装 → 启动 → 命令表单 → 结果渲染）、
+  `SidecarCommandBridge` 收敛安装/启动/命令/停止/卸载。
+- 📊 **六端构建证据模型**：`scripts/v2/build-matrix.ps1`（windows/web 实构建、
+  android 条件构建、跳过端以编译图静态检查作替代证据，不伪造）。
+- 📚 **开发者走查文档**：`docs/guides/v2-plugin-dev-walkthrough.md`。
+
+### Changed
+
+- 仓库演进为 v2 workspace（`v2/` 下 `packages/` + `plugins/` + `sidecars/` +
+  `apps/`），宿主版本号升至 `2.0.0`。
+- 插件开发模型从 v1 的 `IPlugin` 接口 + `PluginContext` 服务定位，重写为
+  「清单声明 + 能力注入 + 声明式 UI Surface」。
+
+### Breaking / Removed
+
+- ⚠️ **与 v1 不兼容**：v1 插件（`IPlugin` 体系）与 v1 平台服务层
+  （通知/音频/任务调度、ServiceLocator、PluginStateManager 等）在 v2 中
+  **不可装载、不可复用**；v2 宿主不加载 v1 插件。
+- 逐特性差异与去向详见差异清单：
+  [`docs/superpowers/cutover/v1-v2-feature-diff.md`](docs/superpowers/cutover/v1-v2-feature-diff.md)。
+
+### Migration
+
+- 插件开发请从走查文档开始：
+  [`docs/guides/v2-plugin-dev-walkthrough.md`](docs/guides/v2-plugin-dev-walkthrough.md)；
+  旧 v1 插件需按 v2 契约重写（参考 `v2/plugins/calculator`）。
+
 ## [Unreleased]
 
 ### Added - 剪贴板服务完整实现
